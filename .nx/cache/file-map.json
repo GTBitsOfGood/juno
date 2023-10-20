@@ -64,7 +64,7 @@
       },
       {
         "file": ".nx/cache/file-map.json",
-        "hash": "8408799756941886842"
+        "hash": "11365635110733669453"
       },
       {
         "file": ".nx/cache/lockfile.hash",
@@ -76,7 +76,7 @@
       },
       {
         "file": ".nx/cache/project-graph.json",
-        "hash": "8740445477310083398"
+        "hash": "10497051486329436883"
       },
       {
         "file": ".nx/cache/run.json",
@@ -200,6 +200,92 @@
         {
           "file": "packages/api-gateway/yarn.lock",
           "hash": "17266973415787857052"
+        }
+      ],
+      "auth-service": [
+        {
+          "file": "packages/auth-service/.eslintrc.js",
+          "hash": "7461846271827386206"
+        },
+        {
+          "file": "packages/auth-service/.prettierrc",
+          "hash": "4808572120966128913"
+        },
+        {
+          "file": "packages/auth-service/README.md",
+          "hash": "11102284767635357661"
+        },
+        {
+          "file": "packages/auth-service/nest-cli.json",
+          "hash": "789240945379598733"
+        },
+        {
+          "file": "packages/auth-service/package.json",
+          "hash": "12982408598566559313",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/core",
+            "npm:@nestjs/platform-express",
+            "npm:reflect-metadata",
+            "npm:rxjs",
+            "npm:@nestjs/cli",
+            "npm:@nestjs/schematics",
+            "npm:@nestjs/testing",
+            "npm:@types/express",
+            "npm:@types/jest",
+            "npm:@types/node",
+            "npm:@types/supertest",
+            "npm:@typescript-eslint/eslint-plugin",
+            "npm:@typescript-eslint/parser",
+            "npm:eslint",
+            "npm:eslint-config-prettier",
+            "npm:eslint-plugin-prettier",
+            "npm:jest",
+            "npm:prettier",
+            "npm:source-map-support",
+            "npm:supertest",
+            "npm:ts-jest",
+            "npm:ts-loader",
+            "npm:ts-node",
+            "npm:tsconfig-paths",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "packages/auth-service/src/app.controller.spec.ts",
+          "hash": "2727664763654384995"
+        },
+        {
+          "file": "packages/auth-service/src/app.controller.ts",
+          "hash": "4552329938751326480"
+        },
+        {
+          "file": "packages/auth-service/src/app.module.ts",
+          "hash": "11673476679848632172"
+        },
+        {
+          "file": "packages/auth-service/src/app.service.ts",
+          "hash": "16892833931858030153"
+        },
+        {
+          "file": "packages/auth-service/src/main.ts",
+          "hash": "16836780892212170881"
+        },
+        {
+          "file": "packages/auth-service/test/app.e2e-spec.ts",
+          "hash": "15142680097789702029"
+        },
+        {
+          "file": "packages/auth-service/test/jest-e2e.json",
+          "hash": "7570273541430074424"
+        },
+        {
+          "file": "packages/auth-service/tsconfig.build.json",
+          "hash": "276845246908739715"
+        },
+        {
+          "file": "packages/auth-service/tsconfig.json",
+          "hash": "1876265833229380624"
         }
       ]
     }
