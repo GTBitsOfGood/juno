@@ -1,0 +1,207 @@
+{
+  "version": "6.0",
+  "nxVersion": "17.0.0",
+  "deps": {
+    "prettier": "^3.0.3",
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "nx": "17.0.0"
+  },
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": ".gitignore",
+        "hash": "1185182241030440471"
+      },
+      {
+        "file": ".nx/cache/2133262064227019621/code",
+        "hash": "1838281907459330133"
+      },
+      {
+        "file": ".nx/cache/2133262064227019621/terminalOutput",
+        "hash": "3711282785607282784"
+      },
+      {
+        "file": ".nx/cache/2133262064227019621.commit",
+        "hash": "4664556114322093609"
+      },
+      {
+        "file": ".nx/cache/2133262064227019621.tar.gz",
+        "hash": "12330119451028217648"
+      },
+      {
+        "file": ".nx/cache/cloud/2310.19.6/index.js",
+        "hash": "15048939128412700699"
+      },
+      {
+        "file": ".nx/cache/cloud/2310.19.6/lib/daemon/process-run-end.js",
+        "hash": "17488724639353388161"
+      },
+      {
+        "file": ".nx/cache/cloud/verify.lock",
+        "hash": "16281846029669812263"
+      },
+      {
+        "file": ".nx/cache/d/server-process.json",
+        "hash": "11490151457413299980"
+      },
+      {
+        "file": ".nx/cache/file-map.json",
+        "hash": "17743533870084921739"
+      },
+      {
+        "file": ".nx/cache/lockfile.hash",
+        "hash": "972470668358188357"
+      },
+      {
+        "file": ".nx/cache/parsed-lock-file.json",
+        "hash": "17326802905073951517"
+      },
+      {
+        "file": ".nx/cache/project-graph.json",
+        "hash": "8740445477310083398"
+      },
+      {
+        "file": ".nx/cache/run.json",
+        "hash": "13550937299022881456"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/2133262064227019621",
+        "hash": "3711282785607282784"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "9555875142989992828"
+      },
+      {
+        "file": "nx.json",
+        "hash": "5944869324540940686"
+      },
+      {
+        "file": "package.json",
+        "hash": "6216153848947654426"
+      },
+      {
+        "file": "yarn.lock",
+        "hash": "3988607459576810772"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/17695918833856380396",
+        "hash": "2223726895013349600"
+      },
+      {
+        "file": ".nx/cache/10068813569714719872.tar.gz",
+        "hash": "8433535845415730345"
+      },
+      {
+        "file": ".nx/cache/10068813569714719872.commit",
+        "hash": "4664556114322093609"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/10068813569714719872",
+        "hash": "4915776336640217633"
+      },
+      {
+        "file": ".nx/cache/10068813569714719872/terminalOutput",
+        "hash": "4915776336640217633"
+      },
+      {
+        "file": ".nx/cache/10068813569714719872/code",
+        "hash": "1838281907459330133"
+      }
+    ],
+    "projectFileMap": {
+      "api-gateway": [
+        {
+          "file": "packages/api-gateway/.eslintrc.js",
+          "hash": "7461846271827386206"
+        },
+        {
+          "file": "packages/api-gateway/.gitignore",
+          "hash": "672911037926083482"
+        },
+        {
+          "file": "packages/api-gateway/README.md",
+          "hash": "11102284767635357661"
+        },
+        {
+          "file": "packages/api-gateway/nest-cli.json",
+          "hash": "789240945379598733"
+        },
+        {
+          "file": "packages/api-gateway/package.json",
+          "hash": "17628991313899283606",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/core",
+            "npm:@nestjs/platform-express",
+            "npm:reflect-metadata",
+            "npm:rxjs",
+            "npm:@nestjs/cli",
+            "npm:@nestjs/schematics",
+            "npm:@nestjs/testing",
+            "npm:@types/express",
+            "npm:@types/jest",
+            "npm:@types/node",
+            "npm:@types/supertest",
+            "npm:@typescript-eslint/eslint-plugin",
+            "npm:@typescript-eslint/parser",
+            "npm:eslint",
+            "npm:eslint-config-prettier",
+            "npm:eslint-plugin-prettier",
+            "npm:jest",
+            "npm:prettier",
+            "npm:source-map-support",
+            "npm:supertest",
+            "npm:ts-jest",
+            "npm:ts-loader",
+            "npm:ts-node",
+            "npm:tsconfig-paths",
+            "npm:typescript"
+          ]
+        },
+        {
+          "file": "packages/api-gateway/src/app.controller.spec.ts",
+          "hash": "2727664763654384995"
+        },
+        {
+          "file": "packages/api-gateway/src/app.controller.ts",
+          "hash": "4552329938751326480"
+        },
+        {
+          "file": "packages/api-gateway/src/app.module.ts",
+          "hash": "11673476679848632172"
+        },
+        {
+          "file": "packages/api-gateway/src/app.service.ts",
+          "hash": "16892833931858030153"
+        },
+        {
+          "file": "packages/api-gateway/src/main.ts",
+          "hash": "16836780892212170881"
+        },
+        {
+          "file": "packages/api-gateway/test/app.e2e-spec.ts",
+          "hash": "15142680097789702029"
+        },
+        {
+          "file": "packages/api-gateway/test/jest-e2e.json",
+          "hash": "7570273541430074424"
+        },
+        {
+          "file": "packages/api-gateway/tsconfig.build.json",
+          "hash": "276845246908739715"
+        },
+        {
+          "file": "packages/api-gateway/tsconfig.json",
+          "hash": "1876265833229380624"
+        },
+        {
+          "file": "packages/api-gateway/yarn.lock",
+          "hash": "17266973415787857052"
+        }
+      ]
+    }
+  }
+}

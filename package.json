@@ -6,10 +6,13 @@
   ],
   "scripts": {
     "api-gateway": "yarn workspace api-gateway start",
-    "format:check": "yarn prettier --check ."
+    "format:check": "yarn prettier --check .",
+    "tsc": "nx run-many --target=tsc",
+    "lint": "nx run-many --target=lint"
   },
   "devDependencies": {
     "prettier": "^3.0.3",
-    "prettier-plugin-organize-imports": "^3.2.3"
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "nx": "17.0.0"
   }
 }
