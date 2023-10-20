@@ -7,6 +7,7 @@
   "scripts": {
     "api-gateway": "yarn workspace api-gateway start",
     "format:check": "yarn prettier --check .",
+    "format:write": "yarn prettier --write .",
     "tsc": "nx run-many --target=tsc",
     "lint": "nx run-many --target=lint"
   },
