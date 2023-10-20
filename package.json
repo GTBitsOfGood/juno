@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "name": "bitsofgood-api",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "api-gateway": "yarn workspace api-gateway start"
+  }
+}
