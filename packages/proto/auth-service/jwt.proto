@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package authservice.jwt;
+
+service JWTService {
+  rpc createJWT(CreateJWTRequest) returns (CreateJWTResponse);
+  rpc validateJWT(ValidateJWTRequest) returns (ValidateJWTResponse);
+}
+
+message CreateJWTRequest {}
+message CreateJWTResponse {}
+
+message ValidateJWTRequest {}
+message ValidateJWTResponse {}
