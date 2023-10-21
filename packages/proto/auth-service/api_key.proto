@@ -2,13 +2,13 @@ syntax = "proto3";
 
 package authservice.api_key;
 
-service APIKeyService {
-  rpc issueAPIKey(IssueAPIKeyRequest) returns (IssueAPIKeyResponse);
-  rpc revokeAPIKey(RevokeAPIKeyRequest) returns (RevokeAPIKeyResponse);
+service ApiKeyService {
+  rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
+  rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
 }
 
-message IssueAPIKeyRequest {}
-message IssueAPIKeyResponse {}
+message IssueApiKeyRequest {}
+message IssueApiKeyResponse {}
 
-message RevokeAPIKeyRequest {}
-message RevokeAPIKeyResponse {}
+message RevokeApiKeyRequest {}
+message RevokeApiKeyResponse {}
