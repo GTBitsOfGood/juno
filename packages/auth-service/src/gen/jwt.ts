@@ -4,47 +4,47 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "authservice.jwt";
 
-export interface CreateJWTRequest {
+export interface CreateJwtRequest {
 }
 
-export interface CreateJWTResponse {
+export interface CreateJwtResponse {
 }
 
-export interface ValidateJWTRequest {
+export interface ValidateJwtRequest {
 }
 
-export interface ValidateJWTResponse {
+export interface ValidateJwtResponse {
 }
 
 export const AUTHSERVICE_JWT_PACKAGE_NAME = "authservice.jwt";
 
-export interface JWTServiceClient {
-  createJwt(request: CreateJWTRequest): Observable<CreateJWTResponse>;
+export interface JwtServiceClient {
+  createJwt(request: CreateJwtRequest): Observable<CreateJwtResponse>;
 
-  validateJwt(request: ValidateJWTRequest): Observable<ValidateJWTResponse>;
+  validateJwt(request: ValidateJwtRequest): Observable<ValidateJwtResponse>;
 }
 
-export interface JWTServiceController {
-  createJwt(request: CreateJWTRequest): Promise<CreateJWTResponse> | Observable<CreateJWTResponse> | CreateJWTResponse;
+export interface JwtServiceController {
+  createJwt(request: CreateJwtRequest): Promise<CreateJwtResponse> | Observable<CreateJwtResponse> | CreateJwtResponse;
 
   validateJwt(
-    request: ValidateJWTRequest,
-  ): Promise<ValidateJWTResponse> | Observable<ValidateJWTResponse> | ValidateJWTResponse;
+    request: ValidateJwtRequest,
+  ): Promise<ValidateJwtResponse> | Observable<ValidateJwtResponse> | ValidateJwtResponse;
 }
 
-export function JWTServiceControllerMethods() {
+export function JwtServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = ["createJwt", "validateJwt"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("JWTService", method)(constructor.prototype[method], method, descriptor);
+      GrpcMethod("JwtService", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("JWTService", method)(constructor.prototype[method], method, descriptor);
+      GrpcStreamMethod("JwtService", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const J_WT_SERVICE_NAME = "JWTService";
+export const JWT_SERVICE_NAME = "JwtService";

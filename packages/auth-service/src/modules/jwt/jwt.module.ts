@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { JWTController } from './jwt.controller';
 
-@Module({})
+@Module({
+  controllers: [JWTController],
+})
 export class JwtModule {}

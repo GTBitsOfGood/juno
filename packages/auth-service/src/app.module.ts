@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { KeysModule } from './modules/keys/keys.module';
 import { JwtModule } from './modules/jwt/jwt.module';
+import { ApiKeyModule } from './modules/api_key/api_key.module';
 
 @Module({
-  imports: [KeysModule, JwtModule],
+  imports: [ApiKeyModule, JwtModule],
   controllers: [AppController],
   providers: [AppService],
 })

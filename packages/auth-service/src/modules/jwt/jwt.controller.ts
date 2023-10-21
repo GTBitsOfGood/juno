@@ -1,19 +1,21 @@
 import { Controller } from '@nestjs/common';
 import {
-  CreateJWTRequest,
-  CreateJWTResponse,
-  JWTServiceController,
-  ValidateJWTRequest,
-  ValidateJWTResponse,
+  CreateJwtRequest,
+  CreateJwtResponse,
+  JwtServiceController,
+  JwtServiceControllerMethods,
+  ValidateJwtRequest,
+  ValidateJwtResponse,
 } from 'src/gen/jwt';
 
 @Controller('jwt')
-export class JWTController implements JWTServiceController {
-  createJwt(request: CreateJWTRequest): Promise<CreateJWTResponse> {
+@JwtServiceControllerMethods()
+export class JWTController implements JwtServiceController {
+  async createJwt(request: CreateJwtRequest): Promise<CreateJwtResponse> {
     console.log(`request: ${request}`);
-    throw new Error('Method not implemented.');
+    return {};
   }
-  validateJwt(request: ValidateJWTRequest): Promise<ValidateJWTResponse> {
+  validateJwt(request: ValidateJwtRequest): Promise<ValidateJwtResponse> {
     console.log(`request: ${request}`);
     throw new Error('Method not implemented.');
   }
