@@ -1,0 +1,36 @@
+services:
+  gateway:
+    build:
+      dockerfile: ./packages/api-gateway/Dockerfile.dev
+    volumes:
+      - ./packages/api-gateway:/app
+      - /app/node_modules
+      - ./packages/proto:/proto
+    ports:
+      - '3000:3000'
+    entrypoint: yarn start:dev
+    environment:
+      AUTH_SERVICE_ADDR: auth-service
+    networks:
+      - bog-api-net
+    depends_on:
+      - auth-service
+
+  auth-service:
+    build:
+      dockerfile: ./packages/auth-service/Dockerfile.dev
+    volumes:
+      - ./packages/auth-service:/app
+      - /app/node_modules
+      - ./packages/proto:/proto
+    ports:
+      - '50052:50052'
+    entrypoint: yarn start:dev
+    environment:
+      AUTH_SERVICE_ADDR: auth-service
+    networks:
+      - bog-api-net
+
+networks:
+  bog-api-net:
+    driver: bridge

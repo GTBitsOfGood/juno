@@ -1,0 +1,17 @@
+FROM node:18 as deps
+
+WORKDIR /app
+
+COPY package.json yarn.lock
+
+RUN yarn install --frozen-lockfile
+
+FROM node:18 as dev
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY . .
+
+EXPOSE 3000
