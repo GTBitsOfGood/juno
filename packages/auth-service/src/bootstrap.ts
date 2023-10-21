@@ -6,9 +6,9 @@ import { AUTHSERVICE_API_KEY_PACKAGE_NAME } from './gen/api_key';
 import { AUTHSERVICE_JWT_PACKAGE_NAME } from './gen/jwt';
 import { ConfigModule } from '@nestjs/config';
 
-async function bootstrap() {
+export async function bootstrap() {
   ConfigModule.forRoot({
-    envFilePath: join(__dirname, '../../../.env.local'),
+    envFilePath: join(__dirname, '../../../../../.env.local'),
   });
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
@@ -29,4 +29,3 @@ async function bootstrap() {
   );
   await app.listen();
 }
-bootstrap();

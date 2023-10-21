@@ -10,15 +10,19 @@ import {
   API_KEY_SERVICE_NAME,
   AUTHSERVICE_API_KEY_PACKAGE_NAME,
 } from 'src/auth-service/gen/api_key';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: join(__dirname, '../../../../../.env.local'),
+    }),
     ClientsModule.register([
       {
         name: JWT_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: '0.0.0.0:50052',
+          url: process.env.AUTH_SERVICE_ADDR,
           package: AUTHSERVICE_JWT_PACKAGE_NAME,
           protoPath: join(
             __dirname,
@@ -30,7 +34,7 @@ import {
         name: API_KEY_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: '0.0.0.0:50052',
+          url: process.env.AUTH_SERVICE_ADDR,
           package: AUTHSERVICE_API_KEY_PACKAGE_NAME,
           protoPath: join(
             __dirname,
@@ -42,4 +46,4 @@ import {
   ],
   controllers: [AuthController],
 })
-export class AuthModule {}
+export class AuthModule { }
