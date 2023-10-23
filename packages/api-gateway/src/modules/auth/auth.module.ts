@@ -11,10 +11,6 @@ import {
   AUTHSERVICE_API_KEY_PACKAGE_NAME,
 } from 'src/auth-service/gen/api_key';
 import { ConfigModule } from '@nestjs/config';
-import {
-  AUTHSERVICE_USER_PACKAGE_NAME,
-  USER_SERVICE_NAME,
-} from 'src/auth-service/gen/user';
 
 @Module({
   imports: [
@@ -43,18 +39,6 @@ import {
           protoPath: join(
             __dirname,
             '../../../../proto/auth-service/api_key.proto',
-          ),
-        },
-      },
-      {
-        name: USER_SERVICE_NAME,
-        transport: Transport.GRPC,
-        options: {
-          url: process.env.AUTH_SERVICE_ADDR,
-          package: AUTHSERVICE_USER_PACKAGE_NAME,
-          protoPath: join(
-            __dirname,
-            '../../../../proto/auth-service/user.proto',
           ),
         },
       },
