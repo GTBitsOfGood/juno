@@ -5,16 +5,21 @@ import {
   UserServiceControllerMethods,
   UserType,
   User as RPCUser,
-  UserIdentifier,
   UpdateUserRequest,
+  LinkProjectToUserRequest,
 } from 'src/gen/user';
 import { UserService } from './user.service';
-import { Prisma, Role, User } from '@prisma/client';
+import { Role } from '@prisma/client';
+import {
+  validateProjectIdentifier,
+  validateUserIdentifier,
+} from 'src/utility/validate';
+import { UserIdentifier } from 'src/gen/shared/identifiers';
 
 @Controller()
 @UserServiceControllerMethods()
 export class UserController implements UserServiceController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   private mapPrismaRoleToRPC(role: Role): UserType {
     switch (role) {
@@ -41,26 +46,8 @@ export class UserController implements UserServiceController {
     }
   }
 
-  private validateIdentifier(identifier: UserIdentifier) {
-    if (identifier.id && identifier.email) {
-      throw new Error('Only one of id or email can be provided');
-    } else if (!identifier.id && !identifier.email) {
-      throw new Error('Neither id nor email are provided');
-    }
-  }
-
   async getUser(identifier: UserIdentifier): Promise<RPCUser> {
-    this.validateIdentifier(identifier);
-    let userFind: Prisma.UserWhereUniqueInput;
-    if (identifier.id) {
-      userFind = {
-        id: Number(identifier.id),
-      };
-    } else {
-      userFind = {
-        email: identifier.email,
-      };
-    }
+    const userFind = validateUserIdentifier(identifier);
     const user = await this.userService.user(userFind);
     return {
       ...user,
@@ -82,18 +69,8 @@ export class UserController implements UserServiceController {
   }
 
   async updateUser(request: UpdateUserRequest): Promise<RPCUser> {
-    this.validateIdentifier(request.userIdentifier);
-    let userFind: Prisma.UserWhereUniqueInput;
-    if (request.userIdentifier.id) {
-      userFind = {
-        id: request.userIdentifier.id,
-      };
-    } else {
-      userFind = {
-        email: request.userIdentifier.email,
-      };
-    }
-    const user = await this.userService.updateUser(userFind, {
+    const identifier = validateUserIdentifier(request.userIdentifier);
+    const user = await this.userService.updateUser(identifier, {
       name: request.updateParams.name,
       email: request.updateParams.email,
       password: request.updateParams.password,
@@ -106,21 +83,26 @@ export class UserController implements UserServiceController {
   }
 
   async deleteUser(request: UserIdentifier): Promise<RPCUser> {
-    this.validateIdentifier(request);
-    let user: User;
-    if (request.id) {
-      user = await this.userService.deleteUser({
-        id: request.id,
-      });
-    } else {
-      user = await this.userService.deleteUser({
-        email: request.email,
-      });
-    }
+    const identifier = validateUserIdentifier(request);
+
+    const user = await this.userService.deleteUser(identifier);
 
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
+    };
+  }
+
+  async linkProject(request: LinkProjectToUserRequest): Promise<RPCUser> {
+    const user = validateUserIdentifier(request.user);
+    const updated = await this.userService.updateUser(user, {
+      allowedProjects: {
+        connect: validateProjectIdentifier(request.project),
+      },
+    });
+    return {
+      ...updated,
+      type: this.mapPrismaRoleToRPC(updated.type),
     };
   }
 }

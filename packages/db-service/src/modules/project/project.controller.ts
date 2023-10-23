@@ -1,39 +1,27 @@
 import { Controller } from '@nestjs/common';
-import { Prisma, Project } from '@prisma/client';
+import { Project } from '@prisma/client';
 import {
   CreateProjectRequest,
-  ProjectIdentifier,
+  LinkUserToProjectRequest,
   ProjectServiceController,
   ProjectServiceControllerMethods,
   UpdateProjectRequest,
 } from 'src/gen/project';
 import { ProjectService } from './project.service';
+import {
+  validateProjectIdentifier,
+  validateUserIdentifier,
+} from 'src/utility/validate';
+import { ProjectIdentifier } from 'src/gen/shared/identifiers';
 
 @Controller()
 @ProjectServiceControllerMethods()
 export class ProjectController implements ProjectServiceController {
-  constructor(private readonly projectService: ProjectService) { }
-
-  private validateIdentifier(identifier: ProjectIdentifier) {
-    if (identifier.id && identifier.name) {
-      throw new Error('Only one of id or name can be provided');
-    } else if (!identifier.id && !identifier.name) {
-      throw new Error('Neither id nor name are provided');
-    }
-  }
+  constructor(private readonly projectService: ProjectService) {}
 
   async getProject(identifier: ProjectIdentifier): Promise<Project> {
-    this.validateIdentifier(identifier);
-    let project: Project;
-    if (identifier.id) {
-      project = await this.projectService.project({
-        id: Number(identifier.id),
-      });
-    } else {
-      project = await this.projectService.project({
-        name: identifier.name,
-      });
-    }
+    const params = validateProjectIdentifier(identifier);
+    const project = await this.projectService.project(params);
     return project;
   }
 
@@ -45,17 +33,7 @@ export class ProjectController implements ProjectServiceController {
   }
 
   async updateProject(request: UpdateProjectRequest): Promise<Project> {
-    this.validateIdentifier(request.projectIdentifier);
-    let projectFind: Prisma.ProjectWhereUniqueInput;
-    if (request.projectIdentifier.id) {
-      projectFind = {
-        id: request.projectIdentifier.id,
-      };
-    } else {
-      projectFind = {
-        name: request.projectIdentifier.name,
-      };
-    }
+    const projectFind = validateProjectIdentifier(request.projectIdentifier);
     const project = await this.projectService.updateProject(projectFind, {
       name: request.updateParams.name,
     });
@@ -63,17 +41,16 @@ export class ProjectController implements ProjectServiceController {
   }
 
   async deleteProject(identifier: ProjectIdentifier): Promise<Project> {
-    this.validateIdentifier(identifier);
-    let project: Project;
-    if (identifier.id) {
-      project = await this.projectService.deleteProject({
-        id: identifier.id,
-      });
-    } else {
-      project = await this.projectService.deleteProject({
-        name: identifier.name,
-      });
-    }
-    return project;
+    const projectParams = validateProjectIdentifier(identifier);
+    return this.projectService.deleteProject(projectParams);
+  }
+
+  async linkUser(request: LinkUserToProjectRequest): Promise<Project> {
+    const project = validateProjectIdentifier(request.project);
+    return this.projectService.updateProject(project, {
+      users: {
+        connect: validateUserIdentifier(request.user),
+      },
+    });
   }
 }

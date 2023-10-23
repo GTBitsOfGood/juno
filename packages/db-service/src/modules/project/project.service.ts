@@ -36,7 +36,7 @@ export class ProjectService {
 
   async updateProject(
     project: Prisma.ProjectWhereUniqueInput,
-    update: Prisma.ProjectCreateInput,
+    update: Prisma.ProjectUpdateInput,
   ): Promise<Project> {
     return this.prisma.project.update({
       where: project,

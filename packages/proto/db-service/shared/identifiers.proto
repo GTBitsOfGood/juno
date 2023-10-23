@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package dbservice.shared.identifiers;
+
+message ProjectIdentifier {
+  oneof identifier {
+    int64 id = 1;
+    string name = 2;
+  }
+}
+
+message UserIdentifier {
+  oneof identifier {
+    int64 id = 1;
+    string email = 2;
+  }
+}
