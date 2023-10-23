@@ -1,6 +1,5 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpException,
@@ -10,7 +9,6 @@ import {
   Param,
   Post,
   Put,
-  UseInterceptors,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -30,7 +28,7 @@ import {
 export class UserController implements OnModuleInit {
   private userService: UserServiceClient;
 
-  constructor(@Inject(USER_SERVICE_NAME) private userClient: ClientGrpc) { }
+  constructor(@Inject(USER_SERVICE_NAME) private userClient: ClientGrpc) {}
 
   onModuleInit() {
     this.userService =

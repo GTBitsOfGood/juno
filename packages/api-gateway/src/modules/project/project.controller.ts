@@ -28,7 +28,7 @@ export class ProjectController implements OnModuleInit {
 
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.projectService =
