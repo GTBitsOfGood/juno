@@ -42,7 +42,7 @@ done
 # will be used in the Auth Service 
 # 
 # NOTE: The proto project's subdirectory MUST match the directory name of the service in packages/
-PROTO_AUTH_USED_SERVICES=("db-service")
+PROTO_AUTH_USED_SERVICES=()
 
 for service in ${PROTO_AUTH_USED_SERVICES[@]}; do
 
