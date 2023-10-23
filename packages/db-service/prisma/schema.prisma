@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+//  url = "postgresql://johndoe:mysecretpassword@localhost:5432"
+}
+
+model User {
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  name            String
+  password        String
+  type            Role
+  allowedProjects Project[]
+}
+
+model Project {
+  id      Int               @id @default(autoincrement())
+  name    String            @unique
+  apiKeys ApiKey[]
+  users   User[]
+}
+
+model ApiKey {
+  id          Int     @id @default(autoincrement())
+  hash        String  @unique
+  description String
+  projectId   Int
+  project     Project @relation(fields: [projectId], references: [id])
+  userVisible Boolean
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  USER
+}

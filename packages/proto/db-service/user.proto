@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package dbservice.user;
+
+service UserService {
+  rpc getUser(UserIdentifier) returns (User);
+  rpc createUser(CreateUserRequest) returns (User);
+  rpc updateUser(UpdateUserRequest) returns (User);
+}
+
+message UserIdentifier {
+  oneof identifier {
+    int64 id = 1;
+    string email = 2;
+  }
+}
+message User {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+  UserType type = 4;
+}
+
+enum UserType {
+  SUPERADMIN = 0;
+  ADMIN = 1;
+  USER = 2;
+}
+
+message CreateUserRequest {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+  UserType type = 4;
+}
+
+message UserUpdateParams {
+  optional string email = 1;
+  optional string name = 2;
+  optional string password = 3;
+  optional UserType type = 4;
+}
+
+message UpdateUserRequest {
+  UserIdentifier userIdentifier = 1;
+  UserUpdateParams updateParams = 2;
+}
