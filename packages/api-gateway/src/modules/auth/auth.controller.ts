@@ -47,7 +47,7 @@ export class AuthController implements OnModuleInit {
     this.apiKeyService.issueApiKey({}).subscribe();
   }
 
-  @Post()
+  @Post('user')
   async createUser(@Body() createUserParams: CreateUserModel) {
     const create = this.userService.createUser({
       ...createUserParams,
@@ -57,7 +57,7 @@ export class AuthController implements OnModuleInit {
     await lastValueFrom(create);
   }
 
-  @Post()
+  @Post('user/type')
   async setUserType(@Body() setUserTypeParams: SetUserTypeModel) {
     await lastValueFrom(
       this.userService.setUserType({
