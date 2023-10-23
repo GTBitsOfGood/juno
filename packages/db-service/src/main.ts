@@ -19,6 +19,7 @@ async function bootstrap() {
         protoPath: [
           join(__dirname, '../../proto/db-service/user.proto'),
           join(__dirname, '../../proto/db-service/project.proto'),
+          join(__dirname, '../../proto/db-service/shared/identifiers.proto'),
         ],
         url: process.env.DB_SERVICE_ADDR,
       },
