@@ -23,7 +23,7 @@ done
 # will be used in the API Gateway
 # 
 # NOTE: The proto project's subdirectory MUST match the directory name of the service in packages/
-PROTO_GW_SERVICES=("auth-service")
+PROTO_GW_SERVICES=("auth-service" "db-service")
 
 for service in ${PROTO_GW_SERVICES[@]}; do
 

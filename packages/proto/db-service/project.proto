@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package dbservice.project;
+
+service ProjectService {
+  rpc getProject(ProjectIdentifier) returns (Project);
+  rpc createProject(CreateProjectRequest) returns (Project);
+  rpc updateProject(UpdateProjectRequest) returns (Project);
+  rpc deleteProject(ProjectIdentifier) returns (Project);
+}
+
+message ProjectIdentifier {
+  oneof identifier {
+    int64 id = 1;
+    string name = 2;
+  }
+}
+message Project {
+  int64 id = 1;
+  string name = 2;
+}
+
+message CreateProjectRequest { string name = 1; }
+
+message ProjectUpdateParams { optional string name = 2; }
+
+message UpdateProjectRequest {
+  ProjectIdentifier projectIdentifier = 1;
+  ProjectUpdateParams updateParams = 2;
+}
