@@ -1,13 +1,9 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
+import { ProjectIdentifier, UserIdentifier } from "./shared/identifiers";
 
 export const protobufPackage = "dbservice.project";
-
-export interface ProjectIdentifier {
-  id?: number | undefined;
-  name?: string | undefined;
-}
 
 export interface Project {
   id: number;
@@ -20,6 +16,11 @@ export interface CreateProjectRequest {
 
 export interface ProjectUpdateParams {
   name?: string | undefined;
+}
+
+export interface LinkUserToProjectRequest {
+  project: ProjectIdentifier | undefined;
+  user: UserIdentifier | undefined;
 }
 
 export interface UpdateProjectRequest {
@@ -37,6 +38,8 @@ export interface ProjectServiceClient {
   updateProject(request: UpdateProjectRequest): Observable<Project>;
 
   deleteProject(request: ProjectIdentifier): Observable<Project>;
+
+  linkUser(request: LinkUserToProjectRequest): Observable<Project>;
 }
 
 export interface ProjectServiceController {
@@ -47,11 +50,13 @@ export interface ProjectServiceController {
   updateProject(request: UpdateProjectRequest): Promise<Project> | Observable<Project> | Project;
 
   deleteProject(request: ProjectIdentifier): Promise<Project> | Observable<Project> | Project;
+
+  linkUser(request: LinkUserToProjectRequest): Promise<Project> | Observable<Project> | Project;
 }
 
 export function ProjectServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getProject", "createProject", "updateProject", "deleteProject"];
+    const grpcMethods: string[] = ["getProject", "createProject", "updateProject", "deleteProject", "linkUser"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ProjectService", method)(constructor.prototype[method], method, descriptor);

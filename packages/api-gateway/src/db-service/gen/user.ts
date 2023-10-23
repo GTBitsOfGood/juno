@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
+import { ProjectIdentifier, UserIdentifier } from "./shared/identifiers";
 
 export const protobufPackage = "dbservice.user";
 
@@ -9,11 +10,6 @@ export enum UserType {
   ADMIN = 1,
   USER = 2,
   UNRECOGNIZED = -1,
-}
-
-export interface UserIdentifier {
-  id?: number | undefined;
-  email?: string | undefined;
 }
 
 export interface User {
@@ -42,6 +38,11 @@ export interface UpdateUserRequest {
   updateParams: UserUpdateParams | undefined;
 }
 
+export interface LinkProjectToUserRequest {
+  project: ProjectIdentifier | undefined;
+  user: UserIdentifier | undefined;
+}
+
 export const DBSERVICE_USER_PACKAGE_NAME = "dbservice.user";
 
 export interface UserServiceClient {
@@ -52,6 +53,8 @@ export interface UserServiceClient {
   updateUser(request: UpdateUserRequest): Observable<User>;
 
   deleteUser(request: UserIdentifier): Observable<User>;
+
+  linkProject(request: LinkProjectToUserRequest): Observable<User>;
 }
 
 export interface UserServiceController {
@@ -62,11 +65,13 @@ export interface UserServiceController {
   updateUser(request: UpdateUserRequest): Promise<User> | Observable<User> | User;
 
   deleteUser(request: UserIdentifier): Promise<User> | Observable<User> | User;
+
+  linkProject(request: LinkProjectToUserRequest): Promise<User> | Observable<User> | User;
 }
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getUser", "createUser", "updateUser", "deleteUser"];
+    const grpcMethods: string[] = ["getUser", "createUser", "updateUser", "deleteUser", "linkProject"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UserService", method)(constructor.prototype[method], method, descriptor);

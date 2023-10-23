@@ -17,3 +17,8 @@ export class ProjectResponse {
     this.name = project.name;
   }
 }
+
+export class LinkUserModel {
+  id?: number;
+  email?: string;
+}

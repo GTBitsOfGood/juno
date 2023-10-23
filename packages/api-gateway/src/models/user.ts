@@ -40,6 +40,11 @@ export class UserResponse {
   }
 }
 
+export class LinkProjectModel {
+  id?: number;
+  name?: string;
+}
+
 function toEnum(params: { value: string }): UserType | undefined {
   switch (params.value) {
     case 'SUPERADMIN':
