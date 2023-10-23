@@ -14,7 +14,7 @@ import { Prisma, Role, User } from '@prisma/client';
 @Controller()
 @UserServiceControllerMethods()
 export class UserController implements UserServiceController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   private mapPrismaRoleToRPC(role: Role): UserType {
     switch (role) {
@@ -51,16 +51,17 @@ export class UserController implements UserServiceController {
 
   async getUser(identifier: UserIdentifier): Promise<RPCUser> {
     this.validateIdentifier(identifier);
-    let user: User;
+    let userFind: Prisma.UserWhereUniqueInput;
     if (identifier.id) {
-      user = await this.userService.user({
-        id: identifier.id,
-      });
+      userFind = {
+        id: Number(identifier.id),
+      };
     } else {
-      user = await this.userService.user({
+      userFind = {
         email: identifier.email,
-      });
+      };
     }
+    const user = await this.userService.user(userFind);
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),

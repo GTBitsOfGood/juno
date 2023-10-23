@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpException,
@@ -8,16 +9,20 @@ import {
   OnModuleInit,
   Param,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import {
   USER_SERVICE_NAME,
-  User,
   UserServiceClient,
   UserType,
 } from 'src/db-service/gen/user';
-import { CreateUserModel, SetUserTypeModel } from 'src/models/user';
+import {
+  CreateUserModel,
+  SetUserTypeModel,
+  UserResponse,
+} from 'src/models/user';
 
 @Controller('user')
 export class UserController implements OnModuleInit {
@@ -31,7 +36,7 @@ export class UserController implements OnModuleInit {
   }
 
   @Get('id/:id')
-  async getUserById(@Param('id') idStr: string): Promise<User> {
+  async getUserById(@Param('id') idStr: string): Promise<UserResponse> {
     const id = parseInt(idStr);
     if (Number.isNaN(id)) {
       throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);
@@ -40,7 +45,7 @@ export class UserController implements OnModuleInit {
       id,
     });
 
-    return lastValueFrom(user);
+    return new UserResponse(await lastValueFrom(user));
   }
 
   @Post()

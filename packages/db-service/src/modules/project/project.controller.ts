@@ -12,7 +12,7 @@ import { ProjectService } from './project.service';
 @Controller()
 @ProjectServiceControllerMethods()
 export class ProjectController implements ProjectServiceController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(private readonly projectService: ProjectService) { }
 
   private validateIdentifier(identifier: ProjectIdentifier) {
     if (identifier.id && identifier.name) {
@@ -27,7 +27,7 @@ export class ProjectController implements ProjectServiceController {
     let project: Project;
     if (identifier.id) {
       project = await this.projectService.project({
-        id: identifier.id,
+        id: Number(identifier.id),
       });
     } else {
       project = await this.projectService.project({
