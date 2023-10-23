@@ -2,19 +2,16 @@ syntax = "proto3";
 
 package dbservice.project;
 
+import "shared/identifiers.proto";
+
 service ProjectService {
-  rpc getProject(ProjectIdentifier) returns (Project);
+  rpc getProject(shared.identifiers.ProjectIdentifier) returns (Project);
   rpc createProject(CreateProjectRequest) returns (Project);
   rpc updateProject(UpdateProjectRequest) returns (Project);
-  rpc deleteProject(ProjectIdentifier) returns (Project);
+  rpc deleteProject(shared.identifiers.ProjectIdentifier) returns (Project);
+  rpc linkUser(LinkUserToProjectRequest) returns (Project);
 }
 
-message ProjectIdentifier {
-  oneof identifier {
-    int64 id = 1;
-    string name = 2;
-  }
-}
 message Project {
   int64 id = 1;
   string name = 2;
@@ -24,7 +21,12 @@ message CreateProjectRequest { string name = 1; }
 
 message ProjectUpdateParams { optional string name = 2; }
 
+message LinkUserToProjectRequest {
+  shared.identifiers.ProjectIdentifier project = 1;
+  shared.identifiers.UserIdentifier user = 2;
+}
+
 message UpdateProjectRequest {
-  ProjectIdentifier projectIdentifier = 1;
+  shared.identifiers.ProjectIdentifier projectIdentifier = 1;
   ProjectUpdateParams updateParams = 2;
 }
