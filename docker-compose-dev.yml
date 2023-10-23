@@ -3,8 +3,8 @@ services:
     build:
       dockerfile: ./packages/api-gateway/Dockerfile.dev
     volumes:
-      - ./packages/api-gateway:/app
       - /app/node_modules
+      - ./packages/api-gateway:/app
       - ./packages/proto:/proto
     ports:
       - '3000:3000'
@@ -20,14 +20,47 @@ services:
     build:
       dockerfile: ./packages/auth-service/Dockerfile.dev
     volumes:
-      - ./packages/auth-service:/app
       - /app/node_modules
+      - ./packages/auth-service:/app
       - ./packages/proto:/proto
     ports:
       - '50052:50052'
     entrypoint: yarn start:dev
     environment:
       AUTH_SERVICE_ADDR: auth-service
+      DB_SERVICE_ADDR: db-service
+    networks:
+      - bog-api-net
+    depends_on:
+      - db-service
+
+  db-service:
+    build:
+      dockerfile: ./packages/auth-service/Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - ./packages/db-service:/app
+      - ./packages/proto:/proto
+    ports:
+      - '50053:50053'
+    entrypoint: ./entrypoint.sh
+    environment:
+      AUTH_SERVICE_ADDR: auth-service
+      DB_SERVICE_ADDR: db-service
+      DATABASE_URL: postgresql://user:password@db
+    networks:
+      - bog-api-net
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
     networks:
       - bog-api-net
 
