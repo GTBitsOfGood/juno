@@ -6,6 +6,7 @@ service UserService {
   rpc getUser(UserIdentifier) returns (User);
   rpc createUser(CreateUserRequest) returns (User);
   rpc updateUser(UpdateUserRequest) returns (User);
+  rpc deleteUser(UserIdentifier) returns (User);
 }
 
 message UserIdentifier {

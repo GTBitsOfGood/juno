@@ -103,4 +103,23 @@ export class UserController implements UserServiceController {
       type: this.mapPrismaRoleToRPC(user.type),
     };
   }
+
+  async deleteUser(request: UserIdentifier): Promise<RPCUser> {
+    this.validateIdentifier(request);
+    let user: User;
+    if (request.id) {
+      user = await this.userService.deleteUser({
+        id: request.id,
+      });
+    } else {
+      user = await this.userService.deleteUser({
+        email: request.email,
+      });
+    }
+
+    return {
+      ...user,
+      type: this.mapPrismaRoleToRPC(user.type),
+    };
+  }
 }
