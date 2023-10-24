@@ -37,7 +37,7 @@ services:
 
   db-service:
     build:
-      dockerfile: ./packages/auth-service/Dockerfile.dev
+      dockerfile: ./packages/db-service/Dockerfile.dev
     volumes:
       - /app/node_modules
       - ./packages/db-service:/app
