@@ -1,11 +1,11 @@
 services:
   gateway:
     build:
-      dockerfile: ./packages/api-gateway/Dockerfile.dev
+      dockerfile: Dockerfile.dev
+      context: ./packages/api-gateway/
     volumes:
-      - /app/node_modules
-      - ./packages/api-gateway:/app
-      - ./packages/proto:/proto
+      - ./packages/api-gateway:/app/src
+      - ./packages/proto:/app/proto
     ports:
       - '3000:3000'
     entrypoint: yarn start:dev
@@ -19,11 +19,11 @@ services:
 
   auth-service:
     build:
-      dockerfile: ./packages/auth-service/Dockerfile.dev
+      dockerfile: Dockerfile.dev
+      context: ./packages/auth-service
     volumes:
-      - /app/node_modules
-      - ./packages/auth-service:/app
-      - ./packages/proto:/proto
+      - ./packages/auth-service:/app/src
+      - ./packages/proto:/app/proto
     ports:
       - '50052:50052'
     entrypoint: yarn start:dev
@@ -37,11 +37,11 @@ services:
 
   db-service:
     build:
-      dockerfile: ./packages/db-service/Dockerfile.dev
+      dockerfile: Dockerfile.dev
+      context: ./packages/db-service
     volumes:
-      - /app/node_modules
-      - ./packages/db-service:/app
-      - ./packages/proto:/proto
+      - ./packages/db-service:/app/src
+      - ./packages/proto:/app/proto
     ports:
       - '50053:50053'
     entrypoint: ./entrypoint.sh
@@ -52,7 +52,8 @@ services:
     networks:
       - bog-api-net
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres
@@ -64,6 +65,11 @@ services:
       POSTGRES_USER: user
     networks:
       - bog-api-net
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U user']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   bog-api-net:
