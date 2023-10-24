@@ -1,7 +1,5 @@
 #!/bin/bash
 
-yarn prisma migrate deploy
-
-yarn prisma generate
+prisma migrate dev 
 
 yarn start:dev
