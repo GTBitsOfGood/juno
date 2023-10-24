@@ -4,7 +4,7 @@
 
 Bits of Good's United Infrastructure API to accelerate deveopment and provide simple setup and integration of various services. This project was ideated and created with the input of various project teams and leads and aims to simplify commonly known tedious workflows and setups, supercharging development throughout and reducing tedious setup.
 
-This project was build with scale in-mind, hence the microservice-based architecture and vast difference from general Bits of Good project repos. It urilizes a custom monorepo structure that's further explained below.
+This project was build with scale in-mind, hence the microservice-based architecture and vastly difference from general Bits of Good project repos. It utilizes a custom monorepo structure that's further explained below.
 
 ## Repo Structure
 
