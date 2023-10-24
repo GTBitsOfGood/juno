@@ -1,16 +1,22 @@
-FROM node:18 as deps
+FROM node:18-alpine as deps
 
 WORKDIR /app
 
-COPY package.json yarn.lock
+RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
 
-RUN yarn install --frozen-lockfile
+COPY package.json ./
+
+RUN yarn install 
 
 FROM node:18 as dev
 
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules/
+
+ENV PATH=/app/node_modules/.bin:$PATH
+
+WORKDIR /app/src
 
 COPY . .
 
