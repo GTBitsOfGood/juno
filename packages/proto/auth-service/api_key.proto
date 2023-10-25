@@ -5,6 +5,7 @@ package authservice.api_key;
 service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
+  rpc isValidApiKey(IsValidApiKeyRequest) returns (IsValidApiKeyResponse);
 }
 
 message IssueApiKeyRequest {}
@@ -12,3 +13,6 @@ message IssueApiKeyResponse {}
 
 message RevokeApiKeyRequest {}
 message RevokeApiKeyResponse {}
+
+message IsValidApiKeyRequest{}
+message IsValidApiKeyResponse{}

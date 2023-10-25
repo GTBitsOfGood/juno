@@ -2,6 +2,8 @@ import { Controller } from '@nestjs/common';
 import {
   ApiKeyServiceController,
   ApiKeyServiceControllerMethods,
+  IsValidApiKeyRequest,
+  IsValidApiKeyResponse,
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   RevokeApiKeyRequest,
@@ -18,5 +20,10 @@ export class ApiKeyController implements ApiKeyServiceController {
   revokeApiKey(request: RevokeApiKeyRequest): Promise<RevokeApiKeyResponse> {
     console.log(`request: ${request}`);
     throw new Error('Method not implemented.');
+  }
+
+  async isValidApiKey(request: IsValidApiKeyRequest): Promise<IsValidApiKeyResponse> {
+
+    return true
   }
 }
