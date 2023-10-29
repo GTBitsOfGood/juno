@@ -16,10 +16,25 @@ export interface RevokeApiKeyRequest {
 export interface RevokeApiKeyResponse {
 }
 
-export interface IsValidApiKeyRequest {
+export interface GetProjectByApiKeyRequest {
+  apiKey: string;
 }
 
-export interface IsValidApiKeyResponse {
+export interface GetProjectByApiKeyResponse {
+  success: boolean;
+  projectId?: string | undefined;
+  scopes: string[];
+  error?: string | undefined;
+}
+
+export interface GetHashedApiKeyRequest {
+  apiKey: string;
+}
+
+export interface GetHashedApiKeyResponse {
+  success: boolean;
+  hashedApiKey?: string | undefined;
+  error?: string | undefined;
 }
 
 export const AUTHSERVICE_API_KEY_PACKAGE_NAME = "authservice.api_key";
@@ -29,7 +44,9 @@ export interface ApiKeyServiceClient {
 
   revokeApiKey(request: RevokeApiKeyRequest): Observable<RevokeApiKeyResponse>;
 
-  isValidApiKey(request: IsValidApiKeyRequest): Observable<IsValidApiKeyResponse>;
+  getProjectByApiKey(request: GetProjectByApiKeyRequest): Observable<GetProjectByApiKeyResponse>;
+
+  getHashedApiKey(request: GetHashedApiKeyRequest): Observable<GetHashedApiKeyResponse>;
 }
 
 export interface ApiKeyServiceController {
@@ -41,14 +58,18 @@ export interface ApiKeyServiceController {
     request: RevokeApiKeyRequest,
   ): Promise<RevokeApiKeyResponse> | Observable<RevokeApiKeyResponse> | RevokeApiKeyResponse;
 
-  isValidApiKey(
-    request: IsValidApiKeyRequest,
-  ): Promise<IsValidApiKeyResponse> | Observable<IsValidApiKeyResponse> | IsValidApiKeyResponse;
+  getProjectByApiKey(
+    request: GetProjectByApiKeyRequest,
+  ): Promise<GetProjectByApiKeyResponse> | Observable<GetProjectByApiKeyResponse> | GetProjectByApiKeyResponse;
+
+  getHashedApiKey(
+    request: GetHashedApiKeyRequest,
+  ): Promise<GetHashedApiKeyResponse> | Observable<GetHashedApiKeyResponse> | GetHashedApiKeyResponse;
 }
 
 export function ApiKeyServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["issueApiKey", "revokeApiKey", "isValidApiKey"];
+    const grpcMethods: string[] = ["issueApiKey", "revokeApiKey", "getProjectByApiKey", "getHashedApiKey"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ApiKeyService", method)(constructor.prototype[method], method, descriptor);

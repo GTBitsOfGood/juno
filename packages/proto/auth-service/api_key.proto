@@ -5,7 +5,8 @@ package authservice.api_key;
 service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
-  rpc isValidApiKey(IsValidApiKeyRequest) returns (IsValidApiKeyResponse);
+  rpc getProjectByApiKey(GetProjectByApiKeyRequest) returns (GetProjectByApiKeyResponse);
+  rpc getHashedApiKey(GetHashedApiKeyRequest) returns (GetHashedApiKeyResponse);
 }
 
 message IssueApiKeyRequest {}
@@ -14,5 +15,34 @@ message IssueApiKeyResponse {}
 message RevokeApiKeyRequest {}
 message RevokeApiKeyResponse {}
 
-message IsValidApiKeyRequest{}
-message IsValidApiKeyResponse{}
+message GetProjectByApiKeyRequest{
+  string apiKey = 1;
+}
+message GetProjectByApiKeyResponse{
+  bool success = 1;
+  oneof project_id_optional{
+    string projectId = 2;
+  }
+  
+  repeated string scopes = 3;
+
+  oneof error_optional{
+    string error = 4;
+  }
+
+}
+
+message GetHashedApiKeyRequest{
+  string apiKey = 1;
+}
+message GetHashedApiKeyResponse{
+  bool success = 1;
+  oneof hashed_api_key_optional{
+    string hashedApiKey = 2;
+  }
+  
+  oneof error_optional{
+    string error = 3;
+  }
+
+}

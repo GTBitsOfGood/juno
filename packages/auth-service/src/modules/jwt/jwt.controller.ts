@@ -1,23 +1,29 @@
-import { Controller, Inject, Post } from '@nestjs/common';
+import { Controller, Inject, OnModuleInit, Post } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { API_KEY_SERVICE_NAME, ApiKeyServiceClient } from 'src/gen/api_key';
+import { API_KEY_SERVICE_NAME, ApiKeyServiceClient, GetProjectByApiKeyResponse } from 'src/gen/api_key';
 import {
   CreateJwtRequest,
   CreateJwtResponse,
-  JWT_SERVICE_NAME,
   JwtServiceController,
   JwtServiceControllerMethods,
   ValidateJwtRequest,
   ValidateJwtResponse,
 } from 'src/gen/jwt';
+import { JWTService } from './jwt.service';
+import { lastValueFrom } from 'rxjs';
 
 @Controller('jwt')
 @JwtServiceControllerMethods()
-export class JWTController implements JwtServiceController {
+export class JWTController implements JwtServiceController, OnModuleInit {
   private apiKeyService: ApiKeyServiceClient;
 
-  constructor(private apiKeyClient: ClientGrpc) {
-    this.apiKeyService = apiKeyClient.getService<ApiKeyServiceClient>(API_KEY_SERVICE_NAME);
+  constructor(
+    private readonly jwtService: JWTService,
+    @Inject(API_KEY_SERVICE_NAME) private apiKeyClient: ClientGrpc
+  ) { }
+
+  onModuleInit() {
+    this.apiKeyService = this.apiKeyClient.getService<ApiKeyServiceClient>(API_KEY_SERVICE_NAME);
   }
 
   @Post('authorize')
@@ -25,14 +31,27 @@ export class JWTController implements JwtServiceController {
     const { header } = request;
     const apiKey = header.XApiKey;
 
-    if (!this.apiKeyService.isValidApiKey(apiKey)) {
+    const project: GetProjectByApiKeyResponse = await lastValueFrom(this.apiKeyService.getProjectByApiKey({ apiKey }));
+
+    if (project.success) {
       return {
         success: false,
         error: "Provided API key is not valid"
       }
     }
 
-    return
+    const { hashedApiKey } = await lastValueFrom(this.apiKeyService.getHashedApiKey({ apiKey }));
+
+    const jwt = this.jwtService.createJwtFromProjectInfo({
+      projectId: project.projectId,
+      scopes: project.scopes,
+      hashedApiKey
+    });
+
+    return {
+      success: true,
+
+    }
   }
   validateJwt(request: ValidateJwtRequest): Promise<ValidateJwtResponse> {
     console.log(`request: ${request}`);

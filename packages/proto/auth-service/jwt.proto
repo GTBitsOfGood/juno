@@ -7,17 +7,30 @@ service JwtService {
   rpc validateJwt(ValidateJwtRequest) returns (ValidateJwtResponse);
 }
 
+service InternalJwtService{
+  rpc createJwtFromProjectInfo(CreateJwtProjectInfo) returns(CreateJwtInfo);
+}
+
+message CreateJwtProjectInfo{
+  string hashedApiKey = 1;
+  string projectId = 2;
+  repeated string scopes = 3;
+}
+
+message CreateJwtInfo{
+  string jwt = 1;
+}
+
 message CreateJwtRequestHeader{
   string X_Api_Key = 1 [json_name = "X-Api-Key"];
 }
-
 message CreateJwtRequest {
   CreateJwtRequestHeader header = 1;  
 }
 message CreateJwtResponse {
   bool success = 1;
   oneof error_optional{
-    string error = 3;
+    string error = 2;
   }
   oneof jwt_optional{
     string jwt = 3;

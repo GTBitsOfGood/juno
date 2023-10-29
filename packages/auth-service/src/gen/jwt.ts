@@ -4,6 +4,16 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "authservice.jwt";
 
+export interface CreateJwtProjectInfo {
+  hashedApiKey: string;
+  projectId: string;
+  scopes: string[];
+}
+
+export interface CreateJwtInfo {
+  jwt: string;
+}
+
 export interface CreateJwtRequestHeader {
   XApiKey: string;
 }
@@ -14,7 +24,7 @@ export interface CreateJwtRequest {
 
 export interface CreateJwtResponse {
   success: boolean;
-  error: string;
+  error?: string | undefined;
   jwt?: string | undefined;
 }
 
@@ -56,3 +66,30 @@ export function JwtServiceControllerMethods() {
 }
 
 export const JWT_SERVICE_NAME = "JwtService";
+
+export interface InternalJwtServiceClient {
+  createJwtFromProjectInfo(request: CreateJwtProjectInfo): Observable<CreateJwtInfo>;
+}
+
+export interface InternalJwtServiceController {
+  createJwtFromProjectInfo(
+    request: CreateJwtProjectInfo,
+  ): Promise<CreateJwtInfo> | Observable<CreateJwtInfo> | CreateJwtInfo;
+}
+
+export function InternalJwtServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ["createJwtFromProjectInfo"];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("InternalJwtService", method)(constructor.prototype[method], method, descriptor);
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("InternalJwtService", method)(constructor.prototype[method], method, descriptor);
+    }
+  };
+}
+
+export const INTERNAL_JWT_SERVICE_NAME = "InternalJwtService";

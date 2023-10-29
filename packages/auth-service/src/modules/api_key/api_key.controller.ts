@@ -2,8 +2,10 @@ import { Controller } from '@nestjs/common';
 import {
   ApiKeyServiceController,
   ApiKeyServiceControllerMethods,
-  IsValidApiKeyRequest,
-  IsValidApiKeyResponse,
+  GetHashedApiKeyRequest,
+  GetHashedApiKeyResponse,
+  GetProjectByApiKeyRequest,
+  GetProjectByApiKeyResponse,
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   RevokeApiKeyRequest,
@@ -22,8 +24,22 @@ export class ApiKeyController implements ApiKeyServiceController {
     throw new Error('Method not implemented.');
   }
 
-  async isValidApiKey(request: IsValidApiKeyRequest): Promise<IsValidApiKeyResponse> {
+  async getProjectByApiKey(request: GetProjectByApiKeyRequest): Promise<GetProjectByApiKeyResponse> {
+    const apiKey = request.apiKey;
 
-    return true
+    return {
+      success: false,
+      projectId: null,
+      scopes: [],
+      error: `Failed to retrieve project with api key ${apiKey}`
+    }
   }
+
+  async getHashedApiKey(request: GetHashedApiKeyRequest): Promise<GetHashedApiKeyResponse> {
+    return {
+      success: true,
+      hashedApiKey: "hello world"
+    }
+  }
+
 }
