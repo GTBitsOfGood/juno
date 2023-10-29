@@ -36,11 +36,10 @@ export class JWTService implements InternalJwtServiceController {
       return {
         verified: true,
       };
-
     } catch {
       return {
-        verified: false
-      }
+        verified: false,
+      };
     }
   }
 }
