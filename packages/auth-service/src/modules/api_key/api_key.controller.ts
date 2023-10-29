@@ -42,7 +42,7 @@ export class ApiKeyController implements ApiKeyServiceController {
   ): Promise<GetHashedApiKeyResponse> {
     return {
       success: true,
-      hashedApiKey: 'hello world',
+      hashedApiKey: request.apiKey,
     };
   }
 }

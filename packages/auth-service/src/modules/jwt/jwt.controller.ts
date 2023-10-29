@@ -51,7 +51,7 @@ export class JWTController implements JwtServiceController, OnModuleInit {
       this.apiKeyService.getHashedApiKey({ apiKey }),
     );
 
-    const jwt = this.jwtService.createJwtFromProjectInfo({
+    const { jwt } = this.jwtService.createJwtFromProjectInfo({
       projectId: project.projectId,
       scopes: project.scopes,
       hashedApiKey,
@@ -59,6 +59,7 @@ export class JWTController implements JwtServiceController, OnModuleInit {
 
     return {
       success: true,
+      jwt,
     };
   }
   validateJwt(request: ValidateJwtRequest): Promise<ValidateJwtResponse> {
