@@ -1,0 +1,66 @@
+FROM node:18-alpine as deps
+
+WORKDIR /app
+
+COPY . .
+
+RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
+
+RUN yarn global add node-gyp prisma
+
+RUN yarn install --frozen-lockfile
+
+WORKDIR /app/packages/api-gateway
+
+RUN yarn install --frozen-lockfile
+
+WORKDIR /app/packages/auth-service
+
+RUN yarn install --frozen-lockfile
+
+WORKDIR /app/packages/db-service
+
+RUN yarn install --frozen-lockfile
+
+
+FROM node:18 as gateway-dev
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/api-gateway/node_modules ./packages/node_modules/
+
+COPY . .
+
+WORKDIR /app/packages/api-gateway
+
+
+FROM node:18 as auth-service-dev
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/auth-service/node_modules ./packages/node_modules/
+
+COPY . .
+
+WORKDIR /app/packages/auth-service
+
+
+FROM node:18 as db-service-dev
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/db-service/node_modules ./packages/node_modules/
+
+COPY . .
+
+RUN yarn global add prisma
+
+WORKDIR /app/packages/db-service
+
+RUN prisma generate
