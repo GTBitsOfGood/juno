@@ -10,6 +10,8 @@ import {
   IssueApiKeyResponse,
   RevokeApiKeyRequest,
   RevokeApiKeyResponse,
+  ValidateHashedApiKeyRequest,
+  ValidateHashedApiKeyResponse,
 } from 'src/gen/api_key';
 
 @Controller('api_key')
@@ -43,6 +45,17 @@ export class ApiKeyController implements ApiKeyServiceController {
     return {
       success: true,
       hashedApiKey: request.apiKey,
+    };
+  }
+
+  async validateHashedApiKey(
+    request: ValidateHashedApiKeyRequest,
+  ): Promise<ValidateHashedApiKeyResponse> {
+    const { hashedApiKey } = request;
+
+    return {
+      success: true,
+      validHash: hashedApiKey !== '',
     };
   }
 }

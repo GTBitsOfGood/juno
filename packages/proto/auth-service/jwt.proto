@@ -18,6 +18,11 @@ message JwtForVerificationInfo {
 
 message VerificationInfo{
   bool verified = 1;
+
+
+  oneof hashed_api_key_optional{
+    string hashedApiKey = 2;
+  }
 }
 
 message CreateJwtProjectInfo{

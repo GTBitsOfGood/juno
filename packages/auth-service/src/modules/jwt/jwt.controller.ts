@@ -1,4 +1,10 @@
-import { Controller, Inject, OnModuleInit, Post } from '@nestjs/common';
+import {
+  Controller,
+  Inject,
+  OnModuleInit,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
   API_KEY_SERVICE_NAME,
@@ -72,17 +78,17 @@ export class JWTController implements JwtServiceController, OnModuleInit {
       authorization[0] !== 'Bearer' ||
       authorization.length !== 2
     ) {
-      return {
-        success: false,
-        verified: false,
-        error: 'Unauthorized',
-      };
+      throw new UnauthorizedException('Invalid Authorization Header');
     }
-    const { verified } = this.jwtService.verifyJwt({ jwt: authorization[1] });
-
+    const { verified, hashedApiKey } = this.jwtService.verifyJwt({
+      jwt: authorization[1],
+    });
+    const { validHash } = await lastValueFrom(
+      this.apiKeyService.validateHashedApiKey({ hashedApiKey }),
+    );
     return {
       success: true,
-      verified,
+      verified: verified && validHash,
     };
   }
 }

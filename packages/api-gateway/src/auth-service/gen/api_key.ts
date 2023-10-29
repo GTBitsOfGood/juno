@@ -33,6 +33,16 @@ export interface GetHashedApiKeyResponse {
   error?: string | undefined;
 }
 
+export interface ValidateHashedApiKeyRequest {
+  hashedApiKey: string;
+}
+
+export interface ValidateHashedApiKeyResponse {
+  success: boolean;
+  validHash: boolean;
+  error?: string | undefined;
+}
+
 export const AUTHSERVICE_API_KEY_PACKAGE_NAME = 'authservice.api_key';
 
 export interface ApiKeyServiceClient {
@@ -47,6 +57,10 @@ export interface ApiKeyServiceClient {
   getHashedApiKey(
     request: GetHashedApiKeyRequest,
   ): Observable<GetHashedApiKeyResponse>;
+
+  validateHashedApiKey(
+    request: ValidateHashedApiKeyRequest,
+  ): Observable<ValidateHashedApiKeyResponse>;
 }
 
 export interface ApiKeyServiceController {
@@ -77,6 +91,13 @@ export interface ApiKeyServiceController {
     | Promise<GetHashedApiKeyResponse>
     | Observable<GetHashedApiKeyResponse>
     | GetHashedApiKeyResponse;
+
+  validateHashedApiKey(
+    request: ValidateHashedApiKeyRequest,
+  ):
+    | Promise<ValidateHashedApiKeyResponse>
+    | Observable<ValidateHashedApiKeyResponse>
+    | ValidateHashedApiKeyResponse;
 }
 
 export function ApiKeyServiceControllerMethods() {
@@ -86,6 +107,7 @@ export function ApiKeyServiceControllerMethods() {
       'revokeApiKey',
       'getProjectByApiKey',
       'getHashedApiKey',
+      'validateHashedApiKey',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

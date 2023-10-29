@@ -10,6 +10,7 @@ export interface JwtForVerificationInfo {
 
 export interface VerificationInfo {
   verified: boolean;
+  hashedApiKey?: string | undefined;
 }
 
 export interface CreateJwtProjectInfo {

@@ -11,17 +11,9 @@ import jwt from 'jsonwebtoken';
 @Injectable()
 export class JWTService implements InternalJwtServiceController {
   createJwtFromProjectInfo(projectInfo: CreateJwtProjectInfo): CreateJwtInfo {
-    const { projectId, scopes, hashedApiKey } = projectInfo;
-
-    const token = jwt.sign(
-      {
-        projectId,
-        hashedApiKey,
-        scopes,
-      },
-      process.env.JWT_SECRET ?? 'secret',
-      { expiresIn: '1h' },
-    );
+    const token = jwt.sign(projectInfo, process.env.JWT_SECRET ?? 'secret', {
+      expiresIn: '1h',
+    });
 
     return {
       jwt: token,
@@ -31,10 +23,14 @@ export class JWTService implements InternalJwtServiceController {
   verifyJwt(jwtInfo: JwtForVerificationInfo): VerificationInfo {
     try {
       const token = jwtInfo.jwt;
-      jwt.verify(token, process.env.JWT_SECRET ?? 'secret');
+      const tokenData: CreateJwtProjectInfo = jwt.verify(
+        token,
+        process.env.JWT_SECRET ?? 'secret',
+      );
 
       return {
         verified: true,
+        hashedApiKey: tokenData.hashedApiKey,
       };
     } catch {
       return {
