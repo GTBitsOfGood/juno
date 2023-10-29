@@ -7,8 +7,17 @@ service ApiKeyService {
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
 }
 
-message IssueApiKeyRequest {}
-message IssueApiKeyResponse {}
+message IssueApiKeyRequest {
+  string project_name = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message IssueApiKeyResponse {
+  oneof response {
+    string apiKey = 1;
+  }
+}
 
 message RevokeApiKeyRequest {}
 message RevokeApiKeyResponse {}

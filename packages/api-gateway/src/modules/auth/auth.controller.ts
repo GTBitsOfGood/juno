@@ -1,8 +1,16 @@
-import { Controller, Get, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  OnModuleInit,
+  Post,
+} from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
   API_KEY_SERVICE_NAME,
   ApiKeyServiceClient,
+  IssueApiKeyRequest,
 } from 'src/auth-service/gen/api_key';
 import { JWT_SERVICE_NAME, JwtServiceClient } from 'src/auth-service/gen/jwt';
 
@@ -26,6 +34,11 @@ export class AuthController implements OnModuleInit {
   @Get()
   getJWT() {
     console.log('CALLED');
-    this.apiKeyService.issueApiKey({}).subscribe();
+    // this.apiKeyService.issueApiKey({}).subscribe();
+  }
+
+  @Post('/key')
+  createApiKey(@Body() issueApiKeyRequest: IssueApiKeyRequest) {
+    this.apiKeyService.issueApiKey(issueApiKeyRequest).subscribe();
   }
 }

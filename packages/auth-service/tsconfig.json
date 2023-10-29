@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
@@ -10,6 +11,9 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@utils/*": ["../bog-utils/dist/*"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
