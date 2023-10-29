@@ -10,7 +10,7 @@
     "format:write": "yarn prettier --write .",
     "tsc": "nx run-many --target=tsc",
     "lint": "nx run-many --target=lint",
-    "gen-proto": "./gen_protos.sh"
+    "gen-proto": "./gen_protos.sh && yarn format:write"
   },
   "devDependencies": {
     "nx": "17.0.0",
