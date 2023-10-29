@@ -2,10 +2,10 @@ services:
   gateway:
     build:
       dockerfile: Dockerfile.dev
-      context: ./packages/api-gateway/
+      target: gateway-dev
     volumes:
-      - ./packages/api-gateway:/app/src
-      - ./packages/proto:/app/proto
+      - ./packages/api-gateway:/app/packages/api-gateway
+      - ./packages/proto:/app/packages/proto
     ports:
       - '3000:3000'
     entrypoint: yarn start:dev
@@ -20,10 +20,10 @@ services:
   auth-service:
     build:
       dockerfile: Dockerfile.dev
-      context: ./packages/auth-service
+      target: auth-service-dev
     volumes:
-      - ./packages/auth-service:/app/src
-      - ./packages/proto:/app/proto
+      - ./packages/auth-service:/app/packages/auth-service
+      - ./packages/proto:/app/packages/proto
     ports:
       - '50052:50052'
     entrypoint: yarn start:dev
@@ -38,10 +38,10 @@ services:
   db-service:
     build:
       dockerfile: Dockerfile.dev
-      context: ./packages/db-service
+      target: db-service-dev
     volumes:
-      - ./packages/db-service:/app/src
-      - ./packages/proto:/app/proto
+      - ./packages/db-service:/app/packages/db-service
+      - ./packages/proto:/app/packages/proto
     ports:
       - '50053:50053'
     entrypoint: ./entrypoint.sh
