@@ -24,22 +24,25 @@ export class ApiKeyController implements ApiKeyServiceController {
     throw new Error('Method not implemented.');
   }
 
-  async getProjectByApiKey(request: GetProjectByApiKeyRequest): Promise<GetProjectByApiKeyResponse> {
+  async getProjectByApiKey(
+    request: GetProjectByApiKeyRequest,
+  ): Promise<GetProjectByApiKeyResponse> {
     const apiKey = request.apiKey;
 
     return {
       success: false,
       projectId: null,
       scopes: [],
-      error: `Failed to retrieve project with api key ${apiKey}`
-    }
+      error: `Failed to retrieve project with api key ${apiKey}`,
+    };
   }
 
-  async getHashedApiKey(request: GetHashedApiKeyRequest): Promise<GetHashedApiKeyResponse> {
+  async getHashedApiKey(
+    request: GetHashedApiKeyRequest,
+  ): Promise<GetHashedApiKeyResponse> {
     return {
       success: true,
-      hashedApiKey: "hello world"
-    }
+      hashedApiKey: 'hello world',
+    };
   }
-
 }

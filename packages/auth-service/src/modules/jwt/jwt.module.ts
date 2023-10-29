@@ -4,7 +4,10 @@ import { JWTService } from './jwt.service';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { API_KEY_SERVICE_NAME, AUTHSERVICE_API_KEY_PACKAGE_NAME } from 'src/gen/api_key';
+import {
+  API_KEY_SERVICE_NAME,
+  AUTHSERVICE_API_KEY_PACKAGE_NAME,
+} from 'src/gen/api_key';
 
 @Module({
   imports: [
@@ -23,9 +26,10 @@ import { API_KEY_SERVICE_NAME, AUTHSERVICE_API_KEY_PACKAGE_NAME } from 'src/gen/
             '../../../../proto/auth-service/api_key.proto',
           ),
         },
-      }])
+      },
+    ]),
   ],
   controllers: [JWTController],
   providers: [JWTService],
 })
-export class JwtModule { }
+export class JwtModule {}
