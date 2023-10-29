@@ -25,6 +25,8 @@ RUN yarn install --frozen-lockfile
 
 FROM node:18 as gateway-dev
 
+RUN apt update && apt install -y protobuf-compiler 
+
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules/
@@ -38,6 +40,8 @@ WORKDIR /app/packages/api-gateway
 
 FROM node:18 as auth-service-dev
 
+RUN apt update && apt install -y protobuf-compiler 
+
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules/
@@ -50,6 +54,8 @@ WORKDIR /app/packages/auth-service
 
 
 FROM node:18 as db-service-dev
+
+RUN apt update && apt install -y protobuf-compiler 
 
 WORKDIR /app
 

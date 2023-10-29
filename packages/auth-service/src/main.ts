@@ -10,6 +10,7 @@ async function bootstrap() {
   ConfigModule.forRoot({
     envFilePath: join(__dirname, '../../../.env.local'),
   });
+  console.log(process.env.AUTH_SERVICE_ADDR);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
