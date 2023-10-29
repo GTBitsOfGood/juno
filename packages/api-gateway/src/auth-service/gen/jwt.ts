@@ -4,6 +4,14 @@ import { Observable } from 'rxjs';
 
 export const protobufPackage = 'authservice.jwt';
 
+export interface JwtForVerificationInfo {
+  jwt: string;
+}
+
+export interface VerificationInfo {
+  verified: boolean;
+}
+
 export interface CreateJwtProjectInfo {
   hashedApiKey: string;
   projectId: string;
@@ -28,9 +36,19 @@ export interface CreateJwtResponse {
   jwt?: string | undefined;
 }
 
-export interface ValidateJwtRequest {}
+export interface ValidateJwtRequestHeader {
+  authorization: string;
+}
 
-export interface ValidateJwtResponse {}
+export interface ValidateJwtRequest {
+  header: ValidateJwtRequestHeader | undefined;
+}
+
+export interface ValidateJwtResponse {
+  success: boolean;
+  verified: boolean;
+  error?: string | undefined;
+}
 
 export const AUTHSERVICE_JWT_PACKAGE_NAME = 'authservice.jwt';
 
@@ -91,17 +109,26 @@ export interface InternalJwtServiceClient {
   createJwtFromProjectInfo(
     request: CreateJwtProjectInfo,
   ): Observable<CreateJwtInfo>;
+
+  verifyJwt(request: JwtForVerificationInfo): Observable<VerificationInfo>;
 }
 
 export interface InternalJwtServiceController {
   createJwtFromProjectInfo(
     request: CreateJwtProjectInfo,
   ): Promise<CreateJwtInfo> | Observable<CreateJwtInfo> | CreateJwtInfo;
+
+  verifyJwt(
+    request: JwtForVerificationInfo,
+  ):
+    | Promise<VerificationInfo>
+    | Observable<VerificationInfo>
+    | VerificationInfo;
 }
 
 export function InternalJwtServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['createJwtFromProjectInfo'];
+    const grpcMethods: string[] = ['createJwtFromProjectInfo', 'verifyJwt'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

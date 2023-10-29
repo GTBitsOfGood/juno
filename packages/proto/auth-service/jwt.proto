@@ -9,6 +9,15 @@ service JwtService {
 
 service InternalJwtService{
   rpc createJwtFromProjectInfo(CreateJwtProjectInfo) returns(CreateJwtInfo);
+  rpc verifyJwt(JwtForVerificationInfo) returns (VerificationInfo);
+}
+
+message JwtForVerificationInfo {
+  string jwt = 1;
+}
+
+message VerificationInfo{
+  bool verified = 1;
 }
 
 message CreateJwtProjectInfo{
@@ -37,5 +46,17 @@ message CreateJwtResponse {
   }
 }
 
-message ValidateJwtRequest {}
-message ValidateJwtResponse {}
+message ValidateJwtRequestHeader{
+  string authorization = 1 [json_name = "Authorization"];
+}
+message ValidateJwtRequest {
+  ValidateJwtRequestHeader header = 1;  
+}
+message ValidateJwtResponse {
+  bool success = 1;
+  bool verified = 2;
+  oneof error_optional{
+    string error = 3;
+  }
+
+}

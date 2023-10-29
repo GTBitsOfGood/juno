@@ -62,8 +62,27 @@ export class JWTController implements JwtServiceController, OnModuleInit {
       jwt,
     };
   }
-  validateJwt(request: ValidateJwtRequest): Promise<ValidateJwtResponse> {
-    console.log(`request: ${request}`);
-    throw new Error('Method not implemented.');
+
+  async validateJwt(request: ValidateJwtRequest): Promise<ValidateJwtResponse> {
+    const { header } = request;
+    const authorization = header.authorization.split(' ');
+
+    if (
+      !authorization ||
+      authorization[0] !== 'Bearer' ||
+      authorization.length !== 2
+    ) {
+      return {
+        success: false,
+        verified: false,
+        error: 'Unauthorized',
+      };
+    }
+    const { verified } = this.jwtService.verifyJwt({ jwt: authorization[1] });
+
+    return {
+      success: true,
+      verified,
+    };
   }
 }

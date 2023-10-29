@@ -3,6 +3,8 @@ import {
   CreateJwtInfo,
   CreateJwtProjectInfo,
   InternalJwtServiceController,
+  JwtForVerificationInfo,
+  VerificationInfo,
 } from 'src/gen/jwt';
 import jwt from 'jsonwebtoken';
 
@@ -23,6 +25,15 @@ export class JWTService implements InternalJwtServiceController {
 
     return {
       jwt: token,
+    };
+  }
+
+  verifyJwt(jwtInfo: JwtForVerificationInfo): VerificationInfo {
+    const token = jwtInfo.jwt;
+    jwt.verify(token, process.env.JWT_SECRET ?? 'secret');
+
+    return {
+      verified: true,
     };
   }
 }
