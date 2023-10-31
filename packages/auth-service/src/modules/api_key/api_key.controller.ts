@@ -13,43 +13,75 @@ import {
 import {
   ProjectServiceClient,
   PROJECT_SERVICE_NAME,
-  Project,
 } from 'src/db-service/gen/project';
 import { ClientGrpc } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
+import { Observable, lastValueFrom } from 'rxjs';
+import { UserPassword, UserServiceClient } from 'src/db-service/gen/user';
+import { USER_SERVICE_NAME } from 'src/gen/user';
+import bcrypt from 'bcrypt';
+import {
+  API_KEY_SERVICE_NAME,
+  ApiKeyServiceClient,
+  ApiScopes,
+} from 'src/db-service/gen/api_key';
 
 @Controller('api_key')
 @ApiKeyServiceControllerMethods()
 export class ApiKeyController implements ApiKeyServiceController {
-  private dbService: ProjectServiceClient;
+  private projectService: ProjectServiceClient;
+  private userService: UserServiceClient;
+  private apiKeyService: ApiKeyServiceClient;
 
   constructor(@Inject(PROJECT_SERVICE_NAME) private dbClient: ClientGrpc) {}
 
   onModuleInit() {
-    this.dbService =
+    this.projectService =
       this.dbClient.getService<ProjectServiceClient>(PROJECT_SERVICE_NAME);
+    this.userService =
+      this.dbClient.getService<UserServiceClient>(USER_SERVICE_NAME);
+    this.apiKeyService =
+      this.dbClient.getService<ApiKeyServiceClient>(API_KEY_SERVICE_NAME);
   }
 
   async issueApiKey(request: IssueApiKeyRequest): Promise<IssueApiKeyResponse> {
     const requiredFields = ['projectName', 'email', 'password'];
-    console.log('???');
     const missingArgs = requiredFields.filter((field) => !request[field]);
     if (missingArgs.length) {
       throw new MissingRequestBodyException(missingArgs);
     }
 
-    const project: Observable<Project> = await this.dbClient.getService(
-      request.projectName,
+    const password: Observable<UserPassword> = this.userService.getUserPassword(
+      {
+        email: request.email,
+      },
     );
-    project.subscribe();
 
-    console.log(project);
-
-    // check stored password hash, if correct, generate api key and return it
-    // api key should be hashed and stored
-    // will require createApiKey method in DBService, and proto def in DbService
-    // return api key if successful and error message if not
-    return {};
+    try {
+      const hash = await bcrypt.hash(request.password, 10);
+      const passwordEquals = bcrypt.compare(
+        hash,
+        (await lastValueFrom(password)).password,
+      );
+      if (!passwordEquals) {
+        // handle
+      } else {
+        const key = await lastValueFrom(
+          this.apiKeyService.createApiKey({
+            // Need to add creation in db
+            scopes: [ApiScopes.FULL],
+          }),
+        );
+        await lastValueFrom(
+          this.projectService.linkApiKey({
+            project: { name: request.projectName },
+            apiKey: { hash: key.apiKey },
+          }),
+        );
+        return key;
+      }
+    } catch (e) {
+      throw e; // handle
+    }
   }
   async revokeApiKey(
     request: RevokeApiKeyRequest,

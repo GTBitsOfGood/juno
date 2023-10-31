@@ -35,6 +35,7 @@ export class AuthController implements OnModuleInit {
   getJWT() {
     console.log('CALLED');
     // this.apiKeyService.issueApiKey({}).subscribe();
+    return 'test';
   }
 
   @Post('/key')

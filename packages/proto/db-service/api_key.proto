@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package dbservice.api_key;
+
+service ApiKeyService {
+  rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
+}
+
+enum ApiScopes {
+    FULL = 0;
+}
+
+message CreateApiKeyParams {
+    repeated ApiScopes scopes = 1;
+}
+
+message ApiKey {
+  string apiKey = 1;
+  repeated ApiScopes scopes = 2;
+}
+
+message createApiKey { }

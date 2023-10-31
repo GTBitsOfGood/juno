@@ -7,6 +7,7 @@ import {
   User as RPCUser,
   UpdateUserRequest,
   LinkProjectToUserRequest,
+  UserPassword,
 } from 'src/gen/user';
 import { UserService } from './user.service';
 import { Role } from '@prisma/client';
@@ -49,9 +50,18 @@ export class UserController implements UserServiceController {
   async getUser(identifier: UserIdentifier): Promise<RPCUser> {
     const userFind = validateUserIdentifier(identifier);
     const user = await this.userService.user(userFind);
+    delete user.password;
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
+    };
+  }
+
+  async getUserPassword(identifier: UserIdentifier): Promise<UserPassword> {
+    const userFind = validateUserIdentifier(identifier);
+    const user = await this.userService.user(userFind);
+    return {
+      password: user.password,
     };
   }
 

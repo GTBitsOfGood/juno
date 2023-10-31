@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { ProjectIdentifier, UserIdentifier } from 'src/gen/shared/identifiers';
+import { ApiKeyIdentifier, ProjectIdentifier, UserIdentifier } from 'src/gen/shared/identifiers';
 
 export function validateProjectIdentifier(
   identifier: ProjectIdentifier,
@@ -37,6 +37,26 @@ export function validateUserIdentifier(
   } else {
     return {
       email: identifier.email,
+    };
+  }
+}
+
+export function validateApiKeyIdentifier(
+  identifier: ApiKeyIdentifier,
+): Prisma.ApiKeyWhereUniqueInput {
+  if (identifier.id && identifier.hash) {
+    throw new Error('Only one of id or hash can be provided');
+  } else if (!identifier.id && !identifier.hash) {
+    throw new Error('Neither id nor hash are provided');
+  }
+
+  if (identifier.id) {
+    return {
+      id: Number(identifier.id),
+    };
+  } else {
+    return {
+      hash: identifier.hash,
     };
   }
 }

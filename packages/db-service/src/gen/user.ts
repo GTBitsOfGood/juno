@@ -19,6 +19,10 @@ export interface User {
   type: UserType;
 }
 
+export interface UserPassword {
+  password: string;
+}
+
 export interface CreateUserRequest {
   email: string;
   name: string;
@@ -48,6 +52,8 @@ export const DBSERVICE_USER_PACKAGE_NAME = "dbservice.user";
 export interface UserServiceClient {
   getUser(request: UserIdentifier): Observable<User>;
 
+  getUserPassword(request: UserIdentifier): Observable<UserPassword>;
+
   createUser(request: CreateUserRequest): Observable<User>;
 
   updateUser(request: UpdateUserRequest): Observable<User>;
@@ -60,6 +66,8 @@ export interface UserServiceClient {
 export interface UserServiceController {
   getUser(request: UserIdentifier): Promise<User> | Observable<User> | User;
 
+  getUserPassword(request: UserIdentifier): Promise<UserPassword> | Observable<UserPassword> | UserPassword;
+
   createUser(request: CreateUserRequest): Promise<User> | Observable<User> | User;
 
   updateUser(request: UpdateUserRequest): Promise<User> | Observable<User> | User;
@@ -71,7 +79,14 @@ export interface UserServiceController {
 
 export function UserServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getUser", "createUser", "updateUser", "deleteUser", "linkProject"];
+    const grpcMethods: string[] = [
+      "getUser",
+      "getUserPassword",
+      "createUser",
+      "updateUser",
+      "deleteUser",
+      "linkProject",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UserService", method)(constructor.prototype[method], method, descriptor);
