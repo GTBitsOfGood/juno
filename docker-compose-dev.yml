@@ -3,12 +3,13 @@ services:
     build:
       dockerfile: Dockerfile.dev
       target: gateway-dev
+      context: .
     volumes:
       - ./packages/api-gateway:/app/packages/api-gateway
       - ./packages/proto:/app/packages/proto
     ports:
       - '3000:3000'
-    entrypoint: yarn start:dev
+    entrypoint: yarn ${GATEWAY_COMMAND-start:dev}
     environment:
       DB_SERVICE_ADDR: db-service
       AUTH_SERVICE_ADDR: auth-service
@@ -21,12 +22,13 @@ services:
     build:
       dockerfile: Dockerfile.dev
       target: auth-service-dev
+      context: .
     volumes:
       - ./packages/auth-service:/app/packages/auth-service
       - ./packages/proto:/app/packages/proto
     ports:
       - '50052:50052'
-    entrypoint: yarn start:dev
+    entrypoint: yarn ${AUTH_COMMAND-start:dev}
     environment:
       AUTH_SERVICE_ADDR: auth-service
       DB_SERVICE_ADDR: db-service
@@ -39,12 +41,13 @@ services:
     build:
       dockerfile: Dockerfile.dev
       target: db-service-dev
+      context: .
     volumes:
       - ./packages/db-service:/app/packages/db-service
       - ./packages/proto:/app/packages/proto
     ports:
       - '50053:50053'
-    entrypoint: ./entrypoint.sh
+    entrypoint: /bin/sh -c "DB_COMMAND=${DB_COMMAND-start:dev} RUN_MODE=${RUN_MODE-dev} ./entrypoint.sh"
     environment:
       AUTH_SERVICE_ADDR: auth-service
       DB_SERVICE_ADDR: db-service
@@ -67,9 +70,9 @@ services:
       - bog-api-net
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U user']
-      interval: 5s
+      interval: 2s
       timeout: 5s
-      retries: 5
+      retries: 10
 
 networks:
   bog-api-net:

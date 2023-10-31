@@ -1,0 +1,33 @@
+name: E2E Tests
+on: [pull_request]
+
+jobs:
+  api-gateway:
+    name: API Gateway E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test
+        run: yarn test:e2e:api-gateway
+
+  auth-service:
+    name: Auth Service E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test
+        run: yarn test:e2e:auth-service
+
+  db-service:
+    name: DB Service E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test
+        run: yarn test:e2e:db-service
