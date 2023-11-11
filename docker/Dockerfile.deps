@@ -1,0 +1,33 @@
+FROM node:18-alpine as deps
+
+WORKDIR /app
+
+COPY . .
+
+RUN apk add --update python3 make g++ protoc bash && rm -rf /var/cache/apk/*
+
+RUN yarn global add node-gyp prisma
+
+RUN yarn install --frozen-lockfile
+
+RUN chmod a+x ./gen_protos.sh 
+
+RUN /bin/bash ./gen_protos.sh
+
+WORKDIR /app/packages/api-gateway
+
+RUN yarn install --frozen-lockfile
+
+RUN yarn build
+
+WORKDIR /app/packages/auth-service
+
+RUN yarn install --frozen-lockfile
+
+RUN yarn build
+
+WORKDIR /app/packages/db-service
+
+RUN yarn install --frozen-lockfile
+
+RUN yarn build

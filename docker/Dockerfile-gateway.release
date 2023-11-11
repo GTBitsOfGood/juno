@@ -1,0 +1,15 @@
+FROM juno/deps AS deps
+
+FROM node:18 as gateway
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/api-gateway/node_modules ./packages/node_modules/
+
+COPY . .
+
+WORKDIR /app/packages/api-gateway
+
+CMD ["yarn", "start:prod"]

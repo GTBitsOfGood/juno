@@ -1,15 +1,8 @@
 services:
   gateway:
-    build:
-      dockerfile: ./docker/Dockerfile.dev
-      target: gateway-dev
-      context: .
-    volumes:
-      - ./packages/api-gateway:/app/packages/api-gateway
-      - ./packages/proto:/app/packages/proto
+    image: gateway
     ports:
       - '3000:3000'
-    entrypoint: yarn ${GATEWAY_COMMAND-start:dev}
     environment:
       DB_SERVICE_ADDR: db-service
       AUTH_SERVICE_ADDR: auth-service
@@ -19,16 +12,9 @@ services:
       - auth-service
 
   auth-service:
-    build:
-      dockerfile: ./docker/Dockerfile.dev
-      target: auth-service-dev
-      context: .
-    volumes:
-      - ./packages/auth-service:/app/packages/auth-service
-      - ./packages/proto:/app/packages/proto
+    image: auth-service
     ports:
       - '50052:50052'
-    entrypoint: yarn ${AUTH_COMMAND-start:dev}
     environment:
       AUTH_SERVICE_ADDR: auth-service
       DB_SERVICE_ADDR: db-service
@@ -38,16 +24,9 @@ services:
       - db-service
 
   db-service:
-    build:
-      dockerfile: ./docker/Dockerfile.dev
-      target: db-service-dev
-      context: .
-    volumes:
-      - ./packages/db-service:/app/packages/db-service
-      - ./packages/proto:/app/packages/proto
+    image: db-service
     ports:
       - '50053:50053'
-    entrypoint: /bin/sh -c "DB_COMMAND=${DB_COMMAND-start:dev} RUN_MODE=${RUN_MODE-dev} ./entrypoint.sh"
     environment:
       AUTH_SERVICE_ADDR: auth-service
       DB_SERVICE_ADDR: db-service
