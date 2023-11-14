@@ -2,7 +2,6 @@ import {
   Controller,
   Inject,
   OnModuleInit,
-  Post,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -37,7 +36,6 @@ export class JWTController implements JwtServiceController, OnModuleInit {
       this.apiKeyClient.getService<ApiKeyServiceClient>(API_KEY_SERVICE_NAME);
   }
 
-  @Post('authorize')
   async createJwt(request: CreateJwtRequest): Promise<CreateJwtResponse> {
     const { header } = request;
     const apiKey = header.XApiKey;
@@ -46,7 +44,7 @@ export class JWTController implements JwtServiceController, OnModuleInit {
       this.apiKeyService.getProjectByApiKey({ apiKey }),
     );
 
-    if (project.success) {
+    if (!project.success) {
       return {
         success: false,
         error: 'Provided API key is not valid',

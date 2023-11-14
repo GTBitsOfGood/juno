@@ -6,7 +6,9 @@ import {
   JwtForVerificationInfo,
   VerificationInfo,
 } from 'src/gen/jwt';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+type JunoJwtPayload = JwtPayload & CreateJwtProjectInfo;
 
 @Injectable()
 export class JWTService implements InternalJwtServiceController {
@@ -23,9 +25,8 @@ export class JWTService implements InternalJwtServiceController {
   verifyJwt(jwtInfo: JwtForVerificationInfo): VerificationInfo {
     try {
       const token = jwtInfo.jwt;
-      const tokenData: CreateJwtProjectInfo = jwt.verify(
-        token,
-        process.env.JWT_SECRET ?? 'secret',
+      const tokenData: CreateJwtProjectInfo = <JunoJwtPayload>(
+        jwt.verify(token, process.env.JWT_SECRET ?? 'secret')
       );
 
       return {
