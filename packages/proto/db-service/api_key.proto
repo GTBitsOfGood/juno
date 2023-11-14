@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package dbservice.api_key;
 
+import "shared/identifiers.proto";
+
 service ApiKeyService {
   rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
 }
@@ -11,12 +13,19 @@ enum ApiScopes {
 }
 
 message CreateApiKeyParams {
-    repeated ApiScopes scopes = 1;
+    string hash = 1;
+    string environment = 2;
+    string description = 3;
+    bool userVisible = 4;
+    repeated ApiScopes scopes = 5;
+    shared.identifiers.ProjectIdentifier project = 6;
 }
 
 message ApiKey {
-  string apiKey = 1;
-  repeated ApiScopes scopes = 2;
+    string hash = 1;
+    string environment = 2;
+    string description = 3;
+    bool userVisible = 4;
+    repeated ApiScopes scopes = 5;
+    shared.identifiers.ProjectIdentifier project = 6;
 }
-
-message createApiKey { }

@@ -31,6 +31,8 @@ model ApiKey {
   id          Int     @id @default(autoincrement())
   hash        String  @unique
   description String
+  environment String
+  scopes      Scope[]
   projectId   Int
   project     Project @relation(fields: [projectId], references: [id])
   userVisible Boolean
@@ -40,4 +42,8 @@ enum Role {
   SUPERADMIN
   ADMIN
   USER
+}
+
+enum Scope {
+  FULL
 }

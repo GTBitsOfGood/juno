@@ -1,4 +1,4 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Inject, Param } from '@nestjs/common';
 import { MissingRequestBodyException } from '@utils/errors';
 
 import {
@@ -24,6 +24,7 @@ import {
   ApiKeyServiceClient,
   ApiScopes,
 } from 'src/db-service/gen/api_key';
+import { randomBytes } from 'crypto';
 
 @Controller('api_key')
 @ApiKeyServiceControllerMethods()
@@ -44,12 +45,6 @@ export class ApiKeyController implements ApiKeyServiceController {
   }
 
   async issueApiKey(request: IssueApiKeyRequest): Promise<IssueApiKeyResponse> {
-    const requiredFields = ['projectName', 'email', 'password'];
-    const missingArgs = requiredFields.filter((field) => !request[field]);
-    if (missingArgs.length) {
-      throw new MissingRequestBodyException(missingArgs);
-    }
-
     const password: Observable<UserPassword> = this.userService.getUserPassword(
       {
         email: request.email,
@@ -65,19 +60,23 @@ export class ApiKeyController implements ApiKeyServiceController {
       if (!passwordEquals) {
         // handle
       } else {
+        const apiKey = randomBytes(20).toString('hex');
+        const apiKeyHash = await bcrypt.hash(apiKey, 10);
         const key = await lastValueFrom(
           this.apiKeyService.createApiKey({
-            // Need to add creation in db
+            hash: apiKeyHash,
+            environment: request.environment,
+            description: request.description,
+            userVisible: request.userVisible,
             scopes: [ApiScopes.FULL],
+            project: {
+              name: request.projectName,
+            },
           }),
         );
-        await lastValueFrom(
-          this.projectService.linkApiKey({
-            project: { name: request.projectName },
-            apiKey: { hash: key.apiKey },
-          }),
-        );
-        return key;
+        return {
+          apiKey,
+        };
       }
     } catch (e) {
       throw e; // handle

@@ -1,5 +1,9 @@
 import { Prisma } from '@prisma/client';
-import { ApiKeyIdentifier, ProjectIdentifier, UserIdentifier } from 'src/gen/shared/identifiers';
+import {
+  ApiKeyIdentifier,
+  ProjectIdentifier,
+  UserIdentifier,
+} from 'src/gen/shared/identifiers';
 
 export function validateProjectIdentifier(
   identifier: ProjectIdentifier,

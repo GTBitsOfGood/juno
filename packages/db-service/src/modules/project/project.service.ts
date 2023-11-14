@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Project } from '@prisma/client';
+import { ApiKey, Prisma, Project } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+
+type ProjectWithKeys = Project & {
+  apiKeys: ApiKey[];
+};
 
 @Injectable()
 export class ProjectService {
@@ -22,31 +26,49 @@ export class ProjectService {
     });
   }
 
-  async project(lookup: Prisma.ProjectWhereUniqueInput): Promise<Project> {
+  async project(
+    lookup: Prisma.ProjectWhereUniqueInput,
+  ): Promise<ProjectWithKeys> {
     return this.prisma.project.findUnique({
       where: lookup,
+      include: {
+        apiKeys: true,
+      },
     });
   }
 
-  async createProject(input: Prisma.ProjectCreateInput): Promise<Project> {
+  async createProject(
+    input: Prisma.ProjectCreateInput,
+  ): Promise<ProjectWithKeys> {
     return this.prisma.project.create({
       data: input,
+      include: {
+        apiKeys: true,
+      },
     });
   }
 
   async updateProject(
     project: Prisma.ProjectWhereUniqueInput,
     update: Prisma.ProjectUpdateInput,
-  ): Promise<Project> {
+  ): Promise<ProjectWithKeys> {
     return this.prisma.project.update({
       where: project,
       data: update,
+      include: {
+        apiKeys: true,
+      },
     });
   }
 
-  async deleteProject(where: Prisma.ProjectWhereUniqueInput): Promise<Project> {
+  async deleteProject(
+    where: Prisma.ProjectWhereUniqueInput,
+  ): Promise<ProjectWithKeys> {
     return this.prisma.project.delete({
       where,
+      include: {
+        apiKeys: true,
+      },
     });
   }
 }

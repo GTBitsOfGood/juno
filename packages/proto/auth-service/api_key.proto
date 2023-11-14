@@ -11,12 +11,13 @@ message IssueApiKeyRequest {
   string project_name = 1;
   string email = 2;
   string password = 3;
+  string environment = 4;
+  string description = 5;
+  bool userVisible = 6;
 }
 
 message IssueApiKeyResponse {
-  oneof response {
-    string apiKey = 1;
-  }
+  oneof response { string apiKey = 1; }
 }
 
 message RevokeApiKeyRequest {}

@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-export const protobufPackage = "dbservice.shared.identifiers";
+export const protobufPackage = 'dbservice.shared.identifiers';
 
 export interface ProjectIdentifier {
   id?: number | undefined;
@@ -17,4 +17,5 @@ export interface ApiKeyIdentifier {
   hash?: string | undefined;
 }
 
-export const DBSERVICE_SHARED_IDENTIFIERS_PACKAGE_NAME = "dbservice.shared.identifiers";
+export const DBSERVICE_SHARED_IDENTIFIERS_PACKAGE_NAME =
+  'dbservice.shared.identifiers';

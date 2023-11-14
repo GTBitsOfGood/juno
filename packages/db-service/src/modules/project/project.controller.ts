@@ -1,9 +1,9 @@
 import { Controller } from '@nestjs/common';
-import { Project } from '@prisma/client';
 import {
   CreateProjectRequest,
   LinkApiKeyToProjectRequest,
   LinkUserToProjectRequest,
+  Project,
   ProjectServiceController,
   ProjectServiceControllerMethods,
   UpdateProjectRequest,
