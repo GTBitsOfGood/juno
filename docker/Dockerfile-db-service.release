@@ -1,0 +1,19 @@
+FROM juno/deps AS deps
+
+FROM node:18 as db-service 
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/db-service/node_modules ./packages/node_modules/
+
+COPY . .
+
+RUN yarn global add prisma
+
+WORKDIR /app/packages/db-service
+
+RUN prisma generate
+
+CMD ["yarn", "start:prod"]
