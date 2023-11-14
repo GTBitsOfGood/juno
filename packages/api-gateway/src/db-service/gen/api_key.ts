@@ -1,53 +1,48 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { ProjectIdentifier } from './shared/identifiers';
 
-export const protobufPackage = 'authservice.api_key';
+export const protobufPackage = 'dbservice.api_key';
 
-export interface IssueApiKeyRequest {
-  projectName: string;
-  email: string;
-  password: string;
+export enum ApiScopes {
+  FULL = 0,
+  UNRECOGNIZED = -1,
+}
+
+export interface CreateApiKeyParams {
+  hash: string;
   environment: string;
   description: string;
   userVisible: boolean;
+  scopes: ApiScopes[];
+  project: ProjectIdentifier | undefined;
 }
 
-export interface IssueApiKeyResponse {
-  apiKey?: string | undefined;
+export interface ApiKey {
+  hash: string;
+  environment: string;
+  description: string;
+  userVisible: boolean;
+  scopes: ApiScopes[];
+  project: ProjectIdentifier | undefined;
 }
 
-export interface RevokeApiKeyRequest {}
-
-export interface RevokeApiKeyResponse {}
-
-export const AUTHSERVICE_API_KEY_PACKAGE_NAME = 'authservice.api_key';
+export const DBSERVICE_API_KEY_PACKAGE_NAME = 'dbservice.api_key';
 
 export interface ApiKeyServiceClient {
-  issueApiKey(request: IssueApiKeyRequest): Observable<IssueApiKeyResponse>;
-
-  revokeApiKey(request: RevokeApiKeyRequest): Observable<RevokeApiKeyResponse>;
+  createApiKey(request: CreateApiKeyParams): Observable<ApiKey>;
 }
 
 export interface ApiKeyServiceController {
-  issueApiKey(
-    request: IssueApiKeyRequest,
-  ):
-    | Promise<IssueApiKeyResponse>
-    | Observable<IssueApiKeyResponse>
-    | IssueApiKeyResponse;
-
-  revokeApiKey(
-    request: RevokeApiKeyRequest,
-  ):
-    | Promise<RevokeApiKeyResponse>
-    | Observable<RevokeApiKeyResponse>
-    | RevokeApiKeyResponse;
+  createApiKey(
+    request: CreateApiKeyParams,
+  ): Promise<ApiKey> | Observable<ApiKey> | ApiKey;
 }
 
 export function ApiKeyServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['issueApiKey', 'revokeApiKey'];
+    const grpcMethods: string[] = ['createApiKey'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

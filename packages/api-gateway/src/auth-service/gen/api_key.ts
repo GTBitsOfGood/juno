@@ -4,9 +4,18 @@ import { Observable } from 'rxjs';
 
 export const protobufPackage = 'authservice.api_key';
 
-export interface IssueApiKeyRequest {}
+export interface IssueApiKeyRequest {
+  projectName: string;
+  email: string;
+  password: string;
+  environment: string;
+  description: string;
+  userVisible: boolean;
+}
 
-export interface IssueApiKeyResponse {}
+export interface IssueApiKeyResponse {
+  apiKey?: string | undefined;
+}
 
 export interface RevokeApiKeyRequest {}
 

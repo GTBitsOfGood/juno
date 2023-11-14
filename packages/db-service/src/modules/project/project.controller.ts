@@ -1,14 +1,16 @@
 import { Controller } from '@nestjs/common';
-import { Project } from '@prisma/client';
 import {
   CreateProjectRequest,
+  LinkApiKeyToProjectRequest,
   LinkUserToProjectRequest,
+  Project,
   ProjectServiceController,
   ProjectServiceControllerMethods,
   UpdateProjectRequest,
 } from 'src/gen/project';
 import { ProjectService } from './project.service';
 import {
+  validateApiKeyIdentifier,
   validateProjectIdentifier,
   validateUserIdentifier,
 } from 'src/utility/validate';
@@ -50,6 +52,15 @@ export class ProjectController implements ProjectServiceController {
     return this.projectService.updateProject(project, {
       users: {
         connect: validateUserIdentifier(request.user),
+      },
+    });
+  }
+
+  async linkApiKey(request: LinkApiKeyToProjectRequest): Promise<Project> {
+    const project = validateProjectIdentifier(request.project);
+    return this.projectService.updateProject(project, {
+      apiKeys: {
+        connect: validateApiKeyIdentifier(request.apiKey),
       },
     });
   }

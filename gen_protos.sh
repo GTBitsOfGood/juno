@@ -40,11 +40,11 @@ for service in ${PROTO_GW_SERVICES[@]}; do
         ${EXEC_PATH}/packages/proto/${service}/*.proto
 done
 
-# Add the names of any services that have proto definitions to auto-genetate that 
+# Add the names of any services that have proto definitions to auto-generate that 
 # will be used in the Auth Service 
 # 
 # NOTE: The proto project's subdirectory MUST match the directory name of the service in packages/
-PROTO_AUTH_USED_SERVICES=()
+PROTO_AUTH_USED_SERVICES=("db-service")
 
 for service in ${PROTO_AUTH_USED_SERVICES[@]}; do
 

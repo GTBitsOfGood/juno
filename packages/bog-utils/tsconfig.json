@@ -11,9 +11,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {
-      "@utils/*": ["../bog-utils/dist/*"]
-    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -21,5 +18,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }

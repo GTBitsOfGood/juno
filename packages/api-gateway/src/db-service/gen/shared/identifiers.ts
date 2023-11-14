@@ -12,5 +12,10 @@ export interface UserIdentifier {
   email?: string | undefined;
 }
 
+export interface ApiKeyIdentifier {
+  id?: number | undefined;
+  hash?: string | undefined;
+}
+
 export const DBSERVICE_SHARED_IDENTIFIERS_PACKAGE_NAME =
   'dbservice.shared.identifiers';

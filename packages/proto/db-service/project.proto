@@ -10,11 +10,13 @@ service ProjectService {
   rpc updateProject(UpdateProjectRequest) returns (Project);
   rpc deleteProject(shared.identifiers.ProjectIdentifier) returns (Project);
   rpc linkUser(LinkUserToProjectRequest) returns (Project);
+  rpc linkApiKey(LinkApiKeyToProjectRequest) returns (Project);
 }
 
 message Project {
   int64 id = 1;
   string name = 2;
+  repeated shared.identifiers.ApiKeyIdentifier apiKeys = 3;
 }
 
 message CreateProjectRequest { string name = 1; }
@@ -24,6 +26,11 @@ message ProjectUpdateParams { optional string name = 2; }
 message LinkUserToProjectRequest {
   shared.identifiers.ProjectIdentifier project = 1;
   shared.identifiers.UserIdentifier user = 2;
+}
+
+message LinkApiKeyToProjectRequest {
+  shared.identifiers.ProjectIdentifier project = 1;
+  shared.identifiers.ApiKeyIdentifier apiKey = 2;
 }
 
 message UpdateProjectRequest {

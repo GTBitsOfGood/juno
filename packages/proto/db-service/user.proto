@@ -6,6 +6,7 @@ import "shared/identifiers.proto";
 
 service UserService {
   rpc getUser(shared.identifiers.UserIdentifier) returns (User);
+  rpc getUserPassword(shared.identifiers.UserIdentifier) returns (UserPassword);
   rpc createUser(CreateUserRequest) returns (User);
   rpc updateUser(UpdateUserRequest) returns (User);
   rpc deleteUser(shared.identifiers.UserIdentifier) returns (User);
@@ -17,6 +18,10 @@ message User {
   string email = 2;
   string name = 3;
   UserType type = 4;
+}
+
+message UserPassword {
+  string password = 1;
 }
 
 enum UserType {

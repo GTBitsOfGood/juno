@@ -5,6 +5,11 @@ import { join } from 'path';
 import { AUTHSERVICE_API_KEY_PACKAGE_NAME } from './gen/api_key';
 import { AUTHSERVICE_JWT_PACKAGE_NAME } from './gen/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { BogExceptionFilter } from '@utils/errors';
+
+if (!process.env.AUTH_SERVICE_ADDR) {
+  throw new Error('Please set AUTH_SERVICE_ADDR in .env.local');
+}
 
 async function bootstrap() {
   ConfigModule.forRoot({
@@ -28,6 +33,9 @@ async function bootstrap() {
       },
     },
   );
+
+  app.useGlobalFilters(new BogExceptionFilter());
+
   await app.listen();
 }
 bootstrap();
