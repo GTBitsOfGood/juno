@@ -26,5 +26,6 @@
   "affected": {
     "defaultBase": "main"
   },
-  "nxCloudAccessToken": "NjEwODU1YTUtMTMwMS00ODM0LWIwZjEtYzJjYzMyYjcxOTQyfHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "NjEwODU1YTUtMTMwMS00ODM0LWIwZjEtYzJjYzMyYjcxOTQyfHJlYWQtd3JpdGU=",
+  "neverConnectToCloud": true
 }
