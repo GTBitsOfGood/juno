@@ -2,11 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import {
-  DBSERVICE_PROJECT_PACKAGE_NAME,
-  PROJECT_SERVICE_NAME,
-} from 'src/db-service/gen/project';
 import { ProjectController } from './project.controller';
+import { ProjectProto, ProjectProtoFile } from 'juno-proto';
+
+const { PROJECT_SERVICE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 // TODO: Make this module Auth protected
 @Module({
@@ -21,10 +20,7 @@ import { ProjectController } from './project.controller';
         options: {
           url: process.env.DB_SERVICE_ADDR,
           package: DBSERVICE_PROJECT_PACKAGE_NAME,
-          protoPath: join(
-            __dirname,
-            '../../../../proto/db-service/project.proto',
-          ),
+          protoPath: ProjectProtoFile,
         },
       },
     ]),

@@ -1,10 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { DBSERVICE_USER_PACKAGE_NAME } from './gen/user';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
-import { DBSERVICE_PROJECT_PACKAGE_NAME } from './gen/project';
+import { DBSERVICE_USER_PACKAGE_NAME } from 'juno-proto/src/gen/user';
+import { DBSERVICE_PROJECT_PACKAGE_NAME } from 'juno-proto/src/gen/project';
+import {
+  UserProtoFile,
+  ProjectProtoFile,
+  IdentifiersProtoFile,
+} from 'juno-proto';
 
 async function bootstrap() {
   ConfigModule.forRoot({
@@ -16,11 +21,7 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         package: [DBSERVICE_USER_PACKAGE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME],
-        protoPath: [
-          join(__dirname, '../../proto/db-service/user.proto'),
-          join(__dirname, '../../proto/db-service/project.proto'),
-          join(__dirname, '../../proto/db-service/shared/identifiers.proto'),
-        ],
+        protoPath: [UserProtoFile, ProjectProtoFile, IdentifiersProtoFile],
         url: process.env.DB_SERVICE_ADDR,
       },
     },

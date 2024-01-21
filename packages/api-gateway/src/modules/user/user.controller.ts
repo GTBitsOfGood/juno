@@ -11,12 +11,8 @@ import {
   Put,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
+import { UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
-import {
-  USER_SERVICE_NAME,
-  UserServiceClient,
-  UserType,
-} from 'src/db-service/gen/user';
 import {
   CreateUserModel,
   LinkProjectModel,
@@ -24,15 +20,19 @@ import {
   UserResponse,
 } from 'src/models/user';
 
+const { USER_SERVICE_NAME } = UserProto;
+
 @Controller('user')
 export class UserController implements OnModuleInit {
-  private userService: UserServiceClient;
+  private userService: UserProto.UserServiceClient;
 
   constructor(@Inject(USER_SERVICE_NAME) private userClient: ClientGrpc) {}
 
   onModuleInit() {
     this.userService =
-      this.userClient.getService<UserServiceClient>(USER_SERVICE_NAME);
+      this.userClient.getService<UserProto.UserServiceClient>(
+        USER_SERVICE_NAME,
+      );
   }
 
   @Get('id/:id')
@@ -52,7 +52,7 @@ export class UserController implements OnModuleInit {
   async createUser(@Body() params: CreateUserModel) {
     const user = this.userService.createUser({
       ...params,
-      type: UserType.USER,
+      type: UserProto.UserType.USER,
     });
 
     await lastValueFrom(user);

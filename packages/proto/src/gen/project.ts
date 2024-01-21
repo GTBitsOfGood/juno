@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
-import { ProjectIdentifier, UserIdentifier } from './shared/identifiers';
+import { ProjectIdentifier, UserIdentifier } from './identifiers';
 
 export const protobufPackage = 'dbservice.project';
 

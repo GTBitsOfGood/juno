@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package dbservice.shared.identifiers;
+package dbservice.identifiers;
 
 message ProjectIdentifier {
   oneof identifier {

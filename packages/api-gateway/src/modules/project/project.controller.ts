@@ -13,18 +13,17 @@ import {
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import {
-  PROJECT_SERVICE_NAME,
-  ProjectServiceClient,
-} from 'src/db-service/gen/project';
-import {
   CreateProjectModel,
   LinkUserModel,
   ProjectResponse,
 } from 'src/models/project';
+import { ProjectProto } from 'juno-proto';
+
+const { PROJECT_SERVICE_NAME } = ProjectProto;
 
 @Controller('project')
 export class ProjectController implements OnModuleInit {
-  private projectService: ProjectServiceClient;
+  private projectService: ProjectProto.ProjectServiceClient;
 
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
@@ -32,7 +31,9 @@ export class ProjectController implements OnModuleInit {
 
   onModuleInit() {
     this.projectService =
-      this.projectClient.getService<ProjectServiceClient>(PROJECT_SERVICE_NAME);
+      this.projectClient.getService<ProjectProto.ProjectServiceClient>(
+        PROJECT_SERVICE_NAME,
+      );
   }
 
   @Get('id/:id')

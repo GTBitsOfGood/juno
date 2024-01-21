@@ -2,13 +2,13 @@ syntax = "proto3";
 
 package dbservice.user;
 
-import "shared/identifiers.proto";
+import "identifiers.proto";
 
 service UserService {
-  rpc getUser(shared.identifiers.UserIdentifier) returns (User);
+  rpc getUser(identifiers.UserIdentifier) returns (User);
   rpc createUser(CreateUserRequest) returns (User);
   rpc updateUser(UpdateUserRequest) returns (User);
-  rpc deleteUser(shared.identifiers.UserIdentifier) returns (User);
+  rpc deleteUser(identifiers.UserIdentifier) returns (User);
   rpc linkProject(LinkProjectToUserRequest) returns (User);
 }
 
@@ -40,11 +40,11 @@ message UserUpdateParams {
 }
 
 message UpdateUserRequest {
-  shared.identifiers.UserIdentifier userIdentifier = 1;
+  identifiers.UserIdentifier userIdentifier = 1;
   UserUpdateParams updateParams = 2;
 }
 
 message LinkProjectToUserRequest {
-  shared.identifiers.ProjectIdentifier project = 1;
-  shared.identifiers.UserIdentifier user = 2;
+  identifiers.ProjectIdentifier project = 1;
+  identifiers.UserIdentifier user = 2;
 }

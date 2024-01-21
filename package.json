@@ -10,7 +10,7 @@
     "format:write": "yarn prettier --write .",
     "tsc": "nx run-many --target=tsc",
     "lint": "nx run-many --target=lint",
-    "gen-proto": "./gen_protos.sh && yarn format:write",
+    "gen-proto": "yarn workspace juno-proto gen-proto",
     "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from gateway",
     "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from auth-service",
     "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from db-service"
