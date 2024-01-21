@@ -3,12 +3,19 @@ import { INestMicroservice } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
-import { join } from 'path';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { DBSERVICE_USER_PACKAGE_NAME } from 'src/gen/user';
-import { DBSERVICE_PROJECT_PACKAGE_NAME } from 'src/gen/project';
+import {
+  IdentifiersProtoFile,
+  ProjectProto,
+  ProjectProtoFile,
+  UserProto,
+  UserProtoFile,
+} from 'juno-proto';
 
 // TODO: Make these actual tests
+
+const { DBSERVICE_USER_PACKAGE_NAME } = UserProto;
+const { DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 let app: INestMicroservice;
 
@@ -31,11 +38,7 @@ beforeEach(async () => {
     transport: Transport.GRPC,
     options: {
       package: [DBSERVICE_USER_PACKAGE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME],
-      protoPath: [
-        join(__dirname, '../../proto/db-service/user.proto'),
-        join(__dirname, '../../proto/db-service/project.proto'),
-        join(__dirname, '../../proto/db-service/shared/identifiers.proto'),
-      ],
+      protoPath: [UserProtoFile, ProjectProtoFile, IdentifiersProtoFile],
       url: process.env.DB_SERVICE_ADDR,
     },
   });
@@ -53,8 +56,8 @@ describe('DB Service User Tests', () => {
   let client: any;
   beforeEach(() => {
     const proto = ProtoLoader.loadSync([
-      join(__dirname, '../../proto/db-service/user.proto'),
-      join(__dirname, '../../proto/db-service/shared/identifiers.proto'),
+      UserProtoFile,
+      IdentifiersProtoFile,
     ]) as any;
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
