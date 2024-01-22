@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
-import { Project } from 'src/db-service/gen/project';
+import { ProjectProto } from 'juno-proto';
 
 export class CreateProjectModel {
   @IsNotEmpty()
@@ -12,7 +12,7 @@ export class ProjectResponse {
   id: number;
   name: string;
 
-  constructor(project: Project) {
+  constructor(project: ProjectProto.Project) {
     this.id = project.id;
     this.name = project.name;
   }

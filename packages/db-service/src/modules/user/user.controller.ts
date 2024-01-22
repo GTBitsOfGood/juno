@@ -1,53 +1,43 @@
 import { Controller } from '@nestjs/common';
-import {
-  CreateUserRequest,
-  UserServiceController,
-  UserServiceControllerMethods,
-  UserType,
-  User as RPCUser,
-  UpdateUserRequest,
-  LinkProjectToUserRequest,
-} from 'src/gen/user';
 import { UserService } from './user.service';
 import { Role } from '@prisma/client';
-import {
-  validateProjectIdentifier,
-  validateUserIdentifier,
-} from 'src/utility/validate';
-import { UserIdentifier } from 'src/gen/shared/identifiers';
+import * as validate from 'src/utility/validate';
+import { IdentifierProto, UserProto } from 'juno-proto';
 
 @Controller()
-@UserServiceControllerMethods()
-export class UserController implements UserServiceController {
+@UserProto.UserServiceControllerMethods()
+export class UserController implements UserProto.UserServiceController {
   constructor(private readonly userService: UserService) {}
 
-  private mapPrismaRoleToRPC(role: Role): UserType {
+  private mapPrismaRoleToRPC(role: Role): UserProto.UserType {
     switch (role) {
       case Role.USER:
-        return UserType.USER;
+        return UserProto.UserType.USER;
       case Role.ADMIN:
-        return UserType.ADMIN;
+        return UserProto.UserType.ADMIN;
       case Role.SUPERADMIN:
-        return UserType.SUPERADMIN;
+        return UserProto.UserType.SUPERADMIN;
       default:
-        return UserType.UNRECOGNIZED;
+        return UserProto.UserType.UNRECOGNIZED;
     }
   }
 
-  private mapRPCRoleToPrisma(role: UserType): Role {
+  private mapRPCRoleToPrisma(role: UserProto.UserType): Role {
     switch (role) {
-      case UserType.ADMIN:
+      case UserProto.UserType.ADMIN:
         return Role.ADMIN;
-      case UserType.SUPERADMIN:
+      case UserProto.UserType.SUPERADMIN:
         return Role.SUPERADMIN;
-      case UserType.USER:
+      case UserProto.UserType.USER:
       default:
         return Role.USER;
     }
   }
 
-  async getUser(identifier: UserIdentifier): Promise<RPCUser> {
-    const userFind = validateUserIdentifier(identifier);
+  async getUser(
+    identifier: IdentifierProto.UserIdentifier,
+  ): Promise<UserProto.User> {
+    const userFind = validate.validateUserIdentifier(identifier);
     const user = await this.userService.user(userFind);
     return {
       ...user,
@@ -55,7 +45,9 @@ export class UserController implements UserServiceController {
     };
   }
 
-  async createUser(request: CreateUserRequest): Promise<RPCUser> {
+  async createUser(
+    request: UserProto.CreateUserRequest,
+  ): Promise<UserProto.User> {
     const user = await this.userService.createUser({
       name: request.name,
       email: request.email,
@@ -68,8 +60,10 @@ export class UserController implements UserServiceController {
     };
   }
 
-  async updateUser(request: UpdateUserRequest): Promise<RPCUser> {
-    const identifier = validateUserIdentifier(request.userIdentifier);
+  async updateUser(
+    request: UserProto.UpdateUserRequest,
+  ): Promise<UserProto.User> {
+    const identifier = validate.validateUserIdentifier(request.userIdentifier);
     const user = await this.userService.updateUser(identifier, {
       name: request.updateParams.name,
       email: request.updateParams.email,
@@ -82,8 +76,10 @@ export class UserController implements UserServiceController {
     };
   }
 
-  async deleteUser(request: UserIdentifier): Promise<RPCUser> {
-    const identifier = validateUserIdentifier(request);
+  async deleteUser(
+    request: IdentifierProto.UserIdentifier,
+  ): Promise<UserProto.User> {
+    const identifier = validate.validateUserIdentifier(request);
 
     const user = await this.userService.deleteUser(identifier);
 
@@ -93,11 +89,13 @@ export class UserController implements UserServiceController {
     };
   }
 
-  async linkProject(request: LinkProjectToUserRequest): Promise<RPCUser> {
-    const user = validateUserIdentifier(request.user);
+  async linkProject(
+    request: UserProto.LinkProjectToUserRequest,
+  ): Promise<UserProto.User> {
+    const user = validate.validateUserIdentifier(request.user);
     const updated = await this.userService.updateUser(user, {
       allowedProjects: {
-        connect: validateProjectIdentifier(request.project),
+        connect: validate.validateProjectIdentifier(request.project),
       },
     });
     return {

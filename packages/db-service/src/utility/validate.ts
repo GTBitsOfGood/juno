@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client';
-import { ProjectIdentifier, UserIdentifier } from 'src/gen/shared/identifiers';
+import { IdentifierProto } from 'juno-proto';
 
 export function validateProjectIdentifier(
-  identifier: ProjectIdentifier,
+  identifier: IdentifierProto.ProjectIdentifier,
 ): Prisma.ProjectWhereUniqueInput {
   if (identifier.id && identifier.name) {
     throw new Error('Only one of id or name can be provided');
@@ -22,7 +22,7 @@ export function validateProjectIdentifier(
 }
 
 export function validateUserIdentifier(
-  identifier: UserIdentifier,
+  identifier: IdentifierProto.UserIdentifier,
 ): Prisma.UserWhereUniqueInput {
   if (identifier.id && identifier.email) {
     throw new Error('Only one of id or email can be provided');

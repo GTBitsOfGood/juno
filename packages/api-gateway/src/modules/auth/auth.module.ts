@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthController } from './auth.controller';
-import {
-  AUTHSERVICE_JWT_PACKAGE_NAME,
-  JWT_SERVICE_NAME,
-} from 'src/auth-service/gen/jwt';
 import { join } from 'path';
-import {
-  API_KEY_SERVICE_NAME,
-  AUTHSERVICE_API_KEY_PACKAGE_NAME,
-} from 'src/auth-service/gen/api_key';
 import { ConfigModule } from '@nestjs/config';
+import {
+  ApiKeyProto,
+  ApiKeyProtoFile,
+  JwtProto,
+  JwtProtoFile,
+} from 'juno-proto';
+
+const { JWT_SERVICE_NAME, AUTHSERVICE_JWT_PACKAGE_NAME } = JwtProto;
+const { API_KEY_SERVICE_NAME, AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
 @Module({
   imports: [
@@ -24,10 +25,7 @@ import { ConfigModule } from '@nestjs/config';
         options: {
           url: process.env.AUTH_SERVICE_ADDR,
           package: AUTHSERVICE_JWT_PACKAGE_NAME,
-          protoPath: join(
-            __dirname,
-            '../../../../proto/auth-service/jwt.proto',
-          ),
+          protoPath: JwtProtoFile,
         },
       },
       {
@@ -36,10 +34,7 @@ import { ConfigModule } from '@nestjs/config';
         options: {
           url: process.env.AUTH_SERVICE_ADDR,
           package: AUTHSERVICE_API_KEY_PACKAGE_NAME,
-          protoPath: join(
-            __dirname,
-            '../../../../proto/auth-service/api_key.proto',
-          ),
+          protoPath: ApiKeyProtoFile,
         },
       },
     ]),

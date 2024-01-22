@@ -3,10 +3,13 @@ import { INestMicroservice } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
-import { join } from 'path';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AUTHSERVICE_API_KEY_PACKAGE_NAME } from 'src/gen/api_key';
-import { AUTHSERVICE_JWT_PACKAGE_NAME } from 'src/gen/jwt';
+import {
+  ApiKeyProto,
+  ApiKeyProtoFile,
+  JwtProto,
+  JwtProtoFile,
+} from 'juno-proto';
 
 let app: INestMicroservice;
 // TODO: make api key tests actually work once implemented
@@ -20,6 +23,9 @@ beforeAll(async () => {
   await wait;
 });
 
+const { AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
+const { AUTHSERVICE_JWT_PACKAGE_NAME } = JwtProto;
+
 beforeEach(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -29,10 +35,7 @@ beforeEach(async () => {
     transport: Transport.GRPC,
     options: {
       package: [AUTHSERVICE_API_KEY_PACKAGE_NAME, AUTHSERVICE_JWT_PACKAGE_NAME],
-      protoPath: [
-        join(__dirname, '../../proto/auth-service/api_key.proto'),
-        join(__dirname, '../../proto/auth-service/jwt.proto'),
-      ],
+      protoPath: [ApiKeyProtoFile, JwtProtoFile],
       url: process.env.AUTH_SERVICE_ADDR,
     },
   });
@@ -50,9 +53,7 @@ describe('Auth Service API Key Tests', () => {
   let client: any;
 
   beforeEach(async () => {
-    const proto = ProtoLoader.loadSync(
-      join(__dirname, '../../proto/auth-service/api_key.proto'),
-    ) as any;
+    const proto = ProtoLoader.loadSync(ApiKeyProtoFile) as any;
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 

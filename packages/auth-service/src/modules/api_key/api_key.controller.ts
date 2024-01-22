@@ -1,21 +1,18 @@
 import { Controller } from '@nestjs/common';
-import {
-  ApiKeyServiceController,
-  ApiKeyServiceControllerMethods,
-  IssueApiKeyRequest,
-  IssueApiKeyResponse,
-  RevokeApiKeyRequest,
-  RevokeApiKeyResponse,
-} from 'src/gen/api_key';
+import { ApiKeyProto } from 'juno-proto';
 
 @Controller('api_key')
-@ApiKeyServiceControllerMethods()
-export class ApiKeyController implements ApiKeyServiceController {
-  async issueApiKey(request: IssueApiKeyRequest): Promise<IssueApiKeyResponse> {
+@ApiKeyProto.ApiKeyServiceControllerMethods()
+export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
+  async issueApiKey(
+    request: ApiKeyProto.IssueApiKeyRequest,
+  ): Promise<ApiKeyProto.IssueApiKeyResponse> {
     console.log(`request: ${request}`);
     return {};
   }
-  revokeApiKey(request: RevokeApiKeyRequest): Promise<RevokeApiKeyResponse> {
+  revokeApiKey(
+    request: ApiKeyProto.RevokeApiKeyRequest,
+  ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
     console.log(`request: ${request}`);
     throw new Error('Method not implemented.');
   }

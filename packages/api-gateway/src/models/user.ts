@@ -1,7 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { UserType } from 'src/auth-service/gen/user';
-import { User } from 'src/db-service/gen/user';
+import { UserProto } from 'juno-proto';
 
 export class CreateUserModel {
   @IsNotEmpty()
@@ -21,7 +20,7 @@ export class SetUserTypeModel {
 
   @IsNotEmpty()
   @Transform(toEnum)
-  type: UserType;
+  type: UserProto.UserType;
 }
 
 export class UserResponse {
@@ -30,9 +29,9 @@ export class UserResponse {
   email: string;
   name: string;
   @Transform(fromEnum)
-  type: UserType;
+  type: UserProto.UserType;
 
-  constructor(user: User) {
+  constructor(user: UserProto.User) {
     this.id = user.id;
     this.email = user.email;
     this.name = user.name;
@@ -45,26 +44,26 @@ export class LinkProjectModel {
   name?: string;
 }
 
-function toEnum(params: { value: string }): UserType | undefined {
+function toEnum(params: { value: string }): UserProto.UserType | undefined {
   switch (params.value) {
     case 'SUPERADMIN':
-      return UserType.SUPERADMIN;
+      return UserProto.UserType.SUPERADMIN;
     case 'ADMIN':
-      return UserType.ADMIN;
+      return UserProto.UserType.ADMIN;
     case 'USER':
-      return UserType.USER;
+      return UserProto.UserType.USER;
     default:
       return undefined;
   }
 }
 
 function fromEnum(params: {
-  value: UserType;
+  value: UserProto.UserType;
 }): 'SUPERADMIN' | 'ADMIN' | 'USER' {
   switch (params.value) {
-    case UserType.SUPERADMIN:
+    case UserProto.UserType.SUPERADMIN:
       return 'SUPERADMIN';
-    case UserType.ADMIN:
+    case UserProto.UserType.ADMIN:
       return 'ADMIN';
     default:
       return 'USER';

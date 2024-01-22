@@ -2,13 +2,13 @@ syntax = "proto3";
 
 package dbservice.project;
 
-import "shared/identifiers.proto";
+import "identifiers.proto";
 
 service ProjectService {
-  rpc getProject(shared.identifiers.ProjectIdentifier) returns (Project);
+  rpc getProject(identifiers.ProjectIdentifier) returns (Project);
   rpc createProject(CreateProjectRequest) returns (Project);
   rpc updateProject(UpdateProjectRequest) returns (Project);
-  rpc deleteProject(shared.identifiers.ProjectIdentifier) returns (Project);
+  rpc deleteProject(identifiers.ProjectIdentifier) returns (Project);
   rpc linkUser(LinkUserToProjectRequest) returns (Project);
 }
 
@@ -22,11 +22,11 @@ message CreateProjectRequest { string name = 1; }
 message ProjectUpdateParams { optional string name = 2; }
 
 message LinkUserToProjectRequest {
-  shared.identifiers.ProjectIdentifier project = 1;
-  shared.identifiers.UserIdentifier user = 2;
+  identifiers.ProjectIdentifier project = 1;
+  identifiers.UserIdentifier user = 2;
 }
 
 message UpdateProjectRequest {
-  shared.identifiers.ProjectIdentifier projectIdentifier = 1;
+  identifiers.ProjectIdentifier projectIdentifier = 1;
   ProjectUpdateParams updateParams = 2;
 }
