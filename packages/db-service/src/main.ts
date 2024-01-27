@@ -3,12 +3,12 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
-import { DBSERVICE_USER_PACKAGE_NAME } from 'juno-proto/src/gen/user';
-import { DBSERVICE_PROJECT_PACKAGE_NAME } from 'juno-proto/src/gen/project';
 import {
   UserProtoFile,
   ProjectProtoFile,
   IdentifiersProtoFile,
+  UserProto,
+  ProjectProto,
 } from 'juno-proto';
 
 async function bootstrap() {
@@ -20,7 +20,10 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: [DBSERVICE_USER_PACKAGE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME],
+        package: [
+          UserProto.DBSERVICE_USER_PACKAGE_NAME,
+          ProjectProto.DBSERVICE_PROJECT_PACKAGE_NAME,
+        ],
         protoPath: [UserProtoFile, ProjectProtoFile, IdentifiersProtoFile],
         url: process.env.DB_SERVICE_ADDR,
       },

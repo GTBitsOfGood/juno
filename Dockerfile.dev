@@ -4,9 +4,11 @@ WORKDIR /app
 
 COPY . .
 
-RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
+RUN apk add --update python3 make g++ protoc bash && rm -rf /var/cache/apk/*
 
 RUN yarn global add node-gyp prisma
+
+RUN chmod +x /app/packages/proto/gen_protos.sh
 
 WORKDIR /app/packages/proto
 
@@ -30,8 +32,6 @@ RUN yarn install --frozen-lockfile
 
 FROM node:18 as gateway-dev
 
-RUN apt update && apt install -y protobuf-compiler 
-
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules/
@@ -40,12 +40,12 @@ COPY --from=deps /app/packages/api-gateway/node_modules ./packages/node_modules/
 
 COPY . .
 
+COPY --from=deps /app/packages/proto/dist ./packages/proto/dist
+
 WORKDIR /app/packages/api-gateway
 
 
 FROM node:18 as auth-service-dev
-
-RUN apt update && apt install -y protobuf-compiler 
 
 WORKDIR /app
 
@@ -55,12 +55,12 @@ COPY --from=deps /app/packages/auth-service/node_modules ./packages/node_modules
 
 COPY . .
 
+COPY --from=deps /app/packages/proto/dist ./packages/proto/dist
+
 WORKDIR /app/packages/auth-service
 
 
 FROM node:18 as db-service-dev
-
-RUN apt update && apt install -y protobuf-compiler 
 
 WORKDIR /app
 
@@ -69,6 +69,8 @@ COPY --from=deps /app/node_modules ./node_modules/
 COPY --from=deps /app/packages/db-service/node_modules ./packages/node_modules/
 
 COPY . .
+
+COPY --from=deps /app/packages/proto/dist ./packages/proto/dist
 
 RUN yarn global add prisma
 
