@@ -3803,8 +3803,16 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-"juno-proto@file:packages/proto/dist":
-  version "0.0.0"
+"juno-proto@file:packages/proto":
+  version "0.0.1"
+  dependencies:
+    "@nestjs/common" "^10.3.0"
+    "@nestjs/core" "^10.3.0"
+    "@nestjs/microservices" "^10.3.0"
+    "@types/node" "^20.11.5"
+    path "^0.12.7"
+    reflect-metadata "^0.1.12"
+    rxjs "^7.8.1"
 
 keyv@^4.5.3:
   version "4.5.4"
@@ -4107,6 +4115,11 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
+
+ncp@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/ncp/-/ncp-2.0.0.tgz#195a21d6c46e361d2fb1281ba38b91e9df7bdbb3"
+  integrity sha512-zIdGUrPRFTUELUvr3Gmc7KZ2Sw/h1PiVM0Af/oHB6zgnV1ikqSfRk+TOufi79aHYCW3NiOXmr1BP5nWbzojLaA==
 
 negotiator@0.6.3:
   version "0.6.3"

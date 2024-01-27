@@ -4,8 +4,8 @@
   "main": "dist/main.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc && cp -r ./definitions ./dist/",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "build": "yarn gen-proto && yarn format && tsc && ncp ./definitions ./dist/definitions",
+    "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -25,6 +25,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "ncp": "^2.0.0",
     "ts-node": "^10.9.2",
     "ts-proto": "^1.166.4",
     "typescript": "^5.3.3"
