@@ -4,7 +4,7 @@
   "main": "dist/main.js",
   "license": "MIT",
   "scripts": {
-    "build": "ls && yarn gen-proto && yarn format && tsc && ncp ./definitions ./dist/definitions",
+    "build": "yarn gen-proto && yarn format && tsc && ncp ./definitions ./dist/definitions",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
