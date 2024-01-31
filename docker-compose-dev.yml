@@ -1,12 +1,9 @@
 services:
-  gateway:
+  api-gateway:
     build:
       dockerfile: Dockerfile.dev
-      target: gateway-dev
+      target: api-gateway-dev
       context: .
-    volumes:
-      - ./packages/api-gateway:/app/packages/api-gateway
-      - ./packages/proto:/app/packages/juno-proto
     ports:
       - '3000:3000'
     entrypoint: yarn ${GATEWAY_COMMAND-start:dev}
@@ -23,9 +20,6 @@ services:
       dockerfile: Dockerfile.dev
       target: auth-service-dev
       context: .
-    volumes:
-      - ./packages/auth-service:/app/packages/auth-service
-      - ./packages/proto:/app/packages/juno-proto
     ports:
       - '50052:50052'
     entrypoint: yarn ${AUTH_COMMAND-start:dev}
@@ -42,9 +36,6 @@ services:
       dockerfile: Dockerfile.dev
       target: db-service-dev
       context: .
-    volumes:
-      - ./packages/db-service:/app/packages/db-service
-      - ./packages/proto:/app/packages/juno-proto
     ports:
       - '50053:50053'
     entrypoint: /bin/sh -c "DB_COMMAND=${DB_COMMAND-start:dev} RUN_MODE=${RUN_MODE-dev} ./entrypoint.sh"
