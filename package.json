@@ -5,14 +5,17 @@
     "packages/*"
   ],
   "scripts": {
-    "api-gateway": "yarn workspace api-gateway start",
+    "start:dev": "docker-compose -f docker-compose-dev.yml up",
+    "start:dev:live-packages": "docker-compose -f docker-compose-dev.yml -f docker/docker-compose-live-packages.yml up",
+    "start:dev:live-proto": "docker-compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml up",
+    "start:dev:live-all": "docker-compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml -f docker/docker-compose-live-packages.yml up",
     "format:check": "yarn prettier --check .",
     "format:write": "yarn prettier --write .",
     "tsc": "nx run-many --target=tsc",
     "lint": "nx run-many --target=lint",
     "gen-proto": "yarn workspace juno-proto install && yarn workspace juno-proto build",
     "preinstall": "yarn gen-proto",
-    "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from gateway",
+    "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from api-gateway",
     "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from auth-service",
     "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from db-service"
   },

@@ -1,0 +1,29 @@
+services:
+  api-gateway:
+    extends:
+      file: docker-compose-dev.yml
+      service: api-gateway
+    volumes:
+      - ./packages/api-gateway:/app/packages/api-gateway
+      - /app/packages/api-gateway/node_modules
+
+  auth-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: auth-service
+    volumes:
+      - ./packages/auth-service:/app/packages/auth-service
+      - /app/packages/auth-service/node_modules
+
+  db-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: db-service
+    volumes:
+      - ./packages/db-service:/app/packages/db-service
+      - /app/packages/db-service/node_modules
+
+  db:
+    extends:
+      file: docker-compose-dev.yml
+      service: db

@@ -1,0 +1,29 @@
+services:
+  api-gateway:
+    extends:
+      file: docker-compose-dev.yml
+      service: api-gateway
+    volumes:
+      - ./packages/proto:/app/packages/proto
+      - ./packages/proto:/app/packages/node_modules/juno-proto
+
+  auth-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: auth-service
+    volumes:
+      - ./packages/proto:/app/packages/proto
+      - ./packages/proto:/app/packages/node_modules/juno-proto
+
+  db-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: db-service
+    volumes:
+      - ./packages/proto:/app/packages/proto
+      - ./packages/proto:/app/packages/node_modules/juno-proto
+
+  db:
+    extends:
+      file: docker-compose-dev.yml
+      service: db

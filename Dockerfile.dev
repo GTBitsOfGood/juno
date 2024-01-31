@@ -6,7 +6,7 @@ COPY . .
 
 RUN apk add --update python3 make g++ protoc bash && rm -rf /var/cache/apk/*
 
-RUN yarn global add node-gyp prisma
+RUN yarn global add node-gyp 
 
 RUN chmod +x /app/packages/proto/gen_protos.sh
 
@@ -16,21 +16,11 @@ RUN yarn install --frozen-lockfile
 
 RUN yarn build
 
-RUN yarn install --frozen-lockfile
+WORKDIR /app
 
-WORKDIR /app/packages/api-gateway
+RUN yarn install --frozen-lockfile --ignore-scripts
 
-RUN yarn install --frozen-lockfile
-
-WORKDIR /app/packages/auth-service
-
-RUN yarn install --frozen-lockfile
-
-WORKDIR /app/packages/db-service
-
-RUN yarn install --frozen-lockfile
-
-FROM node:18 as gateway-dev
+FROM node:18 as api-gateway-dev
 
 WORKDIR /app
 
@@ -40,10 +30,9 @@ COPY --from=deps /app/packages/api-gateway/node_modules ./packages/node_modules/
 
 COPY . .
 
-COPY --from=deps /app/packages/proto/dist ./packages/proto/dist
+COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/api-gateway
-
 
 FROM node:18 as auth-service-dev
 
@@ -55,10 +44,9 @@ COPY --from=deps /app/packages/auth-service/node_modules ./packages/node_modules
 
 COPY . .
 
-COPY --from=deps /app/packages/proto/dist ./packages/proto/dist
+COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/auth-service
-
 
 FROM node:18 as db-service-dev
 
@@ -70,10 +58,8 @@ COPY --from=deps /app/packages/db-service/node_modules ./packages/node_modules/
 
 COPY . .
 
-COPY --from=deps /app/packages/proto/dist ./packages/proto/dist
-
-RUN yarn global add prisma
+COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/db-service
 
-RUN prisma generate
+RUN yarn prisma generate
