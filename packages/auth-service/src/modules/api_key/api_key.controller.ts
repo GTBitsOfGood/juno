@@ -1,4 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { ApiKeyProto } from 'juno-proto';
 import { OptionalAPIKeyResponse, RevokeAPIKeyBody } from 'src/models/api_key';
 
@@ -18,13 +24,9 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     throw new Error('Method not implemented.');
   }
   @Post('/api/auth/keys/revoke')
-  async revokeKeys(
-    @Body() params: RevokeAPIKeyBody,
-  ): Promise<OptionalAPIKeyResponse | ''> {
-    const err: OptionalAPIKeyResponse = { error: '' };
+  async revokeKeys(@Body() params: RevokeAPIKeyBody): Promise<any> {
     if (!params.apiKey && !params.projectName) {
-      err.error = 'Incorrect body';
-      return err;
+      throw new HttpException('Incorrect body', HttpStatus.BAD_REQUEST);
     }
     this.revokeApiKey;
     return '';
