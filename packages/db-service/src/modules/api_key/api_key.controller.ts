@@ -20,10 +20,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   }
   async revokeApiKey(
     identifier: IdentifierProto.ApiKeyIdentifier,
-  ): Promise<
-    | ApiKeyProto.RevokeApiKeyResponse
-    | Observable<ApiKeyProto.RevokeApiKeyResponse>
-  > {
+  ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
     // different structure than previous validation methods because projectName isn't within Prisma.ApiKeyWhereUniqueInput
     const { projectName, hash } = validateApiKeyIdentifier(identifier);
     if (!projectName) {

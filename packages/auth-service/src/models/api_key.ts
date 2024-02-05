@@ -5,7 +5,7 @@ export class RevokeAPIKeyBody {
   email: string;
   @IsNotEmpty()
   password: string;
-  apiKey?: string;
+  hash?: string;
   projectName?: string;
 }
 
