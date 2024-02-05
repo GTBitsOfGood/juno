@@ -8,6 +8,7 @@ import { ApiKey } from '@prisma/client';
 @ApiKeyProto.ApiKeyServiceControllerMethods()
 export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
+
   async issueApiKey(request: ApiKeyProto.IssueApiKeyRequest): Promise<ApiKey> {
     const project = await this.apiKeyService.createApiKey({
       hash: request.hash,
@@ -17,6 +18,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     });
     return project;
   }
+
   async revokeApiKey(
     identifier: IdentifierProto.ApiKeyIdentifier,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {

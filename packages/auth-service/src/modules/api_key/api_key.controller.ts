@@ -11,7 +11,7 @@ import { RevokeAPIKeyBody } from 'src/models/api_key';
 @Controller('api_key')
 @ApiKeyProto.ApiKeyServiceControllerMethods()
 export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
-  private projectService: ApiKeyProto.ApiKeyServiceClient;
+  private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
 
   async issueApiKey(
     request: ApiKeyProto.IssueApiKeyRequest,
@@ -22,7 +22,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async revokeApiKey(
     request: ApiKeyProto.RevokeApiKeyRequest,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
-    this.projectService.revokeApiKey(request);
+    this.apiKeyService.revokeApiKey(request);
     return {};
   }
   @Post('/api/auth/keys/revoke')
