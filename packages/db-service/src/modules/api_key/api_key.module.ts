@@ -7,4 +7,4 @@ import { PrismaService } from 'src/prisma.service';
   controllers: [ApiKeyController],
   providers: [ApiKeyService, PrismaService],
 })
-export class ProjectModule {}
+export class ApiKeyModule {}

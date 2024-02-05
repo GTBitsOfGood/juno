@@ -19,15 +19,20 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     console.log(`request: ${request}`);
     return {};
   }
+
   async revokeApiKey(
     request: ApiKeyProto.RevokeApiKeyRequest,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
     this.apiKeyService.revokeApiKey(request);
     return {};
   }
+
   @Post('/api/auth/keys/revoke')
   async revokeKeys(@Body() params: RevokeAPIKeyBody): Promise<any> {
-    if (!params.hash && !params.projectName) {
+    if (
+      (!params?.hash && !params?.projectName) ||
+      (params?.projectName && params?.hash)
+    ) {
       throw new HttpException('Incorrect body', HttpStatus.BAD_REQUEST);
     }
     await this.revokeApiKey(params);
