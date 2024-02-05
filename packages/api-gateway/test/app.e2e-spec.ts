@@ -89,7 +89,7 @@ describe('User Creation Routes', () => {
   it('should retrieves a user by id', async () => {
     return request(app.getHttpServer())
       .get('/user/1')
-      .expect(201)
+      .expect(200)
       .then((response) => {
         expect(response.body.name).toEqual('John Doe');
       });
