@@ -40,3 +40,15 @@ export function validateUserIdentifier(
     };
   }
 }
+
+export function validateApiKeyIdentifier(
+  identifier: IdentifierProto.ApiKeyIdentifier,
+): IdentifierProto.ApiKeyIdentifier {
+  if (identifier.hash && identifier.projectName) {
+    throw new Error('Only one of hash or projectName can be provided');
+  } else if (!identifier.hash && !identifier.projectName) {
+    throw new Error('Neither hash nor projectName is provided');
+  }
+
+  return identifier;
+}
