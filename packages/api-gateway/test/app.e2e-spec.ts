@@ -7,6 +7,7 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
+import { UserProto } from 'juno-proto';
 
 let app: INestApplication;
 jest.setTimeout(7000);
@@ -80,28 +81,44 @@ describe('User Creation Routes', () => {
       .post('/user/type')
       .send({
         email: 'john@gmail.com',
-        id: '1',
-        type: 'ADMIN',
+        type: UserProto.UserType.ADMIN,
       })
       .expect(201);
   });
 
-  it('should retrieves a user by id', async () => {
+  it('should retrieve a user by id', () => {
     return request(app.getHttpServer())
-      .get('/user/1')
+      .get('/user/id/1')
       .expect(200)
       .then((response) => {
         expect(response.body.name).toEqual('John Doe');
       });
   });
 
+  it('should test invalid user id retrieval', () => {
+    return request(app.getHttpServer()).get('/user/id/abc').expect(400);
+  });
+
+  it('should create a dummy project', () => {
+    return request(app.getHttpServer())
+      .post('/project')
+      .send({
+        name: 'testProject',
+      })
+      .expect(201);
+  });
+
   it('should link a user to a project', () => {
     return request(app.getHttpServer())
-      .put('/id/1/project')
+      .post('/user/id/1/project')
       .send({
         email: 'john@example.com',
         name: 'testProject',
       })
       .expect(201);
+  });
+
+  it('should test project linking with invalid id', () => {
+    return request(app.getHttpServer()).post('/user/id/a/project').expect(400);
   });
 });
