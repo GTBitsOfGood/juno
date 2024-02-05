@@ -1,6 +1,5 @@
 import { Controller } from '@nestjs/common';
 import { ApiKeyProto, IdentifierProto } from 'juno-proto';
-import { Observable } from 'rxjs';
 import { ApiKeyService } from './api_key.service';
 import { validateApiKeyIdentifier } from 'src/utility/validate';
 import { ApiKey } from '@prisma/client';
