@@ -48,3 +48,54 @@ describe('Auth Routes', () => {
     request(app.getHttpServer()).get('/auth').expect(200).expect('');
   });
 });
+
+describe('Project Creation Routes', () => {
+  it('Create a project with valid inputs', async () => {
+    return await request(app.getHttpServer())
+      .post('/project')
+      .send({
+        name: 'testProject',
+      })
+      .expect(201)
+      .expect("");
+  });
+
+  it("Create a project with empty-string name", async () => {
+    return await request(app.getHttpServer())
+      .post('/project')
+      .send({
+        name: '',
+      })
+      .expect(400)
+      .expect('{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}');
+  });
+
+  it("Create a project with no name field", async () => {
+    return await request(app.getHttpServer())
+      .post('/project')
+      .send({
+      })
+      .expect(400)
+      .expect('{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}');
+  });
+
+  it("Create a project with null name", async () => {
+    return await request(app.getHttpServer())
+      .post('/project')
+      .send({
+        name: null,
+      })
+      .expect(400)
+      .expect('{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}');
+  });
+
+  it("Create a project with non-string name", async () => {
+    return await request(app.getHttpServer())
+      .post('/project')
+      .send({
+        name: 1,
+      })
+      .expect(201)
+      .expect("");
+  });
+});
