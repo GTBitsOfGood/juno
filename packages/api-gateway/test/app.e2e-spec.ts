@@ -57,46 +57,51 @@ describe('Project Creation Routes', () => {
         name: 'testProject',
       })
       .expect(201)
-      .expect("");
+      .expect('');
   });
 
-  it("Create a project with empty-string name", async () => {
+  it('Create a project with empty-string name', async () => {
     await request(app.getHttpServer())
       .post('/project')
       .send({
         name: '',
       })
       .expect(400)
-      .expect('{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}');
+      .expect(
+        '{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}',
+      );
   });
 
-  it("Create a project with no name field", async () => {
+  it('Create a project with no name field', async () => {
     await request(app.getHttpServer())
       .post('/project')
-      .send({
-      })
+      .send({})
       .expect(400)
-      .expect('{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}');
+      .expect(
+        '{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}',
+      );
   });
 
-  it("Create a project with null name", async () => {
+  it('Create a project with null name', async () => {
     await request(app.getHttpServer())
       .post('/project')
       .send({
         name: null,
       })
       .expect(400)
-      .expect('{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}');
+      .expect(
+        '{"message":["name should not be empty"],"error":"Bad Request","statusCode":400}',
+      );
   });
 
-  it("Create a project with non-string name", async () => {
+  it('Create a project with non-string name', async () => {
     await request(app.getHttpServer())
       .post('/project')
       .send({
         name: 1,
       })
       .expect(201)
-      .expect("");
+      .expect('');
   });
 });
 
@@ -108,7 +113,7 @@ describe('Project Retrieval Routes', () => {
       .then((response) => {
         expect(response.body.name).toEqual('testProject');
         expect(response.body.id).toEqual(1);
-      })
+      });
   });
 
   it('Get project with valid name', async () => {
@@ -118,14 +123,14 @@ describe('Project Retrieval Routes', () => {
       .then((response) => {
         expect(response.body.name).toEqual('testProject');
         expect(response.body.id).toEqual(1);
-      })
+      });
   });
 
   it('Get project with non-number id', async () => {
     await request(app.getHttpServer())
       .get('/project/id/abc')
       .expect(400)
-      .expect('{"statusCode":400,"message":"id must be a number"}')
+      .expect('{"statusCode":400,"message":"id must be a number"}');
   });
 
   // it('Get project with non-existent id', async () => {
@@ -140,5 +145,102 @@ describe('Project Retrieval Routes', () => {
   //     .get('/project/name/abc')
   //     .expect(400)
   //     .expect('{"statusCode":400,"message":"name does not exist"}')
+  // });
+});
+
+describe('Project Update Routes', () => {
+  beforeAll(async () => {
+    await request(app.getHttpServer()).post('/user').send({
+      id: '1',
+      password: '1234',
+      name: 'Test User',
+      email: 'test@user.com',
+    });
+  });
+
+  it('Link user with project id using valid user id input', async () => {
+    await request(app.getHttpServer())
+      .put('/project/id/1/user')
+      .send({
+        id: '1',
+      })
+      .expect(200);
+  });
+
+  it('Link user with project id using valid user email input', async () => {
+    await request(app.getHttpServer())
+      .put('/project/id/1/user')
+      .send({
+        email: 'test@user.com',
+      })
+      .expect(200);
+  });
+
+  it('Link user with project id using non-number project id param', async () => {
+    await request(app.getHttpServer())
+      .put('/project/id/abc/user')
+      .send({
+        email: 'test@user.com',
+      })
+      .expect(400)
+      .expect('{"statusCode":400,"message":"id must be a number"}');
+  });
+
+  // it('Link user with project id using non-number user id input', async () => {
+  //   await request(app.getHttpServer())
+  //     .put('/project/id/1/user')
+  //     .send({
+  //       id: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('{"statusCode":400,"message":"id must be a number"}');
+  // });
+
+  // it('Link user with project id using invalid user email input', async () => {
+  //   await request(app.getHttpServer())
+  //     .put('/project/id/1/user')
+  //     .send({
+  //       email: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('');
+  // });
+
+  it('Link user with project name using valid user id input', async () => {
+    await request(app.getHttpServer())
+      .put('/project/name/testProject/user')
+      .send({
+        id: '1',
+      })
+      .expect(200);
+  });
+
+  it('Link user with project name using valid user email input', async () => {
+    await request(app.getHttpServer())
+      .put('/project/name/testProject/user')
+      .send({
+        email: 'test@user.com',
+      })
+      .expect(200);
+  });
+
+  // it('Link user with project name using non-number user id input', async () => {
+  //   await request(app.getHttpServer())
+  //     .put('/project/name/testProject/user')
+  //     .send({
+  //       id: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('{"statusCode":400,"message":"id must be a number"}');
+  // });
+
+  // it('Link user with project name using invalid user email input', async () => {
+  //   await request(app.getHttpServer())
+  //     .put('/project/name/testProject/user')
+  //     .send({
+  //       email: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('');
   // });
 });
