@@ -11,8 +11,7 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-
-// TODO: Make these actual tests
+import { UserType } from 'juno-proto/dist/gen/user';
 
 const { DBSERVICE_USER_PACKAGE_NAME } = UserProto;
 const { DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
@@ -53,16 +52,24 @@ afterEach(async () => {
 });
 
 describe('DB Service User Tests', () => {
-  let client: any;
+  let userClient: any;
+  let projectClient: any;
+
   beforeEach(() => {
-    const proto = ProtoLoader.loadSync([
+    const userProto = ProtoLoader.loadSync([
       UserProtoFile,
+      ProjectProtoFile,
       IdentifiersProtoFile,
     ]) as any;
 
-    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+    const userProtoGRPC = GRPC.loadPackageDefinition(userProto) as any;
 
-    client = new protoGRPC.dbservice.user.UserService(
+    userClient = new userProtoGRPC.dbservice.user.UserService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+    projectClient = new userProtoGRPC.dbservice.project.ProjectService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
@@ -70,7 +77,7 @@ describe('DB Service User Tests', () => {
 
   it('creates a new user', async () => {
     const promise = new Promise((resolve) => {
-      client.createUser(
+      userClient.createUser(
         {
           email: 'test@test.com',
           password: 'some-password',
@@ -90,105 +97,172 @@ describe('DB Service User Tests', () => {
 
     await promise;
   });
-  //
-  // it('updates a user', async () => {
+
+  it('can update the user with a valid id', async () => {
+    const promise = new Promise((resolve) => {
+      userClient.updateUser(
+        {
+          userIdentifier: { id: 1 },
+          updateParams: {
+            email: 'new@test.com',
+            name: 'new',
+            type: UserType.USER,
+          },
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['email']).toBe('new@test.com');
+          expect(resp['name']).toBe('new');
+          expect(resp['type']).toBe(UserType.USER);
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
+  it('can remove the user with a valid id', async () => {
+    const promise = new Promise((resolve) => {
+      userClient.deleteUser(
+        {
+          id: 1,
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp).toBeDefined();
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
+  it('can link a valid user to a project', async () => {
+    const projectPromise = new Promise((resolve) => {
+      projectClient.createProject(
+        {
+          name: 'testproject',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['name']).toBe('testproject');
+          resolve({});
+        },
+      );
+    });
+
+    await projectPromise;
+
+    const promise = new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'test@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(`${resp['id']}`).toBe('2');
+          expect(resp['email']).toBe('test@test.com');
+          expect(resp['name']).toBe('some-name');
+          expect(resp['type']).toBe(0);
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+
+    const promise1 = new Promise((resolve) => {
+      userClient.linkProject(
+        {
+          project: { name: 'testproject' },
+          user: { id: 2 },
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['email']).toBe('test@test.com');
+          expect(resp['name']).toBe('some-name');
+          expect(resp['type']).toBe(UserType.SUPERADMIN);
+          resolve({});
+        },
+      );
+    });
+
+    await promise1;
+  });
+
+  it('can get a valid user', async () => {
+    const userPromise = new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'testvaliduser@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['email']).toBe('testvaliduser@test.com');
+          expect(resp['name']).toBe('some-name');
+          expect(resp['type']).toBe(0);
+          resolve({});
+        },
+      );
+    });
+
+    await userPromise;
+
+    const getUserPromise = new Promise((resolve) => {
+      userClient.getUser(
+        {
+          email: 'test@test.com',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp).toBeDefined();
+          expect(resp['email']).toBe('test@test.com');
+          expect(resp['name']).toBe('some-name');
+          expect(resp['type']).toBe(0);
+          resolve({});
+        },
+      );
+    });
+
+    await getUserPromise;
+  });
+
+  // TODO: Wait for top level handler to manage invalid inputs
+  // it('throws an exception when updating the user with a invalid id', async () => {
   //   const promise = new Promise((resolve) => {
-  //     client.revokeApiKey({}, (err, resp) => {
-  //       expect(err).toBeNull();
-  //       expect(resp).toStrictEqual({});
-  //       resolve({});
-  //     });
+  //     userClient.updateUser(
+  //       {
+  //         userIdentifier: { id: 99999 },
+  //         updateParams: { email: 'test@test.com' },
+  //       },
+  //       (err, resp) => {
+  //         expect(err).toBeDefined();
+  //         resolve({});
+  //       },
+  //     );
+  //   }).catch((err) => {
+  //     expect(err).toBeNull();
   //   });
-  //
+
   //   await promise;
   // });
-  //
-  // it('gets a user', async () => {
-  //   const promise = new Promise((resolve) => {
-  //     client.revokeApiKey({}, (err, resp) => {
-  //       expect(err).toBeNull();
-  //       expect(resp).toStrictEqual({});
+  // it('throws an error when neither id nor email are provided', async () => {
+  //   const getUserPromise = new Promise((resolve) => {
+  //     userClient.getUser({}, (err, resp) => {
+  //       expect(err).toBe('');
   //       resolve({});
   //     });
   //   });
-  //
-  //   await promise;
-  // });
-  //
-  // it('deletes a user', async () => {
-  //   const promise = new Promise((resolve) => {
-  //     client.issueApiKey({}, (err, resp) => {
-  //       expect(err).toBeNull();
-  //       expect(resp).toStrictEqual({});
-  //       resolve({});
-  //     });
-  //   });
-  //
-  //   await promise;
+
+  //   // Expect error, TODO: Find method of catching "Internal server error"
+  //   expect(await getUserPromise).toThrow(Error);
   // });
 });
-
-// describe('DB Service Project Tests', () => {
-//   let client: any;
-//   beforeEach(() => {
-//     const proto = ProtoLoader.loadSync([
-//       join(__dirname, '../../proto/db-service/project.proto'),
-//       join(__dirname, '../../proto/db-service/shared/identifiers.proto'),
-//     ]) as any;
-//
-//     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-//
-//     client = new protoGRPC.dbservice.project.ProjectService(
-//       process.env.DB_SERVICE_ADDR,
-//       GRPC.credentials.createInsecure(),
-//     );
-//   });
-//
-//   it('creates a new user', async () => {
-//     const promise = new Promise((resolve) => {
-//       client.issueApiKey({}, (err, resp) => {
-//         expect(err).toBeNull();
-//         expect(resp).toStrictEqual({});
-//         resolve({});
-//       });
-//     });
-//
-//     await promise;
-//   });
-//
-//   it('updates a user', async () => {
-//     const promise = new Promise((resolve) => {
-//       client.revokeApiKey({}, (err, resp) => {
-//         expect(err).toBeNull();
-//         expect(resp).toStrictEqual({});
-//         resolve({});
-//       });
-//     });
-//
-//     await promise;
-//   });
-//
-//   it('gets a user', async () => {
-//     const promise = new Promise((resolve) => {
-//       client.revokeApiKey({}, (err, resp) => {
-//         expect(err).toBeNull();
-//         expect(resp).toStrictEqual({});
-//         resolve({});
-//       });
-//     });
-//
-//     await promise;
-//   });
-//
-//   it('deletes a user', async () => {
-//     const promise = new Promise((resolve) => {
-//       client.issueApiKey({}, (err, resp) => {
-//         expect(err).toBeNull();
-//         expect(resp).toStrictEqual({});
-//         resolve({});
-//       });
-//     });
-//
-//     await promise;
-//   });
-// });
