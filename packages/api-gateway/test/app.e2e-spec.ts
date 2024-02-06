@@ -80,8 +80,8 @@ describe('User Creation Routes', () => {
     return request(app.getHttpServer())
       .post('/user/type')
       .send({
-        email: 'john@gmail.com',
-        type: UserProto.UserType.ADMIN,
+        id: 1,
+        type: 'ADMIN',
       })
       .expect(201);
   });
@@ -108,17 +108,33 @@ describe('User Creation Routes', () => {
       .expect(201);
   });
 
+  let id = 0;
+  it("should retrieve the dummy project's id", () => {
+    return request(app.getHttpServer())
+      .get('/project/name/testProject')
+      .expect(200)
+      .then((response) => {
+        id = parseInt(response.body.id);
+      });
+  });
+
   it('should link a user to a project', () => {
     return request(app.getHttpServer())
       .post('/user/id/1/project')
       .send({
-        email: 'john@example.com',
         name: 'testProject',
+        id: id,
       })
       .expect(201);
   });
 
   it('should test project linking with invalid id', () => {
-    return request(app.getHttpServer()).post('/user/id/a/project').expect(400);
+    return request(app.getHttpServer())
+      .post('/user/id/a/project')
+      .send({
+        name: 'testProject',
+        id: id,
+      })
+      .expect(400);
   });
 });
