@@ -98,26 +98,6 @@ describe('DB Service User Tests', () => {
     await promise;
   });
 
-  // TODO: Find way of catching NestJS exceptions
-  // it('throws an exception when updating the user with a invalid id', async () => {
-  //   const promise = new Promise((resolve) => {
-  //     userClient.updateUser(
-  //       {
-  //         userIdentifier: { id: 99999 },
-  //         updateParams: { email: 'test@test.com' },
-  //       },
-  //       (err, resp) => {
-  //         expect(err).toBeDefined();
-  //         resolve({});
-  //       },
-  //     );
-  //   }).catch((err) => {
-  //     expect(err).toBeNull();
-  //   });
-
-  //   await promise;
-  // });
-
   it('can update the user with a valid id', async () => {
     const promise = new Promise((resolve) => {
       userClient.updateUser(
@@ -255,6 +235,25 @@ describe('DB Service User Tests', () => {
     await getUserPromise;
   });
 
+  // TODO: Wait for top level handler to manage invalid inputs
+  // it('throws an exception when updating the user with a invalid id', async () => {
+  //   const promise = new Promise((resolve) => {
+  //     userClient.updateUser(
+  //       {
+  //         userIdentifier: { id: 99999 },
+  //         updateParams: { email: 'test@test.com' },
+  //       },
+  //       (err, resp) => {
+  //         expect(err).toBeDefined();
+  //         resolve({});
+  //       },
+  //     );
+  //   }).catch((err) => {
+  //     expect(err).toBeNull();
+  //   });
+
+  //   await promise;
+  // });
   // it('throws an error when neither id nor email are provided', async () => {
   //   const getUserPromise = new Promise((resolve) => {
   //     userClient.getUser({}, (err, resp) => {
