@@ -7,7 +7,6 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import { UserProto } from 'juno-proto';
 
 let app: INestApplication;
 jest.setTimeout(7000);
