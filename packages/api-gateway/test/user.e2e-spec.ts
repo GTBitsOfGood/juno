@@ -79,7 +79,7 @@ describe('User Creation Routes', () => {
     return request(app.getHttpServer())
       .post('/user/type')
       .send({
-        id: 1,
+        id: 2,
         type: 'ADMIN',
       })
       .expect(201);
@@ -87,7 +87,7 @@ describe('User Creation Routes', () => {
 
   it('should retrieve a user by id', () => {
     return request(app.getHttpServer())
-      .get('/user/id/1')
+      .get('/user/id/2')
       .expect(200)
       .then((response) => {
         expect(response.body.name).toEqual('John Doe');
@@ -106,7 +106,7 @@ describe('User Creation Routes', () => {
       })
 
     await request(app.getHttpServer())
-      .put('/user/id/1/project')
+      .put('/user/id/2/project')
       .send({
         name: 'projectName',
       })
