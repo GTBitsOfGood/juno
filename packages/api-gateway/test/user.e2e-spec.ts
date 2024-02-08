@@ -103,7 +103,7 @@ describe('User Creation Routes', () => {
       .post('/project')
       .send({
         name: 'projectName',
-      })
+      });
 
     await request(app.getHttpServer())
       .put('/user/id/2/project')
