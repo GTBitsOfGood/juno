@@ -99,11 +99,9 @@ describe('User Creation Routes', () => {
   });
 
   it('should link a user to a project', async () => {
-    const createProjectResponse = await request(app.getHttpServer())
-      .post('/project')
-      .send({
-        name: 'projectName',
-      });
+    await request(app.getHttpServer()).post('/project').send({
+      name: 'projectName',
+    });
 
     await request(app.getHttpServer())
       .put('/user/id/2/project')
