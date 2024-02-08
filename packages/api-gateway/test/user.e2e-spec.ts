@@ -98,41 +98,26 @@ describe('User Creation Routes', () => {
     return request(app.getHttpServer()).get('/user/id/abc').expect(400);
   });
 
-  it('should create a dummy project', () => {
-    return request(app.getHttpServer())
+  it('should link a user to a project', async () => {
+    const createProjectResponse = await request(app.getHttpServer())
       .post('/project')
       .send({
-        name: 'testProject',
+        name: 'projectName',
       })
-      .expect(201);
-  });
 
-  let id = 0;
-  it("should retrieve the dummy project's id", () => {
-    return request(app.getHttpServer())
-      .get('/project/name/testProject')
-      .expect(200)
-      .then((response) => {
-        id = parseInt(response.body.id);
-      });
-  });
-
-  it('should link a user to a project', () => {
-    return request(app.getHttpServer())
-      .post('/user/id/1/project')
+    await request(app.getHttpServer())
+      .put('/user/id/1/project')
       .send({
-        name: 'testProject',
-        id: id,
+        name: 'projectName',
       })
-      .expect(201);
+      .expect(200);
   });
 
-  it('should test project linking with invalid id', () => {
-    return request(app.getHttpServer())
-      .post('/user/id/a/project')
+  it('should test an invalid user id', async () => {
+    await request(app.getHttpServer())
+      .put('/user/id/a/project')
       .send({
-        name: 'testProject',
-        id: id,
+        name: 'projectName',
       })
       .expect(400);
   });
