@@ -5,7 +5,7 @@ services:
       target: api-gateway-dev
       context: .
     ports:
-      - '3000:3000'
+      - 3000
     entrypoint: yarn ${GATEWAY_COMMAND-start:dev}
     environment:
       DB_SERVICE_ADDR: db-service
@@ -21,7 +21,7 @@ services:
       target: auth-service-dev
       context: .
     ports:
-      - '50052:50052'
+      - 50052
     entrypoint: yarn ${AUTH_COMMAND-start:dev}
     environment:
       AUTH_SERVICE_ADDR: auth-service
@@ -37,7 +37,7 @@ services:
       target: db-service-dev
       context: .
     ports:
-      - '50053:50053'
+      - 50053
     entrypoint: /bin/sh -c "DB_COMMAND=${DB_COMMAND-start:dev} RUN_MODE=${RUN_MODE-dev} ./entrypoint.sh"
     environment:
       AUTH_SERVICE_ADDR: auth-service
@@ -53,7 +53,7 @@ services:
     image: postgres
     restart: always
     ports:
-      - '5432:5432'
+      - 5432
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
