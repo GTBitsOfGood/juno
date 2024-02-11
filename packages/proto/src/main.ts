@@ -3,6 +3,7 @@ export * as JwtProto from './gen/jwt';
 export * as ProjectProto from './gen/project';
 export * as UserProto from './gen/user';
 export * as IdentifierProto from './gen/identifiers';
+export * as HealthProto from './gen/health';
 
 import { join } from 'path';
 
@@ -15,3 +16,4 @@ export const JwtProtoFile = getProtoFilePath('jwt.proto');
 export const ProjectProtoFile = getProtoFilePath('project.proto');
 export const UserProtoFile = getProtoFilePath('user.proto');
 export const IdentifiersProtoFile = getProtoFilePath('identifiers.proto');
+export const HealthProtoFile = getProtoFilePath('health.proto');

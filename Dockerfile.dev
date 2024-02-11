@@ -1,3 +1,13 @@
+FROM alpine as grpc-probe
+
+ARG TARGETARCH
+
+RUN apk add wget
+
+COPY ./docker/get_grpc_probe.sh /get_grpc_probe.sh
+
+RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
+
 FROM node:18-alpine as deps
 
 WORKDIR /app
@@ -20,7 +30,13 @@ WORKDIR /app
 
 RUN yarn install --frozen-lockfile --ignore-scripts
 
-FROM node:18 as api-gateway-dev
+FROM node:18 as base-service
+
+COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
+
+RUN chmod a+x /bin/grpc_health_probe
+
+FROM base-service as api-gateway-dev
 
 WORKDIR /app
 
@@ -34,7 +50,7 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/api-gateway
 
-FROM node:18 as auth-service-dev
+FROM base-service as auth-service-dev
 
 WORKDIR /app
 
@@ -48,7 +64,7 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/auth-service
 
-FROM node:18 as db-service-dev
+FROM base-service as db-service-dev
 
 WORKDIR /app
 

@@ -9,15 +9,6 @@ import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
 
 let app: INestApplication;
-jest.setTimeout(7000);
-beforeAll(async () => {
-  const wait = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({});
-    }, 6000);
-  });
-  await wait;
-});
 
 afterAll((done) => {
   app.close();
