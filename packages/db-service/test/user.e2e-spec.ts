@@ -18,16 +18,6 @@ const { DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 let app: INestMicroservice;
 
-jest.setTimeout(7000);
-beforeAll(async () => {
-  const wait = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({});
-    }, 6000);
-  });
-  await wait;
-});
-
 beforeEach(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],

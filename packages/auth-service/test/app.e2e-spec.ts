@@ -13,15 +13,6 @@ import {
 
 let app: INestMicroservice;
 // TODO: make api key tests actually work once implemented
-jest.setTimeout(7000);
-beforeAll(async () => {
-  const wait = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({});
-    }, 6000);
-  });
-  await wait;
-});
 
 const { AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 const { AUTHSERVICE_JWT_PACKAGE_NAME } = JwtProto;
