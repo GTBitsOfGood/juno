@@ -52,6 +52,9 @@ export class UserService {
 
   async authenticate(where: Prisma.UserWhereUniqueInput): Promise<User> {
     const user: User = await this.prisma.user.findFirst({ where });
+    if (!user) {
+      throw new Error('The email provided does not exist within the database.');
+    }
     if (user?.password !== where?.password) {
       throw new Error('The password is invalid.');
     }

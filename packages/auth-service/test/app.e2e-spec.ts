@@ -16,6 +16,7 @@ import {
   ResetProtoFile,
   UserProtoFile,
 } from 'juno-proto';
+import { User, UserType } from 'juno-proto/dist/gen/user';
 
 let app: INestMicroservice;
 
@@ -229,3 +230,98 @@ describe('Auth Service API Key Tests', () => {
 //     await promise;
 //   });
 // });
+
+describe('User authentication tests', () => {
+  let client: any;
+
+  const correctUserResponse: User = {
+    id: 0,
+    email: 'testing@gmail.com',
+    name: 'TEST',
+    type: UserType.USER,
+  };
+
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync(ApiKeyProtoFile) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    client = new protoGRPC.authservice.api_key.UserService(
+      process.env.AUTH_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+  it('User auth with an invalid email format', async () => {
+    const promise = new Promise((resolve) => {
+      client.authenticate(
+        { email: 'testing', password: 'testing123' },
+        (err, resp) => {
+          expect(err).toThrowError('email must be an email');
+          expect(resp).toStrictEqual({});
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+  it('User auth with an invalid email that is not in the database', async () => {
+    const promise = new Promise((resolve) => {
+      client.authenticate(
+        { email: 'testing@gmail.com', password: 'testing123' },
+        (err, resp) => {
+          expect(err).toThrowError(
+            'The email provided does not exist within the database.',
+          );
+          expect(resp).toStrictEqual({});
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
+  it('User auth with an empty password', async () => {
+    const promise = new Promise((resolve) => {
+      client.authenticate(
+        { email: 'testing@gmail.com', password: '' },
+        (err, resp) => {
+          expect(err).toThrowError('password should not be empty');
+          expect(resp).toStrictEqual({});
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+  it('User auth with an invalid password and user within db', async () => {
+    const promise = new Promise((resolve) => {
+      client.authenticate(
+        { email: 'testing@gmail.com', password: 'testing' },
+        (err, resp) => {
+          expect(err).toThrowError('The password is invalid.');
+          expect(resp).toStrictEqual({});
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+  it('User auth with correct credentials', async () => {
+    const promise = new Promise((resolve) => {
+      client.authenticate(
+        { email: 'testing@gmail.com', password: 'testing123' },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp).toStrictEqual(correctUserResponse);
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+});
