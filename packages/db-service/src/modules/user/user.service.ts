@@ -50,7 +50,7 @@ export class UserService {
     });
   }
 
-  async authenticateUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
+  async authenticate(where: Prisma.UserWhereUniqueInput): Promise<User> {
     const user: User = await this.prisma.user.findFirst({ where });
     if (user.password !== where.password) {
       throw new Error('The password is invalid.');

@@ -117,12 +117,12 @@ export class UserController implements UserProto.UserServiceController {
     };
   }
 
-  async authenticateUser(
+  async authenticate(
     request: UserProto.AuthenticateUserRequest,
   ): Promise<UserProto.User> {
     // validate request is valid containing email
-    validate.validateUserIdentifier(request.user);
-    const user = await this.userService.authenticateUser(request);
+    validate.validateUserIdentifier(request);
+    const user = await this.userService.authenticate(request);
     return { ...user, type: this.mapPrismaRoleToRPC(user.type) };
   }
 }
