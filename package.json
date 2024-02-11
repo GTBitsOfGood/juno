@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "start:dev": "docker-compose -f docker-compose-dev.yml up",
+    "start:dev": "docker compose -f docker-compose-dev.yml up",
     "start:dev:watch-packages": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-packages.yml watch --no-up",
     "start:dev:watch-proto": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml watch --no-up",
     "start:dev:watch-all": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml -f docker/docker-compose-live-packages.yml watch --no-up",
@@ -25,8 +25,8 @@
     "test:e2e:auth-service-live": "AUTH_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from auth-service",
     "test:e2e:db-service-live": "DB_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from db-service",
     "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from api-gateway",
-    "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from auth-service",
-    "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from db-service"
+    "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from auth-service auth-service",
+    "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from db-service db-service"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
