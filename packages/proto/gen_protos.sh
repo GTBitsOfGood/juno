@@ -9,5 +9,6 @@ protoc \
     --ts_proto_out=${EXEC_PATH}/src/gen \
     --ts_proto_opt=nestJs=true \
     --ts_proto_opt=returnObservable=false \
+    --ts_proto_opt=lowerCaseServiceMethods=false \
     -I ${EXEC_PATH}/definitions/ \
     ${EXEC_PATH}/definitions/*.proto

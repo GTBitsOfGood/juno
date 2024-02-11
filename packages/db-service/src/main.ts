@@ -9,6 +9,8 @@ import {
   IdentifiersProtoFile,
   UserProto,
   ProjectProto,
+  HealthProto,
+  HealthProtoFile,
 } from 'juno-proto';
 
 async function bootstrap() {
@@ -23,8 +25,14 @@ async function bootstrap() {
         package: [
           UserProto.DBSERVICE_USER_PACKAGE_NAME,
           ProjectProto.DBSERVICE_PROJECT_PACKAGE_NAME,
+          HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
         ],
-        protoPath: [UserProtoFile, ProjectProtoFile, IdentifiersProtoFile],
+        protoPath: [
+          UserProtoFile,
+          ProjectProtoFile,
+          IdentifiersProtoFile,
+          HealthProtoFile,
+        ],
         url: process.env.DB_SERVICE_ADDR,
       },
     },
