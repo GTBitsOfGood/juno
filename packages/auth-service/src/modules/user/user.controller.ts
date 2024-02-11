@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { UserProto } from 'juno-proto';
 import { UserIdentifier } from 'juno-proto/dist/gen/identifiers';
-import { UserServiceClient } from 'juno-proto/dist/gen/user';
 import { Observable } from 'rxjs';
 import { AuthenticateUserBody } from 'src/models/user';
 

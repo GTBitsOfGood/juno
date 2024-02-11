@@ -123,6 +123,6 @@ export class UserController implements UserProto.UserServiceController {
     // validate request is valid containing email
     validate.validateUserIdentifier(request);
     const user = await this.userService.authenticate(request);
-    return { ...user, type: this.mapPrismaRoleToRPC(user.type) };
+    return { ...user, type: this.mapPrismaRoleToRPC(user?.type) };
   }
 }
