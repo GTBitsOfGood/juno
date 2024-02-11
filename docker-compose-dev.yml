@@ -35,7 +35,7 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=auth-service:5000']
       interval: 2s
-      timeout: 5s
+      timeout: 10s
       retries: 10
 
   db-service:
@@ -58,7 +58,7 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=db-service:5000']
       interval: 2s
-      timeout: 5s
+      timeout: 10s
       retries: 10
 
   db:
