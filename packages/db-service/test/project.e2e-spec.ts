@@ -160,35 +160,31 @@ describe('DB Service Project Tests', () => {
     expect(retrievedProject == originalProject);
   });
 
-  // Cannot validate yet because no top level handler for the controller
-  // it('validates identifier', async () => {
-  //   const req: ProjectProto.UpdateProjectRequest = {
-  //     projectIdentifier: {
-  //       id: 0,
-  //       name: 'test',
-  //     },
-  //     updateParams: { name: 'updated' },
-  //   };
-  //   await new Promise((resolve) => {
-  //     projectClient.updateProject(req, (err) => {
-  //       // expect(err.message).toBe(
-  //       //   '2 UNKNOWN: Only one of id or name can be provided',
-  //       // );
-  //       // console.log(err.message);
-  //       // expect(err.message).toBe('Only one of id or name can be provided');
-  //       resolve({});
-  //     });
-  //   });
-  // });
-  //   req.projectIdentifier = {};
-  //   await new Promise((resolve) => {
-  //     projectClient.updateProject(req, (err) => {
-  //       expect(err).toThrow(Error);
-  //       // expect(err.message).toBe("Neither id nor name are provided");
-  //       resolve({});
-  //     });
-  //   });
-  // });
+  it('validates identifier', async () => {
+    const req: ProjectProto.UpdateProjectRequest = {
+      projectIdentifier: {
+        id: 0,
+        name: 'test',
+      },
+      updateParams: { name: 'updated' },
+    };
+    await new Promise((resolve) => {
+      projectClient.updateProject(req, (err) => {
+        expect(err.code).toBe(GRPC.status.INVALID_ARGUMENT);
+        expect(err.details).toBe('Only one of id or name can be provided');
+        console.log(err);
+        resolve({});
+      });
+    });
+    req.projectIdentifier = {};
+    await new Promise((resolve) => {
+      projectClient.updateProject(req, (err) => {
+        expect(err.code).toBe(GRPC.status.INVALID_ARGUMENT);
+        expect(err.details).toBe('Neither id nor name are provided');
+        resolve({});
+      });
+    });
+  });
 
   it('updates a project', async () => {
     const project: ProjectProto.Project = await new Promise((resolve) => {

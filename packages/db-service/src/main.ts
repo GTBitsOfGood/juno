@@ -16,7 +16,7 @@ import {
   ApiKeyProto,
   ApiKeyProtoFile,
 } from 'juno-proto';
-import { CustomRpcExceptionFilter } from './app.filter';
+import { CustomRpcExceptionFilter } from './global-exception.filter';
 
 async function bootstrap() {
   ConfigModule.forRoot({

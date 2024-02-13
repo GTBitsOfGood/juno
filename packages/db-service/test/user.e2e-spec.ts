@@ -306,34 +306,31 @@ describe('DB Service User Tests', () => {
     await getUserPasswordHashPromise;
   });
 
-  // TODO: Wait for top level handler to manage invalid inputs
-  // it('throws an exception when updating the user with a invalid id', async () => {
-  //   const promise = new Promise((resolve) => {
-  //     userClient.updateUser(
-  //       {
-  //         userIdentifier: { id: 99999 },
-  //         updateParams: { email: 'test@test.com' },
-  //       },
-  //       (err, resp) => {
-  //         expect(err).toBeDefined();
-  //         resolve({});
-  //       },
-  //     );
-  //   }).catch((err) => {
-  //     expect(err).toBeNull();
-  //   });
+  it('throws an error when both id and email are provided', async () => {
+    const promise = new Promise((resolve) => {
+      userClient.updateUser(
+        {
+          userIdentifier: { id: 99999 },
+          updateParams: { email: 'test@test.com' },
+        },
+        (err) => {
+          expect(err.code).toBe(GRPC.status.INVALID_ARGUMENT);
+          expect(err.details).toBe('Only one of id or email can be provided');
+          resolve({});
+        },
+      );
+    });
 
-  //   await promise;
-  // });
-  // it('throws an error when neither id nor email are provided', async () => {
-  //   const getUserPromise = new Promise((resolve) => {
-  //     userClient.getUser({}, (err, resp) => {
-  //       expect(err).toBe('');
-  //       resolve({});
-  //     });
-  //   });
-
-  //   // Expect error, TODO: Find method of catching "Internal server error"
-  //   expect(await getUserPromise).toThrow(Error);
-  // });
+    await promise;
+  });
+  it('throws an error when neither id nor email are provided', async () => {
+    const getUserPromise = new Promise((resolve) => {
+      userClient.getUser({}, (err) => {
+        expect(err.code).toBe(GRPC.status.INVALID_ARGUMENT);
+        expect(err.details).toBe('Neither id nor email are provided');
+        resolve({});
+      });
+    });
+    await getUserPromise;
+  });
 });
