@@ -4,7 +4,7 @@
   "main": "dist/main.js",
   "license": "MIT",
   "scripts": {
-    "build": "yarn gen-proto && yarn format && tsc && ncp ./definitions ./dist/definitions",
+    "build": "yarn gen-proto && yarn format && tsc && ncp ./definitions ./dist/definitions && yarn copy-changes",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
@@ -13,7 +13,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "tsc": "tsc && cp -r ./definitions ./dist/",
-    "gen-proto": "bash ./gen_protos.sh"
+    "gen-proto": "bash ./gen_protos.sh",
+    "copy-changes": "bash ./copy_protos.sh"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
