@@ -2,7 +2,7 @@
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
-export const protobufPackage = 'authservice.jwt';
+export const protobufPackage = 'juno.jwt';
 
 export interface CreateJwtRequest {}
 
@@ -12,7 +12,7 @@ export interface ValidateJwtRequest {}
 
 export interface ValidateJwtResponse {}
 
-export const AUTHSERVICE_JWT_PACKAGE_NAME = 'authservice.jwt';
+export const JUNO_JWT_PACKAGE_NAME = 'juno.jwt';
 
 export interface JwtServiceClient {
   createJwt(request: CreateJwtRequest): Observable<CreateJwtResponse>;

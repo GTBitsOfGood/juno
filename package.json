@@ -10,7 +10,8 @@
     "format:write": "yarn prettier --write .",
     "tsc": "nx run-many --target=tsc",
     "lint": "nx run-many --target=lint",
-    "gen-proto": "yarn workspace juno-proto install && yarn workspace juno-proto build",
+    "sync-protos": "node syncJunoProtos.js",
+    "gen-proto": "yarn workspace juno-proto install && yarn workspace juno-proto build && yarn sync-protos",
     "preinstall": "yarn gen-proto",
     "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from gateway",
     "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from auth-service",
@@ -21,5 +22,9 @@
     "prettier": "^3.0.3",
     "prettier-plugin-organize-imports": "^3.2.3",
     "ts-proto": "^1.162.1"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "fs-extra": "^11.2.0"
   }
 }

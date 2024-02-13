@@ -3,7 +3,7 @@ import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { ProjectIdentifier, UserIdentifier } from './identifiers';
 
-export const protobufPackage = 'dbservice.user';
+export const protobufPackage = 'juno.user';
 
 export enum UserType {
   SUPERADMIN = 0,
@@ -17,6 +17,10 @@ export interface User {
   email: string;
   name: string;
   type: UserType;
+}
+
+export interface UserPassword {
+  password: string;
 }
 
 export interface CreateUserRequest {
@@ -43,7 +47,7 @@ export interface LinkProjectToUserRequest {
   user: UserIdentifier | undefined;
 }
 
-export const DBSERVICE_USER_PACKAGE_NAME = 'dbservice.user';
+export const JUNO_USER_PACKAGE_NAME = 'juno.user';
 
 export interface UserServiceClient {
   getUser(request: UserIdentifier): Observable<User>;
@@ -55,6 +59,8 @@ export interface UserServiceClient {
   deleteUser(request: UserIdentifier): Observable<User>;
 
   linkProject(request: LinkProjectToUserRequest): Observable<User>;
+
+  getUserPassword(request: UserIdentifier): Observable<UserPassword>;
 }
 
 export interface UserServiceController {
@@ -73,6 +79,10 @@ export interface UserServiceController {
   linkProject(
     request: LinkProjectToUserRequest,
   ): Promise<User> | Observable<User> | User;
+
+  getUserPassword(
+    request: UserIdentifier,
+  ): Promise<UserPassword> | Observable<UserPassword> | UserPassword;
 }
 
 export function UserServiceControllerMethods() {
@@ -83,6 +93,7 @@ export function UserServiceControllerMethods() {
       'updateUser',
       'deleteUser',
       'linkProject',
+      'getUserPassword',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

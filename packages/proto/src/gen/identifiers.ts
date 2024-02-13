@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-export const protobufPackage = 'dbservice.identifiers';
+export const protobufPackage = 'juno.identifiers';
 
 export interface ProjectIdentifier {
   id?: number | undefined;
@@ -12,4 +12,4 @@ export interface UserIdentifier {
   email?: string | undefined;
 }
 
-export const DBSERVICE_IDENTIFIERS_PACKAGE_NAME = 'dbservice.identifiers';
+export const JUNO_IDENTIFIERS_PACKAGE_NAME = 'juno.identifiers';
