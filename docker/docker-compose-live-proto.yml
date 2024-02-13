@@ -1,0 +1,56 @@
+services:
+  api-gateway:
+    extends:
+      file: docker-compose-dev.yml
+      service: api-gateway
+    develop:
+      watch:
+        - action: sync
+          path: ./packages/proto
+          target: /app/packages/proto
+          ignore:
+            - ./packages/proto/node_modules
+        - action: sync
+          path: ./packages/proto
+          target: /app/packages/node_modules/juno-proto
+          ignore:
+            - ./packages/proto/node_modules
+
+  auth-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: auth-service
+    develop:
+      watch:
+        - action: sync
+          path: ./packages/proto
+          target: /app/packages/proto
+          ignore:
+            - ./packages/proto/node_modules
+        - action: sync
+          path: ./packages/proto
+          target: /app/packages/node_modules/juno-proto
+          ignore:
+            - ./packages/proto/node_modules
+
+  db-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: db-service
+    develop:
+      watch:
+        - action: sync
+          path: ./packages/proto
+          target: /app/packages/proto
+          ignore:
+            - ./packages/proto/node_modules
+        - action: sync
+          path: ./packages/proto
+          target: /app/packages/node_modules/juno-proto
+          ignore:
+            - ./packages/proto/node_modules
+
+  db:
+    extends:
+      file: docker-compose-dev.yml
+      service: db

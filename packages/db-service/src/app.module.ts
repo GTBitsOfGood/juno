@@ -3,10 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { ProjectModule } from './modules/project/project.module';
+import { HealthModule } from './modules/health/health.module';
+import { ResetModule } from './modules/reset/reset.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
-  imports: [UserModule, ProjectModule, AuthModule],
+  imports: [UserModule, ProjectModule, HealthModule, ResetModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

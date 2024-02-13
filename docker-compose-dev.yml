@@ -1,68 +1,72 @@
 services:
-  gateway:
+  api-gateway:
     build:
       dockerfile: Dockerfile.dev
-      target: gateway-dev
+      target: api-gateway-dev
       context: .
-    volumes:
-      - ./packages/api-gateway:/app/packages/api-gateway
-      - ./packages/proto:/app/packages/juno-proto
     ports:
-      - '3000:3000'
+      - 3000
     entrypoint: yarn ${GATEWAY_COMMAND-start:dev}
     environment:
-      DB_SERVICE_ADDR: db-service
-      AUTH_SERVICE_ADDR: auth-service
+      DB_SERVICE_ADDR: db-service:5000
+      AUTH_SERVICE_ADDR: auth-service:5000
     networks:
       - bog-api-net
     depends_on:
-      - auth-service
+      auth-service:
+        condition: service_healthy
 
   auth-service:
     build:
       dockerfile: Dockerfile.dev
       target: auth-service-dev
       context: .
-    volumes:
-      - ./packages/auth-service:/app/packages/auth-service
-      - ./packages/proto:/app/packages/juno-proto
     ports:
-      - '50052:50052'
+      - 5000
     entrypoint: yarn ${AUTH_COMMAND-start:dev}
     environment:
-      AUTH_SERVICE_ADDR: auth-service
-      DB_SERVICE_ADDR: db-service
+      AUTH_SERVICE_ADDR: auth-service:5000
+      DB_SERVICE_ADDR: db-service:5000
     networks:
       - bog-api-net
     depends_on:
-      - db-service
+      db-service:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'grpc_health_probe -addr=auth-service:5000']
+      interval: 2s
+      timeout: 10s
+      retries: 10
 
   db-service:
     build:
       dockerfile: Dockerfile.dev
       target: db-service-dev
       context: .
-    volumes:
-      - ./packages/db-service:/app/packages/db-service
-      - ./packages/proto:/app/packages/juno-proto
     ports:
-      - '50053:50053'
+      - 5000
     entrypoint: /bin/sh -c "DB_COMMAND=${DB_COMMAND-start:dev} RUN_MODE=${RUN_MODE-dev} ./entrypoint.sh"
     environment:
-      AUTH_SERVICE_ADDR: auth-service
-      DB_SERVICE_ADDR: db-service
+      AUTH_SERVICE_ADDR: auth-service:5000
+      DB_SERVICE_ADDR: db-service:5000
       DATABASE_URL: postgresql://user:password@db
+      NODE_ENV: test
     networks:
       - bog-api-net
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'grpc_health_probe -addr=db-service:5000']
+      interval: 2s
+      timeout: 10s
+      retries: 10
 
   db:
     image: postgres
     restart: always
     ports:
-      - '5432:5432'
+      - 5432
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user

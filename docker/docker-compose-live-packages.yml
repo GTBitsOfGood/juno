@@ -1,0 +1,53 @@
+services:
+  api-gateway:
+    extends:
+      file: docker-compose-dev.yml
+      service: api-gateway
+    develop:
+      watch:
+        - action: sync
+          path: ./packages/api-gateway
+          target: /app/packages/api-gateway
+          ignore:
+            - ./packages/api-gateway/node_modules
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./packages/api-gateway/package.json
+
+  auth-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: auth-service
+    develop:
+      watch:
+        - action: sync
+          path: ./packages/auth-service
+          target: /app/packages/auth-service
+          ignore:
+            - ./packages/auth-service/node_modules
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./packages/auth-service/package.json
+
+  db-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: db-service
+    develop:
+      watch:
+        - action: sync
+          path: ./packages/db-service
+          target: /app/packages/db-service
+          ignore:
+            - ./packages/db-service/node_modules
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./packages/db-service/package.json
+
+  db:
+    extends:
+      file: docker-compose-dev.yml
+      service: db

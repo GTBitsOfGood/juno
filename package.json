@@ -5,7 +5,16 @@
     "packages/*"
   ],
   "scripts": {
-    "api-gateway": "yarn workspace api-gateway start",
+    "start:dev": "docker compose -f docker-compose-dev.yml up",
+    "start:dev:watch-packages": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-packages.yml watch --no-up",
+    "start:dev:watch-proto": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml watch --no-up",
+    "start:dev:watch-all": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml -f docker/docker-compose-live-packages.yml watch --no-up",
+    "start:dev:up-packages": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-packages.yml up",
+    "start:dev:up-proto": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml up",
+    "start:dev:up-all": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml -f docker/docker-compose-live-packages.yml up",
+    "start:dev:live-packages": "concurrently -k \"yarn start:dev:watch-packages\" \"yarn start:dev:up-packages\"",
+    "start:dev:live-proto": "concurrently -k \"yarn start:dev:watch-proto\" \"yarn start:dev:up-proto\"",
+    "start:dev:live-all": "concurrently -k -P --success=\"last\" \"yarn start:dev:watch-all\" \"yarn start:dev:up-all {@}\" -- ",
     "format:check": "yarn prettier --check .",
     "format:write": "yarn prettier --write .",
     "tsc": "nx run-many --target=tsc",
@@ -13,11 +22,15 @@
     "sync-protos": "node syncJunoProtos.js",
     "gen-proto": "yarn workspace juno-proto install && yarn workspace juno-proto build && yarn sync-protos",
     "preinstall": "yarn gen-proto",
-    "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from gateway",
-    "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from auth-service",
-    "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test docker-compose -f docker-compose-dev.yml up --exit-code-from db-service"
+    "test:e2e:api-gateway-live": "GATEWAY_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from api-gateway",
+    "test:e2e:auth-service-live": "AUTH_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from auth-service auth-service",
+    "test:e2e:db-service-live": "DB_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from db-service db-service",
+    "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from api-gateway",
+    "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from auth-service auth-service",
+    "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from db-service db-service"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "nx": "17.0.0",
     "prettier": "^3.0.3",
     "prettier-plugin-organize-imports": "^3.2.3",

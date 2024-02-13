@@ -55,7 +55,7 @@ export class UserController implements OnModuleInit {
       type: UserProto.UserType.USER,
     });
 
-    await lastValueFrom(user);
+    return new UserResponse(await lastValueFrom(user));
   }
 
   @Post('type')

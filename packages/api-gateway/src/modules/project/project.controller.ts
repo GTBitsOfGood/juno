@@ -66,7 +66,7 @@ export class ProjectController implements OnModuleInit {
       name: params.name,
     });
 
-    await lastValueFrom(project);
+    return new ProjectResponse(await lastValueFrom(project));
   }
 
   @Put('id/:id/user')
