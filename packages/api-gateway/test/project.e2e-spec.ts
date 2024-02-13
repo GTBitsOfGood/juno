@@ -7,8 +7,26 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
+import { ResetProtoFile } from 'juno-proto';
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
 
 let app: INestApplication;
+
+beforeAll(async () => {
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
+  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
+  });
+});
 
 afterAll((done) => {
   app.close();
@@ -48,7 +66,7 @@ describe('Project Creation Routes', () => {
         name: 'testProject',
       })
       .expect(201)
-      .expect('');
+      .expect('{"id":1,"name":"testProject"}');
   });
 
   it('Create a project with empty-string name', async () => {
@@ -92,28 +110,36 @@ describe('Project Creation Routes', () => {
         name: 1,
       })
       .expect(201)
-      .expect('');
+      .expect('{"id":2,"name":"1"}');
   });
 });
 
 describe('Project Retrieval Routes', () => {
   it('Get project with valid id', async () => {
+    const resp = await request(app.getHttpServer()).post('/project').send({
+      name: 'test-retreival',
+    });
+    const id = resp.body['id'];
     await request(app.getHttpServer())
-      .get('/project/id/1')
+      .get(`/project/id/${id}`)
       .expect(200)
       .then((response) => {
-        expect(response.body.name).toEqual('testProject');
-        expect(response.body.id).toEqual(1);
+        expect(response.body.name).toEqual('test-retreival');
+        expect(response.body.id).toEqual(id);
       });
   });
 
   it('Get project with valid name', async () => {
+    const resp = await request(app.getHttpServer()).post('/project').send({
+      name: 'test-name-get',
+    });
+    const id = resp.body['id'];
     await request(app.getHttpServer())
-      .get('/project/name/testProject')
+      .get('/project/name/test-name-get')
       .expect(200)
       .then((response) => {
-        expect(response.body.name).toEqual('testProject');
-        expect(response.body.id).toEqual(1);
+        expect(response.body.name).toEqual('test-name-get');
+        expect(response.body.id).toEqual(id);
       });
   });
 
@@ -150,10 +176,20 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using valid user id input', async () => {
+    const project = await request(app.getHttpServer()).post('/project').send({
+      name: 'link-valid',
+    });
+    const projectId = project.body['id'];
+    const user = await request(app.getHttpServer()).post('/user').send({
+      name: 'Test User',
+      email: 'test@link-valid.com',
+      password: 'password',
+    });
+    const userId = user.body['id'];
     await request(app.getHttpServer())
-      .put('/project/id/1/user')
+      .put(`/project/id/${projectId}/user`)
       .send({
-        id: '1',
+        id: userId,
       })
       .expect(200);
   });

@@ -16,8 +16,8 @@ export class AuthController implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.jwtService =
-      this.jwtClient.getService<JwtProto.JwtServiceClient>(JWT_SERVICE_NAME);
+    // this.jwtService =
+    //   this.jwtClient.getService<JwtProto.JwtServiceClient>(JWT_SERVICE_NAME);
     this.apiKeyService =
       this.apiClient.getService<ApiKeyProto.ApiKeyServiceClient>(
         ApiKeyProto.API_KEY_SERVICE_NAME,

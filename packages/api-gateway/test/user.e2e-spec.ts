@@ -7,16 +7,25 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
+import { ResetProtoFile } from 'juno-proto';
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
 
 let app: INestApplication;
-jest.setTimeout(7000);
+
 beforeAll(async () => {
-  const wait = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({});
-    }, 6000);
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
+  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
   });
-  await wait;
 });
 
 afterAll((done) => {
@@ -75,19 +84,31 @@ describe('User Creation Routes', () => {
       .expect(400);
   });
 
-  it('should set a user type', () => {
+  it('should set a user type', async () => {
+    const resp = await request(app.getHttpServer()).post('/user').send({
+      password: 'password',
+      name: 'John Doe',
+      email: 'john@anotherexample.com',
+    });
+    const id = resp.body['id'];
     return request(app.getHttpServer())
       .post('/user/type')
       .send({
-        id: 2,
+        id: id,
         type: 'ADMIN',
       })
       .expect(201);
   });
 
-  it('should retrieve a user by id', () => {
+  it('should retrieve a user by id', async () => {
+    const resp = await request(app.getHttpServer()).post('/user').send({
+      password: 'password',
+      name: 'John Doe',
+      email: 'john@retreivebyid.com',
+    });
+    const id = resp.body['id'];
     return request(app.getHttpServer())
-      .get('/user/id/2')
+      .get(`/user/id/${id}`)
       .expect(200)
       .then((response) => {
         expect(response.body.name).toEqual('John Doe');
@@ -102,9 +123,15 @@ describe('User Creation Routes', () => {
     await request(app.getHttpServer()).post('/project').send({
       name: 'projectName',
     });
+    const resp = await request(app.getHttpServer()).post('/user').send({
+      password: 'password',
+      name: 'John Doe',
+      email: 'john@linktoproject.com',
+    });
+    const id = resp.body['id'];
 
     await request(app.getHttpServer())
-      .put('/user/id/2/project')
+      .put(`/user/id/${id}/project`)
       .send({
         name: 'projectName',
       })

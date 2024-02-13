@@ -2,7 +2,7 @@ FROM alpine as grpc-probe
 
 ARG TARGETARCH
 
-RUN apk add wget
+RUN --mount=type=cache,target=/var/cache/apk apk add wget
 
 COPY ./docker/get_grpc_probe.sh /get_grpc_probe.sh
 
@@ -14,7 +14,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN apk add --update python3 make g++ protoc bash && rm -rf /var/cache/apk/*
+RUN --mount=type=cache,target=/var/cache/apk apk add --update python3 make g++ protoc bash
 
 RUN yarn global add node-gyp 
 
