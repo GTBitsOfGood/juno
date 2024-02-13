@@ -23,6 +23,7 @@ function mapPrismaErrorToRpcException(
         status: status.FAILED_PRECONDITION,
         message: 'Foreign key constraint failed.',
       });
+    // Might want to handle new cases here
     default:
       return new RpcException({
         status: status.UNKNOWN,
