@@ -171,11 +171,15 @@ describe('DB Service Project Tests', () => {
   //   };
   //   await new Promise((resolve) => {
   //     projectClient.updateProject(req, (err) => {
-  //       expect(err).toThrow(Error);
-  //       // expect(err.message).toBe("Only one of id or name can be provided");
+  //       // expect(err.message).toBe(
+  //       //   '2 UNKNOWN: Only one of id or name can be provided',
+  //       // );
+  //       // console.log(err.message);
+  //       // expect(err.message).toBe('Only one of id or name can be provided');
   //       resolve({});
   //     });
   //   });
+  // });
   //   req.projectIdentifier = {};
   //   await new Promise((resolve) => {
   //     projectClient.updateProject(req, (err) => {

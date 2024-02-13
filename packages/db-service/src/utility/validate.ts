@@ -1,11 +1,14 @@
 import { Prisma } from '@prisma/client';
 import { IdentifierProto } from 'juno-proto';
+import { RpcException } from '@nestjs/microservices';
 
 export function validateProjectIdentifier(
   identifier: IdentifierProto.ProjectIdentifier,
 ): Prisma.ProjectWhereUniqueInput {
   if (identifier.id && identifier.name) {
-    throw new Error('Only one of id or name can be provided');
+    throw new RpcException({
+      message: 'Only one of id or name can be provided',
+    });
   } else if (!identifier.id && !identifier.name) {
     throw new Error('Neither id nor name are provided');
   }
