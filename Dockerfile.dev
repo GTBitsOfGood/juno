@@ -4,7 +4,7 @@ ARG TARGETARCH
 
 COPY ./docker/get_grpc_probe.sh /get_grpc_probe.sh
 
-RUN --mount=type=cache,target=/var/cache/apk apk add wget
+RUN --mount=type=cache,target=/var/cache/apk apk add --update wget
 
 RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 
