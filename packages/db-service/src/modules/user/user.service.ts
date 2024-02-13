@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+import { isPassword } from 'src/utility/common';
 
 @Injectable()
 export class UserService {
@@ -53,9 +54,9 @@ export class UserService {
   async authenticate(where: Prisma.UserWhereUniqueInput): Promise<User> {
     const user: User = await this.prisma.user.findFirst({ where });
     if (!user) {
-      throw new Error('The email provided does not exist within the database.');
+      throw new Error('This email does not exist within the database.');
     }
-    if (user?.password !== where?.password) {
+    if (!isPassword(user?.password, where.password.toString())) {
       throw new Error('The password is invalid.');
     }
     return user;

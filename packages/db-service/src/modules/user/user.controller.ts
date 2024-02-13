@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import * as validate from 'src/utility/validate';
 import { IdentifierProto, UserProto } from 'juno-proto';
 import * as bcrypt from 'bcrypt';
+import { hashPassword } from 'src/utility/common';
 
 @Controller()
 @UserProto.UserServiceControllerMethods()
