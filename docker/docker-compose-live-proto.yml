@@ -3,52 +3,34 @@ services:
     extends:
       file: docker-compose-dev.yml
       service: api-gateway
+    volumes:
+      - ./packages/proto/dist:/app/packages/node_modules/juno-proto/dist
     develop:
       watch:
-        - action: sync
-          path: ./packages/proto
-          target: /app/packages/proto
-          ignore:
-            - ./packages/proto/node_modules
-        - action: sync
-          path: ./packages/proto
-          target: /app/packages/node_modules/juno-proto
-          ignore:
-            - ./packages/proto/node_modules
+        - action: rebuild
+          path: ./packages/proto/package.json
 
   auth-service:
     extends:
       file: docker-compose-dev.yml
       service: auth-service
+    volumes:
+      - ./packages/proto/dist:/app/packages/node_modules/juno-proto/dist
     develop:
       watch:
-        - action: sync
-          path: ./packages/proto
-          target: /app/packages/proto
-          ignore:
-            - ./packages/proto/node_modules
-        - action: sync
-          path: ./packages/proto
-          target: /app/packages/node_modules/juno-proto
-          ignore:
-            - ./packages/proto/node_modules
+        - action: rebuild
+          path: ./packages/proto/package.json
 
   db-service:
     extends:
       file: docker-compose-dev.yml
       service: db-service
+    volumes:
+      - ./packages/proto/dist:/app/packages/node_modules/juno-proto/dist
     develop:
       watch:
-        - action: sync
-          path: ./packages/proto
-          target: /app/packages/proto
-          ignore:
-            - ./packages/proto/node_modules
-        - action: sync
-          path: ./packages/proto
-          target: /app/packages/node_modules/juno-proto
-          ignore:
-            - ./packages/proto/node_modules
+        - action: rebuild
+          path: ./packages/proto/package.json
 
   db:
     extends:
