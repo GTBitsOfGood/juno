@@ -310,10 +310,11 @@ describe('DB Service User Tests', () => {
     const promise = new Promise((resolve) => {
       userClient.updateUser(
         {
-          userIdentifier: { id: 99999 },
-          updateParams: { email: 'test@test.com' },
+          userIdentifier: { id: 99999, email: 'test@test.com' },
+          updateParams: {},
         },
         (err) => {
+          console.log(err);
           expect(err.code).toBe(GRPC.status.INVALID_ARGUMENT);
           expect(err.details).toBe('Only one of id or email can be provided');
           resolve({});

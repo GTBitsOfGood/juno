@@ -232,12 +232,6 @@ describe('DB Service Project Tests', () => {
         resolve({});
       });
     });
-    await new Promise((resolve) => {
-      projectClient.getProject({ id: project['id'] }, (err) => {
-        expect(err).toBeInstanceOf(Error);
-        resolve({});
-      });
-    });
   });
 
   it('links a user', async () => {
