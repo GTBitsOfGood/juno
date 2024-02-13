@@ -8,6 +8,8 @@ import {
   IdentifiersProtoFile,
   ProjectProto,
   ProjectProtoFile,
+  ResetProto,
+  ResetProtoFile,
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
@@ -18,16 +20,25 @@ const { DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 let app: INestMicroservice;
 
-beforeEach(async () => {
+async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
 
-  app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
+  const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [DBSERVICE_USER_PACKAGE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME],
-      protoPath: [UserProtoFile, ProjectProtoFile, IdentifiersProtoFile],
+      package: [
+        DBSERVICE_USER_PACKAGE_NAME,
+        DBSERVICE_PROJECT_PACKAGE_NAME,
+        ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
+      ],
+      protoPath: [
+        UserProtoFile,
+        ProjectProtoFile,
+        IdentifiersProtoFile,
+        ResetProtoFile,
+      ],
       url: process.env.DB_SERVICE_ADDR,
     },
   });
@@ -35,6 +46,31 @@ beforeEach(async () => {
   await app.init();
 
   await app.listen();
+  return app;
+}
+
+beforeAll(async () => {
+  const app = await initApp();
+
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
+  console.log(`resetting`);
+  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
+  });
+
+  app.close();
+});
+
+beforeEach(async () => {
+  app = await initApp();
 });
 
 afterEach(async () => {

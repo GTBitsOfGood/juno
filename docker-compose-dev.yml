@@ -50,6 +50,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       DATABASE_URL: postgresql://user:password@db
+      NODE_ENV: test
     networks:
       - bog-api-net
     depends_on:

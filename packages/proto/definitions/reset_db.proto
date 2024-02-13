@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package juno.reset_db;
+
+service DatabaseReset { rpc resetDb(ResetDbRequest) returns (ResetDbResponse); }
+
+message ResetDbRequest {}
+message ResetDbResponse {}
