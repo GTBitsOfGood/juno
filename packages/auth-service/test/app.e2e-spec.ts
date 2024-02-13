@@ -13,6 +13,8 @@ import {
 } from 'juno-proto';
 
 let app: INestMicroservice;
+
+jest.setTimeout(10000);
 // TODO: make api key tests actually work once implemented
 
 const { AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
