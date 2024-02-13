@@ -29,7 +29,8 @@ model Project {
 
 model ApiKey {
   id          Int     @id @default(autoincrement())
-  hash        String  @unique
+  uuid        String  @unique
+  environment String
   description String
   projectId   Int
   project     Project @relation(fields: [projectId], references: [id])
