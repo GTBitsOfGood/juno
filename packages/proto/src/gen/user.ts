@@ -134,3 +134,44 @@ export function UserServiceControllerMethods() {
 }
 
 export const USER_SERVICE_NAME = 'UserService';
+
+export interface UserAuthServiceClient {
+  authenticate(request: AuthenticateUserRequest): Observable<User>;
+}
+
+export interface UserAuthServiceController {
+  authenticate(
+    request: AuthenticateUserRequest,
+  ): Promise<User> | Observable<User> | User;
+}
+
+export function UserAuthServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ['authenticate'];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('UserAuthService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('UserAuthService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const USER_AUTH_SERVICE_NAME = 'UserAuthService';
