@@ -9,7 +9,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { validate } from 'class-validator';
 import { EmailProto } from 'juno-proto';
 import { JwtServiceController } from '';
 import { lastValueFrom } from 'rxjs';
