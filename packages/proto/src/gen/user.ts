@@ -51,6 +51,11 @@ export interface LinkProjectToUserRequest {
   user: UserIdentifier | undefined;
 }
 
+export interface AuthenticateUserRequest {
+  email: string;
+  password: string;
+}
+
 export const JUNO_USER_PACKAGE_NAME = 'juno.user';
 
 export interface UserServiceClient {

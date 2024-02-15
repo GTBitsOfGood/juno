@@ -57,3 +57,8 @@ message LinkProjectToUserRequest {
   identifiers.ProjectIdentifier project = 1;
   identifiers.UserIdentifier user = 2;
 }
+
+message AuthenticateUserRequest {
+  string email = 1;
+  string password = 2;
+}
