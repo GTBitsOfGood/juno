@@ -5,7 +5,7 @@ import { join } from 'path';
 import { UserController } from './user.controller';
 import { UserProto, UserProtoFile } from 'juno-proto';
 
-const { USER_SERVICE_NAME, DBSERVICE_USER_PACKAGE_NAME } = UserProto;
+const { USER_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ const { USER_SERVICE_NAME, DBSERVICE_USER_PACKAGE_NAME } = UserProto;
         transport: Transport.GRPC,
         options: {
           url: process.env.DB_SERVICE_ADDR,
-          package: DBSERVICE_USER_PACKAGE_NAME,
+          package: JUNO_USER_PACKAGE_NAME,
           protoPath: UserProtoFile,
         },
       },

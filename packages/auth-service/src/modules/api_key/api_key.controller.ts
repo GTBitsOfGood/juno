@@ -2,7 +2,7 @@ import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { ApiKeyProto, UserProto } from 'juno-proto';
 import { Observable, lastValueFrom } from 'rxjs';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 
 @Controller('api_key')
@@ -12,18 +12,20 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   private apiKeyDbService: ApiKeyProto.ApiKeyDbServiceClient;
 
   constructor(
-    @Inject(ApiKeyProto.API_KEY_SERVICE_NAME) private apiKeyClient: ClientGrpc,
+    @Inject(ApiKeyProto.API_KEY_DB_SERVICE_NAME)
+    private apiKeyClient: ClientGrpc,
     @Inject(UserProto.USER_SERVICE_NAME) private userClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
-    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
-      UserProto.USER_SERVICE_NAME,
-    );
     this.apiKeyDbService =
       this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
         ApiKeyProto.API_KEY_DB_SERVICE_NAME,
       );
+    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
+      UserProto.USER_SERVICE_NAME,
+    );
+    console.log('initialized services');
   }
 
   async issueApiKey(

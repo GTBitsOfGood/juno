@@ -10,9 +10,10 @@ import {
   HealthProto,
   HealthProtoFile,
   IdentifiersProtoFile,
+  JwtProto,
+  JwtProtoFile,
   ProjectProtoFile,
   ResetProtoFile,
-  UserProto,
   UserProtoFile,
 } from 'juno-proto';
 
@@ -30,9 +31,10 @@ async function initApp() {
     options: {
       package: [
         ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
+        JwtProto.JUNO_JWT_PACKAGE_NAME,
         HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
       ],
-      protoPath: [ApiKeyProtoFile, HealthProtoFile],
+      protoPath: [ApiKeyProtoFile, HealthProtoFile, JwtProtoFile],
       url: process.env.AUTH_SERVICE_ADDR,
     },
   });
@@ -45,8 +47,6 @@ async function initApp() {
 
 beforeAll(async () => {
   const app = await initApp();
-
-  console.log('inited');
 
   const proto = ProtoLoader.loadSync([
     ResetProtoFile,
@@ -91,8 +91,8 @@ beforeAll(async () => {
       {
         email: 'test@example.com',
         password: 'password123',
-        name: 'Test User',
-        type: UserProto.UserType.USER,
+        name: 'Test-User',
+        type: 'USER',
       },
       (err, resp) => {
         if (err) return reject(err);
@@ -101,15 +101,9 @@ beforeAll(async () => {
       },
     );
   });
-
-  app.close();
 });
 
-beforeEach(async () => {
-  app = await initApp();
-});
-
-afterEach(async () => {
+afterAll(() => {
   app.close();
 });
 

@@ -8,27 +8,32 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
+import { join } from 'path';
+
+const { USER_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
+const { API_KEY_DB_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: join(__dirname, '../../../../../.env.local'),
+    }),
     ClientsModule.register([
       {
-        name: ApiKeyProto.API_KEY_SERVICE_NAME,
+        name: API_KEY_DB_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
           url: process.env.DB_SERVICE_ADDR,
-          package: ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
+          package: JUNO_API_KEY_PACKAGE_NAME,
           protoPath: ApiKeyProtoFile,
         },
       },
-    ]),
-    ClientsModule.register([
       {
-        name: UserProto.USER_SERVICE_NAME,
+        name: USER_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
           url: process.env.DB_SERVICE_ADDR,
-          package: UserProto.JUNO_USER_PACKAGE_NAME,
+          package: JUNO_USER_PACKAGE_NAME,
           protoPath: UserProtoFile,
         },
       },
