@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { ApiKeyProto, UserProto } from 'juno-proto';
 import { Observable, lastValueFrom } from 'rxjs';
@@ -11,14 +11,17 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   private userService: UserProto.UserServiceClient;
   private apiKeyDbService: ApiKeyProto.ApiKeyDbServiceClient;
 
-  constructor(private dbClient: ClientGrpc) {}
+  constructor(
+    @Inject(ApiKeyProto.API_KEY_SERVICE_NAME) private apiKeyClient: ClientGrpc,
+    @Inject(UserProto.USER_SERVICE_NAME) private userClient: ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.userService = this.dbClient.getService<UserProto.UserServiceClient>(
+    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
       UserProto.USER_SERVICE_NAME,
     );
     this.apiKeyDbService =
-      this.dbClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
+      this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
         ApiKeyProto.API_KEY_DB_SERVICE_NAME,
       );
   }
