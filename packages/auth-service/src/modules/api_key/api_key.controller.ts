@@ -44,7 +44,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       });
 
     try {
-      const passwordHash = await bcrypt.hash(request.password, 10); // this shouldn't just be the password hash
+      const passwordHash = await bcrypt.hash(request.password, 10);
       const passwordEquals = bcrypt.compare(
         passwordHash,
         (await lastValueFrom(password)).hash,

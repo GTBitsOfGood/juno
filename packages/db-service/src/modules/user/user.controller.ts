@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { Role } from '@prisma/client';
 import * as validate from 'src/utility/validate';
 import { IdentifierProto, UserProto } from 'juno-proto';
+import bcrypt from 'bcrypt';
 
 @Controller()
 @UserProto.UserServiceControllerMethods()
@@ -61,7 +62,7 @@ export class UserController implements UserProto.UserServiceController {
     const user = await this.userService.createUser({
       name: request.name,
       email: request.email,
-      password: request.password,
+      password: await bcrypt.hash(request.password, 10),
       type: this.mapRPCRoleToPrisma(request.type),
     });
     return {
