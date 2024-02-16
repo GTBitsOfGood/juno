@@ -15,8 +15,8 @@ import {
 } from 'juno-proto';
 import { UserType } from 'juno-proto/dist/gen/user';
 
-const { DBSERVICE_USER_PACKAGE_NAME } = UserProto;
-const { DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
+const { JUNO_USER_PACKAGE_NAME } = UserProto;
+const { JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 let app: INestMicroservice;
 
@@ -31,8 +31,8 @@ async function initApp() {
     transport: Transport.GRPC,
     options: {
       package: [
-        DBSERVICE_USER_PACKAGE_NAME,
-        DBSERVICE_PROJECT_PACKAGE_NAME,
+        JUNO_USER_PACKAGE_NAME,
+        JUNO_PROJECT_PACKAGE_NAME,
         ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
       ],
       protoPath: [

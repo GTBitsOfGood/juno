@@ -1,6 +1,6 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { ApiKeyProto, UserProto, ProjectProto } from 'juno-proto';
+import { ApiKeyProto, UserProto } from 'juno-proto';
 import { Observable, lastValueFrom } from 'rxjs';
 import bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
@@ -8,27 +8,15 @@ import { createHash, randomBytes } from 'crypto';
 @Controller('api_key')
 @ApiKeyProto.ApiKeyServiceControllerMethods()
 export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
-  private projectService: ProjectProto.ProjectServiceClient;
   private userService: UserProto.UserServiceClient;
-  private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
   private apiKeyDbService: ApiKeyProto.ApiKeyDbServiceClient;
 
-  constructor(
-    @Inject(ProjectProto.PROJECT_SERVICE_NAME) private dbClient: ClientGrpc,
-  ) {}
+  constructor(private dbClient: ClientGrpc) {}
 
   onModuleInit() {
-    this.projectService =
-      this.dbClient.getService<ProjectProto.ProjectServiceClient>(
-        ProjectProto.PROJECT_SERVICE_NAME,
-      );
     this.userService = this.dbClient.getService<UserProto.UserServiceClient>(
       UserProto.USER_SERVICE_NAME,
     );
-    this.apiKeyService =
-      this.dbClient.getService<ApiKeyProto.ApiKeyServiceClient>(
-        ApiKeyProto.API_KEY_SERVICE_NAME,
-      );
     this.apiKeyDbService =
       this.dbClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
         ApiKeyProto.API_KEY_DB_SERVICE_NAME,
