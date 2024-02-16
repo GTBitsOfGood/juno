@@ -5,17 +5,16 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
+  ApiKeyProto,
   ApiKeyProtoFile,
+  HealthProto,
+  HealthProtoFile,
   IdentifiersProtoFile,
   ProjectProtoFile,
-  ResetProto,
   ResetProtoFile,
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-import { JUNO_API_KEY_PACKAGE_NAME } from 'juno-proto/dist/gen/api_key';
-import { JUNO_PROJECT_PACKAGE_NAME } from 'juno-proto/dist/gen/project';
-import { JUNO_USER_PACKAGE_NAME } from 'juno-proto/dist/gen/user';
 
 let app: INestMicroservice;
 
@@ -30,19 +29,11 @@ async function initApp() {
     transport: Transport.GRPC,
     options: {
       package: [
-        JUNO_API_KEY_PACKAGE_NAME,
-        JUNO_PROJECT_PACKAGE_NAME,
-        JUNO_USER_PACKAGE_NAME,
-        ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
+        ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
+        HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
       ],
-      protoPath: [
-        UserProtoFile,
-        ProjectProtoFile,
-        IdentifiersProtoFile,
-        ResetProtoFile,
-        ApiKeyProtoFile,
-      ],
-      url: process.env.DB_SERVICE_ADDR,
+      protoPath: [ApiKeyProtoFile, HealthProtoFile],
+      url: process.env.AUTH_SERVICE_ADDR,
     },
   });
 
@@ -54,6 +45,8 @@ async function initApp() {
 
 beforeAll(async () => {
   const app = await initApp();
+
+  console.log('inited');
 
   const proto = ProtoLoader.loadSync([
     ResetProtoFile,
