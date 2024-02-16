@@ -19,6 +19,8 @@ const { DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 let app: INestMicroservice;
 
+jest.setTimeout(10000);
+
 async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],

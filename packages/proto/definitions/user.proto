@@ -10,7 +10,7 @@ service UserService {
   rpc updateUser(UpdateUserRequest) returns (User);
   rpc deleteUser(identifiers.UserIdentifier) returns (User);
   rpc linkProject(LinkProjectToUserRequest) returns (User);
-  rpc getUserPassword(identifiers.UserIdentifier) returns (UserPassword);
+  rpc getUserPasswordHash(identifiers.UserIdentifier) returns (UserPasswordHash);
 }
 
 message User {
@@ -18,6 +18,10 @@ message User {
   string email = 2;
   string name = 3;
   UserType type = 4;
+}
+
+message UserPasswordHash {
+  string hash = 1;
 }
 
 message UserPassword {

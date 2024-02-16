@@ -25,8 +25,8 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         package: [
-          UserProto.DBSERVICE_USER_PACKAGE_NAME,
-          ProjectProto.DBSERVICE_PROJECT_PACKAGE_NAME,
+          UserProto.JUNO_USER_PACKAGE_NAME,
+          ProjectProto.JUNO_PROJECT_PACKAGE_NAME,
           HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
           ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
         ],

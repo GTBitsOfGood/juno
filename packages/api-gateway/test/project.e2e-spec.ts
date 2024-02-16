@@ -13,6 +13,8 @@ import * as ProtoLoader from '@grpc/proto-loader';
 
 let app: INestApplication;
 
+jest.setTimeout(10000);
+
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
 

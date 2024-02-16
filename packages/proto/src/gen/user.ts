@@ -19,6 +19,10 @@ export interface User {
   type: UserType;
 }
 
+export interface UserPasswordHash {
+  hash: string;
+}
+
 export interface UserPassword {
   password: string;
 }
@@ -60,7 +64,7 @@ export interface UserServiceClient {
 
   linkProject(request: LinkProjectToUserRequest): Observable<User>;
 
-  getUserPassword(request: UserIdentifier): Observable<UserPassword>;
+  getUserPasswordHash(request: UserIdentifier): Observable<UserPasswordHash>;
 }
 
 export interface UserServiceController {
@@ -80,9 +84,12 @@ export interface UserServiceController {
     request: LinkProjectToUserRequest,
   ): Promise<User> | Observable<User> | User;
 
-  getUserPassword(
+  getUserPasswordHash(
     request: UserIdentifier,
-  ): Promise<UserPassword> | Observable<UserPassword> | UserPassword;
+  ):
+    | Promise<UserPasswordHash>
+    | Observable<UserPasswordHash>
+    | UserPasswordHash;
 }
 
 export function UserServiceControllerMethods() {
@@ -93,7 +100,7 @@ export function UserServiceControllerMethods() {
       'updateUser',
       'deleteUser',
       'linkProject',
-      'getUserPassword',
+      'getUserPasswordHash',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

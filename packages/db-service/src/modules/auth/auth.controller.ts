@@ -1,16 +1,30 @@
 import { Controller } from '@nestjs/common';
-import { ApiKey } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { ApiKeyProto } from 'juno-proto';
+import { ApiScope } from '@prisma/client';
 
 @Controller()
-@ApiKeyProto.ApiKeyServiceControllerMethods()
-export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
+@ApiKeyProto.ApiKeyDbServiceControllerMethods()
+export class ApiKeyDbController
+  implements ApiKeyProto.ApiKeyDbServiceController
+{
   constructor(private readonly apiKeyService: AuthService) {}
 
-  async createApiKey(request: ApiKeyProto.CreateApiKeyParams): Promise<ApiKey> {
-    // const apiKey = await this.apiKeyService.createApiKey(request.apiKey);
-    const apiKey = this.apiKeyService.createApiKey(request);
+  async createApiKey(
+    request: ApiKeyProto.CreateApiKeyParams,
+  ): Promise<ApiKeyProto.ApiKey> {
+    const prepareCreateApiKey = {
+      ...request.apiKey,
+      scopes: request.apiKey.scopes.map((scope) => ApiScope[scope]),
+      project: {
+        connect: {
+          id: request.apiKey.project.id,
+          name: request.apiKey.project.name,
+        },
+      },
+    };
+
+    const apiKey = this.apiKeyService.createApiKey(prepareCreateApiKey);
     return apiKey;
   }
 }

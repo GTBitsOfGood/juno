@@ -6,39 +6,48 @@ import "identifiers.proto";
 
 service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
-  rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
+
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
+}
+
+service ApiKeyDbService {
+  rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
 }
 
 message IssueApiKeyRequest {
   string project_name = 1;
   string email = 2;
   string password = 3;
-  string environment = 4;
-  string description = 5;
-  bool userVisible = 6;
+  string description = 4;
 }
 
 message CreateApiKeyParams {
-  ApiKey apiKey = 1;
+  ApiKeyNoId apiKey = 1;
 }
 
-enum ApiScopes {
+enum ApiScope {
   FULL = 0;
 }
 
 message ApiKey {
+  string id = 1;
+  string hash = 2;
+  string description = 3;
+  repeated ApiScope scopes = 4;
+  identifiers.ProjectIdentifier project = 5;
+}
+
+message ApiKeyNoId { 
   string hash = 1;
-  string uuid = 2;
-  string environment = 3;
-  string description = 4;
-  bool userVisible = 5;
-  repeated ApiScopes scopes = 6;
-  identifiers.ProjectIdentifier project = 7;
+  string description = 2;
+  repeated ApiScope scopes = 3;
+  identifiers.ProjectIdentifier project = 4;
 }
 
 message IssueApiKeyResponse {
-  oneof response { string apiKey = 1; }
+  oneof response { 
+    ApiKey apiKey = 1; 
+  }
 }
 
 message RevokeApiKeyRequest {}

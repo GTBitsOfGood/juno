@@ -23,8 +23,8 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         package: [
-          ApiKeyProto.AUTHSERVICE_API_KEY_PACKAGE_NAME,
-          JwtProto.AUTHSERVICE_JWT_PACKAGE_NAME,
+          ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
+          JwtProto.JUNO_JWT_PACKAGE_NAME,
           HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
         ],
         protoPath: [ApiKeyProtoFile, JwtProtoFile, HealthProtoFile],

@@ -3,7 +3,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { ApiKeyProto, UserProto, ProjectProto } from 'juno-proto';
 import { Observable, lastValueFrom } from 'rxjs';
 import bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 
 @Controller('api_key')
 @ApiKeyProto.ApiKeyServiceControllerMethods()
@@ -11,6 +11,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   private projectService: ProjectProto.ProjectServiceClient;
   private userService: UserProto.UserServiceClient;
   private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
+  private apiKeyDbService: ApiKeyProto.ApiKeyDbServiceClient;
 
   constructor(
     @Inject(ProjectProto.PROJECT_SERVICE_NAME) private dbClient: ClientGrpc,
@@ -28,35 +29,40 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       this.dbClient.getService<ApiKeyProto.ApiKeyServiceClient>(
         ApiKeyProto.API_KEY_SERVICE_NAME,
       );
+    this.apiKeyDbService =
+      this.dbClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
+        ApiKeyProto.API_KEY_DB_SERVICE_NAME,
+      );
   }
 
   async issueApiKey(
     request: ApiKeyProto.IssueApiKeyRequest,
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
-    const password: Observable<UserProto.UserPassword> =
-      this.userService.getUserPassword({
+    const password: Observable<UserProto.UserPasswordHash> =
+      await this.userService.getUserPasswordHash({
         email: request.email,
       });
 
     try {
-      const hash = await bcrypt.hash(request.password, 10);
+      const passwordHash = await bcrypt.hash(request.password, 10); // this shouldn't just be the password hash
       const passwordEquals = bcrypt.compare(
-        hash,
-        (await lastValueFrom(password)).password,
+        passwordHash,
+        (await lastValueFrom(password)).hash,
       );
       if (!passwordEquals) {
-        // handle
+        throw new Error('Password Hash Mismatch');
       } else {
-        const apiKey = randomBytes(20).toString('hex'); // temporary, use UUIDv7
+        const rawApiKey = randomBytes(32).toString('hex');
+        const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
         const key = await lastValueFrom(
-          this.apiKeyService.createApiKey({
-            uuid: apiKey,
-            environment: request.environment,
-            description: request.description,
-            userVisible: request.userVisible,
-            scopes: [ApiKeyProto.ApiScopes.FULL],
-            project: {
-              name: request.projectName,
+          this.apiKeyDbService.createApiKey({
+            apiKey: {
+              hash: apiKeyHash,
+              description: request.description,
+              scopes: [ApiKeyProto.ApiScope.FULL],
+              project: {
+                name: request.projectName,
+              },
             },
           }),
         );
@@ -64,7 +70,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
           throw new Error('Failed to create API key');
         }
         return {
-          apiKey,
+          apiKey: key,
         };
       }
     } catch (e) {
@@ -76,11 +82,5 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
     console.log(`request: ${request}`);
     throw new Error('Method not implemented.');
-  }
-
-  async createApiKey(
-    request: ApiKeyProto.CreateApiKeyParams,
-  ): Promise<ApiKeyProto.ApiKey> {
-    return request.apiKey;
   }
 }

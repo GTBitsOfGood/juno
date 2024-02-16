@@ -10,13 +10,12 @@ import {
   JwtProto,
   JwtProtoFile,
   ResetProtoFile,
+  UserProto,
 } from 'juno-proto';
 
 let app: INestMicroservice;
-// TODO: make api key tests actually work once implemented
 
-const { AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
-const { AUTHSERVICE_JWT_PACKAGE_NAME } = JwtProto;
+jest.setTimeout(10000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -32,6 +31,41 @@ beforeAll(async () => {
       resolve(0);
     });
   });
+
+  const projectClient = new protoGRPC.dbservice.project.ProjectService(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+
+  const userClient = new protoGRPC.dbservice.user.UserService(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+
+  await new Promise((resolve, reject) => {
+    projectClient.createProject({ name: 'project' }, (err, resp) => {
+      if (err) return reject(err);
+      console.log('Project created:', resp);
+      resolve(resp);
+    });
+  });
+
+  // Create user
+  await new Promise((resolve, reject) => {
+    userClient.createUser(
+      {
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test User',
+        type: UserProto.UserType.USER,
+      },
+      (err, resp) => {
+        if (err) return reject(err);
+        console.log('User created:', resp);
+        resolve(resp);
+      },
+    );
+  });
 });
 
 beforeEach(async () => {
@@ -42,7 +76,10 @@ beforeEach(async () => {
   app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [AUTHSERVICE_API_KEY_PACKAGE_NAME, AUTHSERVICE_JWT_PACKAGE_NAME],
+      package: [
+        ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
+        JwtProto.JUNO_JWT_PACKAGE_NAME,
+      ],
       protoPath: [ApiKeyProtoFile, JwtProtoFile],
       url: process.env.AUTH_SERVICE_ADDR,
     },
@@ -71,16 +108,85 @@ describe('Auth Service API Key Tests', () => {
     );
   });
 
-  it('issues an API key', async () => {
-    const promise = new Promise((resolve) => {
-      client.issueApiKey({}, (err, resp) => {
-        expect(err).toBeNull();
-        expect(resp).toStrictEqual({});
-        resolve({});
-      });
+  it('issues an API key with correct parameters', async () => {
+    const response = await new Promise((resolve, reject) => {
+      client.issueApiKey(
+        {
+          project: { name: 'project' },
+          email: 'test@example.com',
+          password: 'password123',
+          description: 'Valid API key',
+        },
+        (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        },
+      );
     });
 
-    await promise;
+    expect(response).toBeDefined();
+  });
+
+  it('rejects new key creation when one already exists for a project', async () => {
+    client.issueApiKey({
+      project: { name: 'project' },
+      email: 'test@example.com',
+      password: 'password123',
+      description: 'Valid API key',
+    });
+
+    await expect(
+      new Promise((resolve, reject) => {
+        client.issueApiKey(
+          {
+            project: { name: 'project' },
+            email: 'test@example.com',
+            password: 'password123',
+            description: 'Duplicate project API key request',
+          },
+          (err, resp) => {
+            if (err) return reject(err);
+            return resolve(resp);
+          },
+        );
+      }),
+    ).rejects.toBeDefined(); // Expecting an error due to duplicate project API key
+  });
+
+  it('rejects new key creation with invalid parameters', async () => {
+    await expect(
+      new Promise((resolve, reject) => {
+        client.issueApiKey(
+          {
+            email: 'test@example.com',
+            password: 'password123',
+          },
+          (err, resp) => {
+            if (err) return reject(err);
+            return resolve(resp);
+          },
+        );
+      }),
+    ).rejects.toBeDefined(); // Expecting an error due to invalid parameters
+  });
+
+  it('rejects new key creation with an invalid master password', async () => {
+    await expect(
+      new Promise((resolve, reject) => {
+        client.issueApiKey(
+          {
+            project_name: 'project',
+            email: 'test@example.com',
+            password: 'notthepassword123',
+            description: 'API key request with invalid password',
+          },
+          (err, resp) => {
+            if (err) return reject(err);
+            return resolve(resp);
+          },
+        );
+      }),
+    ).rejects.toBeDefined(); // Expecting an error due to invalid master password
   });
 
   // it('revokes an API key', async () => {

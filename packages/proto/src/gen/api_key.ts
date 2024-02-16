@@ -5,7 +5,7 @@ import { ProjectIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.api_key';
 
-export enum ApiScopes {
+export enum ApiScope {
   FULL = 0,
   UNRECOGNIZED = -1,
 }
@@ -14,27 +14,30 @@ export interface IssueApiKeyRequest {
   projectName: string;
   email: string;
   password: string;
-  environment: string;
   description: string;
-  userVisible: boolean;
 }
 
 export interface CreateApiKeyParams {
-  apiKey: ApiKey | undefined;
+  apiKey: ApiKeyNoId | undefined;
 }
 
 export interface ApiKey {
+  id: string;
   hash: string;
-  uuid: string;
-  environment: string;
   description: string;
-  userVisible: boolean;
-  scopes: ApiScopes[];
+  scopes: ApiScope[];
+  project: ProjectIdentifier | undefined;
+}
+
+export interface ApiKeyNoId {
+  hash: string;
+  description: string;
+  scopes: ApiScope[];
   project: ProjectIdentifier | undefined;
 }
 
 export interface IssueApiKeyResponse {
-  apiKey?: string | undefined;
+  apiKey?: ApiKey | undefined;
 }
 
 export interface RevokeApiKeyRequest {}
@@ -45,8 +48,6 @@ export const JUNO_API_KEY_PACKAGE_NAME = 'juno.api_key';
 
 export interface ApiKeyServiceClient {
   issueApiKey(request: IssueApiKeyRequest): Observable<IssueApiKeyResponse>;
-
-  createApiKey(request: CreateApiKeyParams): Observable<ApiKey>;
 
   revokeApiKey(request: RevokeApiKeyRequest): Observable<RevokeApiKeyResponse>;
 }
@@ -59,10 +60,6 @@ export interface ApiKeyServiceController {
     | Observable<IssueApiKeyResponse>
     | IssueApiKeyResponse;
 
-  createApiKey(
-    request: CreateApiKeyParams,
-  ): Promise<ApiKey> | Observable<ApiKey> | ApiKey;
-
   revokeApiKey(
     request: RevokeApiKeyRequest,
   ):
@@ -73,11 +70,7 @@ export interface ApiKeyServiceController {
 
 export function ApiKeyServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = [
-      'issueApiKey',
-      'createApiKey',
-      'revokeApiKey',
-    ];
+    const grpcMethods: string[] = ['issueApiKey', 'revokeApiKey'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
@@ -105,3 +98,44 @@ export function ApiKeyServiceControllerMethods() {
 }
 
 export const API_KEY_SERVICE_NAME = 'ApiKeyService';
+
+export interface ApiKeyDbServiceClient {
+  createApiKey(request: CreateApiKeyParams): Observable<ApiKey>;
+}
+
+export interface ApiKeyDbServiceController {
+  createApiKey(
+    request: CreateApiKeyParams,
+  ): Promise<ApiKey> | Observable<ApiKey> | ApiKey;
+}
+
+export function ApiKeyDbServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ['createApiKey'];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('ApiKeyDbService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('ApiKeyDbService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const API_KEY_DB_SERVICE_NAME = 'ApiKeyDbService';

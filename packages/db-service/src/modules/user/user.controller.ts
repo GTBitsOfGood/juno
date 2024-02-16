@@ -45,6 +45,16 @@ export class UserController implements UserProto.UserServiceController {
     };
   }
 
+  async getUserPasswordHash(
+    identifier: IdentifierProto.UserIdentifier,
+  ): Promise<UserProto.UserPasswordHash> {
+    const userFind = validate.validateUserIdentifier(identifier);
+    const user = await this.userService.user(userFind);
+    return {
+      hash: user.password,
+    };
+  }
+
   async createUser(
     request: UserProto.CreateUserRequest,
   ): Promise<UserProto.User> {
