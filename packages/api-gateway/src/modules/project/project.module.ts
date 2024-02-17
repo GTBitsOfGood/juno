@@ -1,4 +1,10 @@
-import { Module } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  RequestMethod,
+  MiddlewareConsumer,
+} from '@nestjs/common';
+import { ProjectLinkingMiddleware } from '../../middleware/project.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -27,4 +33,13 @@ const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
   ],
   controllers: [ProjectController],
 })
-export class ProjectModule {}
+export class ProjectModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(ProjectLinkingMiddleware)
+      .forRoutes(
+        { path: 'project/id/:id/user', method: RequestMethod.PUT },
+        { path: 'project/name/:name/user', method: RequestMethod.PUT },
+      );
+  }
+}
