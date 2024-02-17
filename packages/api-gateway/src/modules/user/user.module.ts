@@ -1,4 +1,10 @@
-import { Module } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  RequestMethod,
+  MiddlewareConsumer,
+} from '@nestjs/common';
+import { ProjectLinkingMiddleware } from '../../middleware/project.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -26,4 +32,10 @@ const { USER_SERVICE_NAME, DBSERVICE_USER_PACKAGE_NAME } = UserProto;
   ],
   controllers: [UserController],
 })
-export class UserModule {}
+export class UserModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(ProjectLinkingMiddleware)
+      .forRoutes({ path: 'user/id/:id/project', method: RequestMethod.PUT });
+  }
+}
