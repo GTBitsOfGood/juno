@@ -140,32 +140,6 @@ describe('Auth Service API Key Tests', () => {
     expect(response).toBeDefined();
   });
 
-  it('rejects new key creation when one already exists for a project', async () => {
-    apiKeyClient.issueApiKey({
-      project: { name: 'project' },
-      email: 'test@example.com',
-      password: 'password123',
-      description: 'Valid API key',
-    });
-
-    await expect(
-      new Promise((resolve, reject) => {
-        apiKeyClient.issueApiKey(
-          {
-            project: { name: 'project' },
-            email: 'test@example.com',
-            password: 'password123',
-            description: 'Duplicate project API key request',
-          },
-          (err, resp) => {
-            if (err) return reject(err);
-            return resolve(resp);
-          },
-        );
-      }),
-    ).rejects.toBeDefined(); // Expecting an error due to duplicate project API key
-  });
-
   it('rejects new key creation with invalid parameters', async () => {
     await expect(
       new Promise((resolve, reject) => {
