@@ -9,9 +9,15 @@ import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ProjectController } from './project.controller';
-import { ProjectProto, ProjectProtoFile } from 'juno-proto';
+import {
+  ProjectProto,
+  ProjectProtoFile,
+  JwtProto,
+  JwtProtoFile,
+} from 'juno-proto';
 
 const { PROJECT_SERVICE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
+const { JWT_SERVICE_NAME, AUTHSERVICE_JWT_PACKAGE_NAME } = JwtProto;
 
 // TODO: Make this module Auth protected
 @Module({
@@ -20,6 +26,15 @@ const { PROJECT_SERVICE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
       envFilePath: join(__dirname, '../../../../../.env.local'),
     }),
     ClientsModule.register([
+      {
+        name: JWT_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: AUTHSERVICE_JWT_PACKAGE_NAME,
+          protoPath: JwtProtoFile,
+        },
+      },
       {
         name: PROJECT_SERVICE_NAME,
         transport: Transport.GRPC,
