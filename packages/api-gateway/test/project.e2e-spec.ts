@@ -113,14 +113,14 @@ describe('Project Creation Routes', () => {
 describe('Project Retrieval Routes', () => {
   it('Get project with valid id', async () => {
     const resp = await request(app.getHttpServer()).post('/project').send({
-      name: 'test-retreival',
+      name: 'test-retrieval',
     });
     const id = resp.body['id'];
     await request(app.getHttpServer())
       .get(`/project/id/${id}`)
       .expect(200)
       .then((response) => {
-        expect(response.body.name).toEqual('test-retreival');
+        expect(response.body.name).toEqual('test-retrieval');
         expect(response.body.id).toEqual(id);
       });
   });
@@ -272,12 +272,12 @@ describe('Project Update Routes', () => {
 describe('Project Linking Middleware', () => {
   it('No authorization headers for /project/id/:id/user route ', async () => {
     const project = await request(app.getHttpServer()).post('/project').send({
-      name: 'link-valid',
+      name: 'middleware',
     });
     const projectId = project.body['id'];
     const user = await request(app.getHttpServer()).post('/user').send({
       name: 'Test User',
-      email: 'test@link-valid.com',
+      email: 'test@middleware.com',
       password: 'password',
     });
     const userId = user.body['id'];
@@ -290,7 +290,7 @@ describe('Project Linking Middleware', () => {
   });
   it('No authorization headers for /project/name/:name/user route', async () => {
     await request(app.getHttpServer())
-      .put('/project/name/link-valid/user')
+      .put('/project/name/middleware/user')
       .send({
         id: '1',
       })
@@ -300,7 +300,7 @@ describe('Project Linking Middleware', () => {
     await request(app.getHttpServer())
       .put(`/user/id/1/project`)
       .send({
-        name: 'link-valid',
+        name: 'middleware',
       })
       .expect(401);
   });
@@ -315,7 +315,7 @@ describe('Project Linking Middleware', () => {
   });
   it('Invalid jwt for /project/name/:name/user route', async () => {
     await request(app.getHttpServer())
-      .put('/project/name/link-valid/user')
+      .put('/project/name/middleware/user')
       .set('Authorization', 'Bearer invalid-jwt')
       .send({
         id: '1',
@@ -327,7 +327,7 @@ describe('Project Linking Middleware', () => {
       .put(`/user/id/1/project`)
       .set('Authorization', 'Bearer invalid-jwt')
       .send({
-        name: 'link-valid',
+        name: 'middleware',
       })
       .expect(401);
   });
@@ -344,7 +344,7 @@ describe('Project Linking Middleware', () => {
   it('Valid jwt for /project/name/:name/user route', async () => {
     const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
-      .put('/project/name/link-valid/user')
+      .put('/project/name/middleware/user')
       .set('Authorization', 'Bearer ' + token)
       .send({
         id: '1',
@@ -357,7 +357,7 @@ describe('Project Linking Middleware', () => {
       .put(`/user/id/1/project`)
       .set('Authorization', 'Bearer ' + token)
       .send({
-        name: 'link-valid',
+        name: 'middleware',
       })
       .expect(200);
   });
