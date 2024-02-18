@@ -37,40 +37,43 @@ export class AuthService {
   async createApiKey(
     input: Prisma.ApiKeyCreateInput,
   ): Promise<ApiKeyProto.ApiKey> {
-    let projectId: number;
-
-    // Check if the project identifier provides an ID directly
-    if ('id' in input.project) {
-      if (Number.isInteger(input.project.id)) {
-        projectId = Number(input.project.id);
+    try {
+      let projectId: number;
+      if (input.project.connect.id) {
+        if (Number.isInteger(input.project.connect.id)) {
+          projectId = Number(input.project.connect.id);
+        }
+      } else if (input.project.connect.name) {
+        const name = input.project.connect.name.toString();
+        const project = await this.prisma.project.findUnique({
+          where: { name: name },
+        });
+        if (!project) {
+          throw new Error('Project not found');
+        }
+        projectId = project.id;
       }
-    } else if ('name' in input.project) {
-      const name = input.project.name.toString();
-      const project = await this.prisma.project.findUnique({
-        where: { name: name },
+
+      if (!projectId) {
+        throw new Error('Project ID is required');
+      }
+
+      const prismaApiKey = await this.prisma.apiKey.create({
+        data: {
+          hash: input.hash,
+          description: input.description,
+          scopes: [],
+          projectId: projectId,
+        },
+        include: {
+          project: true,
+        },
       });
-      if (!project) {
-        throw new Error('Project not found');
-      }
-      projectId = project.id;
+      return convertDbApiKeyToTs(prismaApiKey);
+    } catch (error) {
+      console.error('Error creating API key:', error);
+      throw error;
     }
-
-    if (!projectId) {
-      throw new Error('Project ID is required');
-    }
-
-    const prismaApiKey = await this.prisma.apiKey.create({
-      data: {
-        hash: input.hash,
-        description: input.description,
-        scopes: input.scopes,
-        projectId: projectId,
-      },
-      include: {
-        project: true,
-      },
-    });
-    return convertDbApiKeyToTs(prismaApiKey);
   }
 }
 

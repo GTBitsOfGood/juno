@@ -11,7 +11,7 @@ export enum ApiScope {
 }
 
 export interface IssueApiKeyRequest {
-  projectName: string;
+  project: ProjectIdentifier | undefined;
   email: string;
   password: string;
   description: string;

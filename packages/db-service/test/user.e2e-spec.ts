@@ -92,12 +92,12 @@ describe('DB Service User Tests', () => {
 
     const userProtoGRPC = GRPC.loadPackageDefinition(userProto) as any;
 
-    userClient = new userProtoGRPC.dbservice.user.UserService(
+    userClient = new userProtoGRPC.juno.user.UserService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
 
-    projectClient = new userProtoGRPC.dbservice.project.ProjectService(
+    projectClient = new userProtoGRPC.juno.project.ProjectService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
@@ -261,6 +261,49 @@ describe('DB Service User Tests', () => {
     });
 
     await getUserPromise;
+  });
+
+  it('can get a valid user password hash', async () => {
+    const createUserPromise = new Promise((resolve, reject) => {
+      userClient.createUser(
+        {
+          email: 'testpasswordhash@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          if (err) {
+            reject(err);
+          } else {
+            expect(resp['email']).toBe('testpasswordhash@test.com');
+            expect(resp['name']).toBe('some-name');
+            expect(resp['type']).toBe(0);
+            resolve(resp['id']);
+          }
+        },
+      );
+    });
+
+    const userId = await createUserPromise;
+    const getUserPasswordHashPromise = new Promise((resolve, reject) => {
+      userClient.getUserPasswordHash(
+        {
+          id: userId,
+        },
+        (err, resp) => {
+          if (err) {
+            reject(err);
+          } else {
+            expect(resp).toBeDefined();
+            expect(resp['hash']).toBeDefined();
+            resolve({});
+          }
+        },
+      );
+    });
+
+    await getUserPasswordHashPromise;
   });
 
   // TODO: Wait for top level handler to manage invalid inputs

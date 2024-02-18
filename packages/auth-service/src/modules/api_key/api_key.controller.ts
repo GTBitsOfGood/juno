@@ -31,43 +31,46 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async issueApiKey(
     request: ApiKeyProto.IssueApiKeyRequest,
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
-    const password: Observable<UserProto.UserPasswordHash> =
-      await this.userService.getUserPasswordHash({
+    let password: Observable<UserProto.UserPasswordHash>;
+    try {
+      password = await this.userService.getUserPasswordHash({
         email: request.email,
       });
+    } catch (e) {
+      throw new Error('Failed to look up password hash for user');
+    }
+    const userPasswordHash = (await lastValueFrom(password)).hash;
 
     try {
       const passwordHash = await bcrypt.hash(request.password, 10);
-      const passwordEquals = bcrypt.compare(
+      const passwordEquals = await bcrypt.compare(
         passwordHash,
-        (await lastValueFrom(password)).hash,
+        userPasswordHash,
       );
       if (!passwordEquals) {
-        throw new Error('Password Hash Mismatch');
+        throw new Error(
+          `Password Hash Mismatch on description ${request.description}`,
+        );
       } else {
         const rawApiKey = randomBytes(32).toString('hex');
         const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
-        const key = await lastValueFrom(
-          this.apiKeyDbService.createApiKey({
-            apiKey: {
-              hash: apiKeyHash,
-              description: request.description,
-              scopes: [ApiKeyProto.ApiScope.FULL],
-              project: {
-                name: request.projectName,
-              },
-            },
-          }),
-        );
+        const key = this.apiKeyDbService.createApiKey({
+          apiKey: {
+            hash: apiKeyHash,
+            description: request.description,
+            scopes: [ApiKeyProto.ApiScope.FULL],
+            project: request.project,
+          },
+        });
         if (!key) {
           throw new Error('Failed to create API key');
         }
         return {
-          apiKey: key,
+          apiKey: await lastValueFrom(key),
         };
       }
     } catch (e) {
-      throw e; // handle
+      throw e;
     }
   }
   async revokeApiKey(

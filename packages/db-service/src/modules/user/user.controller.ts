@@ -60,6 +60,7 @@ export class UserController implements UserProto.UserServiceController {
     request: UserProto.CreateUserRequest,
   ): Promise<UserProto.User> {
     console.log(`creating!`);
+    console.log(request.password);
     const user = await this.userService.createUser({
       name: request.name,
       email: request.email,

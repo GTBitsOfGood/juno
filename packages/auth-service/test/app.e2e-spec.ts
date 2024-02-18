@@ -46,7 +46,7 @@ async function initApp() {
 }
 
 beforeAll(async () => {
-  const app = await initApp();
+  app = await initApp();
 
   const proto = ProtoLoader.loadSync([
     ResetProtoFile,
@@ -188,7 +188,7 @@ describe('Auth Service API Key Tests', () => {
       new Promise((resolve, reject) => {
         apiKeyClient.issueApiKey(
           {
-            project_name: 'project',
+            project: { name: 'project' },
             email: 'test@example.com',
             password: 'notthepassword123',
             description: 'API key request with invalid password',

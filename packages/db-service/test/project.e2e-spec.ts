@@ -89,11 +89,11 @@ describe('DB Service Project Tests', () => {
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-    projectClient = new protoGRPC.dbservice.project.ProjectService(
+    projectClient = new protoGRPC.juno.project.ProjectService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
-    userClient = new protoGRPC.dbservice.user.UserService(
+    userClient = new protoGRPC.juno.user.UserService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );

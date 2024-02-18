@@ -13,9 +13,20 @@ export class ApiKeyDbController
   async createApiKey(
     request: ApiKeyProto.CreateApiKeyParams,
   ): Promise<ApiKeyProto.ApiKey> {
+    if (!request.apiKey.description) {
+      throw new Error('missing description to create api key');
+    } else if (!request.apiKey.hash) {
+      throw new Error('missing hash to create api key');
+    } else if (!request.apiKey.project) {
+      throw new Error('missing project to create api key');
+    } else if (!request.apiKey.scopes) {
+      throw new Error('missing scopes to create api key');
+    }
+
     const prepareCreateApiKey = {
       ...request.apiKey,
-      scopes: request.apiKey.scopes.map((scope) => ApiScope[scope]),
+      // scopes: request.apiKey.scopes?.map((scope) => ApiScope[scope]),
+      scopes: [],
       project: {
         connect: {
           id: request.apiKey.project.id,
