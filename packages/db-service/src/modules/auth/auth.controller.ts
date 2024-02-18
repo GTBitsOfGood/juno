@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiKeyProto } from 'juno-proto';
-import { ApiScope } from '@prisma/client';
 
 @Controller()
 @ApiKeyProto.ApiKeyDbServiceControllerMethods()
