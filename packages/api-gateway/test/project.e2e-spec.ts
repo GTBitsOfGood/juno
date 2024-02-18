@@ -10,6 +10,7 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 
@@ -272,4 +273,98 @@ describe('Project Update Routes', () => {
   //     .expect(400)
   //     .expect('');
   // });
+});
+
+describe('Project Linking Middleware', () => {
+  it('No authorization headers for /project/id/:id/user route ', async () => {
+    const project = await request(app.getHttpServer()).post('/project').send({
+      name: 'link-valid',
+    });
+    const projectId = project.body['id'];
+    const user = await request(app.getHttpServer()).post('/user').send({
+      name: 'Test User',
+      email: 'test@link-valid.com',
+      password: 'password',
+    });
+    const userId = user.body['id'];
+    await request(app.getHttpServer())
+      .put(`/project/id/${projectId}/user`)
+      .send({
+        id: userId,
+      })
+      .expect(401);
+  });
+  it('No authorization headers for /project/name/:name/user route', async () => {
+    await request(app.getHttpServer())
+      .put('/project/name/link-valid/user')
+      .send({
+        id: '1',
+      })
+      .expect(401);
+  });
+  it('No authorization headers for /user/id/:id/project route', async () => {
+    await request(app.getHttpServer())
+      .put(`/user/id/1/project`)
+      .send({
+        name: 'link-valid',
+      })
+      .expect(401);
+  });
+  it('Invalid jwt for /project/id/:id/user route', async () => {
+    await request(app.getHttpServer())
+      .put(`/project/id/1/user`)
+      .set('Authorization', 'Bearer invalid-jwt')
+      .send({
+        id: '1',
+      })
+      .expect(401);
+  });
+  it('Invalid jwt for /project/name/:name/user route', async () => {
+    await request(app.getHttpServer())
+      .put('/project/name/link-valid/user')
+      .set('Authorization', 'Bearer invalid-jwt')
+      .send({
+        id: '1',
+      })
+      .expect(401);
+  });
+  it('Invalid jwt for /user/id/:id/project route', async () => {
+    await request(app.getHttpServer())
+      .put(`/user/id/1/project`)
+      .set('Authorization', 'Bearer invalid-jwt')
+      .send({
+        name: 'link-valid',
+      })
+      .expect(401);
+  });
+  it('Valid jwt for /project/id/:id/user route', async () => {
+    const token = jwt.sign({}, 'secret');
+    await request(app.getHttpServer())
+      .put(`/project/id/1/user`)
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        id: '1',
+      })
+      .expect(200);
+  });
+  it('Valid jwt for /project/name/:name/user route', async () => {
+    const token = jwt.sign({}, 'secret');
+    await request(app.getHttpServer())
+      .put('/project/name/link-valid/user')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        id: '1',
+      })
+      .expect(200);
+  });
+  it('Valid jwt for /user/id/:id/project route', async () => {
+    const token = jwt.sign({}, 'secret');
+    await request(app.getHttpServer())
+      .put(`/user/id/1/project`)
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        name: 'link-valid',
+      })
+      .expect(200);
+  });
 });

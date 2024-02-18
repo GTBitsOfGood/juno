@@ -34,5 +34,8 @@
     "prettier": "^3.0.3",
     "prettier-plugin-organize-imports": "^3.2.3",
     "ts-proto": "^1.162.1"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
   }
 }
