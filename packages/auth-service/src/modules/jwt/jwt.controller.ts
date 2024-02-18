@@ -14,6 +14,7 @@ export class JWTController implements JwtProto.JwtServiceController {
     request: JwtProto.ValidateJwtRequest,
   ): Promise<JwtProto.ValidateJwtResponse> {
     console.log(`requestJWT: ${request.jwt}`);
-    throw new Error('Method not implemented.');
+    //throw new Error('Method not implemented.');
+    return null;
   }
 }
