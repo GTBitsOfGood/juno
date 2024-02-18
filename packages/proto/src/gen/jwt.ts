@@ -8,7 +8,9 @@ export interface CreateJwtRequest {}
 
 export interface CreateJwtResponse {}
 
-export interface ValidateJwtRequest {}
+export interface ValidateJwtRequest {
+  jwt: string;
+}
 
 export interface ValidateJwtResponse {}
 
