@@ -182,8 +182,10 @@ describe('Project Update Routes', () => {
       password: 'password',
     });
     const userId = user.body['id'];
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put(`/project/id/${projectId}/user`)
+      .set('Authorization', 'Bearer ' + token)
       .send({
         id: userId,
       })
@@ -191,8 +193,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using valid user email input', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/id/1/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
       })
@@ -200,8 +204,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using non-number project id param', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/id/abc/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
       })
@@ -229,10 +235,35 @@ describe('Project Update Routes', () => {
       .expect(404);
     expect(resp.text).toContain('does not exist');
   });
+  // it('Link user with project id using non-number user id input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/id/1/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       id: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('{"statusCode":400,"message":"id must be a number"}');
+  // });
+
+  // it('Link user with project id using invalid user email input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/id/1/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       email: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('');
+  // });
 
   it('Link user with project name using valid user id input', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/name/testProject/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         id: '1',
       })
@@ -240,8 +271,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project name using valid user email input', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/name/testProject/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
       })
@@ -267,6 +300,29 @@ describe('Project Update Routes', () => {
       .expect(404);
     expect(resp.text).toContain('does not exist');
   });
+  // it('Link user with project name using non-number user id input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/name/testProject/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       id: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('{"statusCode":400,"message":"id must be a number"}');
+  // });
+
+  // it('Link user with project name using invalid user email input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/name/testProject/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       email: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('');
+  // });
 });
 
 describe('Project Linking Middleware', () => {
