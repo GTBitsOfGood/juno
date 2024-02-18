@@ -10,5 +10,7 @@ service JwtService {
 message CreateJwtRequest {}
 message CreateJwtResponse {}
 
-message ValidateJwtRequest {}
+message ValidateJwtRequest {
+  string jwt = 2;
+}
 message ValidateJwtResponse {}
