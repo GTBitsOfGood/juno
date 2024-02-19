@@ -14,6 +14,7 @@ import {
   JwtProtoFile,
   ProjectProtoFile,
   ResetProtoFile,
+  UserProto,
   UserProtoFile,
 } from 'juno-proto';
 import { User, UserType } from 'juno-proto/dist/gen/user';
@@ -34,8 +35,14 @@ async function initApp() {
         ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
         JwtProto.JUNO_JWT_PACKAGE_NAME,
         HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
+        UserProto.JUNO_USER_PACKAGE_NAME,
       ],
-      protoPath: [ApiKeyProtoFile, HealthProtoFile, JwtProtoFile],
+      protoPath: [
+        ApiKeyProtoFile,
+        HealthProtoFile,
+        JwtProtoFile,
+        UserProtoFile,
+      ],
       url: process.env.AUTH_SERVICE_ADDR,
     },
   });
@@ -81,7 +88,6 @@ beforeAll(async () => {
   await new Promise((resolve, reject) => {
     projectClient.createProject({ name: 'project' }, (err, resp) => {
       if (err) return reject(err);
-      console.log('Project created:', resp);
       resolve(resp);
     });
   });
@@ -93,11 +99,26 @@ beforeAll(async () => {
         email: 'test@example.com',
         password: 'password123',
         name: 'Test-User',
+        type: 'SUPERADMIN',
+      },
+      (err, resp) => {
+        if (err) return reject(err);
+        resolve(resp);
+      },
+    );
+  });
+
+  // Create unprivileged user
+  await new Promise((resolve, reject) => {
+    userClient.createUser(
+      {
+        email: 'test2@example.com',
+        password: 'password123',
+        name: 'Test-User',
         type: 'USER',
       },
       (err, resp) => {
         if (err) return reject(err);
-        console.log('User created:', resp);
         resolve(resp);
       },
     );
@@ -177,6 +198,25 @@ describe('Auth Service API Key Tests', () => {
     ).rejects.toBeDefined(); // Expecting an error due to invalid master password
   });
 
+  it('rejects new key creation with an unprivileged user', async () => {
+    await expect(
+      new Promise((resolve, reject) => {
+        apiKeyClient.issueApiKey(
+          {
+            project: { name: 'project' },
+            email: 'test2@example.com',
+            password: 'password123',
+            description: 'API key request with unpriviledged user',
+          },
+          (err, resp) => {
+            if (err) return reject(err);
+            return resolve(resp);
+          },
+        );
+      }),
+    ).rejects.toBeDefined(); // Expecting an error due to invalid master password
+  });
+
   // it('revokes an API key', async () => {
   //   const promise = new Promise((resolve) => {
   //     client.revokeApiKey({}, (err, resp) => {
@@ -235,93 +275,103 @@ describe('User authentication tests', () => {
   let client: any;
 
   const correctUserResponse: User = {
-    id: 0,
-    email: 'testing@gmail.com',
-    name: 'TEST',
-    type: UserType.USER,
+    id: 1,
+    email: 'test@example.com',
+    name: 'Test-User',
+    type: UserType.SUPERADMIN,
   };
 
   beforeEach(async () => {
-    const proto = ProtoLoader.loadSync(ApiKeyProtoFile) as any;
+    const proto = ProtoLoader.loadSync(UserProtoFile) as any;
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-    client = new protoGRPC.authservice.api_key.UserService(
+    client = new protoGRPC.juno.user.UserAuthService(
       process.env.AUTH_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
   });
   it('User auth with an invalid email format', async () => {
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve, reject) => {
       client.authenticate(
-        { email: 'testing', password: 'testing123' },
+        { email: 'testing', password: 'password123' },
         (err, resp) => {
-          expect(err).toThrowError('email must be an email');
-          expect(resp).toStrictEqual({});
-          resolve({});
+          if (err) reject(err);
+          resolve(resp);
         },
       );
     });
-
-    await promise;
+    try {
+      await promise;
+    } catch (e) {
+      expect(e.toString()).toContain('No user found for email');
+    }
   });
   it('User auth with an invalid email that is not in the database', async () => {
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve, reject) => {
       client.authenticate(
-        { email: 'testing@gmail.com', password: 'testing123' },
+        { email: 'invalid@example.com', password: 'password123' },
         (err, resp) => {
-          expect(err).toThrowError(
-            'The email provided does not exist within the database.',
-          );
-          expect(resp).toStrictEqual({});
-          resolve({});
+          if (err) reject(err);
+          resolve(resp);
         },
       );
     });
-
-    await promise;
+    try {
+      await promise;
+    } catch (e) {
+      expect(e.toString()).toContain('No user found for email');
+    }
   });
 
   it('User auth with an empty password', async () => {
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve, reject) => {
       client.authenticate(
-        { email: 'testing@gmail.com', password: '' },
+        { email: 'test@example.com', password: '' },
         (err, resp) => {
-          expect(err).toThrowError('password should not be empty');
-          expect(resp).toStrictEqual({});
-          resolve({});
+          if (err) reject(err);
+          resolve(resp);
         },
       );
     });
 
-    await promise;
+    try {
+      await promise;
+    } catch (e) {
+      expect(e.toString()).toContain('Incorrect password');
+    }
   });
   it('User auth with an invalid password and user within db', async () => {
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve, reject) => {
       client.authenticate(
-        { email: 'testing@gmail.com', password: 'testing' },
+        { email: 'test@example.com', password: 'testing' },
         (err, resp) => {
-          expect(err).toThrowError('The password is invalid.');
-          expect(resp).toStrictEqual({});
-          resolve({});
+          if (err) reject(err);
+          resolve(resp);
         },
       );
     });
 
-    await promise;
+    try {
+      await promise;
+    } catch (e) {
+      expect(e.toString()).toContain('Incorrect password');
+    }
   });
+
   it('User auth with correct credentials', async () => {
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve, reject) => {
       client.authenticate(
-        { email: 'testing@gmail.com', password: 'testing123' },
+        { email: 'test@example.com', password: 'password123' },
         (err, resp) => {
-          expect(err).toBeNull();
-          expect(resp).toStrictEqual(correctUserResponse);
-          resolve({});
+          if (err) reject(err);
+          resolve(resp);
         },
       );
     });
 
-    await promise;
+    const res = await promise;
+    res['id'] = Number(res['id']);
+    expect(res).toStrictEqual(correctUserResponse);
   });
 });

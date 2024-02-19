@@ -10,6 +10,8 @@ import {
   JwtProtoFile,
   HealthProto,
   HealthProtoFile,
+  UserProto,
+  UserProtoFile,
 } from 'juno-proto';
 
 async function bootstrap() {
@@ -25,8 +27,14 @@ async function bootstrap() {
           ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
           JwtProto.JUNO_JWT_PACKAGE_NAME,
           HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
+          UserProto.JUNO_USER_PACKAGE_NAME,
         ],
-        protoPath: [ApiKeyProtoFile, JwtProtoFile, HealthProtoFile],
+        protoPath: [
+          ApiKeyProtoFile,
+          JwtProtoFile,
+          HealthProtoFile,
+          UserProtoFile,
+        ],
         url: process.env.AUTH_SERVICE_ADDR,
       },
     },

@@ -1,20 +1,21 @@
 import { Controller, Inject } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { ApiKeyProto, UserProto } from 'juno-proto';
-import { Observable, lastValueFrom } from 'rxjs';
-import * as bcrypt from 'bcrypt';
+import { lastValueFrom } from 'rxjs';
 import { createHash, randomBytes } from 'crypto';
+import { status } from '@grpc/grpc-js';
 
 @Controller('api_key')
 @ApiKeyProto.ApiKeyServiceControllerMethods()
 export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
-  private userService: UserProto.UserServiceClient;
+  private userAuthService: UserProto.UserAuthServiceClient;
   private apiKeyDbService: ApiKeyProto.ApiKeyDbServiceClient;
 
   constructor(
     @Inject(ApiKeyProto.API_KEY_DB_SERVICE_NAME)
     private apiKeyClient: ClientGrpc,
-    @Inject(UserProto.USER_SERVICE_NAME) private userClient: ClientGrpc,
+    @Inject(UserProto.USER_AUTH_SERVICE_NAME)
+    private userAuthClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
@@ -22,54 +23,48 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
         ApiKeyProto.API_KEY_DB_SERVICE_NAME,
       );
-    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
-      UserProto.USER_SERVICE_NAME,
-    );
-    console.log('initialized services');
+    this.userAuthService =
+      this.userAuthClient.getService<UserProto.UserAuthServiceClient>(
+        UserProto.USER_AUTH_SERVICE_NAME,
+      );
   }
 
   async issueApiKey(
     request: ApiKeyProto.IssueApiKeyRequest,
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
-    let password: Observable<UserProto.UserPasswordHash>;
-    try {
-      password = this.userService.getUserPasswordHash({
-        email: request.email,
-      });
-    } catch (e) {
-      throw new Error('Failed to look up password hash for user');
-    }
-    const userPasswordHash = (await lastValueFrom(password)).hash;
-
     // TODO: Validate user type before generating key (only linked admin or any superadmin)
 
     try {
-      const passwordEquals = await bcrypt.compare(
-        request.password,
-        userPasswordHash,
+      const user = await lastValueFrom(
+        this.userAuthService.authenticate({
+          email: request.email,
+          password: request.password,
+        }),
       );
-      if (!passwordEquals) {
-        throw new Error(
-          `Password Hash Mismatch on description ${request.description}`,
-        );
-      } else {
-        const rawApiKey = randomBytes(32).toString('hex');
-        const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
-        const key = this.apiKeyDbService.createApiKey({
-          apiKey: {
-            hash: apiKeyHash,
-            description: request.description,
-            scopes: [ApiKeyProto.ApiScope.FULL],
-            project: request.project,
-          },
+
+      if (user.type !== UserProto.UserType.SUPERADMIN) {
+        throw new RpcException({
+          status: status.PERMISSION_DENIED,
+          message: 'User not permitted to generate keys',
         });
-        if (!key) {
-          throw new Error('Failed to create API key');
-        }
-        return {
-          apiKey: await lastValueFrom(key),
-        };
       }
+
+      const rawApiKey = randomBytes(32).toString('hex');
+      const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
+      const key = this.apiKeyDbService.createApiKey({
+        apiKey: {
+          hash: apiKeyHash,
+          description: request.description,
+          scopes: [ApiKeyProto.ApiScope.FULL],
+          project: request.project,
+        },
+      });
+      if (!key) {
+        throw new Error('Failed to create API key');
+      }
+      return {
+        apiKey: await lastValueFrom(key),
+      };
     } catch (e) {
       throw e;
     }

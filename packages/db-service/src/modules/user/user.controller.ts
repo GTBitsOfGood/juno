@@ -4,7 +4,6 @@ import { Role } from '@prisma/client';
 import * as validate from 'src/utility/validate';
 import { IdentifierProto, UserProto } from 'juno-proto';
 import * as bcrypt from 'bcrypt';
-import { hashPassword } from 'src/utility/common';
 
 @Controller()
 @UserProto.UserServiceControllerMethods()
@@ -116,14 +115,5 @@ export class UserController implements UserProto.UserServiceController {
       ...updated,
       type: this.mapPrismaRoleToRPC(updated.type),
     };
-  }
-
-  async authenticate(
-    request: UserProto.AuthenticateUserRequest,
-  ): Promise<UserProto.User> {
-    // validate request is valid containing email
-    validate.validateUserIdentifier(request);
-    const user = await this.userService.authenticate(request);
-    return { ...user, type: this.mapPrismaRoleToRPC(user?.type) };
   }
 }

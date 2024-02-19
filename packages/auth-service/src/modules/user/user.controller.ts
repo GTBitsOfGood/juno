@@ -1,43 +1,59 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { UserProto } from 'juno-proto';
-import { UserIdentifier } from 'juno-proto/dist/gen/identifiers';
-import { Observable } from 'rxjs';
-import { AuthenticateUserBody } from 'src/models/user';
+import { lastValueFrom } from 'rxjs';
+import * as bcrypt from 'bcrypt';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 @Controller('api_key')
-@UserProto.UserServiceControllerMethods()
-export class UserController implements UserProto.UserServiceController {
-  constructor(private readonly userService: UserProto.UserServiceClient) {}
+@UserProto.UserAuthServiceControllerMethods()
+export class UserController implements UserProto.UserAuthServiceController {
+  private userService: UserProto.UserServiceClient;
 
-  getUser(
-    request: UserIdentifier,
-  ): UserProto.User | Promise<UserProto.User> | Observable<UserProto.User> {
-    throw new Error('Method not implemented.');
+  constructor(
+    @Inject(UserProto.USER_SERVICE_NAME) private userClient: ClientGrpc,
+  ) {}
+
+  onModuleInit() {
+    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
+      UserProto.USER_SERVICE_NAME,
+    );
   }
-  createUser(
-    request: UserProto.CreateUserRequest,
-  ): UserProto.User | Promise<UserProto.User> | Observable<UserProto.User> {
-    throw new Error('Method not implemented.');
-  }
-  updateUser(
-    request: UserProto.UpdateUserRequest,
-  ): UserProto.User | Promise<UserProto.User> | Observable<UserProto.User> {
-    throw new Error('Method not implemented.');
-  }
-  deleteUser(
-    request: UserIdentifier,
-  ): UserProto.User | Promise<UserProto.User> | Observable<UserProto.User> {
-    throw new Error('Method not implemented.');
-  }
-  linkProject(
-    request: UserProto.LinkProjectToUserRequest,
-  ): UserProto.User | Promise<UserProto.User> | Observable<UserProto.User> {
-    throw new Error('Method not implemented.');
-  }
-  authenticate(
-    request: AuthenticateUserBody,
-  ): UserProto.User | Promise<UserProto.User> | Observable<UserProto.User> {
-    const user = this.userService.authenticate(request);
-    return user;
+  async authenticate(
+    request: UserProto.AuthenticateUserRequest,
+  ): Promise<UserProto.User> {
+    let passwordHash: UserProto.UserPasswordHash;
+    try {
+      passwordHash = await lastValueFrom(
+        this.userService.getUserPasswordHash({
+          email: request.email,
+        }),
+      );
+    } catch (e) {
+      throw new RpcException({
+        status: status.NOT_FOUND,
+        message: 'No user found for email',
+      });
+    }
+
+    try {
+      const passwordEquals = await bcrypt.compare(
+        request.password,
+        passwordHash.hash,
+      );
+      if (!passwordEquals) {
+        throw new RpcException({
+          status: status.PERMISSION_DENIED,
+          message: 'Incorrect password',
+        });
+      }
+      return lastValueFrom(
+        this.userService.getUser({
+          email: request.email,
+        }),
+      );
+    } catch (e) {
+      throw e;
+    }
   }
 }
