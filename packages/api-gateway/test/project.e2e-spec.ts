@@ -51,15 +51,6 @@ beforeEach(async () => {
   await app.init();
 });
 
-// TODO: Make these actually test functionality
-// describe('User Creation Routes', () => {});
-// describe('Project Creation Routes', () => {});
-describe('Auth Routes', () => {
-  it('Returns empty value', async () => {
-    await request(app.getHttpServer()).get('/auth').expect(200).expect('');
-  });
-});
-
 describe('Project Creation Routes', () => {
   it('Create a project with valid inputs', async () => {
     await request(app.getHttpServer())
