@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package dbservice.identifiers;
+package juno.identifiers;
 
 message ProjectIdentifier {
   oneof identifier {

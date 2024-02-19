@@ -3,7 +3,7 @@ import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { ProjectIdentifier, UserIdentifier } from './identifiers';
 
-export const protobufPackage = 'dbservice.project';
+export const protobufPackage = 'juno.project';
 
 export interface Project {
   id: number;
@@ -28,7 +28,7 @@ export interface UpdateProjectRequest {
   updateParams: ProjectUpdateParams | undefined;
 }
 
-export const DBSERVICE_PROJECT_PACKAGE_NAME = 'dbservice.project';
+export const JUNO_PROJECT_PACKAGE_NAME = 'juno.project';
 
 export interface ProjectServiceClient {
   getProject(request: ProjectIdentifier): Observable<Project>;

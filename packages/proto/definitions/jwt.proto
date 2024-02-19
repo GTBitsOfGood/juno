@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package authservice.jwt;
+package juno.jwt;
 
 service JwtService {
   rpc createJwt(CreateJwtRequest) returns (CreateJwtResponse);

@@ -1,14 +1,54 @@
 syntax = "proto3";
 
-package authservice.api_key;
+package juno.api_key;
+
+import "identifiers.proto";
 
 service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
+
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
 }
 
-message IssueApiKeyRequest {}
-message IssueApiKeyResponse {}
+service ApiKeyDbService {
+  rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
+}
+
+message IssueApiKeyRequest {
+  identifiers.ProjectIdentifier project = 1;
+  string email = 2;
+  string password = 3;
+  string description = 4;
+}
+
+message CreateApiKeyParams {
+  ApiKeyNoId apiKey = 1;
+}
+
+enum ApiScope {
+  FULL = 0;
+}
+
+message ApiKey {
+  string id = 1;
+  string hash = 2;
+  string description = 3;
+  repeated ApiScope scopes = 4;
+  identifiers.ProjectIdentifier project = 5;
+}
+
+message ApiKeyNoId { 
+  string hash = 1;
+  string description = 2;
+  repeated ApiScope scopes = 3;
+  identifiers.ProjectIdentifier project = 4;
+}
+
+message IssueApiKeyResponse {
+  oneof response { 
+    ApiKey apiKey = 1; 
+  }
+}
 
 message RevokeApiKeyRequest {}
 message RevokeApiKeyResponse {}

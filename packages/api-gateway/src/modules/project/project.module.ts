@@ -5,7 +5,7 @@ import { join } from 'path';
 import { ProjectController } from './project.controller';
 import { ProjectProto, ProjectProtoFile } from 'juno-proto';
 
-const { PROJECT_SERVICE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
+const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 // TODO: Make this module Auth protected
 @Module({
@@ -19,7 +19,7 @@ const { PROJECT_SERVICE_NAME, DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
         transport: Transport.GRPC,
         options: {
           url: process.env.DB_SERVICE_ADDR,
-          package: DBSERVICE_PROJECT_PACKAGE_NAME,
+          package: JUNO_PROJECT_PACKAGE_NAME,
           protoPath: ProjectProtoFile,
         },
       },

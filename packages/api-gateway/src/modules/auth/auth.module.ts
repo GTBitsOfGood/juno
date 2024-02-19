@@ -10,8 +10,8 @@ import {
   JwtProtoFile,
 } from 'juno-proto';
 
-const { JWT_SERVICE_NAME, AUTHSERVICE_JWT_PACKAGE_NAME } = JwtProto;
-const { API_KEY_SERVICE_NAME, AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
+const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
+const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ const { API_KEY_SERVICE_NAME, AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
         transport: Transport.GRPC,
         options: {
           url: process.env.AUTH_SERVICE_ADDR,
-          package: AUTHSERVICE_JWT_PACKAGE_NAME,
+          package: JUNO_JWT_PACKAGE_NAME,
           protoPath: JwtProtoFile,
         },
       },
@@ -33,7 +33,7 @@ const { API_KEY_SERVICE_NAME, AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
         transport: Transport.GRPC,
         options: {
           url: process.env.AUTH_SERVICE_ADDR,
-          package: AUTHSERVICE_API_KEY_PACKAGE_NAME,
+          package: JUNO_API_KEY_PACKAGE_NAME,
           protoPath: ApiKeyProtoFile,
         },
       },

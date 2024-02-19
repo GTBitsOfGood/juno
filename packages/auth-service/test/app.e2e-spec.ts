@@ -7,45 +7,34 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
   ApiKeyProto,
   ApiKeyProtoFile,
+  HealthProto,
+  HealthProtoFile,
+  IdentifiersProtoFile,
   JwtProto,
   JwtProtoFile,
+  ProjectProtoFile,
   ResetProtoFile,
+  UserProtoFile,
 } from 'juno-proto';
 
 let app: INestMicroservice;
 
 jest.setTimeout(10000);
-// TODO: make api key tests actually work once implemented
 
-const { AUTHSERVICE_API_KEY_PACKAGE_NAME } = ApiKeyProto;
-const { AUTHSERVICE_JWT_PACKAGE_NAME } = JwtProto;
-
-beforeAll(async () => {
-  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
-  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
-    process.env.DB_SERVICE_ADDR,
-    GRPC.credentials.createInsecure(),
-  );
-  await new Promise((resolve) => {
-    resetClient.resetDb({}, (err, resp) => {
-      console.log(resp);
-      resolve(0);
-    });
-  });
-});
-
-beforeEach(async () => {
+async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
 
-  app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
+  const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [AUTHSERVICE_API_KEY_PACKAGE_NAME, AUTHSERVICE_JWT_PACKAGE_NAME],
-      protoPath: [ApiKeyProtoFile, JwtProtoFile],
+      package: [
+        ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
+        JwtProto.JUNO_JWT_PACKAGE_NAME,
+        HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
+      ],
+      protoPath: [ApiKeyProtoFile, HealthProtoFile, JwtProtoFile],
       url: process.env.AUTH_SERVICE_ADDR,
     },
   });
@@ -53,36 +42,138 @@ beforeEach(async () => {
   await app.init();
 
   await app.listen();
+  return app;
+}
+
+beforeAll(async () => {
+  app = await initApp();
+
+  const proto = ProtoLoader.loadSync([
+    ResetProtoFile,
+    IdentifiersProtoFile,
+    UserProtoFile,
+    ProjectProtoFile,
+    ApiKeyProtoFile,
+  ]) as any;
+
+  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  const projectClient = new protoGRPC.juno.project.ProjectService(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  const userClient = new protoGRPC.juno.user.UserService(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
+  });
+
+  await new Promise((resolve, reject) => {
+    projectClient.createProject({ name: 'project' }, (err, resp) => {
+      if (err) return reject(err);
+      console.log('Project created:', resp);
+      resolve(resp);
+    });
+  });
+
+  // Create user
+  await new Promise((resolve, reject) => {
+    userClient.createUser(
+      {
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test-User',
+        type: 'USER',
+      },
+      (err, resp) => {
+        if (err) return reject(err);
+        console.log('User created:', resp);
+        resolve(resp);
+      },
+    );
+  });
 });
 
-afterEach(async () => {
+afterAll(() => {
   app.close();
 });
 
 describe('Auth Service API Key Tests', () => {
-  let client: any;
+  let apiKeyClient: any;
 
   beforeEach(async () => {
     const proto = ProtoLoader.loadSync(ApiKeyProtoFile) as any;
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-    client = new protoGRPC.authservice.api_key.ApiKeyService(
+    apiKeyClient = new protoGRPC.juno.api_key.ApiKeyService(
       process.env.AUTH_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
   });
 
-  it('issues an API key', async () => {
-    const promise = new Promise((resolve) => {
-      client.issueApiKey({}, (err, resp) => {
-        expect(err).toBeNull();
-        expect(resp).toStrictEqual({});
-        resolve({});
-      });
+  it('issues an API key with correct parameters', async () => {
+    const response = await new Promise((resolve, reject) => {
+      apiKeyClient.issueApiKey(
+        {
+          project: { name: 'project' },
+          email: 'test@example.com',
+          password: 'password123',
+          description: 'Valid API key',
+        },
+        (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        },
+      );
     });
 
-    await promise;
+    expect(response).toBeDefined();
+  });
+
+  it('rejects new key creation with invalid parameters', async () => {
+    await expect(
+      new Promise((resolve, reject) => {
+        apiKeyClient.issueApiKey(
+          {
+            email: 'test@example.com',
+            password: 'password123',
+          },
+          (err, resp) => {
+            if (err) return reject(err);
+            return resolve(resp);
+          },
+        );
+      }),
+    ).rejects.toBeDefined(); // Expecting an error due to invalid parameters
+  });
+
+  it('rejects new key creation with an invalid master password', async () => {
+    await expect(
+      new Promise((resolve, reject) => {
+        apiKeyClient.issueApiKey(
+          {
+            project: { name: 'project' },
+            email: 'test@example.com',
+            password: 'notthepassword123',
+            description: 'API key request with invalid password',
+          },
+          (err, resp) => {
+            if (err) return reject(err);
+            return resolve(resp);
+          },
+        );
+      }),
+    ).rejects.toBeDefined(); // Expecting an error due to invalid master password
   });
 
   // it('revokes an API key', async () => {

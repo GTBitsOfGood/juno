@@ -14,8 +14,8 @@ import {
   UserProtoFile,
 } from 'juno-proto';
 
-const { DBSERVICE_USER_PACKAGE_NAME } = UserProto;
-const { DBSERVICE_PROJECT_PACKAGE_NAME } = ProjectProto;
+const { JUNO_USER_PACKAGE_NAME } = UserProto;
+const { JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 let app: INestMicroservice;
 
@@ -30,8 +30,8 @@ async function initApp() {
     transport: Transport.GRPC,
     options: {
       package: [
-        DBSERVICE_USER_PACKAGE_NAME,
-        DBSERVICE_PROJECT_PACKAGE_NAME,
+        JUNO_USER_PACKAGE_NAME,
+        JUNO_PROJECT_PACKAGE_NAME,
         ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
       ],
       protoPath: [
@@ -89,11 +89,11 @@ describe('DB Service Project Tests', () => {
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-    projectClient = new protoGRPC.dbservice.project.ProjectService(
+    projectClient = new protoGRPC.juno.project.ProjectService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
-    userClient = new protoGRPC.dbservice.user.UserService(
+    userClient = new protoGRPC.juno.user.UserService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );

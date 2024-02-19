@@ -30,10 +30,14 @@ model Project {
 model ApiKey {
   id          Int     @id @default(autoincrement())
   hash        String  @unique
+  scopes      ApiScope[]
   description String
   projectId   Int
   project     Project @relation(fields: [projectId], references: [id])
-  userVisible Boolean
+}
+
+enum ApiScope {
+  FULL
 }
 
 enum Role {
