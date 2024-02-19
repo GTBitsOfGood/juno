@@ -60,9 +60,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
             hash: apiKeyHash,
             description: request.description,
             scopes: [ApiKeyProto.ApiScope.FULL],
-            project: {
-              name: request.projectName,
-            },
+            project: request.project,
           },
         });
         if (!key) {
