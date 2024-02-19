@@ -22,7 +22,7 @@ export class ProjectController
     const project = await this.projectService.project(params);
     if (!project) {
       throw new RpcException({
-        status: status.NOT_FOUND,
+        code: status.NOT_FOUND,
         message: 'Project not found',
       });
     }

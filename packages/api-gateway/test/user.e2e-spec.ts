@@ -10,6 +10,7 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 
@@ -47,6 +48,7 @@ beforeEach(async () => {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
 });

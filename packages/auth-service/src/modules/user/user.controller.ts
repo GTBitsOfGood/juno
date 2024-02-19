@@ -31,7 +31,7 @@ export class UserController implements UserProto.UserAuthServiceController {
       );
     } catch (e) {
       throw new RpcException({
-        status: status.NOT_FOUND,
+        code: status.NOT_FOUND,
         message: 'No user found for email',
       });
     }
@@ -43,7 +43,7 @@ export class UserController implements UserProto.UserAuthServiceController {
       );
       if (!passwordEquals) {
         throw new RpcException({
-          status: status.PERMISSION_DENIED,
+          code: status.PERMISSION_DENIED,
           message: 'Incorrect password',
         });
       }

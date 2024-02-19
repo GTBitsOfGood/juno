@@ -44,7 +44,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
 
       if (user.type !== UserProto.UserType.SUPERADMIN) {
         throw new RpcException({
-          status: status.PERMISSION_DENIED,
+          code: status.PERMISSION_DENIED,
           message: 'User not permitted to generate keys',
         });
       }

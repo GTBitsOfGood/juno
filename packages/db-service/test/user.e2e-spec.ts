@@ -314,7 +314,6 @@ describe('DB Service User Tests', () => {
           updateParams: {},
         },
         (err) => {
-          console.log(err);
           expect(err.code).toBe(GRPC.status.INVALID_ARGUMENT);
           expect(err.details).toBe('Only one of id or email can be provided');
           resolve({});
