@@ -1,0 +1,59 @@
+import { Controller, Inject } from '@nestjs/common';
+import { UserProto } from 'juno-proto';
+import { lastValueFrom } from 'rxjs';
+import * as bcrypt from 'bcrypt';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
+
+@Controller('api_key')
+@UserProto.UserAuthServiceControllerMethods()
+export class UserController implements UserProto.UserAuthServiceController {
+  private userService: UserProto.UserServiceClient;
+
+  constructor(
+    @Inject(UserProto.USER_SERVICE_NAME) private userClient: ClientGrpc,
+  ) {}
+
+  onModuleInit() {
+    this.userService = this.userClient.getService<UserProto.UserServiceClient>(
+      UserProto.USER_SERVICE_NAME,
+    );
+  }
+  async authenticate(
+    request: UserProto.AuthenticateUserRequest,
+  ): Promise<UserProto.User> {
+    let passwordHash: UserProto.UserPasswordHash;
+    try {
+      passwordHash = await lastValueFrom(
+        this.userService.getUserPasswordHash({
+          email: request.email,
+        }),
+      );
+    } catch (e) {
+      throw new RpcException({
+        status: status.NOT_FOUND,
+        message: 'No user found for email',
+      });
+    }
+
+    try {
+      const passwordEquals = await bcrypt.compare(
+        request.password,
+        passwordHash.hash,
+      );
+      if (!passwordEquals) {
+        throw new RpcException({
+          status: status.PERMISSION_DENIED,
+          message: 'Incorrect password',
+        });
+      }
+      return lastValueFrom(
+        this.userService.getUser({
+          email: request.email,
+        }),
+      );
+    } catch (e) {
+      throw e;
+    }
+  }
+}
