@@ -33,13 +33,15 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
     let password: Observable<UserProto.UserPasswordHash>;
     try {
-      password = await this.userService.getUserPasswordHash({
+      password = this.userService.getUserPasswordHash({
         email: request.email,
       });
     } catch (e) {
       throw new Error('Failed to look up password hash for user');
     }
     const userPasswordHash = (await lastValueFrom(password)).hash;
+
+    // TODO: Validate user type before generating key (only linked admin or any superadmin)
 
     try {
       const passwordEquals = await bcrypt.compare(
@@ -58,7 +60,9 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
             hash: apiKeyHash,
             description: request.description,
             scopes: [ApiKeyProto.ApiScope.FULL],
-            project: request.project,
+            project: {
+              name: request.projectName,
+            },
           },
         });
         if (!key) {
