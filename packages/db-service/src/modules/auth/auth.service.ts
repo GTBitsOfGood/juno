@@ -1,4 +1,6 @@
+import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { ApiKey, Prisma } from '@prisma/client';
 import { ApiKeyProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
@@ -49,13 +51,19 @@ export class AuthService {
           where: { name: name },
         });
         if (!project) {
-          throw new Error('Project not found');
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: 'Project not found',
+          });
         }
         projectId = project.id;
       }
 
       if (!projectId) {
-        throw new Error('Project ID is required');
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: 'Project not found',
+        });
       }
 
       const prismaApiKey = await this.prisma.apiKey.create({

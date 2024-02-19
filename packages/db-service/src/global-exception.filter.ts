@@ -50,9 +50,12 @@ export class CustomRpcExceptionFilter
     } else if (exception instanceof RpcException) {
       return throwError(() => exception.getError());
     } else {
-      console.error('Unexpected Error:', exception.message);
+      console.error(`Unexpected Error: ${JSON.stringify(exception)}`);
       return throwError(() =>
-        new RpcException('An unexpected error occurred').getError(),
+        new RpcException({
+          code: status.INTERNAL,
+          message: 'An unknown error occurred',
+        }).getError(),
       );
     }
   }

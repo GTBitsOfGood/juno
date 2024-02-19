@@ -30,6 +30,7 @@ export class UserController implements UserProto.UserAuthServiceController {
         }),
       );
     } catch (e) {
+      console.log(`${JSON.stringify(e)}`);
       throw new RpcException({
         code: status.NOT_FOUND,
         message: 'No user found for email',

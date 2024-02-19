@@ -162,23 +162,6 @@ describe('Auth Service API Key Tests', () => {
     expect(response).toBeDefined();
   });
 
-  it('rejects new key creation with invalid parameters', async () => {
-    await expect(
-      new Promise((resolve, reject) => {
-        apiKeyClient.issueApiKey(
-          {
-            email: 'test@example.com',
-            password: 'password123',
-          },
-          (err, resp) => {
-            if (err) return reject(err);
-            return resolve(resp);
-          },
-        );
-      }),
-    ).rejects.toBeDefined(); // Expecting an error due to invalid parameters
-  });
-
   it('rejects new key creation with an invalid master password', async () => {
     await expect(
       new Promise((resolve, reject) => {

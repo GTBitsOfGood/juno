@@ -60,7 +60,10 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
         },
       });
       if (!key) {
-        throw new Error('Failed to create API key');
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: 'Failed to create API Key',
+        });
       }
       return {
         apiKey: await lastValueFrom(key),
