@@ -6,7 +6,8 @@ import {
   validateUserIdentifier,
 } from 'src/utility/validate';
 import { IdentifierProto, ProjectProto } from 'juno-proto';
-
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 @Controller()
 @ProjectProto.ProjectServiceControllerMethods()
 export class ProjectController
@@ -19,6 +20,12 @@ export class ProjectController
   ): Promise<Project> {
     const params = validateProjectIdentifier(identifier);
     const project = await this.projectService.project(params);
+    if (!project) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Project not found',
+      });
+    }
     return project;
   }
 

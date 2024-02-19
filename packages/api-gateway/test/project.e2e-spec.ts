@@ -10,6 +10,7 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 
@@ -47,6 +48,7 @@ beforeEach(async () => {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
 });
@@ -140,22 +142,22 @@ describe('Project Retrieval Routes', () => {
     await request(app.getHttpServer())
       .get('/project/id/abc')
       .expect(400)
-      .expect('{"statusCode":400,"message":"id must be a number"}');
+      .expect('id must be a number');
   });
 
-  // it('Get project with non-existent id', async () => {
-  //   await request(app.getHttpServer())
-  //     .get('/project/id/0')
-  //     .expect(400)
-  //     .expect('{"statusCode":400,"message":"id does not exist"}')
-  // });
+  it('Get project with non-existent id', async () => {
+    const resp = await request(app.getHttpServer())
+      .get('/project/id/0')
+      .expect(404);
+    expect(resp.text).toContain('Project not found');
+  });
 
-  // it('Get project with non-existent name', async () => {
-  //   await request(app.getHttpServer())
-  //     .get('/project/name/abc')
-  //     .expect(400)
-  //     .expect('{"statusCode":400,"message":"name does not exist"}')
-  // });
+  it('Get project with non-existent name', async () => {
+    const resp = await request(app.getHttpServer())
+      .get('/project/name/abc')
+      .expect(404);
+    expect(resp.text).toContain('Project not found');
+  });
 });
 
 describe('Project Update Routes', () => {
@@ -203,28 +205,29 @@ describe('Project Update Routes', () => {
         email: 'test@user.com',
       })
       .expect(400)
-      .expect('{"statusCode":400,"message":"id must be a number"}');
+      .expect('id must be a number');
   });
 
-  // it('Link user with project id using non-number user id input', async () => {
-  //   await request(app.getHttpServer())
-  //     .put('/project/id/1/user')
-  //     .send({
-  //       id: 'abc',
-  //     })
-  //     .expect(400)
-  //     .expect('{"statusCode":400,"message":"id must be a number"}');
-  // });
+  it('Link user with project id using non-number user id input', async () => {
+    const resp = await request(app.getHttpServer())
+      .put('/project/id/1/user')
+      .send({
+        id: 'abc',
+      })
+      .expect(404);
 
-  // it('Link user with project id using invalid user email input', async () => {
-  //   await request(app.getHttpServer())
-  //     .put('/project/id/1/user')
-  //     .send({
-  //       email: 'abc',
-  //     })
-  //     .expect(400)
-  //     .expect('');
-  // });
+    expect(resp.text).toContain('does not exist');
+  });
+
+  it('Link user with project id using invalid user email input', async () => {
+    const resp = await request(app.getHttpServer())
+      .put('/project/id/1/user')
+      .send({
+        email: 'abc',
+      })
+      .expect(404);
+    expect(resp.text).toContain('does not exist');
+  });
 
   it('Link user with project name using valid user id input', async () => {
     await request(app.getHttpServer())
@@ -244,23 +247,23 @@ describe('Project Update Routes', () => {
       .expect(200);
   });
 
-  // it('Link user with project name using non-number user id input', async () => {
-  //   await request(app.getHttpServer())
-  //     .put('/project/name/testProject/user')
-  //     .send({
-  //       id: 'abc',
-  //     })
-  //     .expect(400)
-  //     .expect('{"statusCode":400,"message":"id must be a number"}');
-  // });
+  it('Link user with project name using non-number user id input', async () => {
+    const resp = await request(app.getHttpServer())
+      .put('/project/name/testProject/user')
+      .send({
+        id: 'abc',
+      })
+      .expect(404);
+    expect(resp.text).toContain('does not exist');
+  });
 
-  // it('Link user with project name using invalid user email input', async () => {
-  //   await request(app.getHttpServer())
-  //     .put('/project/name/testProject/user')
-  //     .send({
-  //       email: 'abc',
-  //     })
-  //     .expect(400)
-  //     .expect('');
-  // });
+  it('Link user with project name using invalid user email input', async () => {
+    const resp = await request(app.getHttpServer())
+      .put('/project/name/testProject/user')
+      .send({
+        email: 'abc',
+      })
+      .expect(404);
+    expect(resp.text).toContain('does not exist');
+  });
 });
