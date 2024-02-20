@@ -96,3 +96,70 @@ describe('Email Registration Routes', () => {
       .expect(201); // Assuming the server responds with 201 Created on successful registration
   });
 });
+
+describe('EmailController (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('should return 400 when body parameters are missing', async () => {
+    return request(app.getHttpServer()).post('/email/send').expect(400);
+  });
+
+  it('should return 401 when Authorization header is missing', async () => {
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .send({
+        destination: 'test@example.com',
+        subject: 'Test Subject',
+        body: 'Test Body',
+      })
+      .expect(401);
+  });
+
+  it('should return 401 when JWT is invalid', async () => {
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer invalid_token')
+      .send({
+        destination: 'test@example.com',
+        subject: 'Test Subject',
+        body: 'Test Body',
+      })
+      .expect(401);
+  });
+
+  it('should return 200 when parameters are valid and JWT is valid', async () => {
+    const userCreateResp = await request(app.getHttpServer())
+      .post('/user')
+      .send({
+        password: 'pwd123',
+        name: 'John Doe',
+        email: 'john@example.com',
+      });
+
+    // TODO, use user to issue JWT and send email
+
+    const validToken = '';
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + validToken)
+      .send({
+        destination: 'test@example.com',
+        subject: 'Test Subject',
+        body: 'Test Body',
+      })
+      .expect(200);
+  });
+});

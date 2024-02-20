@@ -4,9 +4,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { EmailController } from './email.controller';
 import { ProjectLinkingMiddleware } from 'src/middleware/project.middleware';
-import { JwtProto, JwtProtoFile } from 'juno-proto';
+import { EmailProto, EmailProtoFile, JwtProto, JwtProtoFile } from 'juno-proto';
 
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
+const { EMAIL_SERVICE_NAME, JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
 
 @Module({
   imports: [
@@ -21,6 +22,15 @@ const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
           url: process.env.AUTH_SERVICE_ADDR,
           package: JUNO_JWT_PACKAGE_NAME,
           protoPath: JwtProtoFile,
+        },
+      },
+      {
+        name: EMAIL_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.EMAIL_SERVICE_ADDR,
+          package: JUNO_EMAIL_PACKAGE_NAME,
+          protoPath: EmailProtoFile,
         },
       },
     ]),
