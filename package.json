@@ -24,9 +24,11 @@
     "preinstall": "yarn gen-proto",
     "test:e2e:api-gateway-live": "GATEWAY_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from api-gateway",
     "test:e2e:auth-service-live": "AUTH_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from auth-service auth-service",
+    "test:e2e:email-service-live": "EMAIL_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from email-service email-service",
     "test:e2e:db-service-live": "DB_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from db-service db-service",
     "test:e2e:api-gateway": "GATEWAY_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from api-gateway",
     "test:e2e:auth-service": "AUTH_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from auth-service auth-service",
+    "test:e2e:email-service": "EMAIL_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from email-service email-service",
     "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test yarn start:dev --exit-code-from db-service db-service"
   },
   "devDependencies": {

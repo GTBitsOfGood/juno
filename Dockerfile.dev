@@ -66,6 +66,20 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/auth-service
 
+FROM base-service as email-service-dev
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/email-service/node_modules ./packages/node_modules/
+
+COPY . .
+
+COPY --from=deps /app/packages/proto/ ./packages/proto/
+
+WORKDIR /app/packages/email-service
+
 FROM base-service as db-service-dev
 
 WORKDIR /app

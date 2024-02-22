@@ -10,6 +10,7 @@ services:
     environment:
       DB_SERVICE_ADDR: db-service:5000
       AUTH_SERVICE_ADDR: auth-service:5000
+      EMAIL_SERVICE_ADDR: email-service:5000
     networks:
       - bog-api-net
     depends_on:
@@ -27,6 +28,7 @@ services:
     environment:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
+      EMAIL_SERVICE_ADDR: email-service:5000
     networks:
       - bog-api-net
     depends_on:
@@ -34,6 +36,29 @@ services:
         condition: service_healthy
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=auth-service:5000']
+      interval: 2s
+      timeout: 10s
+      retries: 10
+
+  email-service:
+    build:
+      dockerfile: Dockerfile.dev
+      target: email-service-dev
+      context: .
+    ports:
+      - 5000
+    entrypoint: yarn ${EMAIL_COMMAND-start:dev}
+    environment:
+      AUTH_SERVICE_ADDR: auth-service:5000
+      DB_SERVICE_ADDR: db-service:5000
+      EMAIL_SERVICE_ADDR: email-service:5000
+    networks:
+      - bog-api-net
+    depends_on:
+      db-service:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'grpc_health_probe -addr=email-service:5000']
       interval: 2s
       timeout: 10s
       retries: 10
@@ -49,6 +74,7 @@ services:
     environment:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
+      EMAIL_SERVICE_ADDR: email-service:5000
       DATABASE_URL: postgresql://user:password@db
       NODE_ENV: test
     networks:
