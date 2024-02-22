@@ -31,6 +31,22 @@ services:
         - action: rebuild
           path: ./Dockerfile.dev
 
+  email-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: email-service
+    volumes:
+      - ./packages/email-service:/app/packages/email-service
+      - /app/packages/email-service/node_modules
+    develop:
+      watch:
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./packages/email-service/package.json
+        - action: rebuild
+          path: ./Dockerfile.dev
+
   db-service:
     extends:
       file: docker-compose-dev.yml

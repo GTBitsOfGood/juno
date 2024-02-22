@@ -22,6 +22,16 @@ jobs:
       - name: Test
         run: yarn test:e2e:auth-service
 
+  email-service:
+    name: Email Service E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test
+        run: yarn test:e2e:email-service
+
   db-service:
     name: DB Service E2E Tests
     runs-on: ubuntu-latest
