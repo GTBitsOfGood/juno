@@ -30,11 +30,11 @@ services:
           path: ./packages/auth-service/package.json
         - action: rebuild
           path: ./Dockerfile.dev
-  
+
   email-service:
     extends:
       file: docker-compose-dev.yml
-      service: email-service 
+      service: email-service
     volumes:
       - ./packages/email-service:/app/packages/email-service
       - /app/packages/email-service/node_modules

@@ -20,7 +20,7 @@ services:
       watch:
         - action: rebuild
           path: ./packages/proto/package.json
-  
+
   email-service:
     extends:
       file: docker-compose-dev.yml
