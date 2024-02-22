@@ -1,11 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { UserController } from './user.controller';
 import { UserProto, UserProtoFile } from 'juno-proto';
+import { CredentialsMiddleware } from 'src/credentials.middleware';
 
-const { USER_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
+const { USER_SERVICE_NAME, USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } =
+  UserProto;
 
 @Module({
   imports: [
@@ -22,8 +24,22 @@ const { USER_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
           protoPath: UserProtoFile,
         },
       },
+      {
+        name: USER_AUTH_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          package: JUNO_USER_PACKAGE_NAME,
+          protoPath: UserProtoFile,
+        },
+      },
     ]),
   ],
   controllers: [UserController],
 })
-export class UserModule {}
+export class UserModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(CredentialsMiddleware)
+      .forRoutes({ path: 'user', method: RequestMethod.POST });
+  }
+}

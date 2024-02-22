@@ -1,10 +1,17 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ProjectController } from './project.controller';
-import { ProjectProto, ProjectProtoFile } from 'juno-proto';
+import {
+  ProjectProto,
+  ProjectProtoFile,
+  UserProto,
+  UserProtoFile,
+} from 'juno-proto';
+import { CredentialsMiddleware } from 'src/credentials.middleware';
 
+const { USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
 const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 // TODO: Make this module Auth protected
@@ -23,8 +30,22 @@ const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
           protoPath: ProjectProtoFile,
         },
       },
+      {
+        name: USER_AUTH_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          package: JUNO_USER_PACKAGE_NAME,
+          protoPath: UserProtoFile,
+        },
+      },
     ]),
   ],
   controllers: [ProjectController],
 })
-export class ProjectModule {}
+export class ProjectModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(CredentialsMiddleware)
+      .forRoutes({ path: 'user', method: RequestMethod.POST });
+  }
+}
