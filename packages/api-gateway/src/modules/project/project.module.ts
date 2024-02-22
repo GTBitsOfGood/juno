@@ -14,8 +14,12 @@ import {
   ProjectProtoFile,
   JwtProto,
   JwtProtoFile,
+  UserProto,
+  UserProtoFile,
 } from 'juno-proto';
+import { CredentialsMiddleware } from 'src/credentials.middleware';
 
+const { USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
 const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 
@@ -44,6 +48,15 @@ const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
           protoPath: ProjectProtoFile,
         },
       },
+      {
+        name: USER_AUTH_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: JUNO_USER_PACKAGE_NAME,
+          protoPath: UserProtoFile,
+        },
+      },
     ]),
   ],
   controllers: [ProjectController],
@@ -56,5 +69,8 @@ export class ProjectModule implements NestModule {
         { path: 'project/id/:id/user', method: RequestMethod.PUT },
         { path: 'project/name/:name/user', method: RequestMethod.PUT },
       );
+    consumer
+      .apply(CredentialsMiddleware)
+      .forRoutes({ path: 'project', method: RequestMethod.POST });
   }
 }
