@@ -4,7 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { UserController } from './user.controller';
 import { UserProto, UserProtoFile } from 'juno-proto';
-import { CredentialsMiddleware } from 'src/credentials.middleware';
+import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
 
 const { USER_SERVICE_NAME, USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } =
   UserProto;

@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -9,7 +14,7 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-import { CredentialsMiddleware } from 'src/credentials.middleware';
+import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
 
 const { USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
 const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
@@ -42,10 +47,13 @@ const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
   ],
   controllers: [ProjectController],
 })
-export class ProjectModule {
+export class ProjectModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CredentialsMiddleware)
-      .forRoutes({ path: 'user', method: RequestMethod.POST });
+      .forRoutes(
+        { path: 'user', method: RequestMethod.POST },
+        { path: 'user/type', method: RequestMethod.POST },
+      );
   }
 }
