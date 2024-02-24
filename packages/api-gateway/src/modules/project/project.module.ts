@@ -17,7 +17,7 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-import { CredentialsMiddleware } from 'src/credentials.middleware';
+import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
 
 const { USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
 const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
