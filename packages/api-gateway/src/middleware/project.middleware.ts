@@ -26,7 +26,6 @@ export class ProjectLinkingMiddleware implements NestMiddleware, OnModuleInit {
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
-    console.log('Middleware: ' + req.originalUrl);
     try {
       if (!req.headers.authorization) {
         throw new Error('No authorization headers');

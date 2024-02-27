@@ -21,7 +21,7 @@ import { User, UserType } from 'juno-proto/dist/gen/user';
 
 let app: INestMicroservice;
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({

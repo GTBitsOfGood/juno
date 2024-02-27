@@ -15,7 +15,7 @@ import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;

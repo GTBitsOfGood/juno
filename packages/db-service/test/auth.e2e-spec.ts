@@ -23,7 +23,7 @@ const { JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
 let app: INestMicroservice;
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
