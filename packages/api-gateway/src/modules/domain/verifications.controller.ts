@@ -8,15 +8,15 @@ import {
 
 @Controller('domain')
 export class VerifyController {
-  @Post('register')
-  async registerDomain(
+  @Post('verify')
+  async verifyDomain(
     @Body() body: verifyDomainBody,
   ): Promise<verifyDomainResponse> {
     return undefined;
   }
 
-  @Post('verify')
-  async verifyDomain(
+  @Post('register')
+  async registerDomain(
     @Body() body: registerDomainBody,
   ): Promise<registerDomainResponse> {
     return undefined;
