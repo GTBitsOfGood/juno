@@ -216,8 +216,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using non-number user id input', async () => {
+    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
       .put('/project/id/1/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         id: 'abc',
       })
@@ -227,8 +229,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using invalid user email input', async () => {
+    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
       .put('/project/id/1/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'abc',
       })
