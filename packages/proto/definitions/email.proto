@@ -5,15 +5,28 @@ package juno.email;
 import "identifiers.proto";
 
 service EmailService {
-  rpc sendEmail(SendEmailRequest) returns (SendEmailRequestResponse);
+  rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
 }
 
 message SendEmailRequest {
-    string destination = 1;
-    string subject = 2;
-    string body = 3;
+  repeated EmailRecipient recipients = 1;
+  EmailSender sender = 2;
+  repeated EmailContent content = 3;
 }
 
-message SendEmailRequestResponse {
-    bool success = 1;
+message SendEmailResponse { bool success = 1; }
+
+message EmailRecipient {
+  string email = 1;
+  optional string name = 2;
+}
+
+message EmailSender {
+  string email = 1;
+  optional string name = 2;
+}
+
+message EmailContent {
+  string type = 1;
+  string value = 2;
 }
