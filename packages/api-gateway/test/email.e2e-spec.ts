@@ -114,7 +114,11 @@ describe('EmailController (e2e)', () => {
   });
 
   it('should return 400 when body parameters are missing', async () => {
-    return request(app.getHttpServer()).post('/email/send').expect(400);
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .expect(400);
   });
 
   it('should return 401 when Authorization header is missing', async () => {
@@ -151,15 +155,15 @@ describe('EmailController (e2e)', () => {
 
     // TODO, use user to issue JWT and send email
 
-    const validToken = '';
+    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
-      .set('Authorization', 'Bearer ' + validToken)
+      .set('Authorization', 'Bearer ' + token)
       .send({
         destination: 'test@example.com',
         subject: 'Test Subject',
         body: 'Test Body',
       })
-      .expect(200);
+      .expect(201);
   });
 });
