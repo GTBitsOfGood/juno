@@ -145,16 +145,6 @@ describe('EmailController (e2e)', () => {
   });
 
   it('should return 200 when parameters are valid and JWT is valid', async () => {
-    const userCreateResp = await request(app.getHttpServer())
-      .post('/user')
-      .send({
-        password: 'pwd123',
-        name: 'John Doe',
-        email: 'john@example.com',
-      });
-
-    // TODO, use user to issue JWT and send email
-
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
