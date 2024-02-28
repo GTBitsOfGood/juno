@@ -1,17 +1,9 @@
 import { Body, Controller, Post, OnModuleInit } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
 import { RegisterEmailModel, RegisterEmailResponse } from 'src/models/email';
 
 @Controller('email')
 export class EmailController implements OnModuleInit {
-  // constructor(@Inject(EMAIL_SERVICE_NAME) private emailClient: ClientGrpc) {}
-
-  onModuleInit() {
-    // this.emailService =
-    // this.emailClient.getService<EmailProto.EmailServiceClient>(
-    //   EMAIL_SERVICE_NAME,
-    // );
-  }
+  onModuleInit() {}
 
   @Post('register')
   async registerSenderAddress(@Body('') params: RegisterEmailModel) {
