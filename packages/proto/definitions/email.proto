@@ -14,7 +14,7 @@ message SendEmailRequest {
   repeated EmailContent content = 3;
 }
 
-message SendEmailResponse { bool success = 1; }
+message SendEmailResponse { int32 statusCode = 1; }
 
 message EmailRecipient {
   string email = 1;

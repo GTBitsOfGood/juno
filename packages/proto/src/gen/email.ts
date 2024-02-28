@@ -11,7 +11,7 @@ export interface SendEmailRequest {
 }
 
 export interface SendEmailResponse {
-  success: boolean;
+  statusCode: number;
 }
 
 export interface EmailRecipient {
