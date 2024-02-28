@@ -10,7 +10,7 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
-
+import * as jwt from 'jsonwebtoken';
 let app: INestApplication;
 
 beforeAll(async () => {
@@ -51,11 +51,17 @@ beforeEach(async () => {
 
 describe('Email Registration Routes', () => {
   it('Registers an email without a body', () => {
-    return request(app.getHttpServer()).post('/email/register').expect(400);
-  });
-  it('Has been called with a malformed emaiil', () => {
+    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/register')
+      .set('Authorization', 'Bearer ' + token)
+      .expect(400);
+  });
+  it('Has been called with a malformed emaiil', () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/register')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'invalidemail', // Malformed email
       })
@@ -63,7 +69,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with no Authorization header', () => {
     return request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/email/register')
       .send({
         email: 'validemail@example.com',
       })
@@ -71,7 +77,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with an invalid JWT', () => {
     return request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/email/register')
       .set('Authorization', 'Bearer invalid.jwt.token')
       .send({
         email: 'validemail@example.com',
@@ -80,12 +86,13 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with a correct payload (header + body)', () => {
     // Assuming 'valid.jwt.token' is a placeholder for a valid JWT obtained in a way relevant to your test setup
+    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/auth/register')
-      .set('Authorization', 'Bearer valid.jwt.token')
+      .post('/email/register')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'validemail@example.com',
       })
-      .expect(200); // Assuming the server responds with 201 Created on successful registration
+      .expect(201); // Assuming the server responds with 201 Created on successful registration
   });
 });

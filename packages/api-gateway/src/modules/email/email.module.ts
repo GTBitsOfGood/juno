@@ -1,11 +1,12 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { EmailController } from './email.controller';
-import { EmailProto, EmailProtoFile } from 'juno-proto';
+import { ProjectLinkingMiddleware } from 'src/middleware/project.middleware';
+import { JwtProto, JwtProtoFile } from 'juno-proto';
 
-const { EMAIL_SERVICE_NAME, DBSERVICE_EMAIL_PACKAGE_NAME } = EmailProto;
+const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 
 @Module({
   imports: [
@@ -14,16 +15,20 @@ const { EMAIL_SERVICE_NAME, DBSERVICE_EMAIL_PACKAGE_NAME } = EmailProto;
     }),
     ClientsModule.register([
       {
-        name: EMAIL_SERVICE_NAME,
+        name: JWT_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: process.env.DB_SERVICE_ADDR,
-          package: DBSERVICE_EMAIL_PACKAGE_NAME,
-          protoPath: EmailProtoFile,
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: JUNO_JWT_PACKAGE_NAME,
+          protoPath: JwtProtoFile,
         },
       },
     ]),
   ],
   controllers: [EmailController],
 })
-export class EmailModule {}
+export class EmailModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ProjectLinkingMiddleware).forRoutes('email/*');
+  }
+}

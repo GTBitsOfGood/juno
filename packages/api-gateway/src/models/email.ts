@@ -1,16 +1,15 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { EmailProto } from 'juno-proto';
 
 export class RegisterEmailModel {
   @IsNotEmpty()
   @IsEmail()
-  address: string;
+  email: string;
 }
 
 export class RegisterEmailResponse {
-  address: string;
+  email: string;
 
-  constructor(email: EmailProto.Email) {
-    this.address = email.address;
+  constructor(email: string) {
+    this.email = email;
   }
 }
