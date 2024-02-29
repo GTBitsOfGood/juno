@@ -34,6 +34,7 @@ model ApiKey {
   description String
   projectId   Int
   project     Project @relation(fields: [projectId], references: [id])
+  environment String
 }
 
 enum ApiScope {

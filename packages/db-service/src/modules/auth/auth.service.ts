@@ -72,6 +72,7 @@ export class AuthService {
           description: input.description,
           scopes: [],
           projectId: projectId,
+          environment: input.environment,
         },
         include: {
           project: true,

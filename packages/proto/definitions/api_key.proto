@@ -19,6 +19,7 @@ message IssueApiKeyRequest {
   string email = 2;
   string password = 3;
   string description = 4;
+  string environment = 5;
 }
 
 message CreateApiKeyParams {

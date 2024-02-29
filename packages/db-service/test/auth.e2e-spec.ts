@@ -123,6 +123,7 @@ describe('DB Service API Key Tests', () => {
             description: 'Valid API key',
             scopes: [0],
             project: { name: 'apiKeyTestProject' },
+            environment: 'dev',
           },
         },
         (err, res) => {
@@ -142,5 +143,6 @@ describe('DB Service API Key Tests', () => {
     );
     expect(response).toHaveProperty('description', 'Valid API key');
     expect(response).toHaveProperty('project');
+    expect(response).toHaveProperty('environment', 'dev');
   });
 });
