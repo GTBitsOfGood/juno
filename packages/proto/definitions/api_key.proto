@@ -36,6 +36,7 @@ message ApiKey {
   string description = 3;
   repeated ApiScope scopes = 4;
   identifiers.ProjectIdentifier project = 5;
+  string environment = 6;
 }
 
 message ApiKeyNoId { 

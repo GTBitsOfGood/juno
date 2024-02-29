@@ -102,6 +102,7 @@ const convertDbApiKeyToTs = (key: ApiKey): ApiKeyProto.ApiKey => {
     scopes: mappedScopes,
     description: key.description,
     project: { id: key.projectId },
+    environment: key.environment,
   };
   return apiKey;
 };
