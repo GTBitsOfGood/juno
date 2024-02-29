@@ -43,6 +43,7 @@ message ApiKeyNoId {
   string description = 2;
   repeated ApiScope scopes = 3;
   identifiers.ProjectIdentifier project = 4;
+  string environment = 5;
 }
 
 message IssueApiKeyResponse {
