@@ -25,6 +25,7 @@ model Project {
   name    String            @unique
   apiKeys ApiKey[]
   users   User[]
+  emails Email[]
 }
 
 model ApiKey {
@@ -45,4 +46,12 @@ enum Role {
   SUPERADMIN
   ADMIN
   USER
+}
+
+model Email {
+  @@id([name, projectId])
+  name String
+  description String? // Optional metadata/description field
+  project Project @relation(fields: [projectId], references: [id])
+  projectId Int
 }

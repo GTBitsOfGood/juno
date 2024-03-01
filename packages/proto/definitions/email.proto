@@ -5,7 +5,18 @@ package juno.email;
 import "identifiers.proto";
 
 service EmailService {
+  rpc getEmail(identifiers.EmailIdentifier) returns (Email);
+  rpc createEmail(CreateEmailRequest) returns (Email);
+  rpc updateEmail(UpdateEmailRequest) returns (Email);
+  rpc deleteEmail(identifiers.EmailIdentifier) returns (Email);
   rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
+}
+
+message Email {
+  int64 id = 1;
+  string name = 2;
+  optional string description = 3;
+  identifiers.ProjectIdentifier project = 4;
 }
 
 message SendEmailRequest {
@@ -14,7 +25,7 @@ message SendEmailRequest {
   repeated EmailContent content = 3;
 }
 
-message SendEmailResponse { bool success = 1; }
+message SendEmailResponse { int32 statusCode = 1; }
 
 message EmailRecipient {
   string email = 1;
@@ -29,4 +40,17 @@ message EmailSender {
 message EmailContent {
   string type = 1;
   string value = 2;
+}
+
+message CreateEmailRequest {
+  string name = 1;
+  identifiers.ProjectIdentifier project = 2;
+  optional string description = 3;
+}
+
+message EmailUpdateParams { optional string description = 1; }
+
+message UpdateEmailRequest {
+  identifiers.EmailIdentifier emailIdentifier = 1;
+  EmailUpdateParams updateParams = 2;
 }

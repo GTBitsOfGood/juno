@@ -1,8 +1,16 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { EmailIdentifier, ProjectIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.email';
+
+export interface Email {
+  id: number;
+  name: string;
+  description?: string | undefined;
+  project: ProjectIdentifier | undefined;
+}
 
 export interface SendEmailRequest {
   recipients: EmailRecipient[];
@@ -11,7 +19,7 @@ export interface SendEmailRequest {
 }
 
 export interface SendEmailResponse {
-  success: boolean;
+  statusCode: number;
 }
 
 export interface EmailRecipient {
@@ -29,13 +37,52 @@ export interface EmailContent {
   value: string;
 }
 
+export interface CreateEmailRequest {
+  name: string;
+  project: ProjectIdentifier | undefined;
+  description?: string | undefined;
+}
+
+export interface EmailUpdateParams {
+  description?: string | undefined;
+}
+
+export interface UpdateEmailRequest {
+  emailIdentifier: EmailIdentifier | undefined;
+  updateParams: EmailUpdateParams | undefined;
+}
+
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
+  getEmail(request: EmailIdentifier): Observable<Email>;
+
+  createEmail(request: CreateEmailRequest): Observable<Email>;
+
+  updateEmail(request: UpdateEmailRequest): Observable<Email>;
+
+  deleteEmail(request: EmailIdentifier): Observable<Email>;
+
   sendEmail(request: SendEmailRequest): Observable<SendEmailResponse>;
 }
 
 export interface EmailServiceController {
+  getEmail(
+    request: EmailIdentifier,
+  ): Promise<Email> | Observable<Email> | Email;
+
+  createEmail(
+    request: CreateEmailRequest,
+  ): Promise<Email> | Observable<Email> | Email;
+
+  updateEmail(
+    request: UpdateEmailRequest,
+  ): Promise<Email> | Observable<Email> | Email;
+
+  deleteEmail(
+    request: EmailIdentifier,
+  ): Promise<Email> | Observable<Email> | Email;
+
   sendEmail(
     request: SendEmailRequest,
   ):
@@ -46,7 +93,13 @@ export interface EmailServiceController {
 
 export function EmailServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['sendEmail'];
+    const grpcMethods: string[] = [
+      'getEmail',
+      'createEmail',
+      'updateEmail',
+      'deleteEmail',
+      'sendEmail',
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

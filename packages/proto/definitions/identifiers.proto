@@ -15,3 +15,8 @@ message UserIdentifier {
     string email = 2;
   }
 }
+
+message EmailIdentifier {
+  int64 projectId = 1;
+  string name = 2;
+}
