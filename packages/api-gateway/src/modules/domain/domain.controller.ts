@@ -27,14 +27,7 @@ export class DomainController {
   @Post('verify')
   async verifyDomain(
     @Body() body: verifyDomainBody,
-    @Req() request: Request,
   ): Promise<verifyDomainResponse> {
-    const authToken = request.headers['Authorization']?.split(' ')[1];
-    if (!authToken) {
-      throw new Error('Authorization header is empty');
-    }
-    // middleware inputted here
-
     const sendgridRequest = {
       url: `/v3/whitelabel/domains/${id}/validate`,
       method: 'POST' as HttpMethod,
@@ -52,14 +45,7 @@ export class DomainController {
   @Post('register')
   async registerDomain(
     @Body() body: registerDomainBody,
-    @Req() request: Request,
   ): Promise<registerDomainResponse> {
-    const authToken = request.headers['Authorization']?.split(' ')[1];
-    if (!authToken) {
-      throw new Error('Authorization header is empty');
-    }
-    // midleware here
-
     const data = {
       domain: body.domain,
       subdomain: body.subDomain,
