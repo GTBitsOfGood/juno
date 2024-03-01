@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import {
   registerDomainBody,
   registerDomainResponse,
@@ -28,6 +28,9 @@ export class DomainController {
   async verifyDomain(
     @Body() body: verifyDomainBody,
   ): Promise<verifyDomainResponse> {
+    //domain to id mapping
+    const id = body.domain;
+
     const sendgridRequest = {
       url: `/v3/whitelabel/domains/${id}/validate`,
       method: 'POST' as HttpMethod,
