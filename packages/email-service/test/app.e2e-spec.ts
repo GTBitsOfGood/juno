@@ -4,9 +4,10 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ResetProtoFile } from 'juno-proto';
+import { EmailProtoFile, EmailProto } from 'juno-proto';
 
 let app: INestMicroservice;
+let emailClient: any;
 
 jest.setTimeout(15000);
 
@@ -18,14 +19,13 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [],
-      protoPath: [],
+      package: 'juno',
+      protoPath: [EmailProtoFile],
       url: process.env.EMAIL_SERVICE_ADDR,
     },
   });
 
   await app.init();
-
   await app.listen();
   return app;
 }
@@ -33,26 +33,61 @@ async function initApp() {
 beforeAll(async () => {
   app = await initApp();
 
-  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
+  const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+  emailClient = new protoGRPC.juno.email.EmailService(
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
-
-  await new Promise((resolve) => {
-    resetClient.resetDb({}, () => {
-      resolve(0);
-    });
-  });
 });
 
 afterAll(() => {
   app.close();
 });
 
-it('Dummy test', () => {
-  expect('1').toEqual('1');
+it('should successfully register a domain', async () => {
+  const response: EmailProto.AuthenticateDomainResponse = await new Promise(
+    (resolve, reject) => {
+      emailClient.authenticateDomain(
+        {
+          domain: 'example.com',
+          subdomain: 'mail',
+        },
+        (err: any, response: EmailProto.AuthenticateDomainResponse) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        },
+      );
+    },
+  );
+
+  expect(response).toBeDefined();
+  expect(response.statusCode).toEqual('201');
+  expect(response.id).toBeDefined();
+  expect(response.valid).toEqual('true');
+});
+
+it('should fail to register a domain', async () => {
+  const response: EmailProto.AuthenticateDomainResponse = await new Promise(
+    (resolve, reject) => {
+      emailClient.authenticateDomain(
+        {
+          domain: '',
+          subdomain: '',
+        },
+        (err: any, response: EmailProto.AuthenticateDomainResponse) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        },
+      );
+    },
+  );
+  expect(response.statusCode).not.toEqual('201');
 });
