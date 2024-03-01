@@ -15,6 +15,7 @@ export interface IssueApiKeyRequest {
   email: string;
   password: string;
   description: string;
+  environment: string;
 }
 
 export interface CreateApiKeyParams {
