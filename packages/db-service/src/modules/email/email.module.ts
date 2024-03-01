@@ -7,4 +7,4 @@ import { PrismaService } from 'src/prisma.service';
   controllers: [EmailController],
   providers: [EmailService, PrismaService],
 })
-export class ProjectModule {}
+export class EmailModule {}

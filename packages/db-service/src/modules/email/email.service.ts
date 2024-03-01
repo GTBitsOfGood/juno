@@ -35,11 +35,11 @@ export class EmailService {
   }
 
   async updateEmail(
-    project: Prisma.EmailWhereUniqueInput,
+    email: Prisma.EmailWhereUniqueInput,
     update: Prisma.EmailUpdateInput,
   ): Promise<Email> {
     return this.prisma.email.update({
-      where: project,
+      where: email,
       data: update,
     });
   }

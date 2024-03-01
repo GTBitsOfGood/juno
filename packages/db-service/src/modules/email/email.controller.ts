@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { IdentifierProto, EmailProto } from 'juno-proto';
 import { EmailService } from './email.service';
-import { Email, Project } from '@prisma/client';
+import { Email } from '@prisma/client';
 import { validateEmailIdentifier } from 'src/utility/validate';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -41,10 +41,10 @@ export class EmailController {
 
   async updateEmail(request: EmailProto.UpdateEmailRequest): Promise<Email> {
     const emailFind = validateEmailIdentifier(request.emailIdentifier);
-    const project = await this.emailService.updateEmail(emailFind, {
+    const email = await this.emailService.updateEmail(emailFind, {
       description: request.updateParams.description,
     });
-    return project;
+    return email;
   }
 
   async deleteEmail(
