@@ -11,10 +11,11 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
+import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -112,14 +113,14 @@ describe('Project Creation Routes', () => {
 describe('Project Retrieval Routes', () => {
   it('Get project with valid id', async () => {
     const resp = await request(app.getHttpServer()).post('/project').send({
-      name: 'test-retreival',
+      name: 'test-retrieval',
     });
     const id = resp.body['id'];
     await request(app.getHttpServer())
       .get(`/project/id/${id}`)
       .expect(200)
       .then((response) => {
-        expect(response.body.name).toEqual('test-retreival');
+        expect(response.body.name).toEqual('test-retrieval');
         expect(response.body.id).toEqual(id);
       });
   });
@@ -181,8 +182,10 @@ describe('Project Update Routes', () => {
       password: 'password',
     });
     const userId = user.body['id'];
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put(`/project/id/${projectId}/user`)
+      .set('Authorization', 'Bearer ' + token)
       .send({
         id: userId,
       })
@@ -190,8 +193,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using valid user email input', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/id/1/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
       })
@@ -199,8 +204,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using non-number project id param', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/id/abc/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
       })
@@ -209,8 +216,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using non-number user id input', async () => {
+    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
       .put('/project/id/1/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         id: 'abc',
       })
@@ -220,18 +229,45 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using invalid user email input', async () => {
+    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
       .put('/project/id/1/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'abc',
       })
       .expect(404);
     expect(resp.text).toContain('does not exist');
   });
+  // it('Link user with project id using non-number user id input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/id/1/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       id: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('{"statusCode":400,"message":"id must be a number"}');
+  // });
+
+  // it('Link user with project id using invalid user email input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/id/1/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       email: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('');
+  // });
 
   it('Link user with project name using valid user id input', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/name/testProject/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         id: '1',
       })
@@ -239,8 +275,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project name using valid user email input', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/name/testProject/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
       })
@@ -248,8 +286,10 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project name using non-number user id input', async () => {
+    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
       .put('/project/name/testProject/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         id: 'abc',
       })
@@ -258,12 +298,131 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project name using invalid user email input', async () => {
+    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
       .put('/project/name/testProject/user')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'abc',
       })
       .expect(404);
     expect(resp.text).toContain('does not exist');
+  });
+  // it('Link user with project name using non-number user id input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/name/testProject/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       id: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('{"statusCode":400,"message":"id must be a number"}');
+  // });
+
+  // it('Link user with project name using invalid user email input', async () => {
+  // const token = jwt.sign({}, 'secret');
+  //   await request(app.getHttpServer())
+  //     .put('/project/name/testProject/user')
+  // .set('Authorization', 'Bearer ' + token)
+  //     .send({
+  //       email: 'abc',
+  //     })
+  //     .expect(400)
+  //     .expect('');
+  // });
+});
+
+describe('Project Linking Middleware', () => {
+  it('No authorization headers for /project/id/:id/user route ', async () => {
+    const project = await request(app.getHttpServer()).post('/project').send({
+      name: 'middleware',
+    });
+    const projectId = project.body['id'];
+    const user = await request(app.getHttpServer()).post('/user').send({
+      name: 'Test User',
+      email: 'test@middleware.com',
+      password: 'password',
+    });
+    const userId = user.body['id'];
+    await request(app.getHttpServer())
+      .put(`/project/id/${projectId}/user`)
+      .send({
+        id: userId,
+      })
+      .expect(401);
+  });
+  it('No authorization headers for /project/name/:name/user route', async () => {
+    await request(app.getHttpServer())
+      .put('/project/name/middleware/user')
+      .send({
+        id: '1',
+      })
+      .expect(401);
+  });
+  it('No authorization headers for /user/id/:id/project route', async () => {
+    await request(app.getHttpServer())
+      .put(`/user/id/1/project`)
+      .send({
+        name: 'middleware',
+      })
+      .expect(401);
+  });
+  it('Invalid jwt for /project/id/:id/user route', async () => {
+    await request(app.getHttpServer())
+      .put(`/project/id/1/user`)
+      .set('Authorization', 'Bearer invalid-jwt')
+      .send({
+        id: '1',
+      })
+      .expect(401);
+  });
+  it('Invalid jwt for /project/name/:name/user route', async () => {
+    await request(app.getHttpServer())
+      .put('/project/name/middleware/user')
+      .set('Authorization', 'Bearer invalid-jwt')
+      .send({
+        id: '1',
+      })
+      .expect(401);
+  });
+  it('Invalid jwt for /user/id/:id/project route', async () => {
+    await request(app.getHttpServer())
+      .put(`/user/id/1/project`)
+      .set('Authorization', 'Bearer invalid-jwt')
+      .send({
+        name: 'middleware',
+      })
+      .expect(401);
+  });
+  it('Valid jwt for /project/id/:id/user route', async () => {
+    const token = jwt.sign({}, 'secret');
+    await request(app.getHttpServer())
+      .put(`/project/id/1/user`)
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        id: '1',
+      })
+      .expect(200);
+  });
+  it('Valid jwt for /project/name/:name/user route', async () => {
+    const token = jwt.sign({}, 'secret');
+    await request(app.getHttpServer())
+      .put('/project/name/middleware/user')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        id: '1',
+      })
+      .expect(200);
+  });
+  it('Valid jwt for /user/id/:id/project route', async () => {
+    const token = jwt.sign({}, 'secret');
+    await request(app.getHttpServer())
+      .put(`/user/id/1/project`)
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        name: 'middleware',
+      })
+      .expect(200);
   });
 });

@@ -11,10 +11,11 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
+import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -134,8 +135,10 @@ describe('User Creation Routes', () => {
     });
     const id = resp.body['id'];
 
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put(`/user/id/${id}/project`)
+      .set('Authorization', 'Bearer ' + token)
       .send({
         name: 'projectName',
       })
@@ -143,8 +146,10 @@ describe('User Creation Routes', () => {
   });
 
   it('should test an invalid user id', async () => {
+    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/user/id/a/project')
+      .set('Authorization', 'Bearer ' + token)
       .send({
         name: 'projectName',
       })

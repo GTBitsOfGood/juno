@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { JwtProto } from 'juno-proto';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('jwt')
 @JwtProto.JwtServiceControllerMethods()
@@ -13,7 +14,13 @@ export class JWTController implements JwtProto.JwtServiceController {
   validateJwt(
     request: JwtProto.ValidateJwtRequest,
   ): Promise<JwtProto.ValidateJwtResponse> {
-    console.log(`request: ${request}`);
-    throw new Error('Method not implemented.');
+    console.log(`requestJWT: ${request.jwt}`);
+    // rough implementation for middleware testing, please delete if unused
+    try {
+      jwt.verify(request.jwt, 'secret');
+    } catch (e) {
+      throw new Error(e.message);
+    }
+    return null;
   }
 }
