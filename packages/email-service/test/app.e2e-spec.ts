@@ -7,7 +7,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { EmailProtoFile, EmailProto } from 'juno-proto';
 
 let app: INestMicroservice;
-let emailClient: any;
+let sendGridClient: any;
 
 jest.setTimeout(15000);
 
@@ -35,8 +35,7 @@ beforeAll(async () => {
 
   const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-
-  emailClient = new protoGRPC.juno.email.EmailService(
+  sendGridClient = new protoGRPC.juno.email.SendGridEmailService(
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
@@ -49,7 +48,7 @@ afterAll(() => {
 it('should successfully register a domain', async () => {
   const response: EmailProto.AuthenticateDomainResponse = await new Promise(
     (resolve, reject) => {
-      emailClient.authenticateDomain(
+      sendGridClient.authenticateDomain(
         {
           domain: 'example.com',
           subdomain: 'mail',
@@ -74,7 +73,7 @@ it('should successfully register a domain', async () => {
 it('should fail to register a domain', async () => {
   const response: EmailProto.AuthenticateDomainResponse = await new Promise(
     (resolve, reject) => {
-      emailClient.authenticateDomain(
+      sendGridClient.authenticateDomain(
         {
           domain: '',
           subdomain: '',
