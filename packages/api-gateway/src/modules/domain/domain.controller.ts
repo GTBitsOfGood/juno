@@ -1,47 +1,33 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
 import {
   registerDomainBody,
   registerDomainResponse,
   verifyDomainBody,
   verifyDomainResponse,
 } from 'src/models/domain';
-import client from '../../../../../node_modules/@sendgrid/client';
-
-type HttpMethod =
-  | 'get'
-  | 'GET'
-  | 'post'
-  | 'POST'
-  | 'put'
-  | 'PUT'
-  | 'patch'
-  | 'PATCH'
-  | 'delete'
-  | 'DELETE';
+import { DomainProto } from 'juno-proto';
+import { DOMAIN_SERVICE_NAME } from 'juno-proto/dist/gen/domain';
+import { ClientGrpc } from '@nestjs/microservices';
 
 @Controller('domain')
 export class DomainController {
+  private domainService: DomainProto.DomainServiceClient;
+  constructor(@Inject(DOMAIN_SERVICE_NAME) private domainClient: ClientGrpc) {}
+
   onModuleInit() {
-    client.setApiKey(process.env.SENDGRID_API_KEY);
+    this.domainService =
+      this.domainClient.getService<DomainProto.DomainServiceClient>(
+        DOMAIN_SERVICE_NAME,
+      );
   }
   @Post('verify')
   async verifyDomain(
     @Body() body: verifyDomainBody,
   ): Promise<verifyDomainResponse> {
-    //domain to id mapping
-    const id = body.domain;
-
-    const sendgridRequest = {
-      url: `/v3/whitelabel/domains/${id}/validate`,
-      method: 'POST' as HttpMethod,
-    };
-
-    const response = await client.request(sendgridRequest);
-
-    if (response[0].statusCode !== 200) {
-      throw new Error('There was an error with your request');
+    if (!body.domain) {
+      throw new Error('Invalid body.');
     }
-
+    this.domainService.verifyDomain(body);
     return undefined;
   }
 
@@ -49,21 +35,10 @@ export class DomainController {
   async registerDomain(
     @Body() body: registerDomainBody,
   ): Promise<registerDomainResponse> {
-    const data = {
-      domain: body.domain,
-      subdomain: body.subDomain,
-    };
-
-    const sendgridRequest = {
-      url: `/v3/whitelabel/domains`,
-      method: 'POST' as HttpMethod,
-      body: data,
-    };
-
-    const response = await client.request(sendgridRequest);
-    if (response[0].statusCode !== 200) {
-      throw new Error('There was an error with your request');
+    if (!body.domain || !body.subDomain) {
+      throw new Error('Invalid body.');
     }
+    this.domainService.registerDomain(body);
     return undefined;
   }
 }

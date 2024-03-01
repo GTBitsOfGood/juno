@@ -36,6 +36,12 @@ model ApiKey {
   project     Project @relation(fields: [projectId], references: [id])
 }
 
+model Domain {
+  id        Int     @id @default(autoincrement())
+  domain    String @unique
+  subdomain String @unique
+}
+
 enum ApiScope {
   FULL
 }
