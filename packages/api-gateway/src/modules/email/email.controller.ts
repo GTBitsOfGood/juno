@@ -59,6 +59,27 @@ export class EmailController implements OnModuleInit {
     return new RegisterEmailResponse(params.email);
   }
 
+  @Post('/register-domain')
+  async registerEmailDomain(
+    @Body('domain') domain: string,
+    @Body('subdomain') subdomain: string,
+  ): Promise<EmailProto.AuthenticateDomainResponse> {
+    if (!domain) {
+      throw new HttpException(
+        'Cannot register domain (no domain supplied)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const res = this.emailService.authenticateDomain({
+      domain,
+      subdomain,
+    });
+
+    console.log(res);
+    return lastValueFrom(res);
+  }
+
   @ApiOperation({
     description: 'This endpoint sends an email',
   })

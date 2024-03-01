@@ -7,6 +7,8 @@ import "identifiers.proto";
 service EmailService {
   rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
   rpc registerSender(RegisterSenderRequest) returns (RegisterSenderResponse);
+  rpc authenticateDomain(AuthenticateDomainRequest)
+      returns (AuthenticateDomainResponse);
 }
 
 service EmailDbService {
@@ -69,4 +71,29 @@ message RegisterSenderRequest {
 message RegisterSenderResponse {
   int32 status_code = 1;
   string message = 2;
+}
+
+message AuthenticateDomainRequest {
+  string domain = 1;
+  string subdomain = 2;
+}
+
+message AuthenticateDomainResponse {
+  int64 id = 1;
+  string valid = 2;
+  SendGridDnsRecords records = 3;
+  int32 statusCode = 4;
+}
+
+message SendGridDnsRecords {
+  SendGridRecord mail_cname = 1;
+  SendGridRecord dkim1 = 2;
+  SendGridRecord dkim2 = 3;
+}
+
+message SendGridRecord {
+  bool valid = 1;
+  string type = 2;
+  string host = 3;
+  string data = 4;
 }

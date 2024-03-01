@@ -57,6 +57,69 @@ afterAll((done) => {
   done();
 });
 
+describe('Email Service Authenticate Domain Tests', () => {
+  let emailClient: any;
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    emailClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('should successfully register a domain', async () => {
+    const response: EmailProto.AuthenticateDomainResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.authenticateDomain(
+          {
+            domain: 'example.com',
+            subdomain: 'mail',
+          },
+          (err: any, response: EmailProto.AuthenticateDomainResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.statusCode).toEqual('201');
+    expect(response.id).toBeDefined();
+    expect(response.valid).toEqual('true');
+  });
+
+  it('should fail to register a domain', async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        emailClient.authenticateDomain(
+          {
+            domain: '',
+            subdomain: '',
+          },
+          (err: any, response: EmailProto.AuthenticateDomainResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+
+      fail('Expected an error to be thrown');
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+});
+
 describe('Email Service Send Email Tests', () => {
   let emailClient: any;
   beforeEach(async () => {

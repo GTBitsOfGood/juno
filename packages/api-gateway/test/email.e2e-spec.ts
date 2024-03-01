@@ -398,3 +398,46 @@ describe('Email Sending Route', () => {
       .expect(400);
   });
 });
+
+describe('Domain Registration Routes', () => {
+  it('Registers a domain without a domain parameter', () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/registerDomain')
+      .set('Authorization', 'Bearer ' + token)
+      .expect(400);
+  });
+
+  it('Registers a domain with valid parameters', () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/registerDomain')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(201);
+  });
+
+  it('Registration endpoint called with no Authorization header', () => {
+    return request(app.getHttpServer())
+      .post('/registerDomain')
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(401);
+  });
+
+  it('Registration endpoint called with an invalid JWT', () => {
+    return request(app.getHttpServer())
+      .post('/registerDomain')
+      .set('Authorization', 'Bearer invalid.jwt.token')
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(401);
+  });
+});
