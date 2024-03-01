@@ -5,11 +5,22 @@ import {
   verifyDomainBody,
   verifyDomainResponse,
 } from 'src/models/domain';
-const { client } = require('@sendgrid/client');
+import client from '../../../../../node_modules/@sendgrid/client';
+
+type HttpMethod =
+  | 'get'
+  | 'GET'
+  | 'post'
+  | 'POST'
+  | 'put'
+  | 'PUT'
+  | 'patch'
+  | 'PATCH'
+  | 'delete'
+  | 'DELETE';
 
 @Controller('domain')
 export class DomainController {
-  client;
   onModuleInit() {
     client.setApiKey(process.env.SENDGRID_API_KEY);
   }
@@ -23,14 +34,15 @@ export class DomainController {
       throw new Error('Authorization header is empty');
     }
     // middleware inputted here
+
     const sendgridRequest = {
       url: `/v3/whitelabel/domains/${id}/validate`,
-      method: 'POST',
+      method: 'POST' as HttpMethod,
     };
 
     const response = await client.request(sendgridRequest);
 
-    if (response.statusCode !== 200) {
+    if (response[0].statusCode !== 200) {
       throw new Error('There was an error with your request');
     }
 
@@ -55,13 +67,12 @@ export class DomainController {
 
     const sendgridRequest = {
       url: `/v3/whitelabel/domains`,
-      method: 'POST',
+      method: 'POST' as HttpMethod,
       body: data,
     };
 
     const response = await client.request(sendgridRequest);
-
-    if (response.statusCode !== 200) {
+    if (response[0].statusCode !== 200) {
       throw new Error('There was an error with your request');
     }
     return undefined;
