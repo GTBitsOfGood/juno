@@ -6,6 +6,7 @@ import "identifiers.proto";
 
 service EmailService {
   rpc sendEmail(SendEmailRequest) returns (SendEmailRequestResponse);
+  rpc registerSender(RegisterSenderRequest) returns (RegisterSenderResponse);
 }
 
 message SendEmailRequest {
@@ -16,4 +17,15 @@ message SendEmailRequest {
 
 message SendEmailRequestResponse {
     bool success = 1;
+}
+
+message RegisterSenderRequest {
+    string from_email = 1;
+    string from_name = 2;
+    string reply_to = 3;
+}
+
+message RegisterSenderResponse {
+    int32 status_code = 1;
+    string message = 2;
 }
