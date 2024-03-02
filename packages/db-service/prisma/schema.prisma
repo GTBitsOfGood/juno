@@ -39,7 +39,7 @@ model ApiKey {
 model Domain {
   id        Int     @id @default(autoincrement())
   domain    String @unique
-  subdomain String @unique
+  subdomain String
 }
 
 enum ApiScope {
