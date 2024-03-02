@@ -4,9 +4,10 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ResetProtoFile } from 'juno-proto';
+import { EmailProtoFile, EmailProto } from 'juno-proto';
 
 let app: INestMicroservice;
+let emailClient: any;
 
 jest.setTimeout(15000);
 
@@ -33,17 +34,17 @@ async function initApp() {
 beforeAll(async () => {
   app = await initApp();
 
-  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+  const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
 
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+  const emailClient = new protoGRPC.juno.emailService(
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
 
   await new Promise((resolve) => {
-    resetClient.resetDb({}, () => {
+    emailClient.resetDb({}, () => {
       resolve(0);
     });
   });
@@ -53,6 +54,50 @@ afterAll(() => {
   app.close();
 });
 
-it('Dummy test', () => {
-  expect('1').toEqual('1');
+it('should successfully register a sender', async () => {
+  const response: EmailProto.RegisterSenderResponse = await new Promise(
+    (resolve, reject) => {
+      emailClient.registerSender(
+        {
+          from_email: 'example@example.com',
+          from_name: 'example',
+          reply_to: 'example@example.com',
+        },
+        (err: any, response: EmailProto.RegisterSenderResponse) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        },
+      );
+    },
+  );
+
+  expect(response).toBeDefined();
+  expect(response.statusCode).toEqual('201');
+});
+
+it('should fail to register a sender', async () => {
+  const response: EmailProto.RegisterSenderResponse = await new Promise(
+    (resolve, reject) => {
+      emailClient.registerSender(
+        {
+          from_email: '',
+          from_name: '',
+          reply_to: '',
+        },
+        (err: any, response: EmailProto.RegisterSenderResponse) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        },
+      );
+    },
+  );
+
+  expect(response).toBeDefined();
+  expect(response.statusCode).toEqual('201');
 });
