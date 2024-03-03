@@ -27,8 +27,11 @@ export class DomainController {
     if (!body.domain) {
       throw new Error('Invalid body.');
     }
-    this.domainService.verifyDomain(body);
-    return undefined;
+    const domain = this.domainService.verifyDomain(body);
+    if (!domain) {
+      throw new Error('This domain does not exist.');
+    }
+    return { success: true };
   }
 
   @Post('register')
@@ -38,7 +41,10 @@ export class DomainController {
     if (!body.domain || !body.subDomain) {
       throw new Error('Invalid body.');
     }
-    this.domainService.registerDomain(body);
-    return undefined;
+    const domain = this.domainService.registerDomain(body);
+    if (!domain) {
+      throw new Error('This domain could not be registered.');
+    }
+    return { success: true };
   }
 }

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Domain } from '@prisma/client';
 import { DomainProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -18,7 +19,10 @@ type HttpMethod =
 export class DomainService {
   constructor(private prisma: PrismaService) {}
 
-  async verifyDomain(request: DomainProto.VerifyDomainRequest, client: any) {
+  async verifyDomain(
+    request: DomainProto.VerifyDomainRequest,
+    client: any,
+  ): Promise<Domain> {
     const domainEntry = await this.prisma.domain.findUnique({
       where: { domain: request.domain },
     });
@@ -36,12 +40,13 @@ export class DomainService {
     if (response[0].statusCode !== 200) {
       throw new Error('There was an error with your request');
     }
+    return domainEntry;
   }
 
   async registerDomain(
     request: DomainProto.RegisterDomainRequest,
     client: any,
-  ) {
+  ): Promise<Domain> {
     const data = {
       domain: request.domain,
       subdomain: request.subDomain,
@@ -57,12 +62,13 @@ export class DomainService {
     if (response[0].statusCode !== 200) {
       throw new Error('There was an error with your request');
     }
-    await this.prisma.domain.create({
+    const domain = await this.prisma.domain.create({
       data: {
         domain: request.domain,
         subdomain: request.subDomain,
         id: response[0].body['id'],
       },
     });
+    return domain;
   }
 }

@@ -12,13 +12,11 @@ export class DomainDbController implements DomainProto.DomainServiceController {
   async verifyDomain(
     request: DomainProto.VerifyDomainRequest,
   ): Promise<DomainProto.VerifyDomainResponse> {
-    await this.domainService.verifyDomain(request, client);
-    return undefined;
+    return await this.domainService.verifyDomain(request, client);
   }
   async registerDomain(
     request: DomainProto.RegisterDomainRequest,
   ): Promise<DomainProto.RegisterDomainResponse> {
-    await this.domainService.registerDomain(request, client);
-    return undefined;
+    return await this.domainService.registerDomain(request, client);
   }
 }
