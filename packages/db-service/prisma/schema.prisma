@@ -8,7 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-//  url = "postgresql://johndoe:mysecretpassword@localhost:5432"
+//url = "postgresql://johndoe:mysecretpassword@localhost:5432"
 }
 
 model User {
@@ -34,6 +34,7 @@ model ApiKey {
   description String
   projectId   Int
   project     Project @relation(fields: [projectId], references: [id])
+  environment String
 }
 
 enum ApiScope {

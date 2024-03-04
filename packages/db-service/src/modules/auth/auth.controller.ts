@@ -22,6 +22,7 @@ export class ApiKeyDbController
           name: request.apiKey.project.name,
         },
       },
+      environment: request.apiKey.environment,
     };
 
     const apiKey = this.apiKeyService.createApiKey(prepareCreateApiKey);

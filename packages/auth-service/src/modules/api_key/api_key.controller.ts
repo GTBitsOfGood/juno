@@ -57,6 +57,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
           description: request.description,
           scopes: [ApiKeyProto.ApiScope.FULL],
           project: request.project,
+          environment: request.environment,
         },
       });
       if (!key) {

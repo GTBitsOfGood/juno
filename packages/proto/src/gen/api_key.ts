@@ -15,6 +15,7 @@ export interface IssueApiKeyRequest {
   email: string;
   password: string;
   description: string;
+  environment: string;
 }
 
 export interface CreateApiKeyParams {
@@ -27,6 +28,7 @@ export interface ApiKey {
   description: string;
   scopes: ApiScope[];
   project: ProjectIdentifier | undefined;
+  environment: string;
 }
 
 export interface ApiKeyNoId {
@@ -34,6 +36,7 @@ export interface ApiKeyNoId {
   description: string;
   scopes: ApiScope[];
   project: ProjectIdentifier | undefined;
+  environment: string;
 }
 
 export interface IssueApiKeyResponse {

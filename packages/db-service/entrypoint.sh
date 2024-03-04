@@ -5,6 +5,6 @@ if [[ ${RUN_MODE} == *"test"* ]]; then
     yarn prisma migrate reset --force
 fi
 
-yarn prisma migrate dev 
+yarn prisma migrate dev
 
 yarn ${DB_COMMAND-start:dev} 

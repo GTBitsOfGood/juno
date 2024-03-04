@@ -72,6 +72,7 @@ export class AuthService {
           description: input.description,
           scopes: [],
           projectId: projectId,
+          environment: input.environment,
         },
         include: {
           project: true,
@@ -101,6 +102,7 @@ const convertDbApiKeyToTs = (key: ApiKey): ApiKeyProto.ApiKey => {
     scopes: mappedScopes,
     description: key.description,
     project: { id: key.projectId },
+    environment: key.environment,
   };
   return apiKey;
 };
