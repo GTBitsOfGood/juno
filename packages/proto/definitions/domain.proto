@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package juno.domain;
+
+service DomainService {
+  rpc verifyDomain(VerifyDomainRequest) returns (VerifyDomainResponse);
+  rpc registerDomain(RegisterDomainRequest) returns (RegisterDomainResponse);
+}
+
+message VerifyDomainRequest {
+    string domain = 1;
+}
+message VerifyDomainResponse {}
+
+message RegisterDomainRequest {
+    string domain = 1;
+    string subDomain = 2;
+}
+message RegisterDomainResponse {}
