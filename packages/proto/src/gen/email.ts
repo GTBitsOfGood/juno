@@ -5,28 +5,43 @@ import { Observable } from 'rxjs';
 export const protobufPackage = 'juno.email';
 
 export interface SendEmailRequest {
-  destination: string;
-  subject: string;
-  body: string;
+  recipients: EmailRecipient[];
+  sender: EmailSender | undefined;
+  content: EmailContent[];
 }
 
-export interface SendEmailRequestResponse {
+export interface SendEmailResponse {
   success: boolean;
+}
+
+export interface EmailRecipient {
+  email: string;
+  name?: string | undefined;
+}
+
+export interface EmailSender {
+  email: string;
+  name?: string | undefined;
+}
+
+export interface EmailContent {
+  type: string;
+  value: string;
 }
 
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
-  sendEmail(request: SendEmailRequest): Observable<SendEmailRequestResponse>;
+  sendEmail(request: SendEmailRequest): Observable<SendEmailResponse>;
 }
 
 export interface EmailServiceController {
   sendEmail(
     request: SendEmailRequest,
   ):
-    | Promise<SendEmailRequestResponse>
-    | Observable<SendEmailRequestResponse>
-    | SendEmailRequestResponse;
+    | Promise<SendEmailResponse>
+    | Observable<SendEmailResponse>
+    | SendEmailResponse;
 }
 
 export function EmailServiceControllerMethods() {

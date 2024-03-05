@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
+import { EmailProtoFile, EmailProto } from 'juno-proto';
 
 async function bootstrap() {
   ConfigModule.forRoot({
@@ -13,8 +14,8 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: [],
-        protoPath: [],
+        package: [EmailProto.JUNO_EMAIL_PACKAGE_NAME],
+        protoPath: [EmailProtoFile],
         url: process.env.EMAIL_SERVICE_ADDR,
       },
     },

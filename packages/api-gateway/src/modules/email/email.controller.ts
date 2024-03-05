@@ -6,8 +6,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { SendEmailResponse } from 'juno-proto/dist/gen/email';
 import { RegisterEmailModel, RegisterEmailResponse } from 'src/models/email';
-import { SendEmailRequestResponse } from 'juno-proto/dist/gen/email';
 
 @Controller('email')
 export class EmailController implements OnModuleInit {
@@ -32,7 +32,7 @@ export class EmailController implements OnModuleInit {
     @Body('destination') destination: string,
     @Body('subject') subject: string,
     @Body('body') body: string,
-  ): Promise<SendEmailRequestResponse> {
+  ): Promise<SendEmailResponse> {
     if (!body || !destination || !subject) {
       throw new HttpException(
         'Missing Email Parameters',
