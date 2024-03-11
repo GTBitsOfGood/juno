@@ -1,4 +1,3 @@
-
 <h1 align="center">
   Juno
 </h1>
@@ -6,6 +5,7 @@
 Juno is [Bits of Good](https://bitsofgood.org/)'s central infrastructure API, integrating several in-house services to simplify and streamline project development.
 
 ## Repo Structure
+
 The project is a monorepo using a combination of NestJS, gRPC, Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
 
 Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/workspaces). The current packages are as follows:
@@ -31,24 +31,26 @@ Most of the docker-related functionality has been abstracted away into yarn comm
 ### Install needed dependencies
 
 All package dependencies must first be installed by using the following command in the root directory:
+
 ```
 yarn
 ```
 
 ### For development
+
 For spinning up the entire stack (not watching for changes):
+
 ```
 yarn start:dev
 ```
 
-For spinning up the stack and automatically updating as changes are made to files: 
+For spinning up the stack and automatically updating as changes are made to files:
+
 ```
 yarn start:dev:live-all
 ```
 
-
 ### Making requests
-
 
 Requests can be made at the endpoint `localhost:3000/some/request/path`.
 
