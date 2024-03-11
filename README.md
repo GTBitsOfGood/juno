@@ -71,3 +71,26 @@ If you're working on juno and wish to test with your updates in live time (watch
 - api-gateway: `yarn test:e2e:api-gateway-live`
 - auth-service: `yarn test:e2e:auth-service-live`
 - db-service: `yarn test:e2e:db-service-live`
+
+## Windows Troubleshooting
+
+- Make sure **everything** is done through the Windows Subsystem for Linux (WSL).
+- `protoc` must be installed.
+
+`.sh` related problems - switch line endings to `LF`
+
+`additional property <> is not allowed>` - update docker
+
+`db-service is unhealthy` - wget script likely failed to install, make sure all `.sh` files have correct line endings **and permissions (chmod)**
+
+![image](https://github.com/GTBitsOfGood/juno/assets/36551149/eff13fd4-f7a5-4acc-b3a6-d17399fefd4b)
+
+- First, ensure Docker Desktop is actually running.
+- If it is, Docker Desktop most likely decided to nuke your settings, re-enable WSL in **Settings** > **Resources** > **WLS integration**
+
+`./get_grpc_probe.sh: Permission denied` - add permission to get_grpc_probe using chmod:
+
+```
+chmod +x docker/get_grpc_probe.sh
+chmod +x packages/db-service/entrypoint.sh
+```
