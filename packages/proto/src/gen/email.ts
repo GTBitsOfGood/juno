@@ -5,13 +5,28 @@ import { Observable } from 'rxjs';
 export const protobufPackage = 'juno.email';
 
 export interface SendEmailRequest {
-  destination: string;
-  subject: string;
-  body: string;
+  recipients: EmailRecipient[];
+  sender: EmailSender | undefined;
+  content: EmailContent[];
 }
 
-export interface SendEmailRequestResponse {
+export interface SendEmailResponse {
   success: boolean;
+}
+
+export interface EmailRecipient {
+  email: string;
+  name?: string | undefined;
+}
+
+export interface EmailSender {
+  email: string;
+  name?: string | undefined;
+}
+
+export interface EmailContent {
+  type: string;
+  value: string;
 }
 
 export interface AuthenticateDomainRequest {
@@ -42,21 +57,32 @@ export interface SendGridRecord {
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
-  sendEmail(request: SendEmailRequest): Observable<SendEmailRequestResponse>;
+  sendEmail(request: SendEmailRequest): Observable<SendEmailResponse>;
+
+  authenticateDomain(
+    request: AuthenticateDomainRequest,
+  ): Observable<AuthenticateDomainResponse>;
 }
 
 export interface EmailServiceController {
   sendEmail(
     request: SendEmailRequest,
   ):
-    | Promise<SendEmailRequestResponse>
-    | Observable<SendEmailRequestResponse>
-    | SendEmailRequestResponse;
+    | Promise<SendEmailResponse>
+    | Observable<SendEmailResponse>
+    | SendEmailResponse;
+
+  authenticateDomain(
+    request: AuthenticateDomainRequest,
+  ):
+    | Promise<AuthenticateDomainResponse>
+    | Observable<AuthenticateDomainResponse>
+    | AuthenticateDomainResponse;
 }
 
 export function EmailServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['sendEmail'];
+    const grpcMethods: string[] = ['sendEmail', 'authenticateDomain'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
@@ -84,49 +110,3 @@ export function EmailServiceControllerMethods() {
 }
 
 export const EMAIL_SERVICE_NAME = 'EmailService';
-
-export interface SendGridEmailServiceClient {
-  authenticateDomain(
-    request: AuthenticateDomainRequest,
-  ): Observable<AuthenticateDomainResponse>;
-}
-
-export interface SendGridEmailServiceController {
-  authenticateDomain(
-    request: AuthenticateDomainRequest,
-  ):
-    | Promise<AuthenticateDomainResponse>
-    | Observable<AuthenticateDomainResponse>
-    | AuthenticateDomainResponse;
-}
-
-export function SendGridEmailServiceControllerMethods() {
-  return function (constructor: Function) {
-    const grpcMethods: string[] = ['authenticateDomain'];
-    for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcMethod('SendGridEmailService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
-    }
-    const grpcStreamMethods: string[] = [];
-    for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcStreamMethod('SendGridEmailService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
-    }
-  };
-}
-
-export const SEND_GRID_EMAIL_SERVICE_NAME = 'SendGridEmailService';

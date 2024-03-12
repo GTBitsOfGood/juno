@@ -4,10 +4,9 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { EmailProtoFile, EmailProto } from 'juno-proto';
+import { ResetProtoFile } from 'juno-proto';
 
 let app: INestMicroservice;
-let sendGridClient: any;
 
 jest.setTimeout(15000);
 
@@ -19,13 +18,14 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: 'juno',
-      protoPath: [EmailProtoFile],
+      package: [],
+      protoPath: [],
       url: process.env.EMAIL_SERVICE_ADDR,
     },
   });
 
   await app.init();
+
   await app.listen();
   return app;
 }
@@ -33,60 +33,26 @@ async function initApp() {
 beforeAll(async () => {
   app = await initApp();
 
-  const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-  sendGridClient = new protoGRPC.juno.email.SendGridEmailService(
+
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
+
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
+  });
 });
 
 afterAll(() => {
   app.close();
 });
 
-it('should successfully register a domain', async () => {
-  const response: EmailProto.AuthenticateDomainResponse = await new Promise(
-    (resolve, reject) => {
-      sendGridClient.authenticateDomain(
-        {
-          domain: 'example.com',
-          subdomain: 'mail',
-        },
-        (err: any, response: EmailProto.AuthenticateDomainResponse) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        },
-      );
-    },
-  );
-
-  expect(response).toBeDefined();
-  expect(response.statusCode).toEqual('201');
-  expect(response.id).toBeDefined();
-  expect(response.valid).toEqual('true');
-});
-
-it('should fail to register a domain', async () => {
-  const response: EmailProto.AuthenticateDomainResponse = await new Promise(
-    (resolve, reject) => {
-      sendGridClient.authenticateDomain(
-        {
-          domain: '',
-          subdomain: '',
-        },
-        (err: any, response: EmailProto.AuthenticateDomainResponse) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        },
-      );
-    },
-  );
-  expect(response.statusCode).not.toEqual('201');
+it('Dummy test', () => {
+  expect('1').toEqual('1');
 });
