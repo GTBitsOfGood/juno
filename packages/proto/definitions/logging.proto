@@ -3,11 +3,11 @@ syntax = "proto3";
 package juno.logging;
 
 service LoggingService {
-    rpc recordInfo(recordInfoRequest) returns recordInfoResponse
+    rpc recordInfo(recordInfoRequest) returns (recordInfoResponse);
 }
 
-message recordInfoRequest = {
+message recordInfoRequest {
     string message = 1;
 }
 
-message recordInfoResponse = {}
+message recordInfoResponse {}
