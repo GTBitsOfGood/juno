@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package juno.logging;
+
+service LoggingService {
+    rpc recordInfo(recordInfoRequest) returns recordInfoResponse
+}
+
+message recordInfoRequest = {
+    string message = 1;
+}
+
+message recordInfoResponse = {}
