@@ -31,7 +31,7 @@ services:
       watch:
         - action: rebuild
           path: ./packages/proto/package.json
-  
+
   logging-service:
     extends:
       file: docker-compose-dev.yml

@@ -65,7 +65,7 @@ services:
       interval: 2s
       timeout: 10s
       retries: 10
-  
+
   logging-service:
     build:
       dockerfile: Dockerfile.dev

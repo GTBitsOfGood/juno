@@ -46,7 +46,7 @@ services:
           path: ./packages/email-service/package.json
         - action: rebuild
           path: ./Dockerfile.dev
-  
+
   logging-service:
     extends:
       file: docker-compose-dev.yml
