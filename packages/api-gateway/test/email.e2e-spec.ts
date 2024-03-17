@@ -97,7 +97,7 @@ describe('Email Registration Routes', () => {
   });
 });
 
-describe('EmailController (e2e)', () => {
+describe('Email Sending Route', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -113,21 +113,13 @@ describe('EmailController (e2e)', () => {
     await app.close();
   });
 
-  it('should return 400 when body parameters are missing', async () => {
-    const token = jwt.sign({}, 'secret');
-    return request(app.getHttpServer())
-      .post('/email/send')
-      .set('Authorization', 'Bearer ' + token)
-      .expect(400);
-  });
-
   it('should return 401 when Authorization header is missing', async () => {
     return request(app.getHttpServer())
       .post('/email/send')
       .send({
-        destination: 'test@example.com',
-        subject: 'Test Subject',
-        body: 'Test Body',
+        sender: { email: 'testSender@gmail.com' },
+        recipients: [{ email: 'testRecipient@gmail.com' }],
+        content: [{ type: 'text/plain', value: 'Test email' }],
       })
       .expect(401);
   });
@@ -137,23 +129,272 @@ describe('EmailController (e2e)', () => {
       .post('/email/send')
       .set('Authorization', 'Bearer invalid_token')
       .send({
-        destination: 'test@example.com',
-        subject: 'Test Subject',
-        body: 'Test Body',
+        sender: { email: 'testSender@gmail.com' },
+        recipients: [{ email: 'testRecipient@gmail.com' }],
+        content: [{ type: 'text/plain', value: 'Test email' }],
       })
       .expect(401);
   });
 
-  it('should return 200 when parameters are valid and JWT is valid', async () => {
+  it('Send email with valid parameters and JWT is valid', async () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
       .send({
-        destination: 'test@example.com',
-        subject: 'Test Subject',
-        body: 'Test Body',
+        sender: { email: 'testSender@gmail.com' },
+        recipients: [{ email: 'testRecipient@gmail.com' }],
+        content: [{ type: 'text/plain', value: 'Test email' }],
       })
       .expect(201);
+  });
+
+  it('Send email with valid parameters (with names) and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient@gmail.com', name: 'RecipientName' },
+        ],
+        content: [{ type: 'text/plain', value: 'Test email' }],
+      })
+      .expect(201);
+  });
+
+  it('Send email with valid parameters (with names, multiple recipients) and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [{ type: 'text/plain', value: 'Test email' }],
+      })
+      .expect(201);
+  });
+
+  it('Send email with valid parameters (with names, multiple recipients and contents) and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(201);
+  });
+
+  it('Send email with empty request and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({})
+      .expect(400);
+  });
+
+  it('Send email with empty sender email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: '', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with invalid sender email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'invalid-email', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with null sender email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: null, name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with empty recipients email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: '', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with invalid recipients email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'invalid-email', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with null recipients email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: null, name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with empty content type email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: '', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with null content type email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: null, value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with empty content value email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: '' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
+  });
+
+  it('Send email with null content value email and JWT is valid', async () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        content: [
+          { type: 'text/plain', value: null },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(400);
   });
 });
