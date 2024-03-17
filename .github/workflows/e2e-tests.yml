@@ -41,8 +41,8 @@ jobs:
 
       - name: Test
         run: yarn test:e2e:db-service
-  
-  db-service:
+
+  logging-service:
     name: Logging Service E2E Tests
     runs-on: ubuntu-latest
     steps:
