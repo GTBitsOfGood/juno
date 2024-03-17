@@ -2,9 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestMicroservice } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
-import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ResetProtoFile } from 'juno-proto';
 
 let app: INestMicroservice;
 
@@ -20,7 +18,7 @@ async function initApp() {
     options: {
       package: [],
       protoPath: [],
-      url: process.env.EMAIL_SERVICE_ADDR,
+      url: process.env.LOGGING_SERVICE_ADDR,
     },
   });
 
@@ -32,21 +30,6 @@ async function initApp() {
 
 beforeAll(async () => {
   app = await initApp();
-
-  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
-  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-
-  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
-    process.env.DB_SERVICE_ADDR,
-    GRPC.credentials.createInsecure(),
-  );
-
-  await new Promise((resolve) => {
-    resetClient.resetDb({}, () => {
-      resolve(0);
-    });
-  });
 });
 
 afterAll(() => {
