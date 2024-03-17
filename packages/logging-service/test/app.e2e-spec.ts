@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestMicroservice } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
-import * as ProtoLoader from '@grpc/proto-loader';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 let app: INestMicroservice;
