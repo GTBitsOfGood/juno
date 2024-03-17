@@ -80,6 +80,20 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/email-service
 
+FROM base-service as logging-service-dev
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/logging-service/node_modules ./packages/node_modules/
+
+COPY . .
+
+COPY --from=deps /app/packages/proto/ ./packages/proto/
+
+WORKDIR /app/packages/logging-service
+
 FROM base-service as db-service-dev
 
 WORKDIR /app

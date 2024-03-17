@@ -47,6 +47,22 @@ services:
         - action: rebuild
           path: ./Dockerfile.dev
 
+  logging-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: logging-service
+    volumes:
+      - ./packages/logging-service:/app/packages/logging-service
+      - /app/packages/logging-service/node_modules
+    develop:
+      watch:
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./packages/logging-service/package.json
+        - action: rebuild
+          path: ./Dockerfile.dev
+
   db-service:
     extends:
       file: docker-compose-dev.yml

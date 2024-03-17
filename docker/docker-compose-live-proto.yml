@@ -32,6 +32,17 @@ services:
         - action: rebuild
           path: ./packages/proto/package.json
 
+  logging-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: logging-service
+    volumes:
+      - ./packages/proto/dist:/app/packages/node_modules/juno-proto/dist
+    develop:
+      watch:
+        - action: rebuild
+          path: ./packages/proto/package.json
+
   db-service:
     extends:
       file: docker-compose-dev.yml
