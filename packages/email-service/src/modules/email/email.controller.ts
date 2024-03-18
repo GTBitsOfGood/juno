@@ -7,7 +7,7 @@ import { status } from '@grpc/grpc-js';
 @Controller()
 @EmailProto.EmailServiceControllerMethods()
 export class EmailController implements EmailProto.EmailServiceController {
-  constructor(private readonly emailService: EmailService) {}
+  constructor(private readonly emailService: EmailService) { }
 
   async sendEmail(
     request: EmailProto.SendEmailRequest,
@@ -56,5 +56,10 @@ export class EmailController implements EmailProto.EmailServiceController {
     } catch (error) {
       throw new RpcException(error.message);
     }
+  }
+  async registerSender(
+    req: EmailProto.RegisterSenderRequest,
+  ): Promise<EmailProto.RegisterSenderResponse> {
+    return await this.emailService.registerSender(req);
   }
 }
