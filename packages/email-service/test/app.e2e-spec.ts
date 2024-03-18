@@ -38,12 +38,20 @@ beforeAll(async () => {
 
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+
   const emailClient = new protoGRPC.juno.emailService(
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
 
   await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
     emailClient.resetDb({}, () => {
       resolve(0);
     });
@@ -59,9 +67,9 @@ it('should successfully register a sender', async () => {
     (resolve, reject) => {
       emailClient.registerSender(
         {
-          from_email: 'example@example.com',
-          from_name: 'example',
-          reply_to: 'example@example.com',
+          fromEmail: 'example@example.com',
+          fromName: 'example',
+          replyTo: 'example@example.com',
         },
         (err: any, response: EmailProto.RegisterSenderResponse) => {
           if (err) {
@@ -83,9 +91,9 @@ it('should fail to register a sender', async () => {
     (resolve, reject) => {
       emailClient.registerSender(
         {
-          from_email: '',
-          from_name: '',
-          reply_to: '',
+          fromEmail: '',
+          fromName: '',
+          replyTo: '',
         },
         (err: any, response: EmailProto.RegisterSenderResponse) => {
           if (err) {

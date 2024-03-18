@@ -14,10 +14,25 @@ export interface SendEmailRequestResponse {
   success: boolean;
 }
 
+export interface RegisterSenderRequest {
+  fromEmail: string;
+  fromName: string;
+  replyTo: string;
+}
+
+export interface RegisterSenderResponse {
+  statusCode: number;
+  message: string;
+}
+
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
   sendEmail(request: SendEmailRequest): Observable<SendEmailRequestResponse>;
+
+  registerSender(
+    request: RegisterSenderRequest,
+  ): Observable<RegisterSenderResponse>;
 }
 
 export interface EmailServiceController {
@@ -27,11 +42,18 @@ export interface EmailServiceController {
     | Promise<SendEmailRequestResponse>
     | Observable<SendEmailRequestResponse>
     | SendEmailRequestResponse;
+
+  registerSender(
+    request: RegisterSenderRequest,
+  ):
+    | Promise<RegisterSenderResponse>
+    | Observable<RegisterSenderResponse>
+    | RegisterSenderResponse;
 }
 
 export function EmailServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['sendEmail'];
+    const grpcMethods: string[] = ['sendEmail', 'registerSender'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
