@@ -18,7 +18,7 @@ import * as path from 'path';
             __dirname,
             '../../',
             'juno-proto/dist/definitions',
-            'error_loggin.proto',
+            'error_logging.proto',
           ),
         },
       },
