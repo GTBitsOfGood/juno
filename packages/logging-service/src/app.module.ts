@@ -12,10 +12,15 @@ import path from 'path';
         transport: Transport.GRPC,
         options: {
           package: 'error_logging',
-          protoPath: path.join(__dirname, '../../', 'juno-proto/dist/definitions', 'error_loggin.proto')
-        }
-      }
-    ])
+          protoPath: path.join(
+            __dirname,
+            '../../',
+            'juno-proto/dist/definitions',
+            'error_loggin.proto',
+          ),
+        },
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],
