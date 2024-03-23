@@ -51,4 +51,4 @@ describe('AppService', () => {
     const testMessage = 'Test error';
     expect(service.recordError(testMessage)).toBeUndefined();
   });
-})
+});
