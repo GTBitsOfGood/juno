@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestMicroservice } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { AppService } from 'src/app.service';
 
 let app: INestMicroservice;
 
@@ -35,6 +36,19 @@ afterAll(() => {
   app.close();
 });
 
-it('Dummy test', () => {
-  expect('1').toEqual('1');
-});
+describe('AppService', () => {
+  let service: AppService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [AppService],
+    }).compile();
+
+    service = module.get<AppService>(AppService);
+  });
+
+  it('should log error messages', () => {
+    const testMessage = 'Test error';
+    expect(service.recordError(testMessage)).toBeUndefined();
+  });
+})

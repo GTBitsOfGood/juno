@@ -17,7 +17,7 @@ export class AppService implements OnModuleInit {
     }
 
     recordError(message: string) {
-        // TODO: currently doing nothing here, but want to actually log
+        // TODO: currently doing nothing here, but want to actually log the error
         return;
     }
 }
