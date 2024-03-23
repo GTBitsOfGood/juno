@@ -12,6 +12,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
+      SENTRY_DNS: ''
     networks:
       - bog-api-net
     depends_on:
@@ -36,6 +37,7 @@ services:
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
+      SENTRY_DNS: ''
     networks:
       - bog-api-net
     depends_on:
@@ -62,6 +64,7 @@ services:
       LOGGING_SERVICE_ADDR: logging-service:5000
       NODE_ENV: test
       SENDGRID_API_KEY: test-key
+      SENTRY_DNS: ''
     networks:
       - bog-api-net
     depends_on:
@@ -87,6 +90,7 @@ services:
       EMAIL_SERVICE_ADDR: email-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       DATABASE_URL: postgresql://user:password@db
+      SENTRY_DNS: ''
     networks:
       - bog-api-net
     healthcheck:
@@ -109,6 +113,7 @@ services:
       EMAIL_SERVICE_ADDR: email-service:5000
       DATABASE_URL: postgresql://user:password@db
       NODE_ENV: test
+      SENTRY_DNS: ''
     networks:
       - bog-api-net
     depends_on:
