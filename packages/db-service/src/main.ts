@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -17,10 +17,15 @@ import {
   ApiKeyProtoFile,
 } from 'juno-proto';
 import { CustomRpcExceptionFilter } from './global-exception.filter';
+import * as Sentry from '@sentry/node';
+import { SentryFilter } from './sentry.filter';
 
 async function bootstrap() {
   ConfigModule.forRoot({
     envFilePath: join(__dirname, '../../../.env.local'),
+  });
+  Sentry.init({
+    dsn: process.env.SENTRY_DNS,
   });
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
@@ -46,6 +51,9 @@ async function bootstrap() {
       },
     },
   );
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new SentryFilter(httpAdapter));
+
   app.useGlobalFilters(new CustomRpcExceptionFilter());
   await app.listen();
 }
