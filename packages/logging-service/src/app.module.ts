@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggingModule } from './modules/logging/logging.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import path from 'path';
+import * as path from 'path';
 
 @Module({
   imports: [
