@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -37,7 +37,7 @@ const { EMAIL_SERVICE_NAME, JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
   ],
   controllers: [EmailController],
 })
-export class EmailModule {
+export class EmailModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(ProjectLinkingMiddleware).forRoutes('email/*');
   }

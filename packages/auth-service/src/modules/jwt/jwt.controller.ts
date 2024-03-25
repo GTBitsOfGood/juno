@@ -14,7 +14,6 @@ export class JWTController implements JwtProto.JwtServiceController {
   validateJwt(
     request: JwtProto.ValidateJwtRequest,
   ): Promise<JwtProto.ValidateJwtResponse> {
-    console.log(`requestJWT: ${request.jwt}`);
     // rough implementation for middleware testing, please delete if unused
     try {
       jwt.verify(request.jwt, 'secret');
