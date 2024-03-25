@@ -27,7 +27,6 @@ async function bootstrap() {
   Sentry.init({
     dsn: process.env.SENTRY_DNS,
   });
-  console.log(process.env.SENTRY_DNS);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
