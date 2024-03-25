@@ -5,10 +5,11 @@ import { Email } from '@prisma/client';
 import { validateEmailIdentifier } from 'src/utility/validate';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { EmailDbServiceController } from 'juno-proto/dist/gen/email';
 
 @Controller()
-@EmailProto.EmailServiceControllerMethods()
-export class EmailController {
+@EmailProto.EmailDbServiceControllerMethods()
+export class EmailController implements EmailDbServiceController {
   constructor(private readonly emailService: EmailService) {}
 
   async getEmail(identifier: IdentifierProto.EmailIdentifier): Promise<Email> {

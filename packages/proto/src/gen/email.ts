@@ -55,34 +55,10 @@ export interface UpdateEmailRequest {
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
-  getEmail(request: EmailIdentifier): Observable<Email>;
-
-  createEmail(request: CreateEmailRequest): Observable<Email>;
-
-  updateEmail(request: UpdateEmailRequest): Observable<Email>;
-
-  deleteEmail(request: EmailIdentifier): Observable<Email>;
-
   sendEmail(request: SendEmailRequest): Observable<SendEmailResponse>;
 }
 
 export interface EmailServiceController {
-  getEmail(
-    request: EmailIdentifier,
-  ): Promise<Email> | Observable<Email> | Email;
-
-  createEmail(
-    request: CreateEmailRequest,
-  ): Promise<Email> | Observable<Email> | Email;
-
-  updateEmail(
-    request: UpdateEmailRequest,
-  ): Promise<Email> | Observable<Email> | Email;
-
-  deleteEmail(
-    request: EmailIdentifier,
-  ): Promise<Email> | Observable<Email> | Email;
-
   sendEmail(
     request: SendEmailRequest,
   ):
@@ -93,13 +69,7 @@ export interface EmailServiceController {
 
 export function EmailServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = [
-      'getEmail',
-      'createEmail',
-      'updateEmail',
-      'deleteEmail',
-      'sendEmail',
-    ];
+    const grpcMethods: string[] = ['sendEmail'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
@@ -127,3 +97,67 @@ export function EmailServiceControllerMethods() {
 }
 
 export const EMAIL_SERVICE_NAME = 'EmailService';
+
+export interface EmailDbServiceClient {
+  getEmail(request: EmailIdentifier): Observable<Email>;
+
+  createEmail(request: CreateEmailRequest): Observable<Email>;
+
+  updateEmail(request: UpdateEmailRequest): Observable<Email>;
+
+  deleteEmail(request: EmailIdentifier): Observable<Email>;
+}
+
+export interface EmailDbServiceController {
+  getEmail(
+    request: EmailIdentifier,
+  ): Promise<Email> | Observable<Email> | Email;
+
+  createEmail(
+    request: CreateEmailRequest,
+  ): Promise<Email> | Observable<Email> | Email;
+
+  updateEmail(
+    request: UpdateEmailRequest,
+  ): Promise<Email> | Observable<Email> | Email;
+
+  deleteEmail(
+    request: EmailIdentifier,
+  ): Promise<Email> | Observable<Email> | Email;
+}
+
+export function EmailDbServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = [
+      'getEmail',
+      'createEmail',
+      'updateEmail',
+      'deleteEmail',
+    ];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('EmailDbService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('EmailDbService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const EMAIL_DB_SERVICE_NAME = 'EmailDbService';

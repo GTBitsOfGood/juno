@@ -5,11 +5,14 @@ package juno.email;
 import "identifiers.proto";
 
 service EmailService {
+  rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
+}
+
+service EmailDbService {
   rpc getEmail(identifiers.EmailIdentifier) returns (Email);
   rpc createEmail(CreateEmailRequest) returns (Email);
   rpc updateEmail(UpdateEmailRequest) returns (Email);
   rpc deleteEmail(identifiers.EmailIdentifier) returns (Email);
-  rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
 }
 
 message Email {
