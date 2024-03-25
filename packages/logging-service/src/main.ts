@@ -11,6 +11,9 @@ async function bootstrap() {
   ConfigModule.forRoot({
     envFilePath: join(__dirname, '../../../.env.local'),
   });
+  Sentry.init({
+    dsn: process.env.SENTRY_DNS,
+  });
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
