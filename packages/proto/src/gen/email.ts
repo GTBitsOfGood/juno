@@ -6,7 +6,6 @@ import { EmailIdentifier, ProjectIdentifier } from './identifiers';
 export const protobufPackage = 'juno.email';
 
 export interface Email {
-  id: number;
   name: string;
   description?: string | undefined;
   project: ProjectIdentifier | undefined;

@@ -1,11 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { IdentifierProto, EmailProto } from 'juno-proto';
 import { EmailService } from './email.service';
-import { Email } from '@prisma/client';
 import { validateEmailIdentifier } from 'src/utility/validate';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { EmailDbServiceController } from 'juno-proto/dist/gen/email';
+import { Email, EmailDbServiceController } from 'juno-proto/dist/gen/email';
 
 @Controller()
 @EmailProto.EmailDbServiceControllerMethods()
@@ -24,7 +23,13 @@ export class EmailController implements EmailDbServiceController {
       });
     }
 
-    return email;
+    return {
+      name: email.name,
+      description: email.description,
+      project: {
+        id: email.projectId,
+      },
+    };
   }
 
   async createEmail(request: EmailProto.CreateEmailRequest): Promise<Email> {
@@ -37,7 +42,13 @@ export class EmailController implements EmailDbServiceController {
       },
       description: request.description,
     });
-    return email;
+    return {
+      name: email.name,
+      description: email.description,
+      project: {
+        id: email.projectId,
+      },
+    };
   }
 
   async updateEmail(request: EmailProto.UpdateEmailRequest): Promise<Email> {
@@ -45,7 +56,13 @@ export class EmailController implements EmailDbServiceController {
     const email = await this.emailService.updateEmail(emailFind, {
       description: request.updateParams.description,
     });
-    return email;
+    return {
+      name: email.name,
+      description: email.description,
+      project: {
+        id: email.projectId,
+      },
+    };
   }
 
   async deleteEmail(
@@ -53,6 +70,14 @@ export class EmailController implements EmailDbServiceController {
   ): Promise<Email> {
     const emailParams = validateEmailIdentifier(identifier);
 
-    return this.emailService.deleteEmail(emailParams);
+    const email = await this.emailService.deleteEmail(emailParams);
+
+    return {
+      name: email.name,
+      description: email.description,
+      project: {
+        id: email.projectId,
+      },
+    };
   }
 }
