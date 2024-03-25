@@ -25,7 +25,7 @@ async function bootstrap() {
       },
     },
   );
-1 const { httpAdapter } = app.get(HttpAdapterHost);
+  const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new SentryFilter(httpAdapter));
 
   await app.listen();
