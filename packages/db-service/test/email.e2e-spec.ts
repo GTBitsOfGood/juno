@@ -155,6 +155,7 @@ describe('DB Service Email Tests', () => {
           },
         },
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
           expect(err).not.toBeNull();
           resolve({});
@@ -189,6 +190,7 @@ describe('DB Service Email Tests', () => {
         {
           id: resultingEmail.name, // Use the ID of the created email for deletion
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
           expect(err).toBeNull();
           resolve({});
@@ -205,6 +207,7 @@ describe('DB Service Email Tests', () => {
         {
           id: 999999, // Use nonexistent ID
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
           expect(err).not.toBeNull();
           resolve({});
@@ -243,6 +246,7 @@ describe('DB Service Email Tests', () => {
           description: 'new description',
         },
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp: Email) => {
           expect(err).toBeNull();
           resolve({});
@@ -263,6 +267,7 @@ describe('DB Service Email Tests', () => {
           description: 'new description',
         },
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp: Email) => {
           expect(err).not.toBeNull();
           resolve({});
