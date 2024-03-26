@@ -5,6 +5,7 @@ import { LoggingProto } from 'juno-proto';
 export class LoggingService {
   constructor() {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async recordInfo(request: LoggingProto.RecordInfoRequest): Promise<any> {
     return {};
   }
