@@ -18,7 +18,7 @@
     "format:check": "yarn prettier --check .",
     "format:write": "yarn prettier --write .",
     "tsc": "nx run-many --target=tsc",
-    "lint": "nx run-many --target=lint",
+    "lint": "nx run-many --target=lint --no-cloud",
     "sync-protos": "node syncJunoProtos.js",
     "gen-proto": "yarn workspace juno-proto install && yarn workspace juno-proto build && yarn sync-protos",
     "preinstall": "yarn gen-proto",

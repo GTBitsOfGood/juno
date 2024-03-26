@@ -52,7 +52,7 @@ export class EmailController implements EmailProto.EmailServiceController {
     }
     try {
       await this.emailService.sendEmail(request);
-      return { success: true };
+      return { statusCode: 200 };
     } catch (error) {
       throw new RpcException(error.message);
     }

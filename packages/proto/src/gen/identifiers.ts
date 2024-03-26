@@ -12,4 +12,9 @@ export interface UserIdentifier {
   email?: string | undefined;
 }
 
+export interface EmailIdentifier {
+  projectId: number;
+  name: string;
+}
+
 export const JUNO_IDENTIFIERS_PACKAGE_NAME = 'juno.identifiers';

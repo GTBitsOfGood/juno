@@ -8,13 +8,26 @@ service EmailService {
   rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
 }
 
+service EmailDbService {
+  rpc getEmail(identifiers.EmailIdentifier) returns (Email);
+  rpc createEmail(CreateEmailRequest) returns (Email);
+  rpc updateEmail(UpdateEmailRequest) returns (Email);
+  rpc deleteEmail(identifiers.EmailIdentifier) returns (Email);
+}
+
+message Email {
+  string name = 2;
+  optional string description = 3;
+  identifiers.ProjectIdentifier project = 4;
+}
+
 message SendEmailRequest {
   repeated EmailRecipient recipients = 1;
   EmailSender sender = 2;
   repeated EmailContent content = 3;
 }
 
-message SendEmailResponse { bool success = 1; }
+message SendEmailResponse { int32 statusCode = 1; }
 
 message EmailRecipient {
   string email = 1;
@@ -29,4 +42,17 @@ message EmailSender {
 message EmailContent {
   string type = 1;
   string value = 2;
+}
+
+message CreateEmailRequest {
+  string name = 1;
+  identifiers.ProjectIdentifier project = 2;
+  optional string description = 3;
+}
+
+message EmailUpdateParams { optional string description = 1; }
+
+message UpdateEmailRequest {
+  identifiers.EmailIdentifier emailIdentifier = 1;
+  EmailUpdateParams updateParams = 2;
 }

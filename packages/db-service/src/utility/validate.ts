@@ -54,3 +54,35 @@ export function validateUserIdentifier(
     };
   }
 }
+
+export function validateEmailIdentifier(
+  identifier: IdentifierProto.EmailIdentifier,
+): Prisma.EmailWhereUniqueInput {
+  if (!identifier.projectId && !identifier.name) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Neither id nor email name are provided',
+    });
+  }
+
+  if (!identifier.projectId) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Missing project id argument',
+    });
+  }
+
+  if (!identifier.name) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Missing email name argument',
+    });
+  }
+
+  return {
+    name_projectId: {
+      name: identifier.name,
+      projectId: Number(identifier.projectId),
+    },
+  };
+}
