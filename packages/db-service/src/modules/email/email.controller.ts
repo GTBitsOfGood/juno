@@ -1,7 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { IdentifierProto, EmailProto } from 'juno-proto';
 import { EmailService } from './email.service';
-import { validateEmailIdentifier } from 'src/utility/validate';
+import {
+  validateEmailIdentifier,
+  validateProjectIdentifier,
+} from 'src/utility/validate';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { Email, EmailDbServiceController } from 'juno-proto/dist/gen/email';
@@ -36,9 +39,7 @@ export class EmailController implements EmailDbServiceController {
     const email = await this.emailService.createEmail({
       name: request.name,
       project: {
-        connect: {
-          id: Number(request.project.id),
-        },
+        connect: validateProjectIdentifier(request.project),
       },
       description: request.description,
     });

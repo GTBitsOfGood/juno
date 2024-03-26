@@ -95,7 +95,7 @@ describe('DB Service Email Tests', () => {
 
     const emailProtoGRPC = GRPC.loadPackageDefinition(emailProto) as any;
 
-    emailClient = new emailProtoGRPC.juno.email.EmailService(
+    emailClient = new emailProtoGRPC.juno.email.EmailDbService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
@@ -170,25 +170,26 @@ describe('DB Service Email Tests', () => {
     const promise = new Promise((resolve) => {
       emailClient.createEmail(
         {
-          name: 'tester123',
+          name: 'tester1234',
           project: {
             name: 'testproject',
           },
         },
 
-        (err, resp: Email) => {
-          expect(err).not.toBeNull();
+        (err, resp) => {
+          expect(err).toBeNull();
           resolve(resp);
         },
       );
     });
 
-    const resultingEmail = (await promise) as Email;
+    const resultingEmail = (await promise) as any;
 
     const deletionPromise = new Promise((resolve) => {
       emailClient.deleteEmail(
         {
-          id: resultingEmail.name, // Use the ID of the created email for deletion
+          name: resultingEmail.name,
+          projectId: resultingEmail.project.id,
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
@@ -222,28 +223,31 @@ describe('DB Service Email Tests', () => {
     const promise = new Promise((resolve) => {
       emailClient.createEmail(
         {
-          name: 'tester123',
+          name: 'tester12345',
           project: {
             name: 'testproject',
           },
         },
 
         (err, resp: Email) => {
-          expect(err).not.toBeNull();
+          expect(err).toBeNull();
           resolve(resp);
         },
       );
     });
 
-    await promise;
+    const email = (await promise) as any;
 
     const updatePromise = new Promise((resolve) => {
       emailClient.updateEmail(
         {
-          name: 'tester123',
-        },
-        {
-          description: 'new description',
+          emailIdentifier: {
+            name: email.name,
+            projectId: email.project.id,
+          },
+          updateParams: {
+            description: 'new description',
+          },
         },
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -282,25 +286,26 @@ describe('DB Service Email Tests', () => {
     const promise = new Promise((resolve) => {
       emailClient.createEmail(
         {
-          name: 'tester12345',
+          name: 'tester123456',
           project: {
             name: 'testproject',
           },
         },
 
         (err, resp: Email) => {
-          expect(err).not.toBeNull();
+          expect(err).toBeNull();
           resolve(resp);
         },
       );
     });
 
-    await promise;
+    const email = (await promise) as any;
 
     const updatePromise = new Promise((resolve) => {
       emailClient.getEmail(
         {
-          name: 'tester12345',
+          name: email.name,
+          projectId: email.project.id,
         },
         (err, resp: Email) => {
           expect(err).toBeNull();
