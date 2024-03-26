@@ -80,7 +80,7 @@ describe('Email Service Send Email Tests', () => {
         },
         (err, resp) => {
           expect(err).toBeNull();
-          expect(resp.success).toBe(true);
+          expect(resp.statusCode).toBe(200);
           resolve(resp);
         },
       );
