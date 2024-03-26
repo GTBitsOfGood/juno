@@ -4,25 +4,25 @@ import { Observable } from 'rxjs';
 
 export const protobufPackage = 'juno.logging';
 
-export interface recordInfoRequest {
+export interface RecordInfoRequest {
   message: string;
 }
 
-export interface recordInfoResponse {}
+export interface RecordInfoResponse {}
 
 export const JUNO_LOGGING_PACKAGE_NAME = 'juno.logging';
 
 export interface LoggingServiceClient {
-  recordInfo(request: recordInfoRequest): Observable<recordInfoResponse>;
+  recordInfo(request: RecordInfoRequest): Observable<RecordInfoResponse>;
 }
 
 export interface LoggingServiceController {
   recordInfo(
-    request: recordInfoRequest,
+    request: RecordInfoRequest,
   ):
-    | Promise<recordInfoResponse>
-    | Observable<recordInfoResponse>
-    | recordInfoResponse;
+    | Promise<RecordInfoResponse>
+    | Observable<RecordInfoResponse>
+    | RecordInfoResponse;
 }
 
 export function LoggingServiceControllerMethods() {
