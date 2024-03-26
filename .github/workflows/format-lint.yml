@@ -22,6 +22,6 @@ jobs:
         run: yarn format:check
 
       - name: Run ESLint
-        run: yarn lint
+        run: yarn nx clear-cache && yarn lint
         # Always run the linter, even if prettier failed
         if: ${{ steps.install.outcome == 'success' }}
