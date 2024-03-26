@@ -13,7 +13,7 @@ async function bootstrap() {
     envFilePath: join(__dirname, '../../../.env.local'),
   });
   Sentry.init({
-    dsn: process.env.SENTRY_DNS,
+    dsn: process.env.SENTRY_DSN,
   });
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
