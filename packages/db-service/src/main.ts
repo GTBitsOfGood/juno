@@ -44,7 +44,7 @@ async function bootstrap() {
           HealthProtoFile,
           ResetProtoFile,
           ApiKeyProtoFile,
-          EmailProtoFile
+          EmailProtoFile,
         ],
         url: process.env.DB_SERVICE_ADDR,
       },

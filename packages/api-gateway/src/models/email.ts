@@ -60,6 +60,6 @@ export class SendEmailResponse {
   success: boolean;
 
   constructor(res: EmailProto.SendEmailResponse) {
-    this.success = res.success;
+    this.success = res.statusCode == 200;
   }
 }
