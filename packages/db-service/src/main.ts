@@ -15,6 +15,8 @@ import {
   ResetProtoFile,
   ApiKeyProto,
   ApiKeyProtoFile,
+  EmailProto,
+  EmailProtoFile,
 } from 'juno-proto';
 import { CustomRpcExceptionFilter } from './global-exception.filter';
 
@@ -33,6 +35,7 @@ async function bootstrap() {
           HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
           ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
           ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
+          EmailProto.JUNO_EMAIL_PACKAGE_NAME,
         ],
         protoPath: [
           UserProtoFile,
@@ -41,6 +44,7 @@ async function bootstrap() {
           HealthProtoFile,
           ResetProtoFile,
           ApiKeyProtoFile,
+          EmailProtoFile
         ],
         url: process.env.DB_SERVICE_ADDR,
       },
