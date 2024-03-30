@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
+import { LoggingProtoFile } from 'juno-proto';
+import { JUNO_LOGGING_PACKAGE_NAME } from 'juno-proto/dist/gen/logging';
 
 async function bootstrap() {
   ConfigModule.forRoot({
@@ -13,8 +15,8 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: [],
-        protoPath: [],
+        package: JUNO_LOGGING_PACKAGE_NAME,
+        protoPath: [LoggingProtoFile],
         url: process.env.LOGGING_SERVICE_ADDR,
       },
     },

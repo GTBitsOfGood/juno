@@ -9,4 +9,9 @@ export class LoggingService {
   async recordInfo(request: LoggingProto.RecordInfoRequest): Promise<any> {
     return {};
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async recordError(request: LoggingProto.RecordInfoRequest): Promise<any> {
+    return {};
+  }
 }
