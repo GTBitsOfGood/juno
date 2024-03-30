@@ -88,7 +88,7 @@ describe('Email Service Sender Registration Tests', () => {
     );
 
     expect(response).toBeDefined();
-    expect(response.statusCode).toEqual('201');
+    expect(response.statusCode).toEqual(201);
   });
 
   it('should fail to register a sender', async () => {

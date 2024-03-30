@@ -7,7 +7,7 @@ export class SendGridService
   implements OnModuleInit
 {
   async onModuleInit() {
-    if (process.env.SENDGRID_API_KEY) {
+    if (process.env.SENDGRID_API_KEY && process.env.NODE_ENV != 'test') {
       this.setApiKey(process.env.SENDGRID_API_KEY);
     }
   }
