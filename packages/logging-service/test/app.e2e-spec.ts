@@ -45,8 +45,8 @@ describe('AppService', () => {
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-    loggingClient = new protoGRPC.juno.email.EmailService(
-      process.env.EMAIL_SERVICE_ADDR,
+    loggingClient = new protoGRPC.juno.logging.LoggingService(
+      process.env.LOGGING_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
   });
