@@ -5,6 +5,7 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { EmailProtoFile, EmailProto, ResetProtoFile } from 'juno-proto';
+import { JUNO_EMAIL_PACKAGE_NAME } from 'juno-proto/dist/gen/email';
 
 let app: INestMicroservice;
 
@@ -18,8 +19,8 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [],
-      protoPath: [],
+      package: [JUNO_EMAIL_PACKAGE_NAME],
+      protoPath: [EmailProtoFile],
       url: process.env.EMAIL_SERVICE_ADDR,
     },
   });
