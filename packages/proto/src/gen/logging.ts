@@ -5,13 +5,13 @@ import { Observable } from 'rxjs';
 export const protobufPackage = 'juno.logging';
 
 export interface RecordInfoRequest {
-  message: string;
+  msg: string;
 }
 
 export interface RecordInfoResponse {}
 
 export interface ErrorLogRequest {
-  message: string;
+  msg: string;
 }
 
 /** TODO: to be defined later */

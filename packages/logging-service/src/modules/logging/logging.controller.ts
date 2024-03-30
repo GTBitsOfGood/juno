@@ -11,7 +11,7 @@ export class LoggingController
   async recordError(
     request: LoggingProto.ErrorLogRequest,
   ): Promise<LoggingProto.ErrorLogResponse> {
-    if (!request.message) {
+    if (!request.msg) {
       console.log('Invalid parameters');
     } else {
       try {
@@ -26,7 +26,7 @@ export class LoggingController
     request: LoggingProto.RecordInfoRequest,
   ): Promise<LoggingProto.RecordInfoResponse> {
     // Since we don't want to return exceptions to terminate logs, we should instead console log values
-    if (!request.message) {
+    if (!request.msg) {
       console.log('Invalid parameters');
     } else {
       try {

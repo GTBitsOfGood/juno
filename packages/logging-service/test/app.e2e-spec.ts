@@ -5,6 +5,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { LoggingProtoFile } from 'juno-proto';
+import { JUNO_LOGGING_PACKAGE_NAME } from 'juno-proto/dist/gen/logging';
 
 let app: INestMicroservice;
 
@@ -18,8 +19,8 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [],
-      protoPath: [],
+      package: JUNO_LOGGING_PACKAGE_NAME,
+      protoPath: [LoggingProtoFile],
       url: process.env.LOGGING_SERVICE_ADDR,
     },
   });
@@ -51,8 +52,33 @@ describe('AppService', () => {
     );
   });
 
-  it('should log error messages', () => {
+  it('should log error messages', async () => {
     const testMessage = 'Test error';
-    expect(loggingClient.recordError(testMessage)).toBeUndefined();
+    await new Promise((resolve) => {
+      loggingClient.recordError(
+        {
+          msg: testMessage,
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+  });
+
+  it('should log info messages', async () => {
+    const testMessage = 'Test info';
+    await new Promise((resolve) => {
+      loggingClient.recordInfo(
+        {
+          msg: testMessage,
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
   });
 });
