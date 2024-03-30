@@ -4,10 +4,9 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { EmailProtoFile, EmailProto } from 'juno-proto';
+import { EmailProtoFile, EmailProto, ResetProtoFile } from 'juno-proto';
 
 let app: INestMicroservice;
-let emailClient: any;
 
 jest.setTimeout(15000);
 
@@ -34,7 +33,7 @@ async function initApp() {
 beforeAll(async () => {
   app = await initApp();
 
-  const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+  const proto = ProtoLoader.loadSync([EmailProtoFile, ResetProtoFile]) as any;
 
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
@@ -43,16 +42,8 @@ beforeAll(async () => {
     GRPC.credentials.createInsecure(),
   );
 
-  const emailClient = new protoGRPC.juno.emailService(
-    process.env.DB_SERVICE_ADDR,
-    GRPC.credentials.createInsecure(),
-  );
-
   await new Promise((resolve) => {
     resetClient.resetDb({}, () => {
-      resolve(0);
-    });
-    emailClient.resetDb({}, () => {
       resolve(0);
     });
   });
@@ -62,50 +53,64 @@ afterAll(() => {
   app.close();
 });
 
-it('should successfully register a sender', async () => {
-  const response: EmailProto.RegisterSenderResponse = await new Promise(
-    (resolve, reject) => {
-      emailClient.registerSender(
-        {
-          fromEmail: 'example@example.com',
-          fromName: 'example',
-          replyTo: 'example@example.com',
-        },
-        (err: any, response: EmailProto.RegisterSenderResponse) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        },
-      );
-    },
-  );
+describe('Email Service Sender Registration Tests', () => {
+  let emailClient: any;
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
 
-  expect(response).toBeDefined();
-  expect(response.statusCode).toEqual('201');
-});
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-it('should fail to register a sender', async () => {
-  const response: EmailProto.RegisterSenderResponse = await new Promise(
-    (resolve, reject) => {
-      emailClient.registerSender(
-        {
-          fromEmail: '',
-          fromName: '',
-          replyTo: '',
-        },
-        (err: any, response: EmailProto.RegisterSenderResponse) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        },
-      );
-    },
-  );
+    emailClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
 
-  expect(response).toBeDefined();
-  expect(response.statusCode).toEqual('201');
+  it('should successfully register a sender', async () => {
+    const response: EmailProto.RegisterSenderResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.registerSender(
+          {
+            fromEmail: 'example@example.com',
+            fromName: 'example',
+            replyTo: 'example@example.com',
+          },
+          (err: any, response: EmailProto.RegisterSenderResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.statusCode).toEqual('201');
+  });
+
+  it('should fail to register a sender', async () => {
+    const response: EmailProto.RegisterSenderResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.registerSender(
+          {
+            fromEmail: '',
+            fromName: '',
+            replyTo: '',
+          },
+          (err: any, response: EmailProto.RegisterSenderResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.statusCode).toEqual('201');
+  });
 });
