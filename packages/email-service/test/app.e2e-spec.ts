@@ -92,26 +92,23 @@ describe('Email Service Sender Registration Tests', () => {
   });
 
   it('should fail to register a sender', async () => {
-    const response: EmailProto.RegisterSenderResponse = await new Promise(
-      (resolve, reject) => {
-        emailClient.registerSender(
-          {
-            fromEmail: '',
-            fromName: '',
-            replyTo: '',
-          },
-          (err: any, response: EmailProto.RegisterSenderResponse) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          },
-        );
-      },
-    );
+    const response: any = await new Promise((resolve, reject) => {
+      emailClient.registerSender(
+        {
+          fromEmail: '',
+          fromName: '',
+          replyTo: '',
+        },
+        (err: any, response: EmailProto.RegisterSenderResponse) => {
+          if (err) {
+            resolve(err);
+          } else {
+            reject(response);
+          }
+        },
+      );
+    });
 
     expect(response).toBeDefined();
-    expect(response.statusCode).toEqual('201');
   });
 });
