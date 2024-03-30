@@ -1,34 +1,45 @@
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { UserProto } from 'juno-proto';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserModel {
   @IsNotEmpty()
   @IsEmail()
+  @ApiProperty({ description: 'User email' })
   email: string;
 
   @IsNotEmpty()
+  @ApiProperty({ description: 'User name' })
   name: string;
 
   @IsNotEmpty()
+  @ApiProperty({ description: 'User password' })
   password: string;
 }
 
 export class SetUserTypeModel {
+  @ApiProperty({ description: 'User email' })
   email?: string | undefined;
+  @ApiProperty({ description: 'User id' })
   id?: number | undefined;
 
   @IsNotEmpty()
   @Transform(toEnum)
+  @ApiProperty({ description: 'New user type' })
   type: UserProto.UserType;
 }
 
 export class UserResponse {
   @Transform(({ value }) => Number(value))
+  @ApiProperty({ description: 'User id' })
   id: number;
+  @ApiProperty({ description: 'User email' })
   email: string;
+  @ApiProperty({ description: 'User name' })
   name: string;
   @Transform(fromEnum)
+  @ApiProperty({ description: 'User type' })
   type: UserProto.UserType;
 
   constructor(user: UserProto.User) {
@@ -40,7 +51,9 @@ export class UserResponse {
 }
 
 export class LinkProjectModel {
+  @ApiProperty({ description: 'id of project to be linked' })
   id?: number;
+  @ApiProperty({ description: 'name of project to be linked' })
   name?: string;
 }
 
