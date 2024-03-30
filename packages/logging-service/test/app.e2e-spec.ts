@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestMicroservice } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AppService } from 'src/app.service';
+import * as ProtoLoader from '@grpc/proto-loader';
+import * as GRPC from '@grpc/grpc-js';
+import { LoggingProtoFile } from 'juno-proto';
 
 let app: INestMicroservice;
 
@@ -37,18 +39,20 @@ afterAll(() => {
 });
 
 describe('AppService', () => {
-  let service: AppService;
-
+  let loggingClient: any;
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AppService],
-    }).compile();
+    const proto = ProtoLoader.loadSync([LoggingProtoFile]) as any;
 
-    service = module.get<AppService>(AppService);
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    loggingClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
   });
 
   it('should log error messages', () => {
     const testMessage = 'Test error';
-    expect(service.recordError(testMessage)).toBeUndefined();
+    expect(loggingClient.recordError(testMessage)).toBeUndefined();
   });
 });
