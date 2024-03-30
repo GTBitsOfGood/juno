@@ -17,6 +17,7 @@ export class AppService implements OnModuleInit {
       this.client.getService<LoggingService>('LoggingService');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   recordError(message: string) {
     // TODO: currently doing nothing here, but want to actually log the error
     return;
