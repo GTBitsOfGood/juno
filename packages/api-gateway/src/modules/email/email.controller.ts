@@ -19,8 +19,19 @@ import { EmailProto } from 'juno-proto';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
 
+import {
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiBadRequestResponse,
+  ApiTags,
+  ApiCreatedResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
+
 const { EMAIL_SERVICE_NAME } = EmailProto;
 
+@ApiBearerAuth()
+@ApiTags('email')
 @Controller('email')
 export class EmailController implements OnModuleInit {
   private emailService: EmailProto.EmailServiceClient;
@@ -34,11 +45,29 @@ export class EmailController implements OnModuleInit {
       );
   }
 
+  @ApiOperation({
+    description: 'This endpoint registers a user',
+  })
+  @ApiCreatedResponse({
+    description: 'Email registered successfully',
+    type: RegisterEmailResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post('register')
   async registerSenderAddress(@Body('') params: RegisterEmailModel) {
     return new RegisterEmailResponse(params.email);
   }
 
+  @ApiOperation({
+    description: 'This endpoint sends an email',
+  })
+  @ApiCreatedResponse({
+    description: 'Email sent successfully',
+    type: SendEmailResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post('/send')
   async sendEmail(@Body() req: SendEmailModel): Promise<SendEmailResponse> {
     if (!req) {
