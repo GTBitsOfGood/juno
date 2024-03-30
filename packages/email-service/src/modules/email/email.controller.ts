@@ -57,4 +57,9 @@ export class EmailController implements EmailProto.EmailServiceController {
       throw new RpcException(error.message);
     }
   }
+  async registerSender(
+    req: EmailProto.RegisterSenderRequest,
+  ): Promise<EmailProto.RegisterSenderResponse> {
+    return await this.emailService.registerSender(req);
+  }
 }

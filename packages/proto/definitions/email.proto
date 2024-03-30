@@ -6,6 +6,7 @@ import "identifiers.proto";
 
 service EmailService {
   rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
+  rpc registerSender(RegisterSenderRequest) returns (RegisterSenderResponse);
 }
 
 service EmailDbService {
@@ -55,4 +56,17 @@ message EmailUpdateParams { optional string description = 1; }
 message UpdateEmailRequest {
   identifiers.EmailIdentifier emailIdentifier = 1;
   EmailUpdateParams updateParams = 2;
+}
+
+message SendEmailRequestResponse { bool success = 1; }
+
+message RegisterSenderRequest {
+  string from_email = 1;
+  string from_name = 2;
+  string reply_to = 3;
+}
+
+message RegisterSenderResponse {
+  int32 status_code = 1;
+  string message = 2;
 }

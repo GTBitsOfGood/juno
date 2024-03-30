@@ -4,7 +4,8 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ResetProtoFile } from 'juno-proto';
+import { EmailProtoFile, EmailProto, ResetProtoFile } from 'juno-proto';
+import { JUNO_EMAIL_PACKAGE_NAME } from 'juno-proto/dist/gen/email';
 
 let app: INestMicroservice;
 
@@ -18,8 +19,8 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [],
-      protoPath: [],
+      package: [JUNO_EMAIL_PACKAGE_NAME],
+      protoPath: [EmailProtoFile],
       url: process.env.EMAIL_SERVICE_ADDR,
     },
   });
@@ -33,7 +34,7 @@ async function initApp() {
 beforeAll(async () => {
   app = await initApp();
 
-  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+  const proto = ProtoLoader.loadSync([EmailProtoFile, ResetProtoFile]) as any;
 
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
@@ -53,6 +54,61 @@ afterAll(() => {
   app.close();
 });
 
-it('Dummy test', () => {
-  expect('1').toEqual('1');
+describe('Email Service Sender Registration Tests', () => {
+  let emailClient: any;
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    emailClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('should successfully register a sender', async () => {
+    const response: EmailProto.RegisterSenderResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.registerSender(
+          {
+            fromEmail: 'example@example.com',
+            fromName: 'example',
+            replyTo: 'example@example.com',
+          },
+          (err: any, response: EmailProto.RegisterSenderResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.statusCode).toEqual(201);
+  });
+
+  it('should fail to register a sender', async () => {
+    const response: any = await new Promise((resolve, reject) => {
+      emailClient.registerSender(
+        {
+          fromEmail: '',
+          fromName: '',
+          replyTo: '',
+        },
+        (err: any, response: EmailProto.RegisterSenderResponse) => {
+          if (err) {
+            resolve(err);
+          } else {
+            reject(response);
+          }
+        },
+      );
+    });
+
+    expect(response).toBeDefined();
+  });
 });
