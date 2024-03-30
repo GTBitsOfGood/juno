@@ -18,9 +18,11 @@ import {
   ProjectResponse,
 } from 'src/models/project';
 import { ProjectProto } from 'juno-proto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
+@ApiTags('project')
 @Controller('project')
 export class ProjectController implements OnModuleInit {
   private projectService: ProjectProto.ProjectServiceClient;
@@ -37,6 +39,20 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Get('id/:id')
+  @ApiOperation({ summary: 'Retrieves a project by its unique ID.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'ID must be a number',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No project with specified ID was found',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returned the project associated with the given ID',
+    type: ProjectResponse,
+  })
   async getProjectById(@Param('id') idStr: string): Promise<ProjectResponse> {
     const id = parseInt(idStr);
     if (Number.isNaN(id)) {
@@ -50,6 +66,16 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Get('name/:name')
+  @ApiOperation({ summary: 'Retrieves a project by its unique name.' })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No project with specified name was found',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returned the project associated with the given name',
+    type: ProjectResponse,
+  })
   async getProjectByName(
     @Param('name') name: string,
   ): Promise<ProjectResponse> {
@@ -61,6 +87,18 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Post()
+  @ApiOperation({
+    summary: 'Creates a new project with the specified parameters.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Name should not be empty',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Successfully created project',
+    type: ProjectResponse,
+  })
   async createProject(@Body() params: CreateProjectModel) {
     const project = this.projectService.createProject({
       name: params.name,
@@ -70,6 +108,21 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Put('id/:id/user')
+  @ApiOperation({
+    summary: 'Links a specified user with a given project ID.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid user credentials',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Cannot find valid user and/or project',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid user/project parameters',
+  })
   async linkUserWithProjectId(
     @Param('id') idStr: string,
     @Body() linkUserBody: LinkUserModel,
@@ -92,6 +145,21 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Put('name/:name/user')
+  @ApiOperation({
+    summary: 'Links a specified user with a given project name.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid user credentials',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Cannot find valid user and/or project',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid user/project parameters',
+  })
   async linkUserWithProjectName(
     @Param('name') name: string,
     @Body() linkUserBody: LinkUserModel,
