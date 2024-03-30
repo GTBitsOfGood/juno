@@ -4,6 +4,7 @@ package juno.logging;
 
 service LoggingService {
     rpc recordInfo(RecordInfoRequest) returns (RecordInfoResponse);
+    rpc recordError (ErrorLogRequest) returns (ErrorLogResponse) {}
 }
 
 message RecordInfoRequest {
@@ -11,3 +12,10 @@ message RecordInfoRequest {
 }
 
 message RecordInfoResponse {}
+
+message ErrorLogRequest {
+  string message = 1;
+}
+
+// TODO: to be defined later
+message ErrorLogResponse {}

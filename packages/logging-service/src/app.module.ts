@@ -3,7 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggingModule } from './modules/logging/logging.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import * as path from 'path';
+import { JUNO_LOGGING_PACKAGE_NAME } from 'juno-proto/dist/gen/logging';
+import { LoggingProtoFile } from 'juno-proto';
 
 @Module({
   imports: [
@@ -13,13 +14,8 @@ import * as path from 'path';
         name: 'LOGGING_SERVICE',
         transport: Transport.GRPC,
         options: {
-          package: 'error_logging',
-          protoPath: path.join(
-            __dirname,
-            '../../',
-            'juno-proto/dist/definitions',
-            'error_logging.proto',
-          ),
+          package: JUNO_LOGGING_PACKAGE_NAME,
+          protoPath: [LoggingProtoFile],
         },
       },
     ]),
