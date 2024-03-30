@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { LoggingService } from './logging.service';
 import { LoggingProto } from 'juno-proto';
-import { Observable } from 'rxjs';
 
 @Controller()
 @LoggingProto.LoggingServiceControllerMethods()
