@@ -6,12 +6,12 @@ import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class EmailService {
-  constructor(private sendgrid: SendGridService) { }
+  constructor(private sendgrid: SendGridService) {}
 
   async sendEmail(request: EmailProto.SendEmailRequest): Promise<void> {
     // SendGrid Client for future integration with API
     // Conditional statement used for testing without actually calling Sendgrid. Remove when perform actual integration
-    if (process.env.SENDGRID_API_KEY) {
+    if (process.env.SENDGRID_API_KEY && process.env.NODE_ENV != 'test') {
       await this.sendgrid.send({
         personalizations: [
           {
