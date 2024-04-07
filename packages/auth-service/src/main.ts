@@ -13,6 +13,7 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   ConfigModule.forRoot({
@@ -39,6 +40,16 @@ async function bootstrap() {
       },
     },
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('Auth API')
+    .setDescription('The authentication API description')
+    .setVersion('1.0')
+    .addTag('auth')
+    .build();
+
+  const document = SwaggerModule.createDocument(app as any, config);
+  SwaggerModule.setup('api', app as any, document);
   await app.listen();
 }
 bootstrap();
