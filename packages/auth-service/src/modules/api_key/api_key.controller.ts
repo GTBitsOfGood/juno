@@ -4,7 +4,15 @@ import { ApiKeyProto, UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { createHash, randomBytes } from 'crypto';
 import { status } from '@grpc/grpc-js';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  IssueApiKeyResponse,
+  IssueApiKeyRequest,
+  RevokeApiKeyRequest,
+  RevokeApiKeyResponse,
+} from 'juno-proto/dist/gen/api_key';
 
+@ApiTags('api_key')
 @Controller('api_key')
 @ApiKeyProto.ApiKeyServiceControllerMethods()
 export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
@@ -29,6 +37,9 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       );
   }
 
+  @ApiOperation({ summary: 'Issue an API key' })
+  @ApiResponse({ status: 200, description: 'API key successfully issued.', type: IssueApiKeyResponse })
+  @ApiBody({ type: IssueApiKeyRequest, description: 'Payload to issue a new API key.' })
   async issueApiKey(
     request: ApiKeyProto.IssueApiKeyRequest,
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
@@ -73,6 +84,10 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       throw e;
     }
   }
+
+  @ApiOperation({ summary: 'Revoke an API key' })
+  @ApiResponse({ status: 200, description: 'API key successfully revoked.', type: RevokeApiKeyRequest })
+  @ApiBody({ type: RevokeApiKeyResponse, description: 'Payload to revoke an API key.' })
   async revokeApiKey(
     request: ApiKeyProto.RevokeApiKeyRequest,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
