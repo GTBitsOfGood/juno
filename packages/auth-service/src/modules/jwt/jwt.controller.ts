@@ -14,8 +14,15 @@ import {
 @JwtProto.JwtServiceControllerMethods()
 export class JWTController implements JwtProto.JwtServiceController {
   @ApiOperation({ summary: 'Create a JWT' })
-  @ApiResponse({ status: 200, description: 'JWT successfully created.', type: CreateJwtResponse })
-  @ApiBody({ type: CreateJwtRequest, description: 'Payload to create a new JWT' })
+  @ApiResponse({
+    status: 200,
+    description: 'JWT successfully created.',
+    type: CreateJwtResponse,
+  })
+  @ApiBody({
+    type: CreateJwtRequest,
+    description: 'Payload to create a new JWT',
+  })
   async createJwt(
     request: JwtProto.CreateJwtRequest,
   ): Promise<JwtProto.CreateJwtResponse> {
@@ -24,8 +31,15 @@ export class JWTController implements JwtProto.JwtServiceController {
   }
 
   @ApiOperation({ summary: 'Validate a JWT' })
-  @ApiResponse({ status: 200, description: 'JWT successfully validated.', type: ValidateJwtRequest })
-  @ApiBody({ type: ValidateJwtResponse, description: 'Payload to validate a JWT' })
+  @ApiResponse({
+    status: 200,
+    description: 'JWT successfully validated.',
+    type: ValidateJwtRequest,
+  })
+  @ApiBody({
+    type: ValidateJwtResponse,
+    description: 'Payload to validate a JWT',
+  })
   validateJwt(
     request: JwtProto.ValidateJwtRequest,
   ): Promise<JwtProto.ValidateJwtResponse> {
