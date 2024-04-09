@@ -2,12 +2,12 @@ import { Controller } from '@nestjs/common';
 import { JwtProto } from 'juno-proto';
 import * as jwt from 'jsonwebtoken';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import {
-  CreateJwtRequest,
-  CreateJwtResponse,
-  ValidateJwtRequest,
-  ValidateJwtResponse,
-} from 'juno-proto/dist/gen/jwt';
+// import {
+//   CreateJwtRequest,
+//   CreateJwtResponse,
+//   ValidateJwtRequest,
+//   ValidateJwtResponse,
+// } from 'juno-proto/dist/gen/jwt';
 
 @ApiTags('health')
 @Controller('jwt')
@@ -17,10 +17,10 @@ export class JWTController implements JwtProto.JwtServiceController {
   @ApiResponse({
     status: 200,
     description: 'JWT successfully created.',
-    type: CreateJwtResponse,
+    // type: CreateJwtResponse,
   })
   @ApiBody({
-    type: CreateJwtRequest,
+    // type: CreateJwtRequest,
     description: 'Payload to create a new JWT',
   })
   async createJwt(
@@ -34,10 +34,10 @@ export class JWTController implements JwtProto.JwtServiceController {
   @ApiResponse({
     status: 200,
     description: 'JWT successfully validated.',
-    type: ValidateJwtRequest,
+    // type: ValidateJwtRequest,
   })
   @ApiBody({
-    type: ValidateJwtResponse,
+    // type: ValidateJwtResponse,
     description: 'Payload to validate a JWT',
   })
   validateJwt(
