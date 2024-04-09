@@ -1,11 +1,14 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import * as bcrypt from 'bcrypt';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { AuthenticateUserRequest, User } from 'juno-proto/dist/gen/user';
+import { AuthenticateUserRequest } from 'src/models/auth_user';
+import { ApiResponse, ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { UserResponse } from '../../../../api-gateway/src/models/user';
 
+@ApiTags('api_key')
 @Controller('api_key')
 @UserProto.UserAuthServiceControllerMethods()
 export class UserController implements UserProto.UserAuthServiceController {
@@ -23,9 +26,9 @@ export class UserController implements UserProto.UserAuthServiceController {
 
   @ApiOperation({ summary: 'Authenticate a user' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'User successfully authenticated',
-    type: User,
+    type: UserResponse,
   })
   @ApiBody({
     type: AuthenticateUserRequest,

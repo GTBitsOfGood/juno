@@ -5,12 +5,12 @@ import { lastValueFrom } from 'rxjs';
 import { createHash, randomBytes } from 'crypto';
 import { status } from '@grpc/grpc-js';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-// import {
-//   IssueApiKeyResponse,
-//   IssueApiKeyRequest,
-//   RevokeApiKeyRequest,
-//   RevokeApiKeyResponse,
-// } from 'juno-proto/dist/gen/api_key';
+import {
+  IssueApiKeyResponse,
+  IssueApiKeyRequest,
+  RevokeApiKeyRequest,
+  RevokeApiKeyResponse,
+} from 'src/models/auth_user';
 
 @ApiTags('api_key')
 @Controller('api_key')
@@ -41,10 +41,10 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   @ApiResponse({
     status: 200,
     description: 'API key successfully issued.',
-    // type: IssueApiKeyResponse,
+    type: IssueApiKeyResponse,
   })
   @ApiBody({
-    // type: IssueApiKeyRequest,
+    type: IssueApiKeyRequest,
     description: 'Payload to issue a new API key.',
   })
   async issueApiKey(
@@ -96,10 +96,10 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   @ApiResponse({
     status: 200,
     description: 'API key successfully revoked.',
-    // type: RevokeApiKeyRequest,
+    type: RevokeApiKeyRequest,
   })
   @ApiBody({
-    // type: RevokeApiKeyResponse,
+    type: RevokeApiKeyResponse,
     description: 'Payload to revoke an API key.',
   })
   async revokeApiKey(
