@@ -17,6 +17,10 @@ jobs:
         uses: actions/setup-node@v4
       - name: Install Yarn
         run: npm install -g yarn
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          version: '27.x'
       - name: Install Dependencies
         run: yarn install
       - name: Generate SDK
