@@ -25,7 +25,7 @@ export class AuthController implements OnModuleInit {
   constructor(
     @Inject(JWT_SERVICE_NAME) private jwtClient: ClientGrpc,
     @Inject(API_KEY_SERVICE_NAME) private apiClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.jwtService =

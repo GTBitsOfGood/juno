@@ -41,3 +41,4 @@ lerna-debug.log*
 .env
 .env.local
 .bitwarden.env
+juno-client-sdk/
