@@ -23,6 +23,10 @@ jobs:
           version: '27.x'
       - name: Install Dependencies
         run: yarn install
+      - name: Start Docker Container
+        run: yarn run:dev
+      - name: Get SDK YAML
+        run: ./docker/wait-for-healthy-gateway.sh
       - name: Generate SDK
         run: yarn gen-client-sdk
       - name: Create Tarball
