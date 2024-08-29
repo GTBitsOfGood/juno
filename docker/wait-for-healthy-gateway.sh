@@ -12,5 +12,5 @@ _wait() {
 cmd='[ $(docker ps -f health=healthy -f name=juno-api-gateway -q | wc -l) -eq 1 ]'     # script that only checks health
 _wait 300 $cmd                        # maximum time to wait 300s
 [[ $? -eq 0 ]] && {
-    wget $(docker port juno-api-gateway-1 3000)/docs-yaml
+    wget http://$(docker port juno-api-gateway-1 3000)/docs-yaml
 } || exit 1
