@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: yarn install
       - name: Start Docker Container
-        run: yarn run:dev
+        run: yarn start:dev
       - name: Get SDK YAML
         run: ./docker/wait-for-healthy-gateway.sh
       - name: Generate SDK
