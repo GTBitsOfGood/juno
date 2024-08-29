@@ -17,6 +17,11 @@ services:
     depends_on:
       auth-service:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl http://api-gateway:3000/ || exit 1']
+      interval: 2s
+      timeout: 10s
+      retries: 10
 
   auth-service:
     build:

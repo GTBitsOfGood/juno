@@ -21,7 +21,7 @@
     "lint": "nx run-many --target=lint --no-cloud",
     "sync-protos": "node syncJunoProtos.js",
     "gen-proto": "yarn workspace juno-proto install && yarn workspace juno-proto build && yarn sync-protos",
-    "gen-client-sdk": "yarn openapi-generator-cli generate -g typescript-node -i ./packages/api-gateway/sdk.yaml -o ./juno-client-sdk",
+    "gen-client-sdk": "yarn openapi-generator-cli generate -g typescript-node -i ./docs-yaml -o ./juno-client-sdk",
     "preinstall": "yarn gen-proto",
     "test:e2e:api-gateway-live": "GATEWAY_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from api-gateway",
     "test:e2e:auth-service-live": "AUTH_COMMAND=test:e2e:watch RUN_MODE=test yarn start:dev:live-all --exit-code-from auth-service auth-service",
