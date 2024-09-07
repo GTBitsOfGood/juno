@@ -8,43 +8,69 @@ RUN --mount=type=cache,target=/var/cache/apk apk add --update wget
 
 RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 
+######################################### 
+# TODO: Switch over to minimal node installation
 FROM node:18 as deps
+
+# TODO: move over to direct wget (no more npm usage)
+RUN npm install -g pnpm
+
+# pnpm needs to be added to the global path
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+run corepack enable
+
 
 WORKDIR /app
 
 COPY . .
 
-# RUN --mount=type=cache,target=/var/cache/apk apk add --update python3 make g++ protoc bash
-
 RUN --mount=type=cache,target=/var/cache/apt apt update && apt install -y python3 make g++ protobuf-compiler
 
-RUN yarn global add node-gyp 
+RUN pnpm -g add node-gyp 
 
 RUN chmod +x /app/packages/proto/gen_protos.sh
 
 WORKDIR /app/packages/proto
 
-RUN yarn install --frozen-lockfile
+RUN pnpm --filter juno-proto install --frozen-lockfile
 
-RUN yarn build
+RUN pnpm --filter juno-proto build
 
 WORKDIR /app
 
-RUN yarn install --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
+RUN pnpm deploy --filter db-service /prod/db-service 
+RUN pnpm deploy --filter api-gateway /prod/api-gateway
+RUN pnpm deploy --filter email-service /prod/email-service
+RUN pnpm deploy --filter logging-service /prod/logging-service
+RUN pnpm deploy --filter auth-service /prod/auth-service
+
+#
+# RUN pnpm -r install --frozen-lockfile --ignore-scripts
+# RUN pnpm install --frozen-lockfile --ignore-scripts
+# RUN pnpm --filter db-service install --frozen-lockfile --ignore-scripts
+##################################
+# TODO: Switch over to a minimal node installation
 FROM node:18 as base-service
+
+# TODO: Move over to a direct wget (no more npm usage)
+RUN npm install -g pnpm
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+run corepack enable
 
 COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
 
 RUN chmod a+x /bin/grpc_health_probe
-
+#########################
 FROM base-service as api-gateway-dev
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules/
-
-COPY --from=deps /app/packages/api-gateway/node_modules ./packages/node_modules/
+COPY --from=deps /prod/api-gateway ./
 
 COPY . .
 
@@ -52,13 +78,12 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/api-gateway
 
+#########################
 FROM base-service as auth-service-dev
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules/
-
-COPY --from=deps /app/packages/auth-service/node_modules ./packages/node_modules/
+COPY --from=deps /prod/auth-service ./
 
 COPY . .
 
@@ -66,13 +91,12 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/auth-service
 
+#########################
 FROM base-service as email-service-dev
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules/
-
-COPY --from=deps /app/packages/email-service/node_modules ./packages/node_modules/
+COPY --from=deps /prod/email-service ./
 
 COPY . .
 
@@ -80,13 +104,13 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/email-service
 
+#########################
 FROM base-service as logging-service-dev
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules/
 
-COPY --from=deps /app/packages/logging-service/node_modules ./packages/node_modules/
+COPY --from=deps /prod/logging-service ./
 
 COPY . .
 
@@ -94,18 +118,17 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/logging-service
 
+#########################
 FROM base-service as db-service-dev
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules/
-
-COPY --from=deps /app/packages/db-service/node_modules ./packages/node_modules/
+COPY --from=deps /prod/db-service ./
 
 COPY . .
 
 COPY --from=deps /app/packages/proto/ ./packages/proto/
 
-WORKDIR /app/packages/db-service
 
-RUN yarn prisma generate
+RUN echo $(ls -a -1 /app/node_modules)
+RUN pnpm prisma generate
