@@ -1,21 +1,25 @@
-<h1 align="center">
-  Juno
-
-  <div align="center">
-  <br/>
-    
+<div align="center">
+  
   <a href="">![E2E Tests](https://img.shields.io/github/actions/workflow/status/GTBitsOfGood/juno/e2e-tests.yml?style=for-the-badge)</a> 
   <a href="">![GitHub Releases](https://img.shields.io/github/v/release/GTBitsOfGood/juno?include_prereleases&style=for-the-badge)</a>
   <a href="">![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)</a>
+  
+</div>
+  
+<h3 align="center">
+  Juno
+</h3>
 
-  </div>
-</h1>
+<div align="center">
+  
+[Bits of Good](https://bitsofgood.org/)'s central infrastructure API, integrating several in-house services to simplify and streamline project development.
 
-Juno is [Bits of Good](https://bitsofgood.org/)'s central infrastructure API, integrating several in-house services to simplify and streamline project development.
+</div>
 
-## Monorepo Structure
 
-The project is a monorepo using a combination of NestJS, gRPC, Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
+## Project Description
+
+Juno is a monorepo using a combination of NestJS, gRPC, Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
 
 Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/workspaces). The current packages are as follows:
 
@@ -29,16 +33,16 @@ Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/work
   
 - [logging-service](./packages/logging-service/): A dedicated logging service for error and audit logs, including traces, metrics information, and sentry.io integration.
 
-## Building
+## Getting Started
 
 > [!WARNING]
 > Due to several of the initialization and configuration scripts requiring Unix-specific functionality, building on Windows is currently not supported. However, you can still install Juno onto Windows via [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). When later installing Docker Desktop, follow the [official instructions](https://docs.docker.com/desktop/wsl/) to ensure Docker Desktop WSL 2 is enabled.
 
 ### Prerequisites
 
-- Docker Desktop v4.24+
-- WSL2 if running on a Windows OS
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) v4.24+
 - [protoc](https://github.com/protocolbuffers/protobuf)
+- WSL2 if running on a Windows OS
 
 ### Using Docker
 
@@ -46,7 +50,7 @@ As this repository contains multiple packages, [Docker](https://www.docker.com/)
 
 Most of the docker-related functionality has been abstracted away into yarn commands.
 
-### Install needed dependencies
+### Installation
 
 All package dependencies must first be installed by using the following command in the root directory:
 
@@ -71,8 +75,6 @@ Requests can be made at the endpoint `localhost:3000/some/request/path`.
 Juno currently has support for E2E tests via [Jest](https://jestjs.io/).
 
 To run tests for a particular service:
-
-(In root directory)
 
 - api-gateway: `yarn test:e2e:api-gateway`
 - auth-service: `yarn test:e2e:auth-service`
