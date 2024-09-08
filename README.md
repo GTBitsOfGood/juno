@@ -2,9 +2,17 @@
   Juno
 </h1>
 
+<div align="center">
+
+  <a href="">![E2E Tests](https://github.com/GTBItsOfGood/juno/actions/workflows/e2e-tests.yml/badge.svg)</a> 
+  <a href="">![GitHub Releases](https://img.shields.io/github/v/release/GTBitsOfGood/juno?include_prereleases)</a>
+
+</div>
+
+
 Juno is [Bits of Good](https://bitsofgood.org/)'s central infrastructure API, integrating several in-house services to simplify and streamline project development.
 
-## Repo Structure
+## Monorepo Structure
 
 The project is a monorepo using a combination of NestJS, gRPC, Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
 
@@ -13,13 +21,18 @@ Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/work
 - [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via RPC based on the API route and given information
 - [auth-service](./packages/auth-service/): An internal service used to handle all API authentication necessities. Provides RPC endpoints for API key generation/validation/revocation and JWT generation/validation. Used in some endpoints but primarily as middleware within the gateway to ensure authorized access to other services
 - [db-service](./packages/db-service/): An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals
+- [email-service](./packages/email-service/): A SendGrid-based central service for managing per-project mailing functionality with support for all major mailing providers.
+- [logging-service](./packages/logging-service/): A dedicated logging service for error and audit logs, including traces, metrics information, and sentry.io integration.
 
 ## Building
+
+> [!WARNING]
+> Due to several of the initialization and configuration scripts requiring Unix-specific functionality, building on Windows is currently not supported. However, you can still install Juno onto Windows via [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). When later installing Docker Desktop, follow the [official instructions](https://docs.docker.com/desktop/wsl/) to ensure Docker Desktop WSL 2 is enabled.
 
 ### Prerequisites
 
 - Docker Desktop v4.24+
-- WSL if running on a Windows OS
+- WSL2 if running on a Windows OS
 - [protoc](https://github.com/protocolbuffers/protobuf)
 
 ### Using Docker
@@ -36,13 +49,7 @@ All package dependencies must first be installed by using the following command 
 yarn
 ```
 
-### For development
-
-For spinning up the entire stack (not watching for changes):
-
-```
-yarn start:dev
-```
+## Development
 
 For spinning up the stack and automatically updating as changes are made to files:
 
@@ -54,11 +61,11 @@ yarn start:dev:live-all
 
 Requests can be made at the endpoint `localhost:3000/some/request/path`.
 
-## Testing
+### Testing
 
 Juno currently has support for E2E tests via [Jest](https://jestjs.io/).
 
-### Run tests for specific microservice
+To run tests for a particular service:
 
 (In root directory)
 
@@ -66,30 +73,31 @@ Juno currently has support for E2E tests via [Jest](https://jestjs.io/).
 - auth-service: `yarn test:e2e:auth-service`
 - db-service: `yarn test:e2e:db-service`
 
-If you're working on juno and wish to test with your updates in live time (watched tests), run the prior command suffixed with `-live`. This looks like the following for each service:
+To run tests with watched tests:
 
 - api-gateway: `yarn test:e2e:api-gateway-live`
 - auth-service: `yarn test:e2e:auth-service-live`
 - db-service: `yarn test:e2e:db-service-live`
 
-## Windows Troubleshooting
+## Troubleshooting
 
-- Make sure **everything** is done through the Windows Subsystem for Linux (WSL).
-- `protoc` must be installed.
+### Windows
 
-`.sh` related problems - switch line endings to `LF`
+Make sure **everything** is done through the Windows Subsystem for Linux (WSL).
 
-`additional property <> is not allowed>` - update docker
+Some common issues:
+- Forgetting to install `protoc`
+- Incorrect line endings in `.sh` files (should be `LF`, not `CRLF`)
+- Error message `additional property <> is not allowed`: Docker Desktop should be updated to v4.24+
+- Error message `db-service is unhealthy`: Make sure all shell scripts have correct `chmod` permissions
+- Error message `<>.sh: Permission denied`: Make sure all shell scripts have correct `chmod` permissions
 
-`db-service is unhealthy` - wget script likely failed to install, make sure all `.sh` files have correct line endings **and permissions (chmod)**
-
-![image](https://github.com/GTBitsOfGood/juno/assets/36551149/eff13fd4-f7a5-4acc-b3a6-d17399fefd4b)
+If VSCode outputs `Failed to connect. Is Docker running?`:
 
 - First, ensure Docker Desktop is actually running.
 - If it is, Docker Desktop most likely decided to nuke your settings, re-enable WSL in **Settings** > **Resources** > **WLS integration**
 
-`./get_grpc_probe.sh: Permission denied` - add permission to get_grpc_probe using chmod:
-
+To add `chmod` permissions to all shell scripts:
 ```
 chmod +x docker/get_grpc_probe.sh
 chmod +x packages/db-service/entrypoint.sh
