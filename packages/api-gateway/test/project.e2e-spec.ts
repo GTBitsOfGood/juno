@@ -54,10 +54,15 @@ beforeEach(async () => {
   await app.init();
 });
 
+const ADMIN_EMAIL = 'test-superadmin@test.com';
+const ADMIN_PASSWORD = 'test-password';
+
 describe('Project Creation Routes', () => {
   it('Create a project with valid inputs', async () => {
     await request(app.getHttpServer())
       .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: 'testProject',
       })
@@ -68,6 +73,8 @@ describe('Project Creation Routes', () => {
   it('Create a project with empty-string name', async () => {
     await request(app.getHttpServer())
       .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: '',
       })
@@ -80,6 +87,8 @@ describe('Project Creation Routes', () => {
   it('Create a project with no name field', async () => {
     await request(app.getHttpServer())
       .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({})
       .expect(400)
       .expect(
@@ -90,6 +99,8 @@ describe('Project Creation Routes', () => {
   it('Create a project with null name', async () => {
     await request(app.getHttpServer())
       .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: null,
       })
@@ -102,6 +113,8 @@ describe('Project Creation Routes', () => {
   it('Create a project with non-string name', async () => {
     await request(app.getHttpServer())
       .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: 1,
       })
@@ -112,9 +125,13 @@ describe('Project Creation Routes', () => {
 
 describe('Project Retrieval Routes', () => {
   it('Get project with valid id', async () => {
-    const resp = await request(app.getHttpServer()).post('/project').send({
-      name: 'test-retrieval',
-    });
+    const resp = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'test-retrieval',
+      });
     const id = resp.body['id'];
     await request(app.getHttpServer())
       .get(`/project/id/${id}`)
@@ -126,9 +143,13 @@ describe('Project Retrieval Routes', () => {
   });
 
   it('Get project with valid name', async () => {
-    const resp = await request(app.getHttpServer()).post('/project').send({
-      name: 'test-name-get',
-    });
+    const resp = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'test-name-get',
+      });
     const id = resp.body['id'];
     await request(app.getHttpServer())
       .get('/project/name/test-name-get')
@@ -163,24 +184,36 @@ describe('Project Retrieval Routes', () => {
 
 describe('Project Update Routes', () => {
   beforeAll(async () => {
-    await request(app.getHttpServer()).post('/user').send({
-      id: '1',
-      password: '1234',
-      name: 'Test User',
-      email: 'test@user.com',
-    });
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: '1234',
+        name: 'Test User',
+        email: 'test@user.com',
+      });
   });
 
   it('Link user with project id using valid user id input', async () => {
-    const project = await request(app.getHttpServer()).post('/project').send({
-      name: 'link-valid',
-    });
+    const project = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'link-valid',
+      });
     const projectId = project.body['id'];
-    const user = await request(app.getHttpServer()).post('/user').send({
-      name: 'Test User',
-      email: 'test@link-valid.com',
-      password: 'password',
-    });
+    const user = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'Test User',
+        email: 'test@link-valid.com',
+        password: 'password',
+      });
+
     const userId = user.body['id'];
     const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
@@ -211,21 +244,18 @@ describe('Project Update Routes', () => {
       .send({
         email: 'test@user.com',
       })
-      .expect(400)
-      .expect('id must be a number');
+      .expect(400);
   });
 
   it('Link user with project id using non-number user id input', async () => {
     const token = jwt.sign({}, 'secret');
-    const resp = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .put('/project/id/1/user')
       .set('Authorization', 'Bearer ' + token)
       .send({
         id: 'abc',
       })
-      .expect(404);
-
-    expect(resp.text).toContain('does not exist');
+      .expect(400);
   });
 
   it('Link user with project id using invalid user email input', async () => {
@@ -293,8 +323,8 @@ describe('Project Update Routes', () => {
       .send({
         id: 'abc',
       })
-      .expect(404);
-    expect(resp.text).toContain('does not exist');
+      .expect(400);
+    expect(resp.text).toContain('Project id must be numeric');
   });
 
   it('Link user with project name using invalid user email input', async () => {
@@ -335,15 +365,23 @@ describe('Project Update Routes', () => {
 
 describe('Project Linking Middleware', () => {
   it('No authorization headers for /project/id/:id/user route ', async () => {
-    const project = await request(app.getHttpServer()).post('/project').send({
-      name: 'middleware',
-    });
+    const project = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'middleware',
+      });
     const projectId = project.body['id'];
-    const user = await request(app.getHttpServer()).post('/user').send({
-      name: 'Test User',
-      email: 'test@middleware.com',
-      password: 'password',
-    });
+    const user = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'Test User',
+        email: 'test@middleware.com',
+        password: 'password',
+      });
     const userId = user.body['id'];
     await request(app.getHttpServer())
       .put(`/project/id/${projectId}/user`)

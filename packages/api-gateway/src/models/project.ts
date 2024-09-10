@@ -24,6 +24,7 @@ export class ProjectResponse {
 }
 
 export class LinkUserModel {
+  @Transform(({ value }) => parseInt(value))
   @ApiProperty({ description: 'The ID of the user' })
   id?: number;
 
