@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { Observable, throwError } from 'rxjs';
 import { Catch, RpcExceptionFilter } from '@nestjs/common';
 import { status } from '@grpc/grpc-js';
+import * as Sentry from '@sentry/nestjs';
 
 function mapPrismaErrorToRpcException(
   error: Prisma.PrismaClientKnownRequestError,
@@ -51,6 +52,7 @@ export class CustomRpcExceptionFilter
       return throwError(() => exception.getError());
     } else {
       console.error(`Unexpected Error: ${JSON.stringify(exception)}`);
+      Sentry.captureException(exception);
       return throwError(() =>
         new RpcException({
           code: status.INTERNAL,

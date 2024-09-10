@@ -1,9 +1,11 @@
-import { NestFactory } from '@nestjs/core';
+import './instrument';
+import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
 import { EmailProtoFile, EmailProto } from 'juno-proto';
+import { SentryFilter } from './sentry.filter';
 
 async function bootstrap() {
   ConfigModule.forRoot({
@@ -20,6 +22,9 @@ async function bootstrap() {
       },
     },
   );
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new SentryFilter(httpAdapter));
+
   await app.listen();
 }
 bootstrap();
