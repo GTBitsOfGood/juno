@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { ProjectProto } from 'juno-proto';
 
 export class CreateProjectModel {
