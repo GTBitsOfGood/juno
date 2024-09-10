@@ -31,10 +31,6 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
     const emailHeader = req.header('X-User-Email');
     const passwordHeader = req.header('X-User-Password');
 
-    console.log(
-      `emailHeader: ${emailHeader}, passwordHeader: ${passwordHeader}`,
-    );
-
     // If invalid headers, return 401
     if (emailHeader === undefined || passwordHeader === undefined) {
       throw new HttpException(
@@ -50,8 +46,6 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
         password: passwordHeader,
       }),
     );
-
-    console.log(`user: ${JSON.stringify(user)}`);
 
     // If the user doesn't have valid permissions, return 401
     if (!user || user.type !== UserType.SUPERADMIN) {

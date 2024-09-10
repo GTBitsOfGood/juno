@@ -7,6 +7,7 @@ import {
   Inject,
   OnModuleInit,
   Param,
+  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
@@ -124,13 +125,16 @@ export class ProjectController implements OnModuleInit {
     description: 'Invalid user/project parameters',
   })
   async linkUserWithProjectId(
-    @Param('id') idStr: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() linkUserBody: LinkUserModel,
   ) {
-    const id = parseInt(idStr);
-    if (Number.isNaN(id)) {
-      throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);
+    if (Number.isNaN(linkUserBody.id) && !linkUserBody.email) {
+      throw new HttpException(
+        'Project id must be numeric',
+        HttpStatus.BAD_REQUEST,
+      );
     }
+
     const project = this.projectService.linkUser({
       project: {
         id,
@@ -164,6 +168,13 @@ export class ProjectController implements OnModuleInit {
     @Param('name') name: string,
     @Body() linkUserBody: LinkUserModel,
   ) {
+    if (Number.isNaN(linkUserBody.id) && !linkUserBody.email) {
+      throw new HttpException(
+        'Project id must be numeric',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const project = this.projectService.linkUser({
       project: {
         name,

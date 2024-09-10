@@ -56,7 +56,6 @@ beforeAll(async () => {
 
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
 
-  console.log(`resetting`);
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
   const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
     process.env.DB_SERVICE_ADDR,

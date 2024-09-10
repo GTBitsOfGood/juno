@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty } from 'class-validator';
 import { ProjectProto } from 'juno-proto';
 
 export class CreateProjectModel {
@@ -24,6 +24,7 @@ export class ProjectResponse {
 }
 
 export class LinkUserModel {
+  @Transform(({ value }) => parseInt(value))
   @ApiProperty({ description: 'The ID of the user' })
   id?: number;
 

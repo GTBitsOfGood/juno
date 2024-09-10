@@ -45,6 +45,7 @@ const { USER_SERVICE_NAME, USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } =
         name: USER_AUTH_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
+          url: process.env.AUTH_SERVICE_ADDR,
           package: JUNO_USER_PACKAGE_NAME,
           protoPath: UserProtoFile,
         },
