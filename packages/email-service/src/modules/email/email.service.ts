@@ -25,6 +25,35 @@ export class EmailService {
 
     const sendGridUrl = 'https://api.sendgrid.com/v3/whitelabel/domains';
 
+
+    if (process.env['NODE_ENV'] == 'test') {
+      return {
+        statusCode: 201,
+        id: 0,
+        valid: 'true',
+        records: {
+          mailCname: {
+            valid: true,
+            type: 'cname',
+            host: 'mail',
+            data: 'mail.sendgrid.net',
+          },
+          dkim1: {
+            valid: true,
+            type: 'cname',
+            host: 's1._domainkey',
+            data: 's1.domainkey.u1234.wl.sendgrid.net',
+          },
+          dkim2: {
+            valid: true,
+            type: 'cname',
+            host: 's2._domainkey',
+            data: 's2.domainkey.u1234.wl.sendgrid.net',
+          }
+        }
+      };
+    }
+
     try {
       const response = await axios.post(
         sendGridUrl,
