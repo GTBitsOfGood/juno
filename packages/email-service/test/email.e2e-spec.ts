@@ -90,7 +90,7 @@ describe('Email Service Authenticate Domain Tests', () => {
     );
 
     expect(response).toBeDefined();
-    expect(response.statusCode).toEqual('201');
+    expect(response.statusCode).toEqual(201);
     expect(response.id).toBeDefined();
     expect(response.valid).toEqual('true');
   });

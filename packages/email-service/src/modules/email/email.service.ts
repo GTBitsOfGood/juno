@@ -11,7 +11,7 @@ export class EmailService {
   async authenticateDomain(
     req: EmailProto.AuthenticateDomainRequest,
   ): Promise<EmailProto.AuthenticateDomainResponse> {
-    if (!req.domain) {
+    if (!req.domain || req.domain.length == 0) {
       throw new RpcException('Cannot register domain (no domain supplied)');
     }
 
@@ -24,7 +24,6 @@ export class EmailService {
     }
 
     const sendGridUrl = 'https://api.sendgrid.com/v3/whitelabel/domains';
-
 
     if (process.env['NODE_ENV'] == 'test') {
       return {
@@ -49,8 +48,8 @@ export class EmailService {
             type: 'cname',
             host: 's2._domainkey',
             data: 's2.domainkey.u1234.wl.sendgrid.net',
-          }
-        }
+          },
+        },
       };
     }
 
