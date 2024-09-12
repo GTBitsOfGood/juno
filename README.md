@@ -19,11 +19,11 @@
 
 ## Project Description
 
-Juno is a monorepo using a combination of NestJS, gRPC, Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
+Juno is a monorepo using a combination of NestJS, [gRPC](https://grpc.io/), Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
 
 Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/workspaces). The current packages are as follows:
 
-- [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via RPC based on the API route and given information
+- [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) based on the API route and given information
   
 - [auth-service](./packages/auth-service/): An internal service used to handle all API authentication necessities. Provides RPC endpoints for API key generation/validation/revocation and JWT generation/validation. Used in some endpoints but primarily as middleware within the gateway to ensure authorized access to other services
 
@@ -46,7 +46,7 @@ Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/work
 
 ### Using Docker
 
-As this repository contains multiple packages, [Docker](https://www.docker.com/) is used to spin up all microservices in order with their respective dependencies. For more details regarding the docker process and its internal networking mechanism, take a look at the `docker-compose.yml` file.
+As this repository contains multiple packages, [Docker](https://www.docker.com/) is used to spin up all microservices in order with their respective dependencies. For more details regarding the docker process and its internal networking mechanism, take a look at the `docker-dev-compose.yml` and `Dockerfile` file.
 
 Most of the docker-related functionality has been abstracted away into yarn commands.
 
@@ -74,13 +74,13 @@ Requests can be made at the endpoint `localhost:3000/some/request/path`.
 
 Juno currently has support for E2E tests via [Jest](https://jestjs.io/).
 
-To run tests for a particular service:
+To run tests a single time for a particular service:
 
 - api-gateway: `yarn test:e2e:api-gateway`
 - auth-service: `yarn test:e2e:auth-service`
 - db-service: `yarn test:e2e:db-service`
 
-To run tests with watched tests:
+To continoulsy run tests for a service as file changes are made:
 
 - api-gateway: `yarn test:e2e:api-gateway-live`
 - auth-service: `yarn test:e2e:auth-service-live`
