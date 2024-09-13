@@ -7,7 +7,7 @@
 </div>
   
 <h3 align="center">
-  @juno/api-gateway
+  @juno/proto
 </h3>
 
 <div align="center">
@@ -19,8 +19,14 @@
 
 </div>
 
-## DB Service
-An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals.
+## Proto 
+Juno's `proto` directory is responsible for the generation and synchronization of all [proto](https://grpc.io/docs/what-is-grpc/introduction/) files across the project. Proto distribution is primarily in `copy_protos.sh` and `gen_protos.sh`.
+
+### Adding a new proto to Juno
+To add a new proto to Juno, there are two primary files required:
+- A `.proto` file in the `definitions` folder describing the proto schemas
+- A corresponding file in `src/gen` exporting types for the proto file.
+
 
 ## Package Structure
 Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a standard 3-tier architecture: controllers, service layer, and data access layer. The documentation is fairly comprehensive and a recommended read, but here are the highlights:
