@@ -5,7 +5,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
-import { Reflector } from '@nestjs/core';
+import { NestApplication, Reflector } from '@nestjs/core';
 import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
@@ -400,6 +400,19 @@ describe('Email Sending Route', () => {
 });
 
 describe('Domain Registration Routes', () => {
+  let app: NestApplication;
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
   it('Registers a domain without a domain parameter', () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
