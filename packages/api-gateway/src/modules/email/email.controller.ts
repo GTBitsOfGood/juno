@@ -54,7 +54,7 @@ export class EmailController implements OnModuleInit {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  @Post('register')
+  @Post('/register-sender')
   async registerSenderAddress(@Body('') params: RegisterEmailModel) {
     return new RegisterEmailResponse(params.email);
   }
@@ -76,7 +76,6 @@ export class EmailController implements OnModuleInit {
       subdomain,
     });
 
-    console.log(res);
     return lastValueFrom(res);
   }
 

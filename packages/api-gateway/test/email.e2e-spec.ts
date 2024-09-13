@@ -5,7 +5,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
-import { NestApplication, Reflector } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
@@ -53,14 +53,14 @@ describe('Email Registration Routes', () => {
   it('Registers an email without a body', () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .expect(400);
   });
   it('Has been called with a malformed emaiil', () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'invalidemail', // Malformed email
@@ -69,7 +69,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with no Authorization header', () => {
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .send({
         email: 'validemail@example.com',
       })
@@ -77,7 +77,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with an invalid JWT', () => {
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer invalid.jwt.token')
       .send({
         email: 'validemail@example.com',
@@ -88,7 +88,7 @@ describe('Email Registration Routes', () => {
     // Assuming 'valid.jwt.token' is a placeholder for a valid JWT obtained in a way relevant to your test setup
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'validemail@example.com',
@@ -98,21 +98,6 @@ describe('Email Registration Routes', () => {
 });
 
 describe('Email Sending Route', () => {
-  let app: INestApplication;
-
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
-
   it('should return 401 when Authorization header is missing', async () => {
     return request(app.getHttpServer())
       .post('/email/send')
@@ -400,23 +385,10 @@ describe('Email Sending Route', () => {
 });
 
 describe('Domain Registration Routes', () => {
-  let app: NestApplication;
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
   it('Registers a domain without a domain parameter', () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/registerDomain')
+      .post('/email/register-domain')
       .set('Authorization', 'Bearer ' + token)
       .expect(400);
   });
@@ -424,7 +396,7 @@ describe('Domain Registration Routes', () => {
   it('Registers a domain with valid parameters', () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/registerDomain')
+      .post('/email/register-domain')
       .set('Authorization', 'Bearer ' + token)
       .send({
         domain: 'example.com',
@@ -435,7 +407,7 @@ describe('Domain Registration Routes', () => {
 
   it('Registration endpoint called with no Authorization header', () => {
     return request(app.getHttpServer())
-      .post('/registerDomain')
+      .post('/email/register-domain')
       .send({
         domain: 'example.com',
         subdomain: 'sub',
@@ -445,7 +417,7 @@ describe('Domain Registration Routes', () => {
 
   it('Registration endpoint called with an invalid JWT', () => {
     return request(app.getHttpServer())
-      .post('/registerDomain')
+      .post('/email/register-domain')
       .set('Authorization', 'Bearer invalid.jwt.token')
       .send({
         domain: 'example.com',
