@@ -54,9 +54,29 @@ export class EmailController implements OnModuleInit {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  @Post('register')
+  @Post('/register-sender')
   async registerSenderAddress(@Body('') params: RegisterEmailModel) {
     return new RegisterEmailResponse(params.email);
+  }
+
+  @Post('/register-domain')
+  async registerEmailDomain(
+    @Body('domain') domain: string,
+    @Body('subdomain') subdomain: string,
+  ): Promise<EmailProto.AuthenticateDomainResponse> {
+    if (!domain) {
+      throw new HttpException(
+        'Cannot register domain (no domain supplied)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const res = this.emailService.authenticateDomain({
+      domain,
+      subdomain,
+    });
+
+    return lastValueFrom(res);
   }
 
   @ApiOperation({

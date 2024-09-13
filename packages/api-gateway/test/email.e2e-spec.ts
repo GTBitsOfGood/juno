@@ -53,14 +53,14 @@ describe('Email Registration Routes', () => {
   it('Registers an email without a body', () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .expect(400);
   });
   it('Has been called with a malformed emaiil', () => {
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'invalidemail', // Malformed email
@@ -69,7 +69,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with no Authorization header', () => {
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .send({
         email: 'validemail@example.com',
       })
@@ -77,7 +77,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with an invalid JWT', () => {
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer invalid.jwt.token')
       .send({
         email: 'validemail@example.com',
@@ -88,7 +88,7 @@ describe('Email Registration Routes', () => {
     // Assuming 'valid.jwt.token' is a placeholder for a valid JWT obtained in a way relevant to your test setup
     const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'validemail@example.com',
@@ -98,21 +98,6 @@ describe('Email Registration Routes', () => {
 });
 
 describe('Email Sending Route', () => {
-  let app: INestApplication;
-
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
-
   it('should return 401 when Authorization header is missing', async () => {
     return request(app.getHttpServer())
       .post('/email/send')
@@ -396,5 +381,48 @@ describe('Email Sending Route', () => {
         ],
       })
       .expect(400);
+  });
+});
+
+describe('Domain Registration Routes', () => {
+  it('Registers a domain without a domain parameter', () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .expect(400);
+  });
+
+  it('Registers a domain with valid parameters', () => {
+    const token = jwt.sign({}, 'secret');
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(201);
+  });
+
+  it('Registration endpoint called with no Authorization header', () => {
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(401);
+  });
+
+  it('Registration endpoint called with an invalid JWT', () => {
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer invalid.jwt.token')
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(401);
   });
 });

@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { EmailController } from './email.controller';
-import { ProjectLinkingMiddleware } from 'src/middleware/project.middleware';
 import { EmailProto, EmailProtoFile, JwtProto, JwtProtoFile } from 'juno-proto';
+import { EmailLinkingMiddleware } from 'src/middleware/email.middleware';
 
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 const { EMAIL_SERVICE_NAME, JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
@@ -39,6 +39,6 @@ const { EMAIL_SERVICE_NAME, JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
 })
 export class EmailModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ProjectLinkingMiddleware).forRoutes('email/*');
+    consumer.apply(EmailLinkingMiddleware).forRoutes('email/*');
   }
 }
