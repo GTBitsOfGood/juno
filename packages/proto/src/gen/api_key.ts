@@ -7,7 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
-import { ProjectIdentifier } from './identifiers';
+import { ApiKeyIdentifier, ProjectIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.api_key';
 
@@ -46,7 +46,8 @@ export interface ApiKeyNoId {
 }
 
 export interface IssueApiKeyResponse {
-  apiKey?: ApiKey | undefined;
+  apiKey: string;
+  info: ApiKeyNoId | undefined;
 }
 
 export interface RevokeApiKeyRequest {}
@@ -110,17 +111,23 @@ export const API_KEY_SERVICE_NAME = 'ApiKeyService';
 
 export interface ApiKeyDbServiceClient {
   createApiKey(request: CreateApiKeyParams): Observable<ApiKey>;
+
+  getApiKey(request: ApiKeyIdentifier): Observable<ApiKey>;
 }
 
 export interface ApiKeyDbServiceController {
   createApiKey(
     request: CreateApiKeyParams,
   ): Promise<ApiKey> | Observable<ApiKey> | ApiKey;
+
+  getApiKey(
+    request: ApiKeyIdentifier,
+  ): Promise<ApiKey> | Observable<ApiKey> | ApiKey;
 }
 
 export function ApiKeyDbServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['createApiKey'];
+    const grpcMethods: string[] = ['createApiKey', 'getApiKey'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

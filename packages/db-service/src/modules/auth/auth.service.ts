@@ -36,11 +36,24 @@ export class AuthService {
     );
   }
 
+  async findApiKey(
+    lookup: Prisma.ApiKeyWhereUniqueInput,
+  ): Promise<ApiKeyProto.ApiKey | undefined> {
+    const key = await this.prisma.apiKey.findUnique({
+      where: lookup,
+      include: { project: true },
+    });
+    if (!key) {
+      return undefined;
+    }
+    return convertDbApiKeyToTs(key);
+  }
+
   async createApiKey(
     input: Prisma.ApiKeyCreateInput,
   ): Promise<ApiKeyProto.ApiKey> {
     try {
-      let projectId: number;
+      let projectId: number | undefined = undefined;
       if (input.project.connect.id) {
         if (Number.isInteger(input.project.connect.id)) {
           projectId = Number(input.project.connect.id);
@@ -59,7 +72,7 @@ export class AuthService {
         projectId = project.id;
       }
 
-      if (!projectId) {
+      if (projectId == undefined) {
         throw new RpcException({
           code: status.NOT_FOUND,
           message: 'Project not found',
@@ -69,7 +82,7 @@ export class AuthService {
       const prismaApiKey = await this.prisma.apiKey.create({
         data: {
           hash: input.hash,
-          description: input.description,
+          description: input.description ?? '',
           scopes: [],
           projectId: projectId,
           environment: input.environment,

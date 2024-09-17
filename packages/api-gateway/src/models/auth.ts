@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { ApiKeyProto, IdentifierProto } from 'juno-proto';
+import { ApiKeyProto, IdentifierProto, JwtProto } from 'juno-proto';
 
 export class IssueApiKeyRequest {
   @ApiProperty({ description: 'Issuing user email' })
@@ -20,10 +20,18 @@ export class IssueApiKeyRequest {
 }
 
 export class IssueApiKeyResponse {
-  @ApiProperty({ type: 'boolean' })
-  apiKey: ApiKeyProto.ApiKey;
+  @ApiProperty({ type: 'string' })
+  apiKey: string;
 
   constructor(res: ApiKeyProto.IssueApiKeyResponse) {
     this.apiKey = res.apiKey;
+  }
+}
+
+export class IssueJWTResponse {
+  token: string;
+
+  constructor(res: JwtProto.CreateJwtResponse) {
+    this.token = res.jwt;
   }
 }

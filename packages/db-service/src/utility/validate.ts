@@ -86,3 +86,29 @@ export function validateEmailIdentifier(
     },
   };
 }
+
+export function validateApiKeydentifier(
+  identifier: IdentifierProto.ApiKeyIdentifier,
+): Prisma.ApiKeyWhereUniqueInput {
+  if (identifier.id && identifier.hash) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Only one of id or email can be provided',
+    });
+  } else if (!identifier.id && !identifier.hash) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Neither id nor email are provided',
+    });
+  }
+
+  if (identifier.id) {
+    return {
+      id: Number(identifier.id),
+    };
+  } else {
+    return {
+      hash: identifier.hash,
+    };
+  }
+}

@@ -11,11 +11,33 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
-import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
+let token: string | undefined = undefined;
 
 jest.setTimeout(15000);
+
+async function JWTForProjectName(projectName: string): Promise<string> {
+  const key = await request(app.getHttpServer())
+    .post('/auth/key')
+    .send({
+      email: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+      environment: 'prod',
+      project: {
+        name: projectName,
+      },
+    });
+
+  const apiKey = key.body['apiKey'];
+
+  const jwt = await request(app.getHttpServer())
+    .post('/auth/jwt')
+    .set('Authorization', `Bearer ${apiKey}`)
+    .send();
+
+  return jwt.body['token'];
+}
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -52,6 +74,10 @@ beforeEach(async () => {
   app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
+
+  if (!token) {
+    token = await JWTForProjectName('test-seed-project');
+  }
 });
 
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -169,7 +195,7 @@ describe('Project Retrieval Routes', () => {
 
   it('Get project with non-existent id', async () => {
     const resp = await request(app.getHttpServer())
-      .get('/project/id/0')
+      .get('/project/id/100')
       .expect(404);
     expect(resp.text).toContain('Project not found');
   });
@@ -215,7 +241,7 @@ describe('Project Update Routes', () => {
       });
 
     const userId = user.body['id'];
-    const token = jwt.sign({}, 'secret');
+    const token = await JWTForProjectName('link-valid');
     await request(app.getHttpServer())
       .put(`/project/id/${projectId}/user`)
       .set('Authorization', 'Bearer ' + token)
@@ -226,9 +252,17 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using valid user email input', async () => {
-    const token = jwt.sign({}, 'secret');
+    const project = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'link-valid2',
+      });
+    const projectId = project.body['id'];
+    const token = await JWTForProjectName('link-valid2');
     await request(app.getHttpServer())
-      .put('/project/id/1/user')
+      .put(`/project/id/${projectId}/user`)
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
@@ -237,7 +271,6 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using non-number project id param', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/id/abc/user')
       .set('Authorization', 'Bearer ' + token)
@@ -248,7 +281,6 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using non-number user id input', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/id/1/user')
       .set('Authorization', 'Bearer ' + token)
@@ -259,7 +291,6 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project id using invalid user email input', async () => {
-    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
       .put('/project/id/1/user')
       .set('Authorization', 'Bearer ' + token)
@@ -270,7 +301,7 @@ describe('Project Update Routes', () => {
     expect(resp.text).toContain('does not exist');
   });
   // it('Link user with project id using non-number user id input', async () => {
-  // const token = jwt.sign({}, 'secret');
+  // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/id/1/user')
   // .set('Authorization', 'Bearer ' + token)
@@ -282,7 +313,7 @@ describe('Project Update Routes', () => {
   // });
 
   // it('Link user with project id using invalid user email input', async () => {
-  // const token = jwt.sign({}, 'secret');
+  // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/id/1/user')
   // .set('Authorization', 'Bearer ' + token)
@@ -294,7 +325,6 @@ describe('Project Update Routes', () => {
   // });
 
   it('Link user with project name using valid user id input', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/project/name/testProject/user')
       .set('Authorization', 'Bearer ' + token)
@@ -305,9 +335,8 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project name using valid user email input', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
-      .put('/project/name/testProject/user')
+      .put('/project/name/test-seed-project/user')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'test@user.com',
@@ -316,9 +345,8 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project name using non-number user id input', async () => {
-    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
-      .put('/project/name/testProject/user')
+      .put('/project/name/test-seed-project/user')
       .set('Authorization', 'Bearer ' + token)
       .send({
         id: 'abc',
@@ -328,9 +356,8 @@ describe('Project Update Routes', () => {
   });
 
   it('Link user with project name using invalid user email input', async () => {
-    const token = jwt.sign({}, 'secret');
     const resp = await request(app.getHttpServer())
-      .put('/project/name/testProject/user')
+      .put('/project/name/test-seed-project/user')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'abc',
@@ -339,7 +366,7 @@ describe('Project Update Routes', () => {
     expect(resp.text).toContain('does not exist');
   });
   // it('Link user with project name using non-number user id input', async () => {
-  // const token = jwt.sign({}, 'secret');
+  // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/name/testProject/user')
   // .set('Authorization', 'Bearer ' + token)
@@ -351,7 +378,7 @@ describe('Project Update Routes', () => {
   // });
 
   // it('Link user with project name using invalid user email input', async () => {
-  // const token = jwt.sign({}, 'secret');
+  // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/name/testProject/user')
   // .set('Authorization', 'Bearer ' + token)
@@ -434,9 +461,8 @@ describe('Project Linking Middleware', () => {
       .expect(401);
   });
   it('Valid jwt for /project/id/:id/user route', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
-      .put(`/project/id/1/user`)
+      .put(`/project/id/0/user`)
       .set('Authorization', 'Bearer ' + token)
       .send({
         id: '1',
@@ -444,22 +470,11 @@ describe('Project Linking Middleware', () => {
       .expect(200);
   });
   it('Valid jwt for /project/name/:name/user route', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
-      .put('/project/name/middleware/user')
+      .put('/project/name/test-seed-project/user')
       .set('Authorization', 'Bearer ' + token)
       .send({
         id: '1',
-      })
-      .expect(200);
-  });
-  it('Valid jwt for /user/id/:id/project route', async () => {
-    const token = jwt.sign({}, 'secret');
-    await request(app.getHttpServer())
-      .put(`/user/id/1/project`)
-      .set('Authorization', 'Bearer ' + token)
-      .send({
-        name: 'middleware',
       })
       .expect(200);
   });

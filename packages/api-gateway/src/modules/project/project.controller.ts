@@ -83,7 +83,6 @@ export class ProjectController implements OnModuleInit {
     const project = this.projectService.getProject({
       name,
     });
-
     return new ProjectResponse(await lastValueFrom(project));
   }
 

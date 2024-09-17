@@ -1,10 +1,11 @@
 import {
   Body,
   Controller,
-  Get,
+  Headers,
   Inject,
   OnModuleInit,
   Post,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
@@ -16,7 +17,11 @@ import { ApiKeyProto, JwtProto } from 'juno-proto';
 import { ApiKeyServiceClient } from 'juno-proto/dist/gen/api_key';
 import { JwtServiceClient } from 'juno-proto/dist/gen/jwt';
 import { lastValueFrom } from 'rxjs';
-import { IssueApiKeyRequest, IssueApiKeyResponse } from 'src/models/auth';
+import {
+  IssueApiKeyRequest,
+  IssueApiKeyResponse,
+  IssueJWTResponse,
+} from 'src/models/auth';
 
 const { JWT_SERVICE_NAME } = JwtProto;
 const { API_KEY_SERVICE_NAME } = ApiKeyProto;
@@ -38,12 +43,23 @@ export class AuthController implements OnModuleInit {
       this.apiClient.getService<ApiKeyServiceClient>(API_KEY_SERVICE_NAME);
   }
 
-  @Get()
+  @ApiOperation({
+    description:
+      'Thie endpoint issues a new API key for the project tied to the specified environment.',
+  })
+  @ApiCreatedResponse({
+    description: 'The API Key has been successfully created',
+    type: IssueApiKeyResponse,
+  })
+  @Post('/jwt')
   @ApiBearerAuth()
-  getJWT() {
-    console.log('CALLED');
-    // this.apiKeyService.issueApiKey({}).subscribe();
-    return 'test';
+  async getJWT(@Headers('Authorization') apiKey?: string) {
+    const key = apiKey?.replace('Bearer ', '');
+    if (key === undefined) {
+      throw new UnauthorizedException('API Key is required');
+    }
+    const jwt = await lastValueFrom(this.jwtService.createJwt({ apiKey: key }));
+    return new IssueJWTResponse(jwt);
   }
 
   @ApiOperation({

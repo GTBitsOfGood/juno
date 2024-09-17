@@ -67,7 +67,8 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
         });
       }
       return {
-        apiKey: await lastValueFrom(key),
+        apiKey: rawApiKey,
+        info: await lastValueFrom(key),
       };
     } catch (e) {
       throw e;

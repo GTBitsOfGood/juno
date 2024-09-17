@@ -27,15 +27,24 @@ export class EmailLinkingMiddleware implements NestMiddleware, OnModuleInit {
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      if (!req.headers.authorization) {
+      if (
+        req.headers.authorization === undefined ||
+        req.headers.authorization.length === 0
+      ) {
         throw new Error('No authorization headers');
       }
       const token = this.extractTokenFromHeader(req);
       if (!token) {
         throw new Error('Jwt not found');
       }
+
       const jwtValidation = this.jwtService.validateJwt({ jwt: token });
-      await lastValueFrom(jwtValidation);
+      const res = await lastValueFrom(jwtValidation);
+
+      if (!res.valid) {
+        throw new Error('Invalid JWT');
+      }
+
       next();
     } catch {
       throw new HttpException(
