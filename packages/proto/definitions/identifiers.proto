@@ -20,3 +20,10 @@ message EmailIdentifier {
   int64 projectId = 1;
   string name = 2;
 }
+
+message ApiKeyIdentifier {
+  oneof identifier {
+    int64 id = 1;
+    string hash = 2;
+  }
+}

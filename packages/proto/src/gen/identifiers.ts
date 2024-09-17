@@ -23,4 +23,9 @@ export interface EmailIdentifier {
   name: string;
 }
 
+export interface ApiKeyIdentifier {
+  id?: number | undefined;
+  hash?: string | undefined;
+}
+
 export const JUNO_IDENTIFIERS_PACKAGE_NAME = 'juno.identifiers';

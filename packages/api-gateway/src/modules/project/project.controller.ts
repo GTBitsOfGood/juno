@@ -30,7 +30,7 @@ export class ProjectController implements OnModuleInit {
 
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.projectService =
@@ -83,7 +83,6 @@ export class ProjectController implements OnModuleInit {
     const project = this.projectService.getProject({
       name,
     });
-
     return new ProjectResponse(await lastValueFrom(project));
   }
 

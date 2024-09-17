@@ -15,6 +15,15 @@ async function main() {
       type: Role.SUPERADMIN,
     },
   });
+
+  await prisma.project.upsert({
+    where: { name: 'test-seed-project' },
+    update: {},
+    create: {
+      id: 0,
+      name: 'test-seed-project',
+    },
+  });
 }
 
 main()

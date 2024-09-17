@@ -162,10 +162,10 @@ describe('User Creation Routes', () => {
       });
     const id = resp.body['id'];
 
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put(`/user/id/${id}/project`)
-      .set('Authorization', 'Bearer ' + token)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: 'projectName',
       })
@@ -173,10 +173,10 @@ describe('User Creation Routes', () => {
   });
 
   it('should test an invalid user id', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/user/id/a/project')
-      .set('Authorization', 'Bearer ' + token)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: 'projectName',
       })

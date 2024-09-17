@@ -10,15 +10,21 @@ import { Observable } from 'rxjs';
 
 export const protobufPackage = 'juno.jwt';
 
-export interface CreateJwtRequest {}
+export interface CreateJwtRequest {
+  apiKey: string;
+}
 
-export interface CreateJwtResponse {}
+export interface CreateJwtResponse {
+  jwt: string;
+}
 
 export interface ValidateJwtRequest {
   jwt: string;
 }
 
-export interface ValidateJwtResponse {}
+export interface ValidateJwtResponse {
+  valid: boolean;
+}
 
 export const JUNO_JWT_PACKAGE_NAME = 'juno.jwt';
 
