@@ -50,9 +50,13 @@ export interface IssueApiKeyResponse {
   info: ApiKeyNoId | undefined;
 }
 
-export interface RevokeApiKeyRequest {}
+export interface RevokeApiKeyRequest {
+  apiKey: string;
+}
 
-export interface RevokeApiKeyResponse {}
+export interface RevokeApiKeyResponse {
+  success: boolean;
+}
 
 export const JUNO_API_KEY_PACKAGE_NAME = 'juno.api_key';
 
@@ -113,6 +117,8 @@ export interface ApiKeyDbServiceClient {
   createApiKey(request: CreateApiKeyParams): Observable<ApiKey>;
 
   getApiKey(request: ApiKeyIdentifier): Observable<ApiKey>;
+
+  deleteApiKey(request: ApiKeyIdentifier): Observable<ApiKey>;
 }
 
 export interface ApiKeyDbServiceController {
@@ -123,11 +129,15 @@ export interface ApiKeyDbServiceController {
   getApiKey(
     request: ApiKeyIdentifier,
   ): Promise<ApiKey> | Observable<ApiKey> | ApiKey;
+
+  deleteApiKey(
+    request: ApiKeyIdentifier,
+  ): Promise<ApiKey> | Observable<ApiKey> | ApiKey;
 }
 
 export function ApiKeyDbServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['createApiKey', 'getApiKey'];
+    const grpcMethods: string[] = ['createApiKey', 'getApiKey', 'deleteApiKey'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

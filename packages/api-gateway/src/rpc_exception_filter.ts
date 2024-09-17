@@ -9,6 +9,15 @@ import { RpcException } from '@nestjs/microservices';
 import { Response } from 'express';
 import * as Sentry from '@sentry/nestjs';
 
+interface ErrorInfo {
+  code: status;
+  message: string;
+}
+
+function isErrorInfo(error: any): error is ErrorInfo {
+  return error.code !== undefined && error.message !== undefined;
+}
+
 @Catch(RpcException, Error)
 export class RpcExceptionFilter implements ExceptionFilter {
   catch(exception: RpcException | Error, host: ArgumentsHost) {
@@ -20,6 +29,8 @@ export class RpcExceptionFilter implements ExceptionFilter {
       }
       response.status(exception.getStatus()).send(exception.getResponse());
       return;
+    } else if (isErrorInfo(exception)) {
+      response.status(rpcStatusToHttp(exception.code)).send(exception.message);
     } else {
       let ex: RpcException;
       if (!(exception instanceof RpcException)) {

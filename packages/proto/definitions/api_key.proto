@@ -13,6 +13,7 @@ service ApiKeyService {
 service ApiKeyDbService {
   rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
   rpc getApiKey(identifiers.ApiKeyIdentifier) returns (ApiKey);
+  rpc deleteApiKey(identifiers.ApiKeyIdentifier) returns (ApiKey);
 }
 
 message IssueApiKeyRequest {
@@ -51,5 +52,5 @@ message IssueApiKeyResponse {
   ApiKeyNoId info = 2;
 }
 
-message RevokeApiKeyRequest {}
-message RevokeApiKeyResponse {}
+message RevokeApiKeyRequest { string apiKey = 1; }
+message RevokeApiKeyResponse { bool success = 1; }

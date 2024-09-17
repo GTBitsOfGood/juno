@@ -390,6 +390,59 @@ describe('Project Update Routes', () => {
   // });
 });
 
+describe('Project API Key Routes', () => {
+  it('Create an API key for a project with valid inputs', async () => {
+    const resp = await request(app.getHttpServer())
+      .post('/auth/key')
+      .send({
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+        environment: 'prod',
+        project: {
+          name: 'test-seed-project',
+        },
+      })
+      .expect(201);
+    expect(resp.body['apiKey']).toBeDefined();
+  });
+
+  it('Deletes an API key for a project with valid inputs', async () => {
+    const resp = await request(app.getHttpServer())
+      .post('/auth/key')
+      .send({
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+        environment: 'prod',
+        project: {
+          name: 'test-seed-project',
+        },
+      })
+      .expect(201);
+
+    expect(resp.body['apiKey']).toBeDefined();
+
+    await request(app.getHttpServer())
+      .delete('/auth/key')
+      .set('Authorization', `Bearer ${resp.body['apiKey']}`)
+      .send()
+      .expect(200);
+  });
+
+  it('Create an API Key for a project with invalid user/pass', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/key')
+      .send({
+        email: ADMIN_EMAIL,
+        password: 'not-a-pass',
+        environment: 'prod',
+        project: {
+          name: 'test-seed-project',
+        },
+      })
+      .expect(401);
+  });
+});
+
 describe('Project Linking Middleware', () => {
   it('No authorization headers for /project/id/:id/user route ', async () => {
     const project = await request(app.getHttpServer())

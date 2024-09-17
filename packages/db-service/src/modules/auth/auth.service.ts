@@ -97,8 +97,16 @@ export class AuthService {
       throw error;
     }
   }
-}
 
+  async deleteApiKey(
+    lookup: Prisma.ApiKeyWhereUniqueInput,
+  ): Promise<ApiKeyProto.ApiKey> {
+    const key = await this.prisma.apiKey.delete({
+      where: lookup,
+    });
+    return convertDbApiKeyToTs(key);
+  }
+}
 const convertDbApiKeyToTs = (key: ApiKey): ApiKeyProto.ApiKey => {
   const mappedScopes = key.scopes.map((scope) => {
     switch (scope) {

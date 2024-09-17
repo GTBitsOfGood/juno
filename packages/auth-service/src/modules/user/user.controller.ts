@@ -37,24 +37,20 @@ export class UserController implements UserProto.UserAuthServiceController {
       });
     }
 
-    try {
-      const passwordEquals = await bcrypt.compare(
-        request.password,
-        passwordHash.hash,
-      );
-      if (!passwordEquals) {
-        throw new RpcException({
-          code: status.PERMISSION_DENIED,
-          message: 'Incorrect password',
-        });
-      }
-      return lastValueFrom(
-        this.userService.getUser({
-          email: request.email,
-        }),
-      );
-    } catch (e) {
-      throw e;
+    const passwordEquals = await bcrypt.compare(
+      request.password,
+      passwordHash.hash,
+    );
+    if (!passwordEquals) {
+      throw new RpcException({
+        code: status.PERMISSION_DENIED,
+        message: 'Incorrect password',
+      });
     }
+    return lastValueFrom(
+      this.userService.getUser({
+        email: request.email,
+      }),
+    );
   }
 }
