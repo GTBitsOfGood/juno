@@ -34,4 +34,8 @@ export class ApiKeyDbController
     const apiKey = this.apiKeyService.createApiKey(prepareCreateApiKey);
     return apiKey;
   }
+
+  async deleteApiKey(request: ApiKeyIdentifier): Promise<ApiKeyProto.ApiKey> {
+    return this.apiKeyService.deleteApiKey(validateApiKeydentifier(request));
+  }
 }

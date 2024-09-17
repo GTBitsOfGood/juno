@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Headers,
+  HttpException,
   Inject,
   OnModuleInit,
   Post,
@@ -81,5 +83,31 @@ export class AuthController implements OnModuleInit {
     });
 
     return new IssueApiKeyResponse(await lastValueFrom(obs));
+  }
+
+  @ApiOperation({
+    description: 'Thie endpoint deletes an API key for the project.',
+  })
+  @ApiCreatedResponse({
+    description: 'The API Key has been successfully deleted',
+  })
+  @ApiBearerAuth()
+  @Delete('/key')
+  async deleteApiKey(@Headers('Authorization') apiKey?: string) {
+    const key = apiKey?.replace('Bearer ', '');
+    if (key === undefined) {
+      throw new UnauthorizedException('API Key is required');
+    }
+    const response = await lastValueFrom(
+      this.apiKeyService.revokeApiKey({
+        apiKey: key,
+      }),
+    );
+
+    if (!response.success) {
+      throw new HttpException('API Key revoke failed', 500);
+    }
+
+    return;
   }
 }
