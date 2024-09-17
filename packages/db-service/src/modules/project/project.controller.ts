@@ -11,8 +11,9 @@ import { status } from '@grpc/grpc-js';
 @Controller()
 @ProjectProto.ProjectServiceControllerMethods()
 export class ProjectController
-  implements ProjectProto.ProjectServiceController {
-  constructor(private readonly projectService: ProjectService) { }
+  implements ProjectProto.ProjectServiceController
+{
+  constructor(private readonly projectService: ProjectService) {}
 
   async getProject(
     identifier: IdentifierProto.ProjectIdentifier,

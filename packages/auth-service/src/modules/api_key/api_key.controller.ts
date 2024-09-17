@@ -16,7 +16,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     private apiKeyClient: ClientGrpc,
     @Inject(UserProto.USER_AUTH_SERVICE_NAME)
     private userAuthClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.apiKeyDbService =

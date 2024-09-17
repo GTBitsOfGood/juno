@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async apiKeys(
     skip?: number,

@@ -89,7 +89,7 @@ export function validateEmailIdentifier(
 
 export function validateApiKeydentifier(
   identifier: IdentifierProto.ApiKeyIdentifier,
-): Prisma.ApiKeyWhereUniqueInput{
+): Prisma.ApiKeyWhereUniqueInput {
   if (identifier.id && identifier.hash) {
     throw new RpcException({
       code: status.INVALID_ARGUMENT,

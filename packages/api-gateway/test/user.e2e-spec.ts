@@ -11,7 +11,6 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
-import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 

@@ -4,7 +4,6 @@ import {
   RequestMethod,
   MiddlewareConsumer,
 } from '@nestjs/common';
-import { ProjectLinkingMiddleware } from '../../middleware/project.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';

@@ -17,7 +17,7 @@ const { JWT_SERVICE_NAME } = JwtProto;
 export class ProjectLinkingMiddleware implements NestMiddleware, OnModuleInit {
   private jwtService: JwtProto.JwtServiceClient;
 
-  constructor(@Inject(JWT_SERVICE_NAME) private jwtClient: ClientGrpc) { }
+  constructor(@Inject(JWT_SERVICE_NAME) private jwtClient: ClientGrpc) {}
 
   onModuleInit() {
     this.jwtService = this.jwtClient.getService<JwtProto.JwtServiceClient>(

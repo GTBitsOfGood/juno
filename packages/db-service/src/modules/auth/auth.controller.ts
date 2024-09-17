@@ -7,8 +7,9 @@ import { validateApiKeydentifier } from 'src/utility/validate';
 @Controller()
 @ApiKeyProto.ApiKeyDbServiceControllerMethods()
 export class ApiKeyDbController
-  implements ApiKeyProto.ApiKeyDbServiceController {
-  constructor(private readonly apiKeyService: AuthService) { }
+  implements ApiKeyProto.ApiKeyDbServiceController
+{
+  constructor(private readonly apiKeyService: AuthService) {}
 
   getApiKey(request: ApiKeyIdentifier): Promise<ApiKeyProto.ApiKey> {
     return this.apiKeyService.findApiKey(validateApiKeydentifier(request));
