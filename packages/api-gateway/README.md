@@ -19,10 +19,12 @@
 
 </div>
 
-## API-Gateway 
+## API-Gateway
+
 This is what project teams and API customers interface with. The Gateway guards all sensitive endpoints and utilizes a combination of the feature services described below and the auth service to call subsequent features.
 
 ## Package Structure
+
 Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a standard 3-tier architecture: controllers, service layer, and data access layer. The documentation is fairly comprehensive and a recommended read, but here are the highlights:
 
 - **Modules** - `.module.ts` files splitting the package into capabilities, allowing feature encapsulation. There will always be a root module within the package importing all other modules.
@@ -50,9 +52,11 @@ Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a st
 ```
 
 ## Development
+
 Make sure to check out the [main installation instructions](https://github.com/GTBitsOfGood/juno/tree/ryder/documentation-overhaul) first!
 
 Run E2E tests in watch mode:
+
 ```
 api-gateway: `yarn test:e2e:api-gateway-live`
 ```

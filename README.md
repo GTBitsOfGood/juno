@@ -16,7 +16,6 @@
 
 </div>
 
-
 ## Project Description
 
 Juno is a monorepo using a combination of NestJS, [gRPC](https://grpc.io/), Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
@@ -24,13 +23,10 @@ Juno is a monorepo using a combination of NestJS, [gRPC](https://grpc.io/), Prot
 Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/workspaces). The current packages are as follows:
 
 - [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) based on the API route and given information
-  
 - [auth-service](./packages/auth-service/): An internal service used to handle all API authentication necessities. Provides RPC endpoints for API key generation/validation/revocation and JWT generation/validation. Used in some endpoints but primarily as middleware within the gateway to ensure authorized access to other services
 
 - [db-service](./packages/db-service/): An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals
-  
 - [email-service](./packages/email-service/): A SendGrid-based central service for managing per-project mailing functionality with support for all major mailing providers.
-  
 - [logging-service](./packages/logging-service/): A dedicated logging service for error and audit logs, including traces, metrics information, and sentry.io integration.
 
 ## Getting Started
@@ -93,6 +89,7 @@ To continoulsy run tests for a service as file changes are made:
 Make sure **everything** is done through the Windows Subsystem for Linux (WSL).
 
 Some common issues:
+
 - Forgetting to install `protoc`
 - Incorrect line endings in `.sh` files (should be `LF`, not `CRLF`)
 - Error message `additional property <> is not allowed`: Docker Desktop should be updated to v4.24+
@@ -105,6 +102,7 @@ If VSCode outputs `Failed to connect. Is Docker running?`:
 - If it is, Docker Desktop most likely decided to nuke your settings, re-enable WSL in **Settings** > **Resources** > **WLS integration**
 
 To add `chmod` permissions to all shell scripts:
+
 ```
 chmod +x docker/get_grpc_probe.sh
 chmod +x packages/db-service/entrypoint.sh
