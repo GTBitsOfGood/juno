@@ -18,9 +18,9 @@ export interface UserIdentifier {
   email?: string | undefined;
 }
 
-export interface EmailIdentifier {
-  projectId: number;
-  name: string;
+export interface EmailSenderIdentifier {
+  domain: string;
+  username: string;
 }
 
 export interface ApiKeyIdentifier {

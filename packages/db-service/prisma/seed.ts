@@ -24,6 +24,21 @@ async function main() {
       name: 'test-seed-project',
     },
   });
+
+  await prisma.emailDomain.upsert({
+    where: { domain: 'testdomain' },
+    update: {},
+    create: {
+      domain: 'testdomain',
+      subdomain: 'testsubdomain',
+      sendgridId: 0,
+      attachedConfigs: {
+        create: {
+          id: 0,
+        },
+      },
+    },
+  });
 }
 
 main()

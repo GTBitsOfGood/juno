@@ -1,25 +1,28 @@
 import { Controller } from '@nestjs/common';
 import { IdentifierProto, EmailProto } from 'juno-proto';
 import { EmailService } from './email.service';
-import {
-  validateEmailIdentifier,
-  validateProjectIdentifier,
-} from 'src/utility/validate';
+import { validateEmailSenderIdentifier } from 'src/utility/validate';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { Email, EmailDbServiceController } from 'juno-proto/dist/gen/email';
+import {
+  EmailSender,
+  EmailDbServiceController,
+} from 'juno-proto/dist/gen/email';
+import { Observable } from 'rxjs';
 
 @Controller()
 @EmailProto.EmailDbServiceControllerMethods()
 export class EmailController implements EmailDbServiceController {
-  constructor(private readonly emailService: EmailService) {}
+  constructor(private readonly emailService: EmailService) { }
 
-  async getEmail(identifier: IdentifierProto.EmailIdentifier): Promise<Email> {
-    const params = validateEmailIdentifier(identifier);
+  async getEmailSender(
+    identifier: IdentifierProto.EmailSenderIdentifier,
+  ): Promise<EmailSender> {
+    const params = validateEmailSenderIdentifier(identifier);
 
-    const email = await this.emailService.email(params);
+    const emailSender = await this.emailService.emailSender(params);
 
-    if (!email) {
+    if (!emailSender) {
       throw new RpcException({
         code: status.NOT_FOUND,
         message: 'Email not found',
@@ -27,58 +30,166 @@ export class EmailController implements EmailDbServiceController {
     }
 
     return {
-      name: email.name,
-      description: email.description,
-      project: {
-        id: email.projectId,
-      },
+      username: emailSender.username,
+      description: emailSender.description,
+      projects: emailSender.attachedConfigs.map((config) => {
+        return {
+          id: config.configId,
+        };
+      }),
+      domain: emailSender.domain,
     };
   }
 
-  async createEmail(request: EmailProto.CreateEmailRequest): Promise<Email> {
-    const email = await this.emailService.createEmail({
-      name: request.name,
-      project: {
-        connect: validateProjectIdentifier(request.project),
+  async createEmailSender(
+    request: EmailProto.CreateEmailSenderRequest,
+  ): Promise<EmailSender> {
+    await this.emailService.createOrGetEmailServiceConfig({
+      Project: {
+        connect: {
+          id: Number(request.configId),
+        },
+      },
+    });
+
+    try {
+      const existing = await this.emailService.emailSender({
+        username_domain: {
+          username: request.username,
+          domain: request.domain,
+        },
+      });
+
+      const mapped = existing.attachedConfigs.map((config) => config.configId);
+
+      if (mapped.includes(Number(request.configId))) {
+        throw new RpcException({
+          code: status.ALREADY_EXISTS,
+          message: 'Sender already exists',
+        });
+      }
+    } catch (e) {
+      if (e instanceof RpcException) {
+        throw e;
+      }
+    }
+
+    const emailSender = await this.emailService.createEmailSender({
+      username: request.username,
+      attachedConfigs: {
+        connectOrCreate: {
+          where: {
+            configId_username_domain: {
+              configId: Number(request.configId),
+              username: request.username,
+              domain: request.domain,
+            },
+          },
+          create: {
+            configId: Number(request.configId),
+          },
+        },
       },
       description: request.description,
+      domainItem: {
+        connect: {
+          domain: request.domain,
+        },
+      },
     });
     return {
-      name: email.name,
-      description: email.description,
-      project: {
-        id: email.projectId,
-      },
+      username: emailSender.username,
+      description: emailSender.description,
+      projects: emailSender.attachedConfigs.map((config) => {
+        return {
+          id: config.configId,
+        };
+      }),
+      domain: emailSender.domain,
     };
   }
 
-  async updateEmail(request: EmailProto.UpdateEmailRequest): Promise<Email> {
-    const emailFind = validateEmailIdentifier(request.emailIdentifier);
-    const email = await this.emailService.updateEmail(emailFind, {
+  async updateEmailSender(
+    request: EmailProto.UpdateEmailSenderRequest,
+  ): Promise<EmailSender> {
+    const emailFind = validateEmailSenderIdentifier(
+      request.emailSenderIdentifier,
+    );
+    const emailSender = await this.emailService.updateEmailSender(emailFind, {
       description: request.updateParams.description,
     });
     return {
-      name: email.name,
-      description: email.description,
-      project: {
-        id: email.projectId,
-      },
+      username: emailSender.username,
+      description: emailSender.description,
+      projects: emailSender.attachedConfigs.map((config) => {
+        return {
+          id: config.configId,
+        };
+      }),
+      domain: emailSender.domain,
     };
   }
 
-  async deleteEmail(
-    identifier: IdentifierProto.EmailIdentifier,
-  ): Promise<Email> {
-    const emailParams = validateEmailIdentifier(identifier);
+  async deleteEmailSender(
+    request: EmailProto.DeleteEmailSenderRequest,
+  ): Promise<EmailSender> {
+    const emailParams = validateEmailSenderIdentifier(
+      request.emailSenderIdentifier,
+    );
 
-    const email = await this.emailService.deleteEmail(emailParams);
+    const emailSender = await this.emailService.deleteEmailSender(
+      emailParams,
+      request.configId,
+    );
 
     return {
-      name: email.name,
-      description: email.description,
-      project: {
-        id: email.projectId,
-      },
+      username: emailSender.username,
+      description: emailSender.description,
+      projects: emailSender.attachedConfigs.map((config) => {
+        return {
+          id: config.configId,
+        };
+      }),
+      domain: emailSender.domain,
     };
+  }
+
+  async createEmailDomain(
+    request: EmailProto.CreateEmailDomainRequest,
+  ): Promise<EmailProto.EmailDomain> {
+    await this.emailService.createOrGetEmailServiceConfig({
+      Project: {
+        connect: {
+          id: Number(request.configId),
+        },
+      },
+    });
+
+    const emailDomain = await this.emailService.createEmailDomain({
+      domain: request.domain,
+      subdomain: request.subdomain,
+      sendgridId: request.sendgridId,
+      attachedConfigs: {
+        connect: {
+          id: Number(request.configId),
+        },
+      },
+    });
+    return {
+      domain: emailDomain.domain,
+      subdomain: emailDomain.subdomain,
+      sendgridId: emailDomain.sendgridId,
+      projects: emailDomain.attachedConfigs.map((config) => {
+        return {
+          id: config.id,
+        };
+      }),
+    };
+  }
+
+  getEmailDomain(
+    request: EmailProto.EmailDomainRequest,
+  ): Promise<EmailProto.EmailDomain> {
+    throw new Error('Method not implemented.');
   }
 }

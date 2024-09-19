@@ -12,16 +12,20 @@ service EmailService {
 }
 
 service EmailDbService {
-  rpc getEmail(identifiers.EmailIdentifier) returns (Email);
-  rpc createEmail(CreateEmailRequest) returns (Email);
-  rpc updateEmail(UpdateEmailRequest) returns (Email);
-  rpc deleteEmail(identifiers.EmailIdentifier) returns (Email);
+  rpc getEmailSender(identifiers.EmailSenderIdentifier) returns (EmailSender);
+  rpc createEmailSender(CreateEmailSenderRequest) returns (EmailSender);
+  rpc updateEmailSender(UpdateEmailSenderRequest) returns (EmailSender);
+  rpc deleteEmailSender(DeleteEmailSenderRequest)
+      returns (EmailSender);
+  rpc getEmailDomain(EmailDomainRequest) returns (EmailDomain);
+  rpc createEmailDomain(CreateEmailDomainRequest) returns (EmailDomain);
 }
 
-message Email {
-  string name = 2;
+message EmailSender {
+  string username = 2;
   optional string description = 3;
-  identifiers.ProjectIdentifier project = 4;
+  repeated identifiers.ProjectIdentifier projects = 4;
+  string domain = 5;
 }
 
 message SendEmailRequest {
@@ -37,30 +41,31 @@ message EmailRecipient {
   optional string name = 2;
 }
 
-message EmailSender {
-  string email = 1;
-  optional string name = 2;
-}
-
 message EmailContent {
   string type = 1;
   string value = 2;
 }
 
-message CreateEmailRequest {
-  string name = 1;
-  identifiers.ProjectIdentifier project = 2;
+message CreateEmailSenderRequest {
+  string username = 1;
+  int64 configId = 2;
   optional string description = 3;
+  string domain = 4;
 }
 
 message EmailUpdateParams { optional string description = 1; }
 
-message UpdateEmailRequest {
-  identifiers.EmailIdentifier emailIdentifier = 1;
+message UpdateEmailSenderRequest {
+  identifiers.EmailSenderIdentifier emailSenderIdentifier = 1;
   EmailUpdateParams updateParams = 2;
 }
 
-message SendEmailRequestResponse { bool success = 1; }
+message DeleteEmailSenderRequest {
+  identifiers.EmailSenderIdentifier emailSenderIdentifier = 1;
+  int64 configId = 2;
+}
+
+message SendEmailSenderRequestResponse { bool success = 1; }
 
 message RegisterSenderRequest {
   string from_email = 1;
@@ -96,4 +101,20 @@ message SendGridRecord {
   string type = 2;
   string host = 3;
   string data = 4;
+}
+
+message EmailDomain {
+  string domain = 1;
+  string subdomain = 2;
+  int64 sendgridId = 3;
+  repeated identifiers.ProjectIdentifier projects = 4;
+}
+
+message EmailDomainRequest { string domain = 1; }
+
+message CreateEmailDomainRequest {
+  string domain = 1;
+  string subdomain = 2;
+  int64 sendgridId = 3;
+  int64 configId = 4;
 }

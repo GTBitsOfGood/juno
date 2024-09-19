@@ -7,6 +7,7 @@ import {
 import { Type } from 'class-transformer';
 import { EmailProto } from 'juno-proto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { SendGridDnsRecords, SendGridRecord } from 'juno-proto/dist/gen/email';
 
 export class RegisterEmailModel {
   @ApiProperty({ type: 'string', format: 'email' })
@@ -79,5 +80,36 @@ export class SendEmailResponse {
 
   constructor(res: EmailProto.SendEmailResponse) {
     this.success = res.statusCode == 200;
+  }
+}
+
+export class RegisterDomainResponse {
+  @ApiProperty({ type: 'number' })
+  id: number;
+  @ApiProperty({ type: 'string' })
+  valid: string;
+  @ApiProperty({ type: SendEmailResponse })
+  @Type(() => SendGridDNSResponse)
+  records: SendGridDNSResponse;
+  @ApiProperty({ type: 'number' })
+  statusCode: number;
+
+  constructor(res: EmailProto.AuthenticateDomainResponse) {
+    this.id = res.id;
+    this.valid = res.valid;
+    this.records = new SendGridDNSResponse(res.records);
+    this.statusCode = res.statusCode;
+  }
+}
+
+export class SendGridDNSResponse {
+  mail_cname: SendGridRecord;
+  dkim1: SendGridRecord;
+  dkim2: SendGridRecord;
+
+  constructor(res: SendGridDnsRecords) {
+    this.mail_cname = res.mailCname;
+    this.dkim1 = res.dkim1;
+    this.dkim2 = res.dkim2;
   }
 }

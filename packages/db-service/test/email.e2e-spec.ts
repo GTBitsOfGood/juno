@@ -14,7 +14,7 @@ import {
   ProjectProto,
 } from 'juno-proto';
 import { AppModule } from 'src/app.module';
-import { Email } from '@prisma/client';
+import { EmailSender } from '@prisma/client';
 
 const { JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
 const { JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
@@ -107,35 +107,17 @@ describe('DB Service Email Tests', () => {
   });
 
   it('creates an email registration record correctly', async () => {
-    const projectPromise = new Promise((resolve) => {
-      projectClient.createProject(
-        {
-          name: 'testproject',
-        },
-        (err, resp) => {
-          expect(err).toBeNull();
-          expect(resp['name']).toBe('testproject');
-          resolve({});
-        },
-      );
-    });
-
-    await projectPromise;
-
     // Create email linked to test project
     const promise = new Promise((resolve) => {
-      emailClient.createEmail(
+      emailClient.createEmailSender(
         {
-          name: 'tester123',
-          project: {
-            name: 'testproject',
-          },
+          username: 'tester123',
+          domain: 'testdomain',
+          configId: 0,
         },
 
         (err, resp) => {
           expect(err).toBeNull();
-          console.log('ID:' + resp['id']);
-          console.log(resp);
           resolve({});
         },
       );
@@ -147,12 +129,11 @@ describe('DB Service Email Tests', () => {
   it('cannot create a duplicate email registration', async () => {
     // Create email linked to test project
     const promise = new Promise((resolve) => {
-      emailClient.createEmail(
+      emailClient.createEmailSender(
         {
-          name: 'tester123',
-          project: {
-            name: 'testproject',
-          },
+          username: 'tester123',
+          domain: 'testdomain',
+          configId: 0,
         },
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -168,12 +149,11 @@ describe('DB Service Email Tests', () => {
 
   it('can delete an email registration record that exists', async () => {
     const promise = new Promise((resolve) => {
-      emailClient.createEmail(
+      emailClient.createEmailSender(
         {
-          name: 'tester1234',
-          project: {
-            name: 'testproject',
-          },
+          username: 'tester1234',
+          domain: 'testdomain',
+          configId: 0,
         },
 
         (err, resp) => {
@@ -186,10 +166,13 @@ describe('DB Service Email Tests', () => {
     const resultingEmail = (await promise) as any;
 
     const deletionPromise = new Promise((resolve) => {
-      emailClient.deleteEmail(
+      emailClient.deleteEmailSender(
         {
-          name: resultingEmail.name,
-          projectId: resultingEmail.project.id,
+          emailSenderIdentifier: {
+            username: resultingEmail.username,
+            domain: resultingEmail.domain,
+          },
+          configId: 0,
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
@@ -204,9 +187,13 @@ describe('DB Service Email Tests', () => {
 
   it('cannot delete an email registration record that does not exist', async () => {
     const promise = new Promise((resolve) => {
-      emailClient.deleteEmail(
+      emailClient.deleteEmailSender(
         {
-          id: 999999, // Use nonexistent ID
+          emailSenderIdentifier: {
+            username: 'nonexistent',
+            domain: 'nonexistent',
+          },
+          configId: 0,
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
@@ -221,15 +208,14 @@ describe('DB Service Email Tests', () => {
 
   it("can update an email's description of an existing email registration record", async () => {
     const promise = new Promise((resolve) => {
-      emailClient.createEmail(
+      emailClient.createEmailSender(
         {
-          name: 'tester12345',
-          project: {
-            name: 'testproject',
-          },
+          username: 'tester12345',
+          domain: 'testdomain',
+          configId: 0,
         },
 
-        (err, resp: Email) => {
+        (err, resp: EmailSender) => {
           expect(err).toBeNull();
           resolve(resp);
         },
@@ -239,11 +225,11 @@ describe('DB Service Email Tests', () => {
     const email = (await promise) as any;
 
     const updatePromise = new Promise((resolve) => {
-      emailClient.updateEmail(
+      emailClient.updateEmailSender(
         {
-          emailIdentifier: {
-            name: email.name,
-            projectId: email.project.id,
+          emailSenderIdentifier: {
+            username: email.username,
+            domain: email.domain,
           },
           updateParams: {
             description: 'new description',
@@ -251,7 +237,7 @@ describe('DB Service Email Tests', () => {
         },
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (err, resp: Email) => {
+        (err, resp: EmailSender) => {
           expect(err).toBeNull();
           resolve({});
         },
@@ -263,16 +249,19 @@ describe('DB Service Email Tests', () => {
 
   it("cannot update an email's description of a nonexistent email registration record", async () => {
     const updatePromise = new Promise((resolve) => {
-      emailClient.updateEmail(
+      emailClient.updateEmailSender(
         {
-          name: 'nonexistentNAME',
-        },
-        {
-          description: 'new description',
+          emailSenderIdentifier: {
+            username: 'nonexistent',
+            domain: 'nonexistent',
+          },
+          updateParams: {
+            description: 'new description',
+          },
         },
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (err, resp: Email) => {
+        (err, resp: EmailSender) => {
           expect(err).not.toBeNull();
           resolve({});
         },
@@ -284,15 +273,14 @@ describe('DB Service Email Tests', () => {
 
   it('can retrieve an email registration record', async () => {
     const promise = new Promise((resolve) => {
-      emailClient.createEmail(
+      emailClient.createEmailSender(
         {
-          name: 'tester123456',
-          project: {
-            name: 'testproject',
-          },
+          username: 'tester123456',
+          domain: 'testdomain',
+          configId: 0,
         },
 
-        (err, resp: Email) => {
+        (err, resp: EmailSender) => {
           expect(err).toBeNull();
           resolve(resp);
         },
@@ -302,12 +290,12 @@ describe('DB Service Email Tests', () => {
     const email = (await promise) as any;
 
     const updatePromise = new Promise((resolve) => {
-      emailClient.getEmail(
+      emailClient.getEmailSender(
         {
-          name: email.name,
-          projectId: email.project.id,
+          username: email.username,
+          domain: 'testdomain',
         },
-        (err, resp: Email) => {
+        (err, resp: EmailSender) => {
           expect(err).toBeNull();
           expect(resp).not.toBeNull();
           resolve({});
