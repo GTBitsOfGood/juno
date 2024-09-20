@@ -16,9 +16,9 @@ message UserIdentifier {
   }
 }
 
-message EmailIdentifier {
-  int64 projectId = 1;
-  string name = 2;
+message EmailSenderIdentifier {
+  string domain = 1;
+  string username = 2;
 }
 
 message ApiKeyIdentifier {

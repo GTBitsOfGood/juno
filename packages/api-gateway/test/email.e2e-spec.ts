@@ -432,3 +432,41 @@ describe('Domain Registration Routes', () => {
       .expect(401);
   });
 });
+
+describe('Domain Verification Routes', () => {
+  it('Verifies a domain without a domain parameter', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .expect(400);
+  });
+
+  it('Verifies a domain with valid parameters', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        domain: 'testdomain',
+      })
+      .expect(201);
+  });
+
+  it('Verification endpoint called with no Authorization header', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .send({
+        domain: 'testdomain',
+      })
+      .expect(401);
+  });
+
+  it('Verification endpoint called with an invalid JWT', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer invalid.jwt.token')
+      .send({
+        domain: 'testdomain',
+      })
+      .expect(401);
+  });
+});

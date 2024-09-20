@@ -69,4 +69,10 @@ export class EmailController implements EmailProto.EmailServiceController {
   ): Promise<EmailProto.RegisterSenderResponse> {
     return await this.emailService.registerSender(req);
   }
+
+  async verifyDomain(
+    request: EmailProto.VerifyDomainRequest,
+  ): Promise<EmailProto.VerifyDomainResponse> {
+    return this.emailService.verifyDomain(request);
+  }
 }

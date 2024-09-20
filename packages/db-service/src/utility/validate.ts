@@ -55,34 +55,34 @@ export function validateUserIdentifier(
   }
 }
 
-export function validateEmailIdentifier(
-  identifier: IdentifierProto.EmailIdentifier,
-): Prisma.EmailWhereUniqueInput {
-  if (!identifier.projectId && !identifier.name) {
+export function validateEmailSenderIdentifier(
+  identifier: IdentifierProto.EmailSenderIdentifier,
+): Prisma.EmailSenderWhereUniqueInput {
+  if (!identifier.domain && !identifier.username) {
     throw new RpcException({
       code: status.INVALID_ARGUMENT,
       message: 'Neither id nor email name are provided',
     });
   }
 
-  if (!identifier.projectId) {
+  if (!identifier.domain) {
     throw new RpcException({
       code: status.INVALID_ARGUMENT,
-      message: 'Missing project id argument',
+      message: 'Missing domain argument',
     });
   }
 
-  if (!identifier.name) {
+  if (!identifier.username) {
     throw new RpcException({
       code: status.INVALID_ARGUMENT,
-      message: 'Missing email name argument',
+      message: 'Missing username argument',
     });
   }
 
   return {
-    name_projectId: {
-      name: identifier.name,
-      projectId: Number(identifier.projectId),
+    username_domain: {
+      username: identifier.username,
+      domain: identifier.domain,
     },
   };
 }

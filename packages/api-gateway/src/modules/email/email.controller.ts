@@ -10,13 +10,15 @@ import {
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import {
+  RegisterDomainModel,
+  RegisterDomainResponse,
   RegisterEmailModel,
   RegisterEmailResponse,
   SendEmailModel,
   SendEmailResponse,
+  VerifyDomainModel,
 } from 'src/models/email';
 import { EmailProto } from 'juno-proto';
-import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
 
 import {
@@ -26,6 +28,7 @@ import {
   ApiTags,
   ApiCreatedResponse,
   ApiOperation,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 
 const { EMAIL_SERVICE_NAME } = EmailProto;
@@ -46,7 +49,7 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description: 'This endpoint registers a user',
+    description: 'This endpoint registers a sender email address',
   })
   @ApiCreatedResponse({
     description: 'Email registered successfully',
@@ -59,12 +62,20 @@ export class EmailController implements OnModuleInit {
     return new RegisterEmailResponse(params.email);
   }
 
+  @ApiOperation({
+    description: 'This endpoint registers a sender domain',
+  })
+  @ApiCreatedResponse({
+    description: 'domain registered successfully',
+    type: RegisterEmailResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post('/register-domain')
   async registerEmailDomain(
-    @Body('domain') domain: string,
-    @Body('subdomain') subdomain: string,
-  ): Promise<EmailProto.AuthenticateDomainResponse> {
-    if (!domain) {
+    @Body() req: RegisterDomainModel,
+  ): Promise<RegisterDomainResponse> {
+    if (!req.domain) {
       throw new HttpException(
         'Cannot register domain (no domain supplied)',
         HttpStatus.BAD_REQUEST,
@@ -72,11 +83,39 @@ export class EmailController implements OnModuleInit {
     }
 
     const res = this.emailService.authenticateDomain({
-      domain,
-      subdomain,
+      domain: req.domain,
+      subdomain: req.subdomain,
     });
 
-    return lastValueFrom(res);
+    return new RegisterDomainResponse(await lastValueFrom(res));
+  }
+
+  @ApiOperation({
+    description: 'This endpoint verifies a sender domain registration status',
+  })
+  @ApiCreatedResponse({
+    description: 'domain is registered',
+    type: RegisterEmailResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiNotFoundResponse({ description: 'No domain registered' })
+  @Post('/verify-domain')
+  async verifySenderDomain(
+    @Body() req: VerifyDomainModel,
+  ): Promise<RegisterDomainResponse> {
+    if (!req.domain || req.domain.length == 0) {
+      throw new HttpException(
+        'Cannot register domain (no domain supplied)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const res = this.emailService.verifyDomain({
+      domain: req.domain,
+    });
+
+    return new RegisterDomainResponse(await lastValueFrom(res));
   }
 
   @ApiOperation({
@@ -96,9 +135,8 @@ export class EmailController implements OnModuleInit {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const params = plainToInstance(SendEmailModel, req);
     try {
-      await validateOrReject(params);
+      await validateOrReject(req);
     } catch {
       throw new HttpException(
         'Invalid email parameters',
@@ -108,9 +146,12 @@ export class EmailController implements OnModuleInit {
     return new SendEmailResponse(
       await lastValueFrom(
         this.emailService.sendEmail({
-          recipients: params.recipients,
-          sender: params.sender,
-          content: params.content,
+          recipients: req.recipients,
+          sender: {
+            email: req.sender.email,
+            name: req.sender.name,
+          },
+          content: req.content,
         }),
       ),
     );

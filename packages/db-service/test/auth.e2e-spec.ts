@@ -7,6 +7,8 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
   ApiKeyProto,
   ApiKeyProtoFile,
+  EmailProto,
+  EmailProtoFile,
   IdentifiersProtoFile,
   ProjectProto,
   ProjectProtoFile,
@@ -20,6 +22,7 @@ import { ApiKey } from '@prisma/client';
 const { JUNO_USER_PACKAGE_NAME } = UserProto;
 const { JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 const { JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
+const { JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
 
 let app: INestMicroservice;
 
@@ -37,6 +40,7 @@ async function initApp() {
         JUNO_API_KEY_PACKAGE_NAME,
         JUNO_USER_PACKAGE_NAME,
         JUNO_PROJECT_PACKAGE_NAME,
+        JUNO_EMAIL_PACKAGE_NAME,
         ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
       ],
       protoPath: [
@@ -45,6 +49,7 @@ async function initApp() {
         IdentifiersProtoFile,
         ResetProtoFile,
         ApiKeyProtoFile,
+        EmailProtoFile,
       ],
       url: process.env.DB_SERVICE_ADDR,
     },
@@ -63,6 +68,7 @@ beforeAll(async () => {
     ResetProtoFile,
     ProjectProtoFile,
     IdentifiersProtoFile,
+    EmailProtoFile,
   ]) as any;
 
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
