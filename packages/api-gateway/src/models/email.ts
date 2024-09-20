@@ -55,6 +55,22 @@ class EmailContent {
   value: string;
 }
 
+export class RegisterDomainModel {
+  @ApiProperty({ type: 'string', example: 'example.com' })
+  @IsNotEmpty()
+  domain: string;
+
+  @ApiProperty({ type: 'string', example: 'subdomain' })
+  @IsNotEmpty()
+  subdomain: string;
+}
+
+export class VerifyDomainModel {
+  @ApiProperty({ type: 'string', example: 'example.com' })
+  @IsNotEmpty()
+  domain: string;
+}
+
 export class SendEmailModel {
   @ApiProperty({ type: [EmailRecipient] })
   @ArrayNotEmpty()
@@ -83,6 +99,18 @@ export class SendEmailResponse {
   }
 }
 
+export class SendGridDNSResponse {
+  mail_cname: SendGridRecord;
+  dkim1: SendGridRecord;
+  dkim2: SendGridRecord;
+
+  constructor(res: SendGridDnsRecords) {
+    this.mail_cname = res.mailCname;
+    this.dkim1 = res.dkim1;
+    this.dkim2 = res.dkim2;
+  }
+}
+
 export class RegisterDomainResponse {
   @ApiProperty({ type: 'number' })
   id: number;
@@ -103,17 +131,5 @@ export class RegisterDomainResponse {
     this.valid = `${res.valid}`;
     this.records = new SendGridDNSResponse(res.records);
     this.statusCode = res.statusCode;
-  }
-}
-
-export class SendGridDNSResponse {
-  mail_cname: SendGridRecord;
-  dkim1: SendGridRecord;
-  dkim2: SendGridRecord;
-
-  constructor(res: SendGridDnsRecords) {
-    this.mail_cname = res.mailCname;
-    this.dkim1 = res.dkim1;
-    this.dkim2 = res.dkim2;
   }
 }

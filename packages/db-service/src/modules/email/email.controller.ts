@@ -189,9 +189,16 @@ export class EmailController implements EmailDbServiceController {
   async getEmailDomain(
     request: EmailProto.EmailDomainRequest,
   ): Promise<EmailProto.EmailDomain> {
+    console.log('getEmailDomain', request);
     const domain = await this.emailService.emailDomain({
       domain: request.domain,
     });
+    if (!domain) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Domain not found',
+      });
+    }
     return {
       domain: domain.domain,
       subdomain: domain.subdomain,

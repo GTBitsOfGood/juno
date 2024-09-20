@@ -10,11 +10,13 @@ import {
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import {
+  RegisterDomainModel,
   RegisterDomainResponse,
   RegisterEmailModel,
   RegisterEmailResponse,
   SendEmailModel,
   SendEmailResponse,
+  VerifyDomainModel,
 } from 'src/models/email';
 import { EmailProto } from 'juno-proto';
 import { validateOrReject } from 'class-validator';
@@ -71,10 +73,9 @@ export class EmailController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post('/register-domain')
   async registerEmailDomain(
-    @Body('domain') domain: string,
-    @Body('subdomain') subdomain: string,
+    @Body() req: RegisterDomainModel,
   ): Promise<RegisterDomainResponse> {
-    if (!domain) {
+    if (!req.domain) {
       throw new HttpException(
         'Cannot register domain (no domain supplied)',
         HttpStatus.BAD_REQUEST,
@@ -82,8 +83,8 @@ export class EmailController implements OnModuleInit {
     }
 
     const res = this.emailService.authenticateDomain({
-      domain,
-      subdomain,
+      domain: req.domain,
+      subdomain: req.subdomain,
     });
 
     return new RegisterDomainResponse(await lastValueFrom(res));
@@ -99,11 +100,11 @@ export class EmailController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiNotFoundResponse({ description: 'No domain registered' })
-  @Post('/veirfy-domain')
+  @Post('/verify-domain')
   async verifySenderDomain(
-    @Body('domain') domain: string,
+    @Body() req: VerifyDomainModel,
   ): Promise<RegisterDomainResponse> {
-    if (!domain) {
+    if (!req.domain || req.domain.length == 0) {
       throw new HttpException(
         'Cannot register domain (no domain supplied)',
         HttpStatus.BAD_REQUEST,
@@ -111,7 +112,7 @@ export class EmailController implements OnModuleInit {
     }
 
     const res = this.emailService.verifyDomain({
-      domain,
+      domain: req.domain,
     });
 
     return new RegisterDomainResponse(await lastValueFrom(res));

@@ -14,7 +14,7 @@ const { EMAIL_DB_SERVICE_NAME, JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
         name: EMAIL_DB_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: process.env.EMAIL_SERVICE_ADDR,
+          url: process.env.DB_SERVICE_ADDR,
           package: JUNO_EMAIL_PACKAGE_NAME,
           protoPath: EmailProtoFile,
         },

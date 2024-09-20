@@ -40,6 +40,12 @@ export class EmailService implements OnModuleInit {
     const sendGridUrl = 'https://api.sendgrid.com/v3/whitelabel/domains';
 
     if (process.env['NODE_ENV'] == 'test') {
+      this.emailService.createEmailDomain({
+        domain: req.domain,
+        subdomain: req.subdomain,
+        sendgridId: 0,
+        configId: 0,
+      });
       return {
         statusCode: 201,
         id: 0,
@@ -156,11 +162,14 @@ export class EmailService implements OnModuleInit {
   async verifyDomain(
     req: EmailProto.VerifyDomainRequest,
   ): Promise<EmailProto.VerifyDomainResponse> {
+    console.log(`verifying`);
     const domain = await lastValueFrom(
       this.emailService.getEmailDomain({
         domain: req.domain,
       }),
     );
+
+    console.log(`verifying: ${JSON.stringify(domain)}`);
 
     const id = domain.sendgridId;
 
