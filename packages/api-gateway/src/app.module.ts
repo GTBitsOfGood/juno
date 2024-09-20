@@ -14,4 +14,4 @@ import { SentryModule } from '@sentry/nestjs/setup';
     EmailModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -7,7 +7,7 @@ import { status } from '@grpc/grpc-js';
 @Controller()
 @EmailProto.EmailServiceControllerMethods()
 export class EmailController implements EmailProto.EmailServiceController {
-  constructor(private readonly emailService: EmailService) { }
+  constructor(private readonly emailService: EmailService) {}
 
   async authenticateDomain(
     @Body() req: EmailProto.AuthenticateDomainRequest,
