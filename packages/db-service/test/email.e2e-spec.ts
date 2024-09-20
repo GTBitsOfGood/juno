@@ -84,7 +84,6 @@ afterEach(async () => {
 
 describe('DB Service Email Tests', () => {
   let emailClient: any;
-  let projectClient: any;
 
   beforeEach(() => {
     const emailProto = ProtoLoader.loadSync([
@@ -96,11 +95,6 @@ describe('DB Service Email Tests', () => {
     const emailProtoGRPC = GRPC.loadPackageDefinition(emailProto) as any;
 
     emailClient = new emailProtoGRPC.juno.email.EmailDbService(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-
-    projectClient = new emailProtoGRPC.juno.project.ProjectService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
@@ -116,7 +110,7 @@ describe('DB Service Email Tests', () => {
           configId: 0,
         },
 
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },

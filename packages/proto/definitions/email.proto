@@ -9,6 +9,7 @@ service EmailService {
   rpc registerSender(RegisterSenderRequest) returns (RegisterSenderResponse);
   rpc authenticateDomain(AuthenticateDomainRequest)
       returns (AuthenticateDomainResponse);
+  rpc verifyDomain(VerifyDomainRequest) returns (VerifyDomainResponse);
 }
 
 service EmailDbService {
@@ -117,4 +118,15 @@ message CreateEmailDomainRequest {
   string subdomain = 2;
   int64 sendgridId = 3;
   int64 configId = 4;
+}
+
+message VerifyDomainRequest {
+  string domain = 1;
+}
+
+message VerifyDomainResponse {
+  int64 id = 1;
+  bool valid = 2;
+  SendGridDnsRecords records = 3;
+  int32 statusCode = 4;
 }

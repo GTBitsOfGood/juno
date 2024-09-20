@@ -1,11 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  EmailServiceConfig,
-  EmailSender,
-  EmailDomain,
-  Prisma,
-} from '@prisma/client';
-import { PROJECT_SERVICE_NAME } from 'juno-proto/dist/gen/project';
+import { EmailServiceConfig, EmailSender, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
 const senderWithConfigIds = {
@@ -38,7 +32,7 @@ type EmailDomainWithConfigIds = Prisma.EmailDomainGetPayload<
 
 @Injectable()
 export class EmailService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async emailSenders(
     skip?: number,
@@ -134,9 +128,10 @@ export class EmailService {
 
   async emailDomain(
     where: Prisma.EmailDomainWhereUniqueInput,
-  ): Promise<EmailDomain> {
+  ): Promise<EmailDomainWithConfigIds> {
     return this.prisma.emailDomain.findUnique({
       where,
+      ...domainWithConfigIds,
     });
   }
 

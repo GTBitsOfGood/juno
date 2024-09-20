@@ -94,9 +94,13 @@ export class RegisterDomainResponse {
   @ApiProperty({ type: 'number' })
   statusCode: number;
 
-  constructor(res: EmailProto.AuthenticateDomainResponse) {
+  constructor(
+    res:
+      | EmailProto.AuthenticateDomainResponse
+      | EmailProto.VerifyDomainResponse,
+  ) {
     this.id = res.id;
-    this.valid = res.valid;
+    this.valid = `${res.valid}`;
     this.records = new SendGridDNSResponse(res.records);
     this.statusCode = res.statusCode;
   }

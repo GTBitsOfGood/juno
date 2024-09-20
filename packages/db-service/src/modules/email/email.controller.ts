@@ -8,12 +8,11 @@ import {
   EmailSender,
   EmailDbServiceController,
 } from 'juno-proto/dist/gen/email';
-import { Observable } from 'rxjs';
 
 @Controller()
 @EmailProto.EmailDbServiceControllerMethods()
 export class EmailController implements EmailDbServiceController {
-  constructor(private readonly emailService: EmailService) { }
+  constructor(private readonly emailService: EmailService) {}
 
   async getEmailSender(
     identifier: IdentifierProto.EmailSenderIdentifier,
@@ -187,9 +186,21 @@ export class EmailController implements EmailDbServiceController {
     };
   }
 
-  getEmailDomain(
+  async getEmailDomain(
     request: EmailProto.EmailDomainRequest,
   ): Promise<EmailProto.EmailDomain> {
-    throw new Error('Method not implemented.');
+    const domain = await this.emailService.emailDomain({
+      domain: request.domain,
+    });
+    return {
+      domain: domain.domain,
+      subdomain: domain.subdomain,
+      sendgridId: domain.sendgridId,
+      projects: domain.attachedConfigs.map((config) => {
+        return {
+          id: config.id,
+        };
+      }),
+    };
   }
 }

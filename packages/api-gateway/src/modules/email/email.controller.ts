@@ -17,7 +17,6 @@ import {
   SendEmailResponse,
 } from 'src/models/email';
 import { EmailProto } from 'juno-proto';
-import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
 
 import {
@@ -38,7 +37,7 @@ const { EMAIL_SERVICE_NAME } = EmailProto;
 export class EmailController implements OnModuleInit {
   private emailService: EmailProto.EmailServiceClient;
 
-  constructor(@Inject(EMAIL_SERVICE_NAME) private emailClient: ClientGrpc) { }
+  constructor(@Inject(EMAIL_SERVICE_NAME) private emailClient: ClientGrpc) {}
 
   onModuleInit() {
     this.emailService =
@@ -91,7 +90,7 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description: 'This endpoint verifies a sender domain registration status,
+    description: 'This endpoint verifies a sender domain registration status',
   })
   @ApiCreatedResponse({
     description: 'domain is registered',
@@ -100,10 +99,9 @@ export class EmailController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiNotFoundResponse({ description: 'No domain registered' })
-  @Post('/register-domain')
+  @Post('/veirfy-domain')
   async verifySenderDomain(
     @Body('domain') domain: string,
-    @Body('subdomain') subdomain: string,
   ): Promise<RegisterDomainResponse> {
     if (!domain) {
       throw new HttpException(
@@ -114,7 +112,6 @@ export class EmailController implements OnModuleInit {
 
     const res = this.emailService.verifyDomain({
       domain,
-      subdomain,
     });
 
     return new RegisterDomainResponse(await lastValueFrom(res));
@@ -137,21 +134,25 @@ export class EmailController implements OnModuleInit {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const params = plainToInstance(SendEmailModel, req);
     try {
-      await validateOrReject(params);
+      await validateOrReject(req);
     } catch {
       throw new HttpException(
         'Invalid email parameters',
         HttpStatus.BAD_REQUEST,
       );
     }
+    const [username, domain] = req.sender?.email.split('@');
     return new SendEmailResponse(
       await lastValueFrom(
         this.emailService.sendEmail({
-          recipients: params.recipients,
-          sender: params.sender,
-          content: params.content,
+          recipients: req.recipients,
+          sender: {
+            username,
+            domain,
+            projects: [],
+          },
+          content: req.content,
         }),
       ),
     );

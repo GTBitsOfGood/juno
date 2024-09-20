@@ -117,6 +117,17 @@ export interface CreateEmailDomainRequest {
   configId: number;
 }
 
+export interface VerifyDomainRequest {
+  domain: string;
+}
+
+export interface VerifyDomainResponse {
+  id: number;
+  valid: boolean;
+  records: SendGridDnsRecords | undefined;
+  statusCode: number;
+}
+
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
@@ -129,6 +140,8 @@ export interface EmailServiceClient {
   authenticateDomain(
     request: AuthenticateDomainRequest,
   ): Observable<AuthenticateDomainResponse>;
+
+  verifyDomain(request: VerifyDomainRequest): Observable<VerifyDomainResponse>;
 }
 
 export interface EmailServiceController {
@@ -152,6 +165,13 @@ export interface EmailServiceController {
     | Promise<AuthenticateDomainResponse>
     | Observable<AuthenticateDomainResponse>
     | AuthenticateDomainResponse;
+
+  verifyDomain(
+    request: VerifyDomainRequest,
+  ):
+    | Promise<VerifyDomainResponse>
+    | Observable<VerifyDomainResponse>
+    | VerifyDomainResponse;
 }
 
 export function EmailServiceControllerMethods() {
@@ -160,6 +180,7 @@ export function EmailServiceControllerMethods() {
       'sendEmail',
       'registerSender',
       'authenticateDomain',
+      'verifyDomain',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
