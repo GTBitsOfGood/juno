@@ -7,7 +7,7 @@ import { status } from '@grpc/grpc-js';
 @Controller()
 @EmailProto.EmailServiceControllerMethods()
 export class EmailController implements EmailProto.EmailServiceController {
-  constructor(private readonly emailService: EmailService) {}
+  constructor(private readonly emailService: EmailService) { }
 
   async authenticateDomain(
     @Body() req: EmailProto.AuthenticateDomainRequest,
@@ -48,8 +48,8 @@ export class EmailController implements EmailProto.EmailServiceController {
     }
     if (
       !request.sender ||
-      request.sender.username.length == 0 ||
-      request.sender.domain.length == 0
+      !request.sender.email ||
+      request.sender.email.length == 0
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,

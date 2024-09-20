@@ -31,8 +31,13 @@ message EmailSender {
 
 message SendEmailRequest {
   repeated EmailRecipient recipients = 1;
-  EmailSender sender = 2;
+  SenderInfo sender = 2;
   repeated EmailContent content = 3;
+}
+
+message SenderInfo {
+  string email = 1;
+  string name = 2;
 }
 
 message SendEmailResponse { int32 statusCode = 1; }

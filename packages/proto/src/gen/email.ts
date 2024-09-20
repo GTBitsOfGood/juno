@@ -20,8 +20,13 @@ export interface EmailSender {
 
 export interface SendEmailRequest {
   recipients: EmailRecipient[];
-  sender: EmailSender | undefined;
+  sender: SenderInfo | undefined;
   content: EmailContent[];
+}
+
+export interface SenderInfo {
+  email: string;
+  name: string;
 }
 
 export interface SendEmailResponse {

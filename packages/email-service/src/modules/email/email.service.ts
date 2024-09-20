@@ -13,7 +13,7 @@ export class EmailService implements OnModuleInit {
   constructor(
     private sendgrid: SendGridService,
     @Inject(EMAIL_DB_SERVICE_NAME) private emailClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.emailService =
@@ -88,7 +88,8 @@ export class EmailService implements OnModuleInit {
           },
         ],
         from: {
-          email: request.sender.username + '@' + request.sender.domain,
+          email: request.sender.email,
+          name: request.sender.name,
         },
         content: [
           request.content[0],

@@ -142,15 +142,13 @@ export class EmailController implements OnModuleInit {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const [username, domain] = req.sender?.email.split('@');
     return new SendEmailResponse(
       await lastValueFrom(
         this.emailService.sendEmail({
           recipients: req.recipients,
           sender: {
-            username,
-            domain,
-            projects: [],
+            email: req.sender.email,
+            name: req.sender.name,
           },
           content: req.content,
         }),
