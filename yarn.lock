@@ -1431,14 +1431,6 @@
     "@sentry/types" "8.30.0"
     "@sentry/utils" "8.30.0"
 
-"@sentry/profiling-node@^7.108.0":
-  version "7.119.0"
-  resolved "https://registry.yarnpkg.com/@sentry/profiling-node/-/profiling-node-7.119.0.tgz#021263e3167a416b5eb868f5994feddbaadbdf28"
-  integrity sha512-KEJ2kFVWDmg2qi7y24PuSqerlW+iDK4C6pDXpXV6h+GEekUXsnRSAqtKc5H6LJqVGe8ljgFqPy75XIkM1qPBzw==
-  dependencies:
-    detect-libc "^2.0.2"
-    node-abi "^3.61.0"
-
 "@sentry/profiling-node@^8.29.0":
   version "8.30.0"
   resolved "https://registry.yarnpkg.com/@sentry/profiling-node/-/profiling-node-8.30.0.tgz#f30a7d0b2e3ffe7dc65993b33574414b6b590111"
