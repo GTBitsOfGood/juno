@@ -85,7 +85,7 @@ describe('Invalid key push to get jwt route', () => {
       .post('/auth/key')
       .send({
         email: ADMIN_EMAIL,
-        password: 'invalid-passowrd',
+        password: ADMIN_PASSWORD,
         environment: 'staging',
         project: {
           name: 'invalid-project-name',
