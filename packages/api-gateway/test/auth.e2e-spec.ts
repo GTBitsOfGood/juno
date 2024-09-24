@@ -110,6 +110,10 @@ describe('Invalid key push to get jwt route', () => {
 });
 
 describe('Malformed paramters to get jwt route', async () => {
+  it('Empty api key request', async () => {
+    return request(app.getHttpServer()).post('/auth/jwt').send().expect(400);
+  });
+
   it('Malformed api key request', async () => {
     const key = await request(app.getHttpServer())
       .post('/auth/key')
@@ -143,7 +147,7 @@ describe('Correct parameters to both generate auth key and jwt', () => {
           name: 'test-seed-project',
         },
       });
-    const apiKey = key.body['apiKey'] + 'test';
+    const apiKey = key.body['apiKey'];
 
     return request(app.getHttpServer())
       .post('/auth/jwt')
