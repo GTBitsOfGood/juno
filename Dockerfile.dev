@@ -1,109 +1,111 @@
+# Juno uses multi-stage builds to optimize for docker development.
+# Here's a link for more info: https://docs.docker.com/build/building/multi-stage/
+
 FROM alpine as grpc-probe
 
 ARG TARGETARCH
 
-COPY ./docker/get_grpc_probe.sh /get_grpc_probe.sh
-
 RUN --mount=type=cache,target=/var/cache/apk apk add --update wget
 
+# install grpc_health_probe, a tool used for probing grpc service health of juno packages
+COPY ./docker/get_grpc_probe.sh /get_grpc_probe.sh
 RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 
-FROM node:18 as deps
+# deps is the main build stage, where node modules are copied from
+FROM node:18-slim as deps
 
+# cover over all app contents
 WORKDIR /app
-
 COPY . .
 
-# RUN --mount=type=cache,target=/var/cache/apk apk add --update python3 make g++ protoc bash
-
+# install necessary dependencies for proto generation
 RUN --mount=type=cache,target=/var/cache/apt apt update && apt install -y python3 make g++ protobuf-compiler
 
 RUN yarn global add node-gyp 
 
+# generate protos
 RUN chmod +x /app/packages/proto/gen_protos.sh
 
+# build proto package before all other packages
 WORKDIR /app/packages/proto
 
 RUN yarn install --frozen-lockfile
-
 RUN yarn build
 
+# install all other packages
 WORKDIR /app
 
 RUN yarn install --frozen-lockfile --ignore-scripts
 
+# Base image used for all juno services
 FROM node:18 as base-service
 
+# grpc_health_probe for checking health
 COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
 
 RUN chmod a+x /bin/grpc_health_probe
 
+# API Gateway service
 FROM base-service as api-gateway-dev
 
 WORKDIR /app
 
+# Copy all files over 
 COPY --from=deps /app/node_modules ./node_modules/
-
 COPY --from=deps /app/packages/api-gateway/node_modules ./packages/node_modules/
-
 COPY . .
-
 COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/api-gateway
 
+# Auth service
 FROM base-service as auth-service-dev
 
 WORKDIR /app
 
+# Copy all files over
 COPY --from=deps /app/node_modules ./node_modules/
-
 COPY --from=deps /app/packages/auth-service/node_modules ./packages/node_modules/
-
 COPY . .
-
 COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/auth-service
 
+# Email service
 FROM base-service as email-service-dev
 
 WORKDIR /app
 
+# Copy all files over 
 COPY --from=deps /app/node_modules ./node_modules/
-
 COPY --from=deps /app/packages/email-service/node_modules ./packages/node_modules/
-
 COPY . .
-
 COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/email-service
 
+# Logging service
 FROM base-service as logging-service-dev
 
 WORKDIR /app
 
+# Copy all files over 
 COPY --from=deps /app/node_modules ./node_modules/
-
 COPY --from=deps /app/packages/logging-service/node_modules ./packages/node_modules/
-
 COPY . .
-
 COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/logging-service
 
+# DB Service
 FROM base-service as db-service-dev
 
 WORKDIR /app
 
+# Copy all files over 
 COPY --from=deps /app/node_modules ./node_modules/
-
 COPY --from=deps /app/packages/db-service/node_modules ./packages/node_modules/
-
 COPY . .
-
 COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/db-service
