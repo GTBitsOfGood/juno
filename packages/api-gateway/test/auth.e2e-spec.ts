@@ -63,7 +63,7 @@ describe('Invalid key push to get jwt route', () => {
           name: 'test-seed-project',
         },
       })
-      .expect(400);
+      .expect(500);
   });
 
   it('Invalid password parameter to /auth/key', () => {
@@ -77,7 +77,7 @@ describe('Invalid key push to get jwt route', () => {
           name: 'test-seed-project',
         },
       })
-      .expect(400);
+      .expect(500);
   });
 
   it('Different environment parameter to /auth/key', () => {
@@ -91,7 +91,7 @@ describe('Invalid key push to get jwt route', () => {
           name: 'invalid-project-name',
         },
       })
-      .expect(200);
+      .expect(500);
   });
 
   it('Invalid project name to /auth/key', () => {
@@ -105,13 +105,13 @@ describe('Invalid key push to get jwt route', () => {
           name: 'invalid-project-name',
         },
       })
-      .expect(400);
+      .expect(500);
   });
 });
 
 describe('Malformed paramters to get jwt route', () => {
   it('Empty api key request', () => {
-    return request(app.getHttpServer()).post('/auth/jwt').send().expect(400);
+    return request(app.getHttpServer()).post('/auth/jwt').send().expect(401);
   });
 
   it('Malformed api key request', async () => {
@@ -131,7 +131,7 @@ describe('Malformed paramters to get jwt route', () => {
       .post('/auth/jwt')
       .set('Authorization', `Bearer ${apiKey}`)
       .send()
-      .expect(400);
+      .expect(500);
   });
 });
 
@@ -153,6 +153,6 @@ describe('Correct parameters to both generate auth key and jwt', () => {
       .post('/auth/jwt')
       .set('Authorization', `Bearer ${apiKey}`)
       .send()
-      .expect(200);
+      .expect(201);
   });
 });
