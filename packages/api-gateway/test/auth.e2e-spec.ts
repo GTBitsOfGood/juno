@@ -109,8 +109,8 @@ describe('Invalid key push to get jwt route', () => {
   });
 });
 
-describe('Malformed paramters to get jwt route', async () => {
-  it('Empty api key request', async () => {
+describe('Malformed paramters to get jwt route', () => {
+  it('Empty api key request', () => {
     return request(app.getHttpServer()).post('/auth/jwt').send().expect(400);
   });
 
