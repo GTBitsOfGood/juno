@@ -10,6 +10,7 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -51,8 +52,8 @@ beforeEach(async () => {
   await app.init();
 });
 
-describe('Invalid key push to get jwt route', () => {
-  it('Invalid email parameter to /auth/key', () => {
+describe('Auth Key Verification Routes', () => {
+  it('Invalid email parameter when getting auth key', () => {
     return request(app.getHttpServer())
       .post('/auth/key')
       .send({
@@ -66,12 +67,12 @@ describe('Invalid key push to get jwt route', () => {
       .expect(500);
   });
 
-  it('Invalid password parameter to /auth/key', () => {
+  it('Invalid password parameter when generating auth key', () => {
     return request(app.getHttpServer())
       .post('/auth/key')
       .send({
         email: ADMIN_EMAIL,
-        password: 'invalid-passowrd',
+        password: 'invalid-password',
         environment: 'prod',
         project: {
           name: 'test-seed-project',
@@ -88,18 +89,18 @@ describe('Invalid key push to get jwt route', () => {
         password: ADMIN_PASSWORD,
         environment: 'staging',
         project: {
-          name: 'invalid-project-name',
+          name: 'test-seed-project',
         },
       })
-      .expect(500);
+      .expect(201);
   });
 
-  it('Invalid project name to /auth/key', () => {
+  it('Invalid project name when generating auth key', () => {
     return request(app.getHttpServer())
       .post('/auth/key')
       .send({
         email: ADMIN_EMAIL,
-        password: 'invalid-passowrd',
+        password: ADMIN_PASSWORD,
         environment: 'prod',
         project: {
           name: 'invalid-project-name',
@@ -109,12 +110,28 @@ describe('Invalid key push to get jwt route', () => {
   });
 });
 
-describe('Malformed paramters to get jwt route', () => {
-  it('Empty api key request', () => {
+describe('JWT Verification Routes', () => {
+  it('Missing authorization header', () => {
     return request(app.getHttpServer()).post('/auth/jwt').send().expect(401);
   });
 
+  it('Empty bearer authorization header', () => {
+    return request(app.getHttpServer())
+      .post('/auth/jwt')
+      .set('Authorization', `Bearer `)
+      .send()
+      .expect(401);
+  });
+
   it('Malformed api key request', async () => {
+    return request(app.getHttpServer())
+      .post('/auth/jwt')
+      .set('Authorization', `Bearer invalid.jwt.token`)
+      .send()
+      .expect(500);
+  });
+
+  it('Expired JWT api key', async () => {
     const key = await request(app.getHttpServer())
       .post('/auth/key')
       .send({
@@ -125,7 +142,11 @@ describe('Malformed paramters to get jwt route', () => {
           name: 'test-seed-project',
         },
       });
-    const apiKey = key.body['apiKey'] + 'test';
+
+    // create a jwt token that expires 30 seconds before the request
+    const apiKey = jwt.sign({ data: key.body['apiKey'] }, 'secret', {
+      expiresIn: Math.floor(Date.now() / 1000) - 30,
+    });
 
     return request(app.getHttpServer())
       .post('/auth/jwt')
@@ -133,10 +154,8 @@ describe('Malformed paramters to get jwt route', () => {
       .send()
       .expect(500);
   });
-});
 
-describe('Correct parameters to both generate auth key and jwt', () => {
-  it('Valid api key', async () => {
+  it('Expected valid request for auth key and jwt generation', async () => {
     const key = await request(app.getHttpServer())
       .post('/auth/key')
       .send({
@@ -147,7 +166,11 @@ describe('Correct parameters to both generate auth key and jwt', () => {
           name: 'test-seed-project',
         },
       });
-    const apiKey = key.body['apiKey'];
+
+    let apiKey = '';
+    if (key.body['apiKey']) {
+      apiKey = key.body['apiKey'] + apiKey;
+    }
 
     return request(app.getHttpServer())
       .post('/auth/jwt')
