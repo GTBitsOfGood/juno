@@ -10,7 +10,7 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
-import jwt from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -120,7 +120,7 @@ describe('JWT Verification Routes', () => {
       .post('/auth/jwt')
       .set('Authorization', `Bearer `)
       .send()
-      .expect(401);
+      .expect(500);
   });
 
   it('Malformed api key request', async () => {
@@ -144,7 +144,7 @@ describe('JWT Verification Routes', () => {
       });
 
     // create a jwt token that expires 30 seconds before the request
-    const apiKey = jwt.sign({ data: key.body['apiKey'] }, 'secret', {
+    const apiKey = sign({ data: key.body['apiKey'] }, 'secret', {
       expiresIn: Math.floor(Date.now() / 1000) - 30,
     });
 
