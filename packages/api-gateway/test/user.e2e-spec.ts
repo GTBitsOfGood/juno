@@ -11,7 +11,6 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
-import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 
@@ -54,10 +53,15 @@ beforeEach(async () => {
   await app.init();
 });
 
+const ADMIN_EMAIL = 'test-superadmin@test.com';
+const ADMIN_PASSWORD = 'test-password';
+
 describe('User Creation Routes', () => {
   it('Creates a user', () => {
     return request(app.getHttpServer())
       .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         id: '1',
         password: 'pwd123',
@@ -70,6 +74,8 @@ describe('User Creation Routes', () => {
   it('Tests invalid email', () => {
     return request(app.getHttpServer())
       .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         id: '1',
         password: 'pwd123',
@@ -82,6 +88,8 @@ describe('User Creation Routes', () => {
   it('Tests invalid name', () => {
     return request(app.getHttpServer())
       .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         password: 'pwd123',
         email: 'john@gmail.com',
@@ -90,14 +98,20 @@ describe('User Creation Routes', () => {
   });
 
   it('should set a user type', async () => {
-    const resp = await request(app.getHttpServer()).post('/user').send({
-      password: 'password',
-      name: 'John Doe',
-      email: 'john@anotherexample.com',
-    });
+    const resp = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'password',
+        name: 'John Doe',
+        email: 'john@anotherexample.com',
+      });
     const id = resp.body['id'];
     return request(app.getHttpServer())
       .post('/user/type')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         id: id,
         type: 'ADMIN',
@@ -106,11 +120,15 @@ describe('User Creation Routes', () => {
   });
 
   it('should retrieve a user by id', async () => {
-    const resp = await request(app.getHttpServer()).post('/user').send({
-      password: 'password',
-      name: 'John Doe',
-      email: 'john@retreivebyid.com',
-    });
+    const resp = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'password',
+        name: 'John Doe',
+        email: 'john@retreivebyid.com',
+      });
     const id = resp.body['id'];
     return request(app.getHttpServer())
       .get(`/user/id/${id}`)
@@ -125,20 +143,28 @@ describe('User Creation Routes', () => {
   });
 
   it('should link a user to a project', async () => {
-    await request(app.getHttpServer()).post('/project').send({
-      name: 'projectName',
-    });
-    const resp = await request(app.getHttpServer()).post('/user').send({
-      password: 'password',
-      name: 'John Doe',
-      email: 'john@linktoproject.com',
-    });
+    await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'projectName',
+      });
+    const resp = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'password',
+        name: 'John Doe',
+        email: 'john@linktoproject.com',
+      });
     const id = resp.body['id'];
 
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put(`/user/id/${id}/project`)
-      .set('Authorization', 'Bearer ' + token)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: 'projectName',
       })
@@ -146,10 +172,10 @@ describe('User Creation Routes', () => {
   });
 
   it('should test an invalid user id', async () => {
-    const token = jwt.sign({}, 'secret');
     await request(app.getHttpServer())
       .put('/user/id/a/project')
-      .set('Authorization', 'Bearer ' + token)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
         name: 'projectName',
       })

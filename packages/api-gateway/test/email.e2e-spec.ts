@@ -10,8 +10,12 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
-import * as jwt from 'jsonwebtoken';
+
 let app: INestApplication;
+const ADMIN_EMAIL = 'test-superadmin@test.com';
+const ADMIN_PASSWORD = 'test-password';
+
+let token: string;
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -47,20 +51,40 @@ beforeEach(async () => {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   await app.init();
+
+  if (!token) {
+    const key = await request(app.getHttpServer())
+      .post('/auth/key')
+      .send({
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
+        environment: 'prod',
+        project: {
+          name: 'test-seed-project',
+        },
+      });
+
+    const apiKey = key.body['apiKey'];
+
+    const jwt = await request(app.getHttpServer())
+      .post('/auth/jwt')
+      .set('Authorization', `Bearer ${apiKey}`)
+      .send();
+
+    token = jwt.body['token'];
+  }
 });
 
 describe('Email Registration Routes', () => {
   it('Registers an email without a body', () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .expect(400);
   });
   it('Has been called with a malformed emaiil', () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'invalidemail', // Malformed email
@@ -69,7 +93,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with no Authorization header', () => {
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .send({
         email: 'validemail@example.com',
       })
@@ -77,7 +101,7 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with an invalid JWT', () => {
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer invalid.jwt.token')
       .send({
         email: 'validemail@example.com',
@@ -86,9 +110,8 @@ describe('Email Registration Routes', () => {
   });
   it('Registration endpoint called with a correct payload (header + body)', () => {
     // Assuming 'valid.jwt.token' is a placeholder for a valid JWT obtained in a way relevant to your test setup
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
-      .post('/email/register')
+      .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + token)
       .send({
         email: 'validemail@example.com',
@@ -98,21 +121,6 @@ describe('Email Registration Routes', () => {
 });
 
 describe('Email Sending Route', () => {
-  let app: INestApplication;
-
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
-
   it('should return 401 when Authorization header is missing', async () => {
     return request(app.getHttpServer())
       .post('/email/send')
@@ -137,7 +145,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with valid parameters and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -150,7 +157,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with valid parameters (with names) and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -165,7 +171,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with valid parameters (with names, multiple recipients) and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -181,7 +186,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with valid parameters (with names, multiple recipients and contents) and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -200,7 +204,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with empty request and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -209,7 +212,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with empty sender email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -228,7 +230,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with invalid sender email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -247,7 +248,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with null sender email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -266,7 +266,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with empty recipients email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -285,7 +284,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with invalid recipients email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -304,7 +302,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with null recipients email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -323,7 +320,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with empty content type email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -342,7 +338,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with null content type email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -361,7 +356,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with empty content value email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -380,7 +374,6 @@ describe('Email Sending Route', () => {
   });
 
   it('Send email with null content value email and JWT is valid', async () => {
-    const token = jwt.sign({}, 'secret');
     return request(app.getHttpServer())
       .post('/email/send')
       .set('Authorization', 'Bearer ' + token)
@@ -396,5 +389,84 @@ describe('Email Sending Route', () => {
         ],
       })
       .expect(400);
+  });
+});
+
+describe('Domain Registration Routes', () => {
+  it('Registers a domain without a domain parameter', () => {
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .expect(400);
+  });
+
+  it('Registers a domain with valid parameters', () => {
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(201);
+  });
+
+  it('Registration endpoint called with no Authorization header', () => {
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(401);
+  });
+
+  it('Registration endpoint called with an invalid JWT', () => {
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer invalid.jwt.token')
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(401);
+  });
+});
+
+describe('Domain Verification Routes', () => {
+  it('Verifies a domain without a domain parameter', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .expect(400);
+  });
+
+  it('Verifies a domain with valid parameters', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        domain: 'testdomain',
+      })
+      .expect(201);
+  });
+
+  it('Verification endpoint called with no Authorization header', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .send({
+        domain: 'testdomain',
+      })
+      .expect(401);
+  });
+
+  it('Verification endpoint called with an invalid JWT', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer invalid.jwt.token')
+      .send({
+        domain: 'testdomain',
+      })
+      .expect(401);
   });
 });

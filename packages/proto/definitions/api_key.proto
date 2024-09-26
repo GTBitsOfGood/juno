@@ -12,6 +12,8 @@ service ApiKeyService {
 
 service ApiKeyDbService {
   rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
+  rpc getApiKey(identifiers.ApiKeyIdentifier) returns (ApiKey);
+  rpc deleteApiKey(identifiers.ApiKeyIdentifier) returns (ApiKey);
 }
 
 message IssueApiKeyRequest {
@@ -22,9 +24,7 @@ message IssueApiKeyRequest {
   string environment = 5;
 }
 
-message CreateApiKeyParams {
-  ApiKeyNoId apiKey = 1;
-}
+message CreateApiKeyParams { ApiKeyNoId apiKey = 1; }
 
 enum ApiScope {
   FULL = 0;
@@ -39,7 +39,7 @@ message ApiKey {
   string environment = 6;
 }
 
-message ApiKeyNoId { 
+message ApiKeyNoId {
   string hash = 1;
   string description = 2;
   repeated ApiScope scopes = 3;
@@ -48,10 +48,9 @@ message ApiKeyNoId {
 }
 
 message IssueApiKeyResponse {
-  oneof response { 
-    ApiKey apiKey = 1; 
-  }
+  string apiKey = 1;
+  ApiKeyNoId info = 2;
 }
 
-message RevokeApiKeyRequest {}
-message RevokeApiKeyResponse {}
+message RevokeApiKeyRequest { string apiKey = 1; }
+message RevokeApiKeyResponse { bool success = 1; }

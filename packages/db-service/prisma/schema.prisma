@@ -8,12 +8,12 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-//url = "postgresql://johndoe:mysecretpassword@localhost:5432"
+  //url = "postgresql://johndoe:mysecretpassword@localhost:5432"
 }
 
 model User {
-  id              Int               @id @default(autoincrement())
-  email           String            @unique
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
   name            String
   password        String
   type            Role
@@ -21,20 +21,20 @@ model User {
 }
 
 model Project {
-  id      Int               @id @default(autoincrement())
-  name    String            @unique
-  apiKeys ApiKey[]
-  users   User[]
-  emails Email[]
+  id           Int                 @id @default(autoincrement())
+  name         String              @unique
+  apiKeys      ApiKey[]
+  users        User[]
+  emailService EmailServiceConfig?
 }
 
 model ApiKey {
-  id          Int     @id @default(autoincrement())
-  hash        String  @unique
+  id          Int        @id @default(autoincrement())
+  hash        String     @unique
   scopes      ApiScope[]
   description String
   projectId   Int
-  project     Project @relation(fields: [projectId], references: [id])
+  project     Project    @relation(fields: [projectId], references: [id])
   environment String
 }
 
@@ -48,10 +48,37 @@ enum Role {
   USER
 }
 
-model Email {
-  @@id([name, projectId])
-  name String
-  description String? // Optional metadata/description field
-  project Project @relation(fields: [projectId], references: [id])
-  projectId Int
+model EmailServiceConfig {
+  id      Int                           @id
+  emails  EmailServiceConfigAndSender[]
+  domains EmailDomain[]
+  Project Project                       @relation(fields: [id], references: [id])
+}
+
+model EmailServiceConfigAndSender {
+  config   EmailServiceConfig @relation(fields: [configId], references: [id])
+  configId Int // relation scalar field (used in the `@relation` attribute above)
+  sender   EmailSender        @relation(fields: [username, domain], references: [username, domain])
+  username String
+  domain   String
+
+  @@id([configId, username, domain])
+}
+
+model EmailSender {
+  username        String
+  domain          String
+  domainItem      EmailDomain                   @relation(fields: [domain], references: [domain])
+  description     String? // Optional metadata/description field
+  attachedConfigs EmailServiceConfigAndSender[]
+
+  @@id([username, domain])
+}
+
+model EmailDomain {
+  domain          String               @id()
+  subdomain       String
+  sendgridId      Int
+  attachedConfigs EmailServiceConfig[]
+  EmailSender     EmailSender[]
 }

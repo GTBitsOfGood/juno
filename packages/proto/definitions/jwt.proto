@@ -7,10 +7,8 @@ service JwtService {
   rpc validateJwt(ValidateJwtRequest) returns (ValidateJwtResponse);
 }
 
-message CreateJwtRequest {}
-message CreateJwtResponse {}
+message CreateJwtRequest { string api_key = 1; }
+message CreateJwtResponse { string jwt = 1; }
 
-message ValidateJwtRequest {
-  string jwt = 2;
-}
-message ValidateJwtResponse {}
+message ValidateJwtRequest { string jwt = 2; }
+message ValidateJwtResponse { bool valid = 1; }

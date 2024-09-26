@@ -34,49 +34,52 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
     // TODO: Validate user type before generating key (only linked admin or any superadmin)
 
-    try {
-      const user = await lastValueFrom(
-        this.userAuthService.authenticate({
-          email: request.email,
-          password: request.password,
-        }),
-      );
+    const user = await lastValueFrom(
+      this.userAuthService.authenticate({
+        email: request.email,
+        password: request.password,
+      }),
+    );
 
-      if (user.type !== UserProto.UserType.SUPERADMIN) {
-        throw new RpcException({
-          code: status.PERMISSION_DENIED,
-          message: 'User not permitted to generate keys',
-        });
-      }
-
-      const rawApiKey = randomBytes(32).toString('hex');
-      const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
-      const key = this.apiKeyDbService.createApiKey({
-        apiKey: {
-          hash: apiKeyHash,
-          description: request.description,
-          scopes: [ApiKeyProto.ApiScope.FULL],
-          project: request.project,
-          environment: request.environment,
-        },
+    if (!user || user.type !== UserProto.UserType.SUPERADMIN) {
+      throw new RpcException({
+        code: status.PERMISSION_DENIED,
+        message: 'User not permitted to generate keys',
       });
-      if (!key) {
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: 'Failed to create API Key',
-        });
-      }
-      return {
-        apiKey: await lastValueFrom(key),
-      };
-    } catch (e) {
-      throw e;
     }
+
+    const rawApiKey = randomBytes(32).toString('hex');
+    const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
+    const key = this.apiKeyDbService.createApiKey({
+      apiKey: {
+        hash: apiKeyHash,
+        description: request.description,
+        scopes: [ApiKeyProto.ApiScope.FULL],
+        project: request.project,
+        environment: request.environment,
+      },
+    });
+    if (!key) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: 'Failed to create API Key',
+      });
+    }
+    return {
+      apiKey: rawApiKey,
+      info: await lastValueFrom(key),
+    };
   }
   async revokeApiKey(
     request: ApiKeyProto.RevokeApiKeyRequest,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
-    console.log(`request: ${request}`);
-    throw new Error('Method not implemented.');
+    const hash = createHash('sha256').update(request.apiKey).digest('hex');
+    const key = this.apiKeyDbService.deleteApiKey({
+      hash,
+    });
+    if (!key) {
+      return { success: false };
+    }
+    return { success: true };
   }
 }

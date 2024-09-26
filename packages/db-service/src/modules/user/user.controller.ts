@@ -59,7 +59,6 @@ export class UserController implements UserProto.UserServiceController {
   async createUser(
     request: UserProto.CreateUserRequest,
   ): Promise<UserProto.User> {
-    console.log(request.password);
     const user = await this.userService.createUser({
       name: request.name,
       email: request.email,

@@ -4,15 +4,17 @@ import {
   RequestMethod,
   MiddlewareConsumer,
 } from '@nestjs/common';
-import { ProjectLinkingMiddleware } from '../../middleware/project.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { UserController } from './user.controller';
 import { UserProto, UserProtoFile, JwtProto, JwtProtoFile } from 'juno-proto';
 
-const { USER_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
+import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
+
+const { USER_SERVICE_NAME, USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } =
+  UserProto;
 
 @Module({
   imports: [
@@ -38,6 +40,15 @@ const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
           protoPath: UserProtoFile,
         },
       },
+      {
+        name: USER_AUTH_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: JUNO_USER_PACKAGE_NAME,
+          protoPath: UserProtoFile,
+        },
+      },
     ]),
   ],
   controllers: [UserController],
@@ -45,7 +56,11 @@ const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(ProjectLinkingMiddleware)
-      .forRoutes({ path: 'user/id/:id/project', method: RequestMethod.PUT });
+      .apply(CredentialsMiddleware)
+      .forRoutes(
+        { path: 'user', method: RequestMethod.POST },
+        { path: 'user/type', method: RequestMethod.POST },
+        { path: 'user/id/:id/project', method: RequestMethod.PUT },
+      );
   }
 }

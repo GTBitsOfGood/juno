@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { EmailProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
@@ -8,6 +8,12 @@ import { status } from '@grpc/grpc-js';
 @EmailProto.EmailServiceControllerMethods()
 export class EmailController implements EmailProto.EmailServiceController {
   constructor(private readonly emailService: EmailService) {}
+
+  async authenticateDomain(
+    @Body() req: EmailProto.AuthenticateDomainRequest,
+  ): Promise<EmailProto.AuthenticateDomainResponse> {
+    return await this.emailService.authenticateDomain(req);
+  }
 
   async sendEmail(
     request: EmailProto.SendEmailRequest,
@@ -57,9 +63,16 @@ export class EmailController implements EmailProto.EmailServiceController {
       throw new RpcException(error.message);
     }
   }
+
   async registerSender(
     req: EmailProto.RegisterSenderRequest,
   ): Promise<EmailProto.RegisterSenderResponse> {
     return await this.emailService.registerSender(req);
+  }
+
+  async verifyDomain(
+    request: EmailProto.VerifyDomainRequest,
+  ): Promise<EmailProto.VerifyDomainResponse> {
+    return this.emailService.verifyDomain(request);
   }
 }

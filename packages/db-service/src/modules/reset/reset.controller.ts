@@ -12,7 +12,7 @@ export class ResetController implements ResetProto.DatabaseResetController {
     if (process.env['NODE_ENV'] == 'test') {
       await new Promise((resolve) => {
         exec(
-          'pnpm prisma migrate reset --force --skip-generate --skip-seed',
+          'pnpm prisma migrate reset --force --skip-generate',
           (_, stdout, stderr) => {
             console.log(`reset out: ${stdout}`);
             console.log(`reset err: ${stderr}`);

@@ -12,6 +12,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
+      SENTRY_DSN: 'https://895c35e671ebe116967d7818f6c99efb@o4506876382609408.ingest.us.sentry.io/4507926410559488'
     networks:
       - bog-api-net
     depends_on:
@@ -36,6 +37,7 @@ services:
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
+      SENTRY_DSN: 'https://f65c541f1d3217cf4752046e8ce46ec4@o4506876382609408.ingest.us.sentry.io/4507926438346752'
     networks:
       - bog-api-net
     depends_on:
@@ -62,6 +64,7 @@ services:
       LOGGING_SERVICE_ADDR: logging-service:5000
       NODE_ENV: test
       SENDGRID_API_KEY: test-key
+      SENTRY_DSN: 'https://46b6656a920cc32333cc37cdc2c1ce12@o4506876382609408.ingest.us.sentry.io/4507926519873536'
     networks:
       - bog-api-net
     depends_on:
@@ -87,6 +90,7 @@ services:
       EMAIL_SERVICE_ADDR: email-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       DATABASE_URL: postgresql://user:password@db
+      SENTRY_DSN: 'https://9057d8b86db87880b424db0d8e923cfc@o4506876382609408.ingest.us.sentry.io/4507926523478016'
     networks:
       - bog-api-net
     healthcheck:
@@ -107,8 +111,10 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
+      LOGGING_SERVICE_ADDR: logging-service:5000
       DATABASE_URL: postgresql://user:password@db
       NODE_ENV: test
+      SENTRY_DSN: 'https://235226366783809ee8337a530785707f@o4506876382609408.ingest.us.sentry.io/4507926518038528'
     networks:
       - bog-api-net
     depends_on:
