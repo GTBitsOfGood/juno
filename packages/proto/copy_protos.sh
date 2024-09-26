@@ -1,7 +1,5 @@
 EXEC_PATH=${EXEC_PATH-.}
 
-echo $EXEC_PATH
-
 mkdir -p ../${EXEC_PATH}/api-gateway/node_modules/juno-proto/dist
 mkdir -p ../${EXEC_PATH}/auth-service/node_modules/juno-proto/dist
 mkdir -p ../${EXEC_PATH}/db-service/node_modules/juno-proto/dist
