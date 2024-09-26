@@ -9,12 +9,7 @@ import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { EmailSenderIdentifier, ProjectIdentifier } from './identifiers';
 
-/* eslint-disable */
-import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
-import { Observable } from "rxjs";
-import { EmailIdentifier, ProjectIdentifier } from "./identifiers";
-
-export const protobufPackage = "juno.email";
+export const protobufPackage = 'juno.email';
 
 export interface EmailSender {
   username: string;
@@ -155,7 +150,12 @@ export interface EmailServiceClient {
 }
 
 export interface EmailServiceController {
-  sendEmail(request: SendEmailRequest): Promise<SendEmailResponse> | Observable<SendEmailResponse> | SendEmailResponse;
+  sendEmail(
+    request: SendEmailRequest,
+  ):
+    | Promise<SendEmailResponse>
+    | Observable<SendEmailResponse>
+    | SendEmailResponse;
 
   registerSender(
     request: RegisterSenderRequest,
@@ -188,18 +188,32 @@ export function EmailServiceControllerMethods() {
       'verifyDomain',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("EmailService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('EmailService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("EmailService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('EmailService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
   };
 }
 
-export const EMAIL_SERVICE_NAME = "EmailService";
+export const EMAIL_SERVICE_NAME = 'EmailService';
 
 export interface EmailDbServiceClient {
   getEmailSender(request: EmailSenderIdentifier): Observable<EmailSender>;
@@ -252,15 +266,29 @@ export function EmailDbServiceControllerMethods() {
       'createEmailDomain',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("EmailDbService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('EmailDbService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("EmailDbService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('EmailDbService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
   };
 }
 
-export const EMAIL_DB_SERVICE_NAME = "EmailDbService";
+export const EMAIL_DB_SERVICE_NAME = 'EmailDbService';
