@@ -18,7 +18,7 @@ RUN npm install -g pnpm
 # pnpm needs to be added to the global path
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-run corepack enable
+RUN corepack enable
 
 
 WORKDIR /app
@@ -26,8 +26,6 @@ WORKDIR /app
 COPY . .
 
 RUN --mount=type=cache,target=/var/cache/apt apt update && apt install -y python3 make g++ protobuf-compiler
-
-RUN pnpm -g add node-gyp 
 
 RUN chmod +x /app/packages/proto/gen_protos.sh
 
@@ -48,7 +46,7 @@ RUN npm install -g pnpm
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-run corepack enable
+RUN corepack enable
 
 COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
 

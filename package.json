@@ -1,6 +1,6 @@
 {
   "private": true,
-  "packageManager": "pnpm@9",
+  "packageManager": "pnpm@9.11.0",
   "name": "bitsofgood-api",
   "scripts": {
     "preinstall": "pnpm --filter juno-proto gen-proto",
