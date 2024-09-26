@@ -6,7 +6,7 @@ services:
       context: .
     ports:
       - 3000
-    entrypoint: yarn ${GATEWAY_COMMAND-start:dev}
+    entrypoint: pnpm --filter api-gateway ${GATEWAY_COMMAND-start:dev}
     environment:
       DB_SERVICE_ADDR: db-service:5000
       AUTH_SERVICE_ADDR: auth-service:5000
@@ -31,7 +31,7 @@ services:
       context: .
     ports:
       - 5000
-    entrypoint: yarn ${AUTH_COMMAND-start:dev}
+    entrypoint: pnpm --filter auth-service ${AUTH_COMMAND-start:dev}
     environment:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
@@ -56,7 +56,7 @@ services:
       context: .
     ports:
       - 5000
-    entrypoint: yarn ${EMAIL_COMMAND-start:dev}
+    entrypoint: pnpm --filter email-service ${EMAIL_COMMAND-start:dev}
     environment:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
@@ -83,7 +83,7 @@ services:
       context: .
     ports:
       - 5000
-    entrypoint: yarn ${LOGGING_COMMAND-start:dev}
+    entrypoint: pnpm --filter logging-service ${LOGGING_COMMAND-start:dev}
     environment:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000

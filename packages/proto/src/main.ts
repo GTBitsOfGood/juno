@@ -11,7 +11,7 @@ export * as LoggingProto from './gen/logging';
 import { join } from 'path';
 
 function getProtoFilePath(name: string) {
-  return join(__dirname, '../../', 'juno-proto/dist/definitions', name);
+  return join(__dirname, 'definitions', name);
 }
 
 export const ApiKeyProtoFile = getProtoFilePath('api_key.proto');
