@@ -9,6 +9,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - uses: pnpm/action-setup@v4
+
       - name: Install Protoc
         uses: arduino/setup-protoc@v2
         with:
