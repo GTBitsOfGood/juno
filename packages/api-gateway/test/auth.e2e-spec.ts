@@ -144,9 +144,13 @@ describe('JWT Verification Routes', () => {
       });
 
     // create a jwt token that expires 30 seconds before the request
-    const apiKey = sign({ data: key.body['apiKey'] }, 'secret', {
-      expiresIn: Math.floor(Date.now() / 1000) - 30,
-    });
+    const apiKey = sign(
+      { data: key.body['apiKey'] },
+      process.env.JWT_SECRET ?? 'secret',
+      {
+        expiresIn: Math.floor(Date.now() / 1000) - 30,
+      },
+    );
 
     return request(app.getHttpServer())
       .post('/auth/jwt')
