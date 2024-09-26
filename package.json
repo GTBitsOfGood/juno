@@ -3,7 +3,7 @@
   "name": "bitsofgood-api",
   "scripts": {
     "preinstall": "pnpm --filter juno-proto gen-proto",
-    "start:dev": "BUILDKIT_PROGRESS=plain docker compose -f docker-compose-dev.yml up",
+    "start:dev": "docker compose -f docker-compose-dev.yml up",
     "start:dev:watch-packages": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-packages.yml watch --no-up",
     "start:dev:watch-proto": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml watch --no-up",
     "start:dev:watch-all": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml -f docker/docker-compose-live-packages.yml watch --no-up",

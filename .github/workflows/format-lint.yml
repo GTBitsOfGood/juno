@@ -15,13 +15,13 @@ jobs:
           version: '24.4'
 
       - name: Install
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
         id: install
 
       - name: Run prettier
-        run: yarn format:check
+        run: pnpm format:check
 
       - name: Run ESLint
-        run: yarn nx clear-cache && yarn lint --verbose
+        run: pnpm nx clear-cache && pnpm lint --verbose
         # Always run the linter, even if prettier failed
         if: ${{ steps.install.outcome == 'success' }}
