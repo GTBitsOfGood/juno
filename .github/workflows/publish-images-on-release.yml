@@ -11,25 +11,8 @@ permissions:
 name: Upload Production Images
 
 jobs:
-  setup:
-    name: Setup Build & Publish Environment
-    runs-on: ubuntu-latest
-    environment: publish
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Build common service deps
-        run: docker build --target deps .
-
   build:
-    name: Build All Images
+    name: Build & Upload Images to ACR
     needs: setup
     strategy:
       matrix:
@@ -43,14 +26,18 @@ jobs:
           ]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Build ${{ matrix.image }} Image
         run: docker build --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} --target ${{ matrix.image }} -t junoservices.azurecr.io/${{ matrix.image }}:${{ github.ref_name }} .
 
-  acr-setup:
-    name: Setup ACR Credentials
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Get ACR credentials
         id: get-acr-credentials
         uses: azure/CLI@v1
@@ -67,20 +54,5 @@ jobs:
           username: 00000000-0000-0000-0000-000000000000
           password: ${{ steps.get-acr-credentials.outputs.ACR_ACCESS_TOKEN }}
 
-  acr-publish:
-    name: Publish Images to ACR
-    needs: acr-setup
-    strategy:
-      matrix:
-        image:
-          [
-            api-gateway,
-            auth-service,
-            db-service,
-            logging-service,
-            email-service,
-          ]
-    runs-on: ubuntu-latest
-    steps:
       - name: Push ${{ matrix.image }} Image
         run: docker push junoservices.azurecr.io/${{ matrix.image }}:${{ github.ref_name }}
