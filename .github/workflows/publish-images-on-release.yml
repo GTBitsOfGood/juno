@@ -13,7 +13,6 @@ name: Upload Production Images
 jobs:
   build:
     name: Build & Upload Images to ACR
-    needs: setup
     strategy:
       matrix:
         image:
