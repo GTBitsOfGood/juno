@@ -26,19 +26,19 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Build API Gateway Image
-        run: docker build --target api-gateway -t junoservices.azureicr.io/api-gateway:${{ github.ref_name }} .
+        run: docker build --target api-gateway -t junoservices.azurecr.io/api-gateway:${{ github.ref_name }} .
 
       - name: Build Auth Service Image
-        run: docker build --target auth-service -t junoservices.azureicr.io/auth-service:${{ github.ref_name }} .
+        run: docker build --target auth-service -t junoservices.azurecr.io/auth-service:${{ github.ref_name }} .
 
       - name: Build DB Service Image
-        run: docker build --target db-service -t junoservices.azureicr.io/db-service:${{ github.ref_name }} .
+        run: docker build --target db-service -t junoservices.azurecr.io/db-service:${{ github.ref_name }} .
 
       - name: Build Logging Service Image
-        run: docker build --target logging-service -t junoservices.azureicr.io/logging-service:${{ github.ref_name }} .
+        run: docker build --target logging-service -t junoservices.azurecr.io/logging-service:${{ github.ref_name }} .
 
       - name: Build Email Service Image
-        run: docker build --target email-service -t junoservices.azureicr.io/email-service:${{ github.ref_name }} .
+        run: docker build --target email-service -t junoservices.azurecr.io/email-service:${{ github.ref_name }} .
 
       - name: Get ACR credentials
         id: get-acr-credentials
