@@ -8,9 +8,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - uses: pnpm/action-setup@v4
       - name: Test
-        run: yarn test:e2e:api-gateway
+        run: pnpm test:e2e:api-gateway
 
   auth-service:
     name: Auth Service E2E Tests
@@ -18,9 +18,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - uses: pnpm/action-setup@v4
       - name: Test
-        run: yarn test:e2e:auth-service
+        run: pnpm test:e2e:auth-service
 
   email-service:
     name: Email Service E2E Tests
@@ -28,9 +28,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - uses: pnpm/action-setup@v4
       - name: Test
-        run: yarn test:e2e:email-service
+        run: pnpm test:e2e:email-service
 
   db-service:
     name: DB Service E2E Tests
@@ -38,9 +38,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - uses: pnpm/action-setup@v4
       - name: Test
-        run: yarn test:e2e:db-service
+        run: pnpm test:e2e:db-service
 
   logging-service:
     name: Logging Service E2E Tests
@@ -48,6 +48,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - uses: pnpm/action-setup@v4
       - name: Test
-        run: yarn test:e2e:logging-service
+        run: pnpm test:e2e:logging-service

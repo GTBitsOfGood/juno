@@ -5,10 +5,10 @@
 // source: jwt.proto
 
 /* eslint-disable */
-import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
+import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
+import { Observable } from "rxjs";
 
-export const protobufPackage = 'juno.jwt';
+export const protobufPackage = "juno.jwt";
 
 export interface CreateJwtRequest {
   apiKey: string;
@@ -26,7 +26,7 @@ export interface ValidateJwtResponse {
   valid: boolean;
 }
 
-export const JUNO_JWT_PACKAGE_NAME = 'juno.jwt';
+export const JUNO_JWT_PACKAGE_NAME = "juno.jwt";
 
 export interface JwtServiceClient {
   createJwt(request: CreateJwtRequest): Observable<CreateJwtResponse>;
@@ -35,48 +35,26 @@ export interface JwtServiceClient {
 }
 
 export interface JwtServiceController {
-  createJwt(
-    request: CreateJwtRequest,
-  ):
-    | Promise<CreateJwtResponse>
-    | Observable<CreateJwtResponse>
-    | CreateJwtResponse;
+  createJwt(request: CreateJwtRequest): Promise<CreateJwtResponse> | Observable<CreateJwtResponse> | CreateJwtResponse;
 
   validateJwt(
     request: ValidateJwtRequest,
-  ):
-    | Promise<ValidateJwtResponse>
-    | Observable<ValidateJwtResponse>
-    | ValidateJwtResponse;
+  ): Promise<ValidateJwtResponse> | Observable<ValidateJwtResponse> | ValidateJwtResponse;
 }
 
 export function JwtServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['createJwt', 'validateJwt'];
+    const grpcMethods: string[] = ["createJwt", "validateJwt"];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcMethod('JwtService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("JwtService", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method,
-      );
-      GrpcStreamMethod('JwtService', method)(
-        constructor.prototype[method],
-        method,
-        descriptor,
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("JwtService", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const JWT_SERVICE_NAME = 'JwtService';
+export const JWT_SERVICE_NAME = "JwtService";
