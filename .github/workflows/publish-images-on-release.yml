@@ -4,59 +4,55 @@ on:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
+permissions:
+  id-token: write
+  contents: read
+
 name: Upload Production Images
 
 jobs:
   build:
-    name: Build & Upload Production Images
-    runs-on: ubuntu-latest
+    name: Build & Upload Images to ACR
     environment: publish
+    strategy:
+      matrix:
+        image:
+          [
+            api-gateway,
+            auth-service,
+            db-service,
+            logging-service,
+            email-service,
+          ]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Build Images
-        run: docker build -t ${{ github.ref_name }} .
-      - name: Deploy Api Gateway Image
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          acrName: junoservices
-          containerAppName: api-gateway
-          resourceGroup: juno
-          imageToDeploy: junoservices.azurecr.io/api-gateway:${{ github.ref_name }}
 
-      - name: Deploy Auth Service Image
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          acrName: junoservices
-          containerAppName: auth-service
-          resourceGroup: juno
-          imageToDeploy: junoservices.azurecr.io/auth-service:${{ github.ref_name }}
+      - name: Build ${{ matrix.image }} Image
+        run: docker build --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} --target ${{ matrix.image }} -t junoservices.azurecr.io/${{ matrix.image }}:${{ github.ref_name }} .
 
-      - name: Deploy DB Service Image
-        uses: azure/container-apps-deploy-action@v1
+      - name: Get ACR credentials
+        id: get-acr-credentials
+        uses: azure/CLI@v1
         with:
-          acrName: junoservices
-          containerAppName: db-service
-          resourceGroup: juno
-          imageToDeploy: junoservices.azurecr.io/db-service:${{ github.ref_name }}
+          azcliversion: latest
+          inlineScript: |
+            echo "ACR_ACCESS_TOKEN=$(az acr login --name junoservices --expose-token --output tsv --query accessToken)" >> "$GITHUB_OUTPUT"
+            echo "ACR_LOGIN_SERVER=$(az acr login --name junoservices --expose-token --output tsv --query loginServer)" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy Email Service Image
-        uses: azure/container-apps-deploy-action@v1
+      - name: Login to ACR
+        uses: azure/docker-login@v1
         with:
-          acrName: junoservices
-          containerAppName: email-service
-          resourceGroup: juno
-          imageToDeploy: junoservices.azurecr.io/email-service:${{ github.ref_name }}
+          login-server: ${{ steps.get-acr-credentials.outputs.ACR_LOGIN_SERVER }}
+          username: 00000000-0000-0000-0000-000000000000
+          password: ${{ steps.get-acr-credentials.outputs.ACR_ACCESS_TOKEN }}
 
-      - name: Deploy Logging Service Image
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          acrName: junoservices
-          containerAppName: logging-service
-          resourceGroup: juno
-          imageToDeploy: junoservices.azurecr.io/logging-service:${{ github.ref_name }}
+      - name: Push ${{ matrix.image }} Image
+        run: docker push junoservices.azurecr.io/${{ matrix.image }}:${{ github.ref_name }}

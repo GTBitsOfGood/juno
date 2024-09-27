@@ -49,8 +49,9 @@ RUN pnpm deploy --filter=logging-service --prod /deploy/logging-service
 # TODO: Switch over to a minimal node installation
 FROM node:18 as base-service
 
+ARG SENTRY_AUTH_TOKEN
 # TODO: Move over to a direct wget (no more npm usage)
-RUN npm install -g pnpm
+RUN npm install -g pnpm @nestjs/cli
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -68,6 +69,10 @@ COPY --from=deps /deploy/api-gateway/ ./api-gateway/
 
 WORKDIR /app/api-gateway
 
+EXPOSE 3000
+
+RUN pnpm build
+
 ENTRYPOINT ["pnpm", "start:prod"]
 
 FROM base-service as auth-service
@@ -77,6 +82,10 @@ WORKDIR /app
 COPY --from=deps /deploy/auth-service/ ./auth-service/
 
 WORKDIR /app/auth-service
+
+EXPOSE 5000
+
+RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]
 
@@ -88,6 +97,10 @@ COPY --from=deps /deploy/email-service/ ./email-service/
 
 WORKDIR /app/email-service
 
+EXPOSE 5000
+
+RUN pnpm build
+
 ENTRYPOINT ["pnpm", "start:prod"]
 
 FROM base-service as logging-service
@@ -98,6 +111,10 @@ COPY --from=deps /deploy/logging-service/ ./logging-service/
 
 WORKDIR /app/logging-service
 
+EXPOSE 5000
+
+RUN pnpm build
+
 ENTRYPOINT ["pnpm", "start:prod"]
 
 FROM base-service as db-service
@@ -107,5 +124,13 @@ WORKDIR /app
 COPY --from=deps /deploy/db-service/ ./db-service/
 
 WORKDIR /app/db-service
+
+EXPOSE 5000
+
+RUN pnpm install -g prisma
+
+RUN prisma generate
+
+RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]

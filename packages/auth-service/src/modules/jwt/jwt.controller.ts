@@ -69,9 +69,3 @@ export class JWTController implements JwtProto.JwtServiceController {
     }
   }
 }
-
-declare module 'jsonwebtoken' {
-  export interface ApiKeyHashJWTPayload extends jwt.JwtPayload {
-    apiKeyHash: string;
-  }
-}
