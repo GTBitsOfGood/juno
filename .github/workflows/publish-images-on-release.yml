@@ -1,0 +1,62 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Upload Production Images
+
+jobs:
+  build:
+    name: Build & Upload Production Images
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Build Images
+        run: docker build -t ${{ github.ref_name }} .
+    - name: Deploy Api Gateway Image 
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: junoservices 
+        containerAppName: api-gateway 
+        resourceGroup: juno 
+        imageToDeploy: junoservices.azurecr.io/api-gateway:${{ github.ref_name }}
+
+    - name: Deploy Auth Service Image 
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: junoservices 
+        containerAppName: auth-service
+        resourceGroup: juno 
+        imageToDeploy: junoservices.azurecr.io/auth-service:${{ github.ref_name }}
+
+    - name: Deploy DB Service Image 
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: junoservices 
+        containerAppName: db-service
+        resourceGroup: juno 
+        imageToDeploy: junoservices.azurecr.io/db-service:${{ github.ref_name }}
+
+    - name: Deploy Email Service Image 
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: junoservices 
+        containerAppName: email-service
+        resourceGroup: juno 
+        imageToDeploy: junoservices.azurecr.io/email-service:${{ github.ref_name }}
+
+    - name: Deploy Logging Service Image 
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: junoservices 
+        containerAppName: logging-service
+        resourceGroup: juno 
+        imageToDeploy: junoservices.azurecr.io/logging-service:${{ github.ref_name }}
