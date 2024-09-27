@@ -20,7 +20,7 @@
 
 Juno is a monorepo using a combination of NestJS, [gRPC](https://grpc.io/), Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
 
-Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/workspaces). The current packages are as follows:
+Packages are managed through [PNPM Workspaces](https://pnpm.io/workspaces). The current packages are as follows:
 
 - [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) based on the API route and given information
 - [auth-service](./packages/auth-service/): An internal service used to handle all API authentication necessities. Provides RPC endpoints for API key generation/validation/revocation and JWT generation/validation. Used in some endpoints but primarily as middleware within the gateway to ensure authorized access to other services
@@ -44,14 +44,14 @@ Packages are managed through [Yarn Workspaces](https://yarnpkg.com/features/work
 
 As this repository contains multiple packages, [Docker](https://www.docker.com/) is used to spin up all microservices in order with their respective dependencies. For more details regarding the docker process and its internal networking mechanism, take a look at the `docker-dev-compose.yml` and `Dockerfile` file.
 
-Most of the docker-related functionality has been abstracted away into yarn commands.
+Most of the docker-related functionality has been abstracted away into pnpm commands.
 
 ### Installation
 
 All package dependencies must first be installed by using the following command in the root directory:
 
 ```
-yarn
+pnpm install
 ```
 
 ## Development
@@ -59,7 +59,7 @@ yarn
 For spinning up the stack and automatically updating as changes are made to files:
 
 ```
-yarn start:dev:live-all
+pnpm start:dev:live-all
 ```
 
 ### Making requests
@@ -72,15 +72,15 @@ Juno currently has support for E2E tests via [Jest](https://jestjs.io/).
 
 To run tests a single time for a particular service:
 
-- api-gateway: `yarn test:e2e:api-gateway`
-- auth-service: `yarn test:e2e:auth-service`
-- db-service: `yarn test:e2e:db-service`
+- api-gateway: `pnpm test:e2e:api-gateway`
+- auth-service: `pnpm test:e2e:auth-service`
+- db-service: `pnpm test:e2e:db-service`
 
 To continoulsy run tests for a service as file changes are made:
 
-- api-gateway: `yarn test:e2e:api-gateway-live`
-- auth-service: `yarn test:e2e:auth-service-live`
-- db-service: `yarn test:e2e:db-service-live`
+- api-gateway: `pnpm test:e2e:api-gateway-live`
+- auth-service: `pnpm test:e2e:auth-service-live`
+- db-service: `pnpm test:e2e:db-service-live`
 
 ## Troubleshooting
 
