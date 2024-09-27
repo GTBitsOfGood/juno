@@ -25,6 +25,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Build Images
+        run: docker build -t ${{ github.ref_name }} .
+
       - name: Get ACR credentials
         id: get-acr-credentials
         uses: azure/CLI@v1
@@ -37,12 +40,9 @@ jobs:
       - name: Login to ACR
         uses: azure/docker-login@v1
         with:
-          registry: ${{ steps.get-acr-credentials.outputs.ACR_LOGIN_SERVER }}
+          login-server: ${{ steps.get-acr-credentials.outputs.ACR_LOGIN_SERVER }}
           username: 00000000-0000-0000-0000-000000000000
           password: ${{ steps.get-acr-credentials.outputs.ACR_ACCESS_TOKEN }}
-
-      - name: Build Images
-        run: docker build -t ${{ github.ref_name }} .
 
       - name: Push API Gateway Image
         run: docker push junoservices.azurecr.io/api-gateway:${{ github.ref_name }}
