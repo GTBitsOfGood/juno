@@ -13,6 +13,7 @@ name: Upload Production Images
 jobs:
   build:
     name: Build & Upload Images to ACR
+    environment: publish
     strategy:
       matrix:
         image:
