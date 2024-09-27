@@ -76,7 +76,7 @@ To run tests a single time for a particular service:
 - auth-service: `pnpm test:e2e:auth-service`
 - db-service: `pnpm test:e2e:db-service`
 
-To continoulsy run tests for a service as file changes are made:
+To continuously run tests for a service as file changes are made:
 
 - api-gateway: `pnpm test:e2e:api-gateway-live`
 - auth-service: `pnpm test:e2e:auth-service-live`
@@ -104,6 +104,5 @@ If VSCode outputs `Failed to connect. Is Docker running?`:
 To add `chmod` permissions to all shell scripts:
 
 ```
-chmod +x docker/get_grpc_probe.sh
 chmod +x packages/db-service/entrypoint.sh
 ```
