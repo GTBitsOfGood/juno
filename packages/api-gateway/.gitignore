@@ -36,3 +36,6 @@ lerna-debug.log*
 
 sdk/
 sdk*
+
+# Sentry Config File
+.sentryclirc

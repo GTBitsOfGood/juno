@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && npm run sentry:sourcemaps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "pnpm start --watch",
@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --runInBand --watchAll",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org bits-of-good-development --project juno-email-service ./dist && sentry-cli sourcemaps upload --org bits-of-good-development --project juno-email-service ./dist"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.9.7",
@@ -30,6 +31,7 @@
     "@nestjs/microservices": "^10.2.7",
     "@nestjs/platform-express": "^10.0.0",
     "@sendgrid/mail": "^8.1.3",
+    "@sentry/cli": "^2.36.3",
     "@sentry/nestjs": "^8.29.0",
     "@sentry/profiling-node": "^8.29.0",
     "axios": "^1.7.7",
