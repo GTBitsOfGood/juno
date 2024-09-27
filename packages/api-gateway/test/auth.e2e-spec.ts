@@ -171,10 +171,9 @@ describe('JWT Verification Routes', () => {
         },
       });
 
-    let apiKey = '';
-    if (key.body['apiKey']) {
-      apiKey = key.body['apiKey'] + apiKey;
-    }
+    expect(key.body['apiKey']).toBeDefined();
+
+    const apiKey = key.body['apiKey'];
 
     return request(app.getHttpServer())
       .post('/auth/jwt')
