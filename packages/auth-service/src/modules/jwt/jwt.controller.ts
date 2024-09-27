@@ -13,7 +13,7 @@ export class JWTController implements JwtProto.JwtServiceController {
   constructor(
     @Inject(ApiKeyProto.API_KEY_DB_SERVICE_NAME)
     private apiKeyClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.apiKeyDbService =
@@ -67,11 +67,5 @@ export class JWTController implements JwtProto.JwtServiceController {
     } catch (e) {
       throw new Error(e.message);
     }
-  }
-}
-
-declare module 'jsonwebtoken' {
-  export interface ApiKeyHashJWTPayload extends jwt.JwtPayload {
-    apiKeyHash: string;
   }
 }
