@@ -18,13 +18,47 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get ACR credentials
+        id: get-acr-credentials
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "ACR_ACCESS_TOKEN=$(az acr login --name junoservices --expose-token --output tsv --query accessToken)" >> "$GITHUB_OUTPUT"
+            echo "ACR_LOGIN_SERVER=$(az acr login --name junoservices --expose-token --output tsv --query loginServer)" >> "$GITHUB_OUTPUT"
+
+      - name: Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          registry: ${{ steps.get-acr-credentials.outputs.ACR_LOGIN_SERVER }}
+          username: 00000000-0000-0000-0000-000000000000
+          password: ${{ steps.get-acr-credentials.outputs.ACR_ACCESS_TOKEN }}
+
       - name: Build Images
         run: docker build -t ${{ github.ref_name }} .
+
+      - name: Push API Gateway Image
+        run: docker push junoservices.azurecr.io/api-gateway:${{ github.ref_name }}
+
+      - name: Push Auth Service Image
+        run: docker push junoservices.azurecr.io/auth-service:${{ github.ref_name }}
+
+      - name: Push DB Service Image
+        run: docker push junoservices.azurecr.io/db-service:${{ github.ref_name }}
+
+      - name: Push Email Service Image
+        run: docker push junoservices.azurecr.io/email-service:${{ github.ref_name }}
+
+      - name: Push Logging Service Image
+        run: docker push junoservices.azurecr.io/logging-service:${{ github.ref_name }}
+
       - name: Deploy Api Gateway Image
         uses: azure/container-apps-deploy-action@v1
         with:
