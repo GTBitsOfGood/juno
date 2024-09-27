@@ -13,7 +13,7 @@ export class JWTController implements JwtProto.JwtServiceController {
   constructor(
     @Inject(ApiKeyProto.API_KEY_DB_SERVICE_NAME)
     private apiKeyClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.apiKeyDbService =
