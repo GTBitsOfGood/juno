@@ -25,7 +25,7 @@ import {
   LinkProjectModel,
   SetUserTypeModel,
   UserResponse,
-} from 'src/models/user';
+} from 'src/models/user.dto';
 
 const { USER_SERVICE_NAME } = UserProto;
 

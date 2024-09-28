@@ -17,7 +17,7 @@ import {
   SendEmailModel,
   SendEmailResponse,
   VerifyDomainModel,
-} from 'src/models/email';
+} from 'src/models/email.dto';
 import { EmailProto } from 'juno-proto';
 import { validateOrReject } from 'class-validator';
 
@@ -67,7 +67,7 @@ export class EmailController implements OnModuleInit {
   })
   @ApiCreatedResponse({
     description: 'domain registered successfully',
-    type: RegisterEmailResponse,
+    type: RegisterDomainResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -95,7 +95,7 @@ export class EmailController implements OnModuleInit {
   })
   @ApiCreatedResponse({
     description: 'domain is registered',
-    type: RegisterEmailResponse,
+    type: RegisterDomainResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })

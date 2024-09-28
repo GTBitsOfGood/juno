@@ -99,15 +99,32 @@ export class SendEmailResponse {
   }
 }
 
+export class SendGridDNSRecord {
+  valid: boolean;
+  type: string;
+  host: string;
+  data: string;
+
+  constructor(res: SendGridRecord) {
+    this.valid = res.valid;
+    this.type = res.type;
+    this.host = res.host;
+    this.data = res.data;
+  }
+}
+
 export class SendGridDNSResponse {
-  mail_cname: SendGridRecord;
-  dkim1: SendGridRecord;
-  dkim2: SendGridRecord;
+  @Type(() => SendGridDNSRecord)
+  mail_cname: SendGridDNSRecord;
+  @Type(() => SendGridDNSRecord)
+  dkim1: SendGridDNSRecord;
+  @Type(() => SendGridDNSRecord)
+  dkim2: SendGridDNSRecord;
 
   constructor(res: SendGridDnsRecords) {
-    this.mail_cname = res.mailCname;
-    this.dkim1 = res.dkim1;
-    this.dkim2 = res.dkim2;
+    this.mail_cname = new SendGridDNSRecord(res.mailCname);
+    this.dkim1 = new SendGridDNSRecord(res.dkim1);
+    this.dkim2 = new SendGridDNSRecord(res.dkim2);
   }
 }
 
@@ -116,7 +133,7 @@ export class RegisterDomainResponse {
   id: number;
   @ApiProperty({ type: 'string' })
   valid: string;
-  @ApiProperty({ type: SendEmailResponse })
+  @ApiProperty({ type: SendGridDNSResponse })
   @Type(() => SendGridDNSResponse)
   records: SendGridDNSResponse;
   @ApiProperty({ type: 'number' })

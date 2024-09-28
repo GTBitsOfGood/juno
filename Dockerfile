@@ -25,7 +25,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN --mount=type=cache,target=/var/cache/apt apt update && apt install -y python3 make g++ protobuf-compiler
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt apt update && apt install -y python3 make g++ protobuf-compiler
 
 RUN chmod +x /app/packages/proto/gen_protos.sh
 
@@ -36,7 +36,7 @@ RUN pnpm --filter juno-proto build
 
 WORKDIR /app
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install -r --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,sharing=locked,id=pnpm,target=/pnpm/store pnpm install -r --frozen-lockfile --ignore-scripts
 
 RUN mkdir /deploy
 
