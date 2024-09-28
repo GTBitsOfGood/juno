@@ -17,7 +17,7 @@ import {
   CreateProjectModel,
   LinkUserModel,
   ProjectResponse,
-} from 'src/models/project';
+} from 'src/models/project.dto';
 import { ProjectProto } from 'juno-proto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 

@@ -13,6 +13,8 @@ import {
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
+console.log(JwtProtoFile);
+
 @Module({
   imports: [
     ConfigModule.forRoot({

@@ -23,7 +23,7 @@ import {
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   IssueJWTResponse,
-} from 'src/models/auth';
+} from 'src/models/auth.dto';
 
 const { JWT_SERVICE_NAME } = JwtProto;
 const { API_KEY_SERVICE_NAME } = ApiKeyProto;
