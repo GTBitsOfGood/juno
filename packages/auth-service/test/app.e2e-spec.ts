@@ -238,7 +238,7 @@ describe('Auth Service JWT Tests', () => {
     );
   });
 
-  it('creates a valid JWT', async () => {
+  it('successfully creates a valid JWT', async () => {
     const key = await new Promise((resolve, reject) => {
       apiKeyClient.issueApiKey(
         {
@@ -277,7 +277,7 @@ describe('Auth Service JWT Tests', () => {
     expect(response['jwt']).toStrictEqual(expectedJwt);
   });
 
-  it('creates a JWT with non-existent apiKey', async () => {
+  it('fails to create a JWT with an invalid apiKey', async () => {
     const apiKey = 'non-existent apiKey';
 
     await expect(
@@ -290,7 +290,7 @@ describe('Auth Service JWT Tests', () => {
     ).rejects.toBeDefined(); // Expecting an error because apiKey does not exist in DB
   });
 
-  it('creates a JWT with empty apiKey', async () => {
+  it('fails to create a JWT with empty apiKey', async () => {
     const apiKey = '';
 
     await expect(
@@ -303,7 +303,7 @@ describe('Auth Service JWT Tests', () => {
     ).rejects.toBeDefined(); // Expecting an error because apiKey is empty (non-existent in DB)
   });
 
-  it('creates a JWT with null apiKey', async () => {
+  it('fails to create a JWT with null apiKey', async () => {
     const apiKey = null;
 
     await expect(
@@ -316,7 +316,7 @@ describe('Auth Service JWT Tests', () => {
     ).rejects.toBeDefined(); // Expecting an error because apiKey is null (non-existent in DB)
   });
 
-  it('validates a valid JWT whose apiKeyHash is in DB', async () => {
+  it('successfully validates a valid JWT whose apiKeyHash is in DB', async () => {
     const key = await new Promise((resolve, reject) => {
       apiKeyClient.issueApiKey(
         {
@@ -355,7 +355,7 @@ describe('Auth Service JWT Tests', () => {
     expect(response['valid']).toEqual(true);
   });
 
-  it('validates a empty JWT', async () => {
+  it('rejects an empty JWT', async () => {
     const jwt = '';
 
     await expect(
@@ -368,7 +368,7 @@ describe('Auth Service JWT Tests', () => {
     ).rejects.toBeDefined();
   });
 
-  it('validates a null JWT', async () => {
+  it('rejects a null JWT', async () => {
     const jwt = null;
 
     await expect(
@@ -381,7 +381,7 @@ describe('Auth Service JWT Tests', () => {
     ).rejects.toBeDefined();
   });
 
-  it('validates a JWT whose apiKeyHash is not in DB', async () => {
+  it('rejects a JWT whose apiKeyHash is not in DB', async () => {
     const apiKeyHash = createHash('sha256')
       .update(randomBytes(32).toString('hex'))
       .digest('hex');
@@ -402,7 +402,7 @@ describe('Auth Service JWT Tests', () => {
     ).rejects.toBeDefined(); // Expecting an error because apiKey is not in DB
   });
 
-  it('validates an expired JWT whose apiKeyHash is in DB', async () => {
+  it('rejects an expired JWT whose apiKeyHash is in DB', async () => {
     const key = await new Promise((resolve, reject) => {
       apiKeyClient.issueApiKey(
         {
