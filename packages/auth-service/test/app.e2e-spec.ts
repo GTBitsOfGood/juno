@@ -18,6 +18,8 @@ import {
   UserProtoFile,
 } from 'juno-proto';
 import { User, UserType } from 'juno-proto/dist/gen/user';
+import { sign } from 'jsonwebtoken';
+import { createHash, randomBytes } from 'crypto';
 
 let app: INestMicroservice;
 
@@ -216,46 +218,230 @@ describe('Auth Service API Key Tests', () => {
   // });
 });
 
-// describe('Auth Service JWT Tests', () => {
-//   let client: any;
-//
-//   beforeEach(async () => {
-//     const proto = ProtoLoader.loadSync(
-//       join(__dirname, '../../proto/auth-service/jwt.proto'),
-//     ) as any;
-//
-//     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-//
-//     client = new protoGRPC.authservice.api_key.ApiKeyService(
-//       process.env.AUTH_SERVICE_ADDR,
-//       GRPC.credentials.createInsecure(),
-//     );
-//   });
-//
-//   it('creates a JWT', async () => {
-//     const promise = new Promise((resolve) => {
-//       client.createJWT({}, (err, resp) => {
-//         expect(err).toBeNull();
-//         expect(resp).toStrictEqual({});
-//         resolve({});
-//       });
-//     });
-//
-//     await promise;
-//   });
-//
-//   it('validates a JWT', async () => {
-//     const promise = new Promise((resolve) => {
-//       client.revokeApiKey({}, (err, resp) => {
-//         expect(err).toBeNull();
-//         expect(resp).toStrictEqual({});
-//         resolve({});
-//       });
-//     });
-//
-//     await promise;
-//   });
-// });
+describe('Auth Service JWT Tests', () => {
+  let jwtClient: any;
+  let apiKeyClient: any;
+
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([JwtProtoFile, ApiKeyProtoFile]) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    jwtClient = new protoGRPC.juno.jwt.JwtService(
+      process.env.AUTH_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+    apiKeyClient = new protoGRPC.juno.api_key.ApiKeyService(
+      process.env.AUTH_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('successfully creates a valid JWT', async () => {
+    const key = await new Promise((resolve, reject) => {
+      apiKeyClient.issueApiKey(
+        {
+          project: { name: 'project' },
+          email: 'test@example.com',
+          password: 'password123',
+          description: 'Valid API key',
+          environment: 'dev',
+        },
+        (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        },
+      );
+    });
+    expect(key['apiKey']).toBeDefined();
+    const apiKey = key['apiKey'];
+
+    // expected JWT
+    const apiKeyHash = createHash('sha256').update(apiKey).digest('hex');
+    const expectedJwt = sign(
+      {
+        apiKeyHash: apiKeyHash,
+      },
+      process.env.JWT_SECRET ?? 'secret',
+    );
+
+    const response = await new Promise((resolve, reject) => {
+      jwtClient.createJwt({ apiKey: apiKey }, (err, resp) => {
+        if (err) return reject(err);
+        return resolve(resp);
+      });
+    });
+
+    expect(response['jwt']).toBeDefined();
+    expect(response['jwt']).toStrictEqual(expectedJwt);
+  });
+
+  it('fails to create a JWT with an invalid apiKey', async () => {
+    const apiKey = 'non-existent apiKey';
+
+    await expect(
+      new Promise((resolve, reject) => {
+        jwtClient.createJwt({ apiKey: apiKey }, (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        });
+      }),
+    ).rejects.toBeDefined(); // Expecting an error because apiKey does not exist in DB
+  });
+
+  it('fails to create a JWT with empty apiKey', async () => {
+    const apiKey = '';
+
+    await expect(
+      new Promise((resolve, reject) => {
+        jwtClient.createJwt({ apiKey: apiKey }, (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        });
+      }),
+    ).rejects.toBeDefined(); // Expecting an error because apiKey is empty (non-existent in DB)
+  });
+
+  it('fails to create a JWT with null apiKey', async () => {
+    const apiKey = null;
+
+    await expect(
+      new Promise((resolve, reject) => {
+        jwtClient.createJwt({ apiKey: apiKey }, (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        });
+      }),
+    ).rejects.toBeDefined(); // Expecting an error because apiKey is null (non-existent in DB)
+  });
+
+  it('successfully validates a valid JWT whose apiKeyHash is in DB', async () => {
+    const key = await new Promise((resolve, reject) => {
+      apiKeyClient.issueApiKey(
+        {
+          project: { name: 'project' },
+          email: 'test@example.com',
+          password: 'password123',
+          description: 'Valid API key',
+          environment: 'dev',
+        },
+        (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        },
+      );
+    });
+    expect(key['apiKey']).toBeDefined();
+    const apiKey = key['apiKey'];
+
+    const jwtResponse = await new Promise((resolve, reject) => {
+      jwtClient.createJwt({ apiKey: apiKey }, (err, resp) => {
+        if (err) return reject(err);
+        return resolve(resp);
+      });
+    });
+    expect(jwtResponse['jwt']).toBeDefined();
+    const jwt = jwtResponse['jwt'];
+
+    const response = await new Promise((resolve, reject) => {
+      jwtClient.validateJwt({ jwt: jwt }, (err, resp) => {
+        if (err) return reject(err);
+        return resolve(resp);
+      });
+    });
+
+    expect(response['valid']).toBeDefined();
+    expect(response['valid']).toEqual(true);
+  });
+
+  it('rejects an empty JWT', async () => {
+    const jwt = '';
+
+    await expect(
+      new Promise((resolve, reject) => {
+        jwtClient.validateJwt({ jwt: jwt }, (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        });
+      }),
+    ).rejects.toBeDefined();
+  });
+
+  it('rejects a null JWT', async () => {
+    const jwt = null;
+
+    await expect(
+      new Promise((resolve, reject) => {
+        jwtClient.validateJwt({ jwt: jwt }, (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        });
+      }),
+    ).rejects.toBeDefined();
+  });
+
+  it('rejects a JWT whose apiKeyHash is not in DB', async () => {
+    const apiKeyHash = createHash('sha256')
+      .update(randomBytes(32).toString('hex'))
+      .digest('hex');
+    const jwt = sign(
+      {
+        apiKeyHash: apiKeyHash,
+      },
+      process.env.JWT_SECRET ?? 'secret',
+    );
+
+    await expect(
+      new Promise((resolve, reject) => {
+        jwtClient.validateJwt({ jwt: jwt }, (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        });
+      }),
+    ).rejects.toBeDefined(); // Expecting an error because apiKey is not in DB
+  });
+
+  it('rejects an expired JWT whose apiKeyHash is in DB', async () => {
+    const key = await new Promise((resolve, reject) => {
+      apiKeyClient.issueApiKey(
+        {
+          project: { name: 'project' },
+          email: 'test@example.com',
+          password: 'password123',
+          description: 'Valid API key',
+          environment: 'dev',
+        },
+        (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        },
+      );
+    });
+    expect(key['apiKey']).toBeDefined();
+    const apiKey = key['apiKey'];
+
+    const apiKeyHash = createHash('sha256').update(apiKey).digest('hex');
+    const jwt = sign(
+      {
+        apiKeyHash: apiKeyHash,
+      },
+      process.env.JWT_SECRET ?? 'secret',
+      {
+        expiresIn: -30,
+      },
+    );
+
+    await expect(
+      new Promise((resolve, reject) => {
+        jwtClient.validateJwt({ jwt: jwt }, (err, resp) => {
+          if (err) return reject(err);
+          return resolve(resp);
+        });
+      }),
+    ).rejects.toBeDefined(); // Expecting an error because jwt is expired
+  });
+});
 
 describe('User authentication tests', () => {
   let client: any;
