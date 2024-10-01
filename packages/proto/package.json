@@ -4,7 +4,7 @@
   "main": "dist/main.js",
   "license": "MIT",
   "scripts": {
-    "build": "pnpm --filter juno-proto gen-proto && pnpm --filter juno-proto format && tsc && ncp ./definitions ./dist/definitions && pnpm --filter juno-proto copy-changes",
+    "build": "pnpm --filter juno-proto gen-proto && pnpm --filter juno-proto format && tsc && ncp ./definitions ./dist/definitions",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",

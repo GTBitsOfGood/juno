@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package juno.file_service.config;
+
+import "identifiers.proto";
+
+service FileServiceFileServiceConfigDbService {
+  rpc getConfig(GetFileServiceConfigRequest) returns (FileServiceConfig);
+  rpc createConfig(CreateFileServiceConfigRequest) returns (FileServiceConfig);
+  rpc deleteConfig(DeleteFileServiceConfigRequest) returns (FileServiceConfig);
+  rpc updateConfig(UpdateFileServiceConfigRequest) returns (FileServiceConfig);
+}
+
+message FileServiceConfig {}
+
+message GetFileServiceConfigRequest {}
+
+message CreateFileServiceConfigRequest {}
+
+message UpdateFileServiceConfigRequest {}
+
+message DeleteFileServiceConfigRequest {}

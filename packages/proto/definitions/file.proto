@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package juno.file_service.file;
+
+import "identifiers.proto";
+
+service FileDbService {
+  rpc getFile(GetFileRequest) returns (File);
+  rpc createFile(CreateFileRequest) returns (File);
+  rpc deleteFile(DeleteFileRequest) returns (File);
+  rpc updateFile(UpdateFileRequest) returns (File);
+}
+
+message File {}
+
+message GetFileRequest {}
+
+message CreateFileRequest {}
+
+message UpdateFileRequest {}
+
+message DeleteFileRequest {}
