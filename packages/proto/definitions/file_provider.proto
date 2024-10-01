@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package juno.file_service.provider;
+
+import "identifiers.proto";
+
+service FileProviderDbService {
+  rpc getProvider(GetFileProviderRequest) returns (FileProvider);
+  rpc createProvider(CreateFileProviderRequest) returns (FileProvider);
+  rpc deleteProvider(DeleteFileProviderRequest) returns (FileProvider);
+  rpc updateProvider(UpdateFileProviderRequest) returns (FileProvider);
+}
+
+message FileProvider {}
+
+message GetFileProviderRequest {}
+
+message CreateFileProviderRequest {}
+
+message UpdateFileProviderRequest {}
+
+message DeleteFileProviderRequest {}

@@ -26,6 +26,7 @@ model Project {
   apiKeys      ApiKey[]
   users        User[]
   emailService EmailServiceConfig?
+  fileService  FileServiceConfig?
 }
 
 model ApiKey {
@@ -81,4 +82,39 @@ model EmailDomain {
   sendgridId      Int
   attachedConfigs EmailServiceConfig[]
   EmailSender     EmailSender[]
+}
+
+model FileServiceConfig {
+  id              Int                 @id
+  buckets         FileServiceBucket[]
+  Project         Project             @relation(fields: [id], references: [id])
+  FileServiceFile FileServiceFile[]
+}
+
+model FileProvider {
+  name              String              @id
+  accessKey         String
+  metadata          String
+  FileServiceBucket FileServiceBucket[]
+}
+
+model FileServiceBucket {
+  name             String
+  provider         FileProvider      @relation(fields: [fileProviderName], references: [name])
+  configId         Int
+  config           FileServiceConfig @relation(fields: [configId], references: [id])
+  fileProviderName String
+  FileServiceFile  FileServiceFile[]
+
+  @@id([name, configId])
+}
+
+model FileServiceFile {
+  path       String
+  bucket     FileServiceBucket @relation(fields: [bucketName, configId], references: [name, configId])
+  config     FileServiceConfig @relation(fields: [configId], references: [id])
+  configId   Int
+  bucketName String
+
+  @@id([path, bucketName, configId])
 }

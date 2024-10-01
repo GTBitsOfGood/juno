@@ -19,7 +19,7 @@
     "tsc": "nx run-many --target=tsc",
     "lint": "nx run-many --target=lint --no-cloud",
     "sync-protos": "node syncJunoProtos.js",
-    "gen-proto": "pnpm --filter juno-proto install && pnpm --filter juno-proto build && pnpm --filter juno-proto sync-protos",
+    "gen-proto": "pnpm --filter juno-proto install && pnpm --filter juno-proto build",
     "gen-client-sdk": "pnpm openapi-generator-cli generate -g typescript-node -i ./docs-yaml -o ./juno-client-sdk",
     "test:e2e:api-gateway-live": "GATEWAY_COMMAND=test:e2e:watch RUN_MODE=test pnpm start:dev:live-all --exit-code-from api-gateway",
     "test:e2e:auth-service-live": "AUTH_COMMAND=test:e2e:watch RUN_MODE=test pnpm start:dev:live-all --exit-code-from auth-service auth-service",
