@@ -115,6 +115,7 @@ model FileServiceFile {
   config     FileServiceConfig @relation(fields: [configId], references: [id])
   configId   Int
   bucketName String
+  metadata   String
 
   @@id([path, bucketName, configId])
 }
