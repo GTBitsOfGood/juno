@@ -3,7 +3,7 @@
   "packageManager": "pnpm@9.11.0",
   "name": "bitsofgood-api",
   "scripts": {
-    "preinstall": "pnpm --filter juno-proto gen-proto",
+    "preinstall": "pnpm --filter . gen-proto",
     "start:dev": "docker compose -f docker-compose-dev.yml up",
     "start:dev:watch-packages": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-packages.yml watch --no-up",
     "start:dev:watch-proto": "docker compose -f docker-compose-dev.yml -f docker/docker-compose-live-proto.yml watch --no-up",
