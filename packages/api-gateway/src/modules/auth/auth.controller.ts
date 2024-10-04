@@ -4,6 +4,7 @@ import {
   Delete,
   Headers,
   HttpException,
+  HttpStatus,
   Inject,
   OnModuleInit,
   Post,
@@ -14,6 +15,10 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiCreatedResponse,
+  ApiTags,
+  ApiHeader,
+  ApiResponse,
+  ApiBody,
 } from '@nestjs/swagger';
 import { ApiKeyProto, JwtProto } from 'juno-proto';
 import { ApiKeyServiceClient } from 'juno-proto/dist/gen/api_key';
@@ -28,6 +33,7 @@ import {
 const { JWT_SERVICE_NAME } = JwtProto;
 const { API_KEY_SERVICE_NAME } = ApiKeyProto;
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController implements OnModuleInit {
   private jwtService: JwtServiceClient;
@@ -45,15 +51,25 @@ export class AuthController implements OnModuleInit {
       this.apiClient.getService<ApiKeyServiceClient>(API_KEY_SERVICE_NAME);
   }
 
+  @Post('/jwt')
   @ApiOperation({
+    summary:
+      'Generates a temporary JWT for the project tied to a specified API key.',
     description:
-      'Thie endpoint issues a new API key for the project tied to the specified environment.',
+      'JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given a valid API key.',
   })
   @ApiCreatedResponse({
-    description: 'The API Key has been successfully created',
-    type: IssueApiKeyResponse,
+    description: 'Successfully created a JWT.',
+    type: IssueJWTResponse,
   })
-  @Post('/jwt')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'A valid API key',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBearerAuth()
   async getJWT(@Headers('Authorization') apiKey?: string) {
     const key = apiKey?.replace('Bearer ', '');
@@ -65,13 +81,14 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description:
-      'Thie endpoint issues a new API key for the project tied to the specified environment.',
+    summary:
+      'Issues a new API key for the project tied to the specified environment.',
   })
   @ApiCreatedResponse({
     description: 'The API Key has been successfully created',
     type: IssueApiKeyResponse,
   })
+  @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
   async createApiKey(@Body() issueApiKeyRequest: IssueApiKeyRequest) {
     const obs = this.apiKeyService.issueApiKey({
@@ -86,10 +103,23 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description: 'Thie endpoint deletes an API key for the project.',
+    summary: 'Deletes an API key, detaching it from its project.',
   })
-  @ApiCreatedResponse({
-    description: 'The API Key has been successfully deleted',
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid API Key',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successful API Key deletion',
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'A valid API key',
+    required: true,
+    schema: {
+      type: 'string',
+    },
   })
   @ApiBearerAuth()
   @Delete('/key')

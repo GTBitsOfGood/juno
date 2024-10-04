@@ -10,14 +10,22 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { SendGridDnsRecords, SendGridRecord } from 'juno-proto/dist/gen/email';
 
 export class RegisterEmailModel {
-  @ApiProperty({ type: 'string', format: 'email' })
+  @ApiProperty({
+    type: 'string',
+    format: 'email',
+    description: 'The email to register',
+  })
   @IsNotEmpty()
   @IsEmail()
   email: string;
 }
 
 export class RegisterEmailResponse {
-  @ApiProperty({ type: 'string', format: 'email' })
+  @ApiProperty({
+    type: 'string',
+    format: 'email',
+    description: 'The email registered',
+  })
   email: string;
 
   constructor(email: string) {
@@ -26,64 +34,106 @@ export class RegisterEmailResponse {
 }
 
 class EmailRecipient {
-  @ApiProperty({ type: 'string', format: 'email' })
+  @ApiProperty({
+    type: 'string',
+    format: 'email',
+    description: 'Recipient email address',
+  })
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
-  @ApiPropertyOptional({ type: 'string', example: 'John Doe' })
+  @ApiPropertyOptional({
+    type: 'string',
+    example: 'John Doe',
+    description: 'Recipient name',
+  })
   name?: string | undefined;
 }
 
 class EmailSender {
-  @ApiProperty({ type: 'string', format: 'email' })
+  @ApiProperty({
+    type: 'string',
+    format: 'email',
+    description: 'Sender email address',
+  })
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
-  @ApiPropertyOptional({ type: 'string', example: 'John Doe' })
+  @ApiPropertyOptional({
+    type: 'string',
+    example: 'John Doe',
+    description: 'Sender name',
+  })
   name?: string | undefined;
 }
 
 class EmailContent {
-  @ApiProperty({ type: 'string', example: 'text/html' })
+  @ApiProperty({
+    type: 'string',
+    example: 'text/html',
+    description: 'MIME type for the content',
+  })
   @IsNotEmpty()
   type: string;
 
-  @ApiProperty({ type: 'string', example: 'Email content' })
+  @ApiProperty({
+    type: 'string',
+    example: 'Email content',
+    description: 'Content of the email',
+  })
   @IsNotEmpty()
   value: string;
 }
 
 export class RegisterDomainModel {
-  @ApiProperty({ type: 'string', example: 'example.com' })
+  @ApiProperty({
+    type: 'string',
+    example: 'example.com',
+    description: 'Domain to be registered',
+  })
   @IsNotEmpty()
   domain: string;
 
-  @ApiProperty({ type: 'string', example: 'subdomain' })
+  @ApiProperty({
+    type: 'string',
+    example: 'subdomain',
+    description: 'Subdomain to be registered',
+  })
   @IsNotEmpty()
   subdomain: string;
 }
 
 export class VerifyDomainModel {
-  @ApiProperty({ type: 'string', example: 'example.com' })
+  @ApiProperty({
+    type: 'string',
+    example: 'example.com',
+    description: 'Domain to be verified',
+  })
   @IsNotEmpty()
   domain: string;
 }
 
 export class SendEmailModel {
-  @ApiProperty({ type: [EmailRecipient] })
+  @ApiProperty({
+    type: [EmailRecipient],
+    description: 'List of recipients for the email',
+  })
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => EmailRecipient)
   recipients: EmailRecipient[];
 
-  @ApiProperty({ type: EmailSender })
+  @ApiProperty({ type: EmailSender, description: 'The sender of the email' })
   @ValidateNested({ each: true })
   @Type(() => EmailSender)
   sender: EmailSender | undefined;
 
-  @ApiProperty({ type: [EmailContent] })
+  @ApiProperty({
+    type: [EmailContent],
+    description: 'List of MIME content to send in the email',
+  })
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => EmailContent)
@@ -91,7 +141,10 @@ export class SendEmailModel {
 }
 
 export class SendEmailResponse {
-  @ApiProperty({ type: 'boolean' })
+  @ApiProperty({
+    type: 'boolean',
+    description: 'Whether an email was successfully sent',
+  })
   success: boolean;
 
   constructor(res: EmailProto.SendEmailResponse) {

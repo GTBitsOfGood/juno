@@ -44,7 +44,7 @@ export class UserController implements OnModuleInit {
   }
 
   @Get('id/:id')
-  @ApiOperation({ summary: 'Get an existing user' })
+  @ApiOperation({ summary: 'Retrieve an existing user.' })
   @ApiParam({
     name: 'id',
     required: true,
@@ -77,7 +77,7 @@ export class UserController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create a new user' })
+  @ApiOperation({ summary: 'Create a new user.' })
   @ApiBody({ type: CreateUserModel, description: 'The user details' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -103,8 +103,9 @@ export class UserController implements OnModuleInit {
 
   @Post('type')
   @ApiOperation({
-    summary: 'Set User Type',
-    description: 'Updates the user type for an existing user.',
+    summary: 'Update user type.',
+    description:
+      'Updates the user type for an existing user. User type can be thought of as a role with role-based permissions, e.g. SUPERADMIN could have permissions an ADMIN would not.',
   })
   @ApiBody({
     type: SetUserTypeModel,
@@ -139,12 +140,12 @@ export class UserController implements OnModuleInit {
 
   @Put('id/:id/project')
   @ApiOperation({
-    summary: 'Link User to Project',
-    description: 'Associates a user with a project by their IDs.',
+    summary: 'Link user to project.',
+    description: 'Associates a user with a project ID.',
   })
   @ApiParam({
     name: 'id',
-    description: 'User ID that is being linked to a project',
+    description: 'User ID being linked to a project',
     type: String,
   })
   @ApiBody({

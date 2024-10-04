@@ -49,7 +49,7 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description: 'This endpoint registers a sender email address',
+    summary: 'Registers a sender email address.',
   })
   @ApiCreatedResponse({
     description: 'Email registered successfully',
@@ -63,14 +63,14 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description: 'This endpoint registers a sender domain',
+    summary: 'Registers a sender domain.',
   })
   @ApiCreatedResponse({
-    description: 'domain registered successfully',
+    description: 'Domain registered successfully',
     type: RegisterDomainResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @Post('/register-domain')
   async registerEmailDomain(
     @Body() req: RegisterDomainModel,
@@ -91,14 +91,14 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description: 'This endpoint verifies a sender domain registration status',
+    summary: 'Verifies a sender domain registration status.',
   })
   @ApiCreatedResponse({
-    description: 'domain is registered',
+    description: 'Domain is registered',
     type: RegisterDomainResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiNotFoundResponse({ description: 'No domain registered' })
   @Post('/verify-domain')
   async verifySenderDomain(
@@ -119,7 +119,7 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    description: 'This endpoint sends an email',
+    summary: 'Sends an email using Juno services.',
   })
   @ApiCreatedResponse({
     description: 'Email sent successfully',
@@ -131,7 +131,7 @@ export class EmailController implements OnModuleInit {
   async sendEmail(@Body() req: SendEmailModel): Promise<SendEmailResponse> {
     if (!req) {
       throw new HttpException(
-        'Missing Email Parameters',
+        'Missing email parameters',
         HttpStatus.BAD_REQUEST,
       );
     }

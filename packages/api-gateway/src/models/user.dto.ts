@@ -34,12 +34,12 @@ export class UserResponse {
   @Transform(({ value }) => Number(value))
   @ApiProperty({ description: 'User id' })
   id: number;
-  @ApiProperty({ description: 'User email' })
+  @ApiProperty({ description: 'User email', example: 'user@email.com' })
   email: string;
-  @ApiProperty({ description: 'User name' })
+  @ApiProperty({ description: 'User name', example: 'John' })
   name: string;
   @Transform(fromEnum)
-  @ApiProperty({ description: 'User type' })
+  @ApiProperty({ description: 'User type', example: UserProto.UserType.ADMIN })
   type: UserProto.UserType;
 
   constructor(user: UserProto.User) {
@@ -51,9 +51,9 @@ export class UserResponse {
 }
 
 export class LinkProjectModel {
-  @ApiProperty({ description: 'id of project to be linked' })
+  @ApiProperty({ description: 'ID of project to be linked' })
   id?: number;
-  @ApiProperty({ description: 'name of project to be linked' })
+  @ApiProperty({ description: 'Name of project to be linked' })
   name?: string;
 }
 

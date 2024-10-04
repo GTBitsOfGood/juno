@@ -6,21 +6,25 @@ export class IssueApiKeyRequest {
   @ApiProperty({ description: 'Issuing user email' })
   @IsNotEmpty()
   email: string;
+
   @ApiProperty({ description: 'Issuing user password' })
   @IsNotEmpty()
   password: string;
+
   @ApiProperty({ description: 'Optional description for key' })
   description?: string | undefined;
-  @ApiProperty({ description: 'Environemnt this key should be tied to' })
+
+  @ApiProperty({ description: 'Environment the key will be tied to' })
   @IsNotEmpty()
   environment: string;
 
   @IsNotEmpty()
+  @ApiProperty({ description: 'Project identifier' })
   project: IdentifierProto.ProjectIdentifier;
 }
 
 export class IssueApiKeyResponse {
-  @ApiProperty({ type: 'string' })
+  @ApiProperty({ type: 'string', description: 'The generated API key' })
   apiKey: string;
 
   constructor(res: ApiKeyProto.IssueApiKeyResponse) {
@@ -29,6 +33,7 @@ export class IssueApiKeyResponse {
 }
 
 export class IssueJWTResponse {
+  @ApiProperty({ type: 'string', description: 'Created JWT token' })
   token: string;
 
   constructor(res: JwtProto.CreateJwtResponse) {
