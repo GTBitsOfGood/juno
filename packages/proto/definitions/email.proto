@@ -16,8 +16,7 @@ service EmailDbService {
   rpc getEmailSender(identifiers.EmailSenderIdentifier) returns (EmailSender);
   rpc createEmailSender(CreateEmailSenderRequest) returns (EmailSender);
   rpc updateEmailSender(UpdateEmailSenderRequest) returns (EmailSender);
-  rpc deleteEmailSender(DeleteEmailSenderRequest)
-      returns (EmailSender);
+  rpc deleteEmailSender(DeleteEmailSenderRequest) returns (EmailSender);
   rpc getEmailDomain(EmailDomainRequest) returns (EmailDomain);
   rpc createEmailDomain(CreateEmailDomainRequest) returns (EmailDomain);
 }
@@ -31,8 +30,10 @@ message EmailSender {
 
 message SendEmailRequest {
   repeated EmailRecipient recipients = 1;
-  SenderInfo sender = 2;
-  repeated EmailContent content = 3;
+  repeated EmailRecipient cc = 2;
+  repeated EmailRecipient bcc = 3;
+  SenderInfo sender = 4;
+  repeated EmailContent content = 5;
 }
 
 message SenderInfo {
@@ -125,9 +126,7 @@ message CreateEmailDomainRequest {
   int64 configId = 4;
 }
 
-message VerifyDomainRequest {
-  string domain = 1;
-}
+message VerifyDomainRequest { string domain = 1; }
 
 message VerifyDomainResponse {
   int64 id = 1;

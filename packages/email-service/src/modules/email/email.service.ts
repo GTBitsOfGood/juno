@@ -91,6 +91,8 @@ export class EmailService implements OnModuleInit {
         personalizations: [
           {
             to: request.recipients,
+            cc: request.cc,
+            bcc: request.bcc,
           },
         ],
         from: {

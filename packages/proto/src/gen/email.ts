@@ -20,6 +20,8 @@ export interface EmailSender {
 
 export interface SendEmailRequest {
   recipients: EmailRecipient[];
+  cc: EmailRecipient[];
+  bcc: EmailRecipient[];
   sender: SenderInfo | undefined;
   content: EmailContent[];
 }

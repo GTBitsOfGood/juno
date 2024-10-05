@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   ArrayNotEmpty,
   ValidateNested,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { EmailProto } from 'juno-proto';
@@ -124,6 +125,24 @@ export class SendEmailModel {
   @ValidateNested({ each: true })
   @Type(() => EmailRecipient)
   recipients: EmailRecipient[];
+
+  @ApiProperty({
+    type: [EmailRecipient],
+    description: 'List of email addresses to CC on the email',
+  })
+  @ValidateNested({ each: true })
+  @IsOptional()
+  @Type(() => EmailRecipient)
+  cc: EmailRecipient[] = [];
+
+  @ApiProperty({
+    type: [EmailRecipient],
+    description: 'List of email addresses to BCC on the email',
+  })
+  @ValidateNested({ each: true })
+  @IsOptional()
+  @Type(() => EmailRecipient)
+  bcc: EmailRecipient[] = [];
 
   @ApiProperty({ type: EmailSender, description: 'The sender of the email' })
   @ValidateNested({ each: true })

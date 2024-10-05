@@ -203,6 +203,44 @@ describe('Email Sending Route', () => {
       .expect(201);
   });
 
+  it('Send email with valid parameters (with names, recipients, cc and contents) and JWT is valid', async () => {
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        cc: [{ email: 'testRecipient1@gmail.com', name: 'RecipientName1' }],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(201);
+  });
+
+  it('Send email with valid parameters (with names, recipients, bcc and contents) and JWT is valid', async () => {
+    return request(app.getHttpServer())
+      .post('/email/send')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        sender: { email: 'testSender@gmail.com', name: 'SenderName' },
+        recipients: [
+          { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
+          { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
+        ],
+        bcc: [{ email: 'testRecipient1@gmail.com', name: 'RecipientName1' }],
+        content: [
+          { type: 'text/plain', value: 'Test email' },
+          { type: 'text/plain', value: 'Test email' },
+        ],
+      })
+      .expect(201);
+  });
+
   it('Send email with empty request and JWT is valid', async () => {
     return request(app.getHttpServer())
       .post('/email/send')

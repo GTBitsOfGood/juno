@@ -147,6 +147,8 @@ export class EmailController implements OnModuleInit {
       await lastValueFrom(
         this.emailService.sendEmail({
           recipients: req.recipients,
+          cc: req.cc,
+          bcc: req.bcc,
           sender: {
             email: req.sender.email,
             name: req.sender.name,
