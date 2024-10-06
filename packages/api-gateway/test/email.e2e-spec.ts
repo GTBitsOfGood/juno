@@ -99,7 +99,7 @@ describe('Email Service Setup Routes', () => {
 
   it('Fails without a sendgridKey', async () => {
     const apiKey = await createApiKey('test-seed-project', 'dev2');
-    request(app.getHttpServer())
+    return request(app.getHttpServer())
       .post('/email/setup')
       .set('Authorization', 'Bearer ' + apiKey)
       .send({})
