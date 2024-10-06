@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import { lastValueFrom } from 'rxjs';
-import { UserType } from 'juno-proto/dist/gen/user';
 import { ClientGrpc } from '@nestjs/microservices';
 import { UserProto } from 'juno-proto';
 
@@ -27,7 +26,7 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
       );
   }
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: UserReq, res: Response, next: NextFunction) {
     const emailHeader = req.header('X-User-Email');
     const passwordHeader = req.header('X-User-Password');
 
@@ -39,18 +38,19 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
       );
     }
 
-    // Wait for RPC result from authentication request
-    const user = await lastValueFrom(
-      this.userAuthService.authenticate({
-        email: emailHeader,
-        password: passwordHeader,
-      }),
-    );
+    try {
+      // Wait for RPC result from authentication request
+      const user = await lastValueFrom(
+        this.userAuthService.authenticate({
+          email: emailHeader,
+          password: passwordHeader,
+        }),
+      );
 
-    // If the user doesn't have valid permissions, return 401
-    if (!user || user.type !== UserType.SUPERADMIN) {
+      req.user = user;
+    } catch {
       throw new HttpException(
-        'Invalid credentials provided',
+        'Invalid user credentials',
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -58,3 +58,5 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
     next();
   }
 }
+
+type UserReq = Request & { user?: UserProto.User };

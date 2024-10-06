@@ -7,14 +7,10 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { ApiKey, ApiScope } from './auth_common';
 import { ApiKeyIdentifier, ProjectIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.api_key';
-
-export enum ApiScope {
-  FULL = 0,
-  UNRECOGNIZED = -1,
-}
 
 export interface IssueApiKeyRequest {
   project: ProjectIdentifier | undefined;
@@ -24,17 +20,17 @@ export interface IssueApiKeyRequest {
   environment: string;
 }
 
-export interface CreateApiKeyParams {
-  apiKey: ApiKeyNoId | undefined;
+export interface ValidateApiKeyRequest {
+  apiKey: string;
 }
 
-export interface ApiKey {
-  id: string;
-  hash: string;
-  description: string;
-  scopes: ApiScope[];
-  project: ProjectIdentifier | undefined;
-  environment: string;
+export interface ValidateApiKeyResponse {
+  valid: boolean;
+  key: ApiKey | undefined;
+}
+
+export interface CreateApiKeyParams {
+  apiKey: ApiKeyNoId | undefined;
 }
 
 export interface ApiKeyNoId {
@@ -64,6 +60,10 @@ export interface ApiKeyServiceClient {
   issueApiKey(request: IssueApiKeyRequest): Observable<IssueApiKeyResponse>;
 
   revokeApiKey(request: RevokeApiKeyRequest): Observable<RevokeApiKeyResponse>;
+
+  validateApiKey(
+    request: ValidateApiKeyRequest,
+  ): Observable<ValidateApiKeyResponse>;
 }
 
 export interface ApiKeyServiceController {
@@ -80,11 +80,22 @@ export interface ApiKeyServiceController {
     | Promise<RevokeApiKeyResponse>
     | Observable<RevokeApiKeyResponse>
     | RevokeApiKeyResponse;
+
+  validateApiKey(
+    request: ValidateApiKeyRequest,
+  ):
+    | Promise<ValidateApiKeyResponse>
+    | Observable<ValidateApiKeyResponse>
+    | ValidateApiKeyResponse;
 }
 
 export function ApiKeyServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['issueApiKey', 'revokeApiKey'];
+    const grpcMethods: string[] = [
+      'issueApiKey',
+      'revokeApiKey',
+      'validateApiKey',
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

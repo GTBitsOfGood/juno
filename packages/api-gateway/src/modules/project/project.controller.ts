@@ -18,8 +18,10 @@ import {
   LinkUserModel,
   ProjectResponse,
 } from 'src/models/project.dto';
-import { ProjectProto } from 'juno-proto';
+import { AuthCommonProto, ProjectProto, UserProto } from 'juno-proto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { User } from 'src/decorators/user.decorator';
+import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
@@ -99,7 +101,13 @@ export class ProjectController implements OnModuleInit {
     description: 'Successfully created project',
     type: ProjectResponse,
   })
-  async createProject(@Body() params: CreateProjectModel) {
+  async createProject(
+    @User() user: UserProto.User,
+    @Body() params: CreateProjectModel,
+  ) {
+    if (user.type !== UserProto.UserType.SUPERADMIN) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
     const project = this.projectService.createProject({
       name: params.name,
     });
@@ -124,9 +132,16 @@ export class ProjectController implements OnModuleInit {
     description: 'Invalid user/project parameters',
   })
   async linkUserWithProjectId(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Param('id', ParseIntPipe) id: number,
     @Body() linkUserBody: LinkUserModel,
   ) {
+    if (Number(apiKey.project.id) != Number(id)) {
+      throw new HttpException(
+        'API Key is not for the specified project',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     if (Number.isNaN(linkUserBody.id) && !linkUserBody.email) {
       throw new HttpException(
         'Project id must be numeric',
@@ -164,9 +179,21 @@ export class ProjectController implements OnModuleInit {
     description: 'Invalid user/project parameters',
   })
   async linkUserWithProjectName(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Param('name') name: string,
     @Body() linkUserBody: LinkUserModel,
   ) {
+    const proj = await lastValueFrom(
+      this.projectService.getProject({
+        name: name,
+      }),
+    );
+    if (Number(apiKey.project.id) != Number(proj.id)) {
+      throw new HttpException(
+        'API Key is not for the specified project',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     if (Number.isNaN(linkUserBody.id) && !linkUserBody.email) {
       throw new HttpException(
         'Project id must be numeric',

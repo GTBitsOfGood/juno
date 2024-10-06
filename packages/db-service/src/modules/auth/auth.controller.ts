@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiKeyProto } from 'juno-proto';
+import { ApiKeyProto, AuthCommonProto } from 'juno-proto';
 import { ApiKeyIdentifier } from 'juno-proto/dist/gen/identifiers';
 import { validateApiKeydentifier } from 'src/utility/validate';
 
@@ -11,13 +11,13 @@ export class ApiKeyDbController
 {
   constructor(private readonly apiKeyService: AuthService) {}
 
-  getApiKey(request: ApiKeyIdentifier): Promise<ApiKeyProto.ApiKey> {
+  getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
     return this.apiKeyService.findApiKey(validateApiKeydentifier(request));
   }
 
   async createApiKey(
     request: ApiKeyProto.CreateApiKeyParams,
-  ): Promise<ApiKeyProto.ApiKey> {
+  ): Promise<AuthCommonProto.ApiKey> {
     const prepareCreateApiKey = {
       ...request.apiKey,
       // scopes: request.apiKey.scopes?.map((scope) => ApiScope[scope]),
@@ -35,7 +35,9 @@ export class ApiKeyDbController
     return apiKey;
   }
 
-  async deleteApiKey(request: ApiKeyIdentifier): Promise<ApiKeyProto.ApiKey> {
+  async deleteApiKey(
+    request: ApiKeyIdentifier,
+  ): Promise<AuthCommonProto.ApiKey> {
     return this.apiKeyService.deleteApiKey(validateApiKeydentifier(request));
   }
 }

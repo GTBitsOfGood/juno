@@ -7,6 +7,7 @@ export * as HealthProto from './gen/health';
 export * as ResetProto from './gen/reset_db';
 export * as EmailProto from './gen/email';
 export * as LoggingProto from './gen/logging';
+export * as AuthCommonProto from './gen/auth_common';
 
 import { join } from 'path';
 
@@ -23,3 +24,4 @@ export const HealthProtoFile = getProtoFilePath('health.proto');
 export const ResetProtoFile = getProtoFilePath('reset_db.proto');
 export const EmailProtoFile = getProtoFilePath('email.proto');
 export const LoggingProtoFile = getProtoFilePath('logging.proto');
+export const AuthCommonProtoFile = getProtoFilePath('auth_common.proto');

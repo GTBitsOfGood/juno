@@ -26,6 +26,7 @@ import {
   SetUserTypeModel,
   UserResponse,
 } from 'src/models/user.dto';
+import { User } from 'src/decorators/user.decorator';
 
 const { USER_SERVICE_NAME } = UserProto;
 
@@ -92,13 +93,19 @@ export class UserController implements OnModuleInit {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Internal server error.',
   })
-  async createUser(@Body() params: CreateUserModel) {
-    const user = this.userService.createUser({
+  async createUser(
+    @User() user: UserProto.User,
+    @Body() params: CreateUserModel,
+  ) {
+    if (user.type !== UserProto.UserType.SUPERADMIN) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    const createdUser = this.userService.createUser({
       ...params,
       type: UserProto.UserType.USER,
     });
 
-    return new UserResponse(await lastValueFrom(user));
+    return new UserResponse(await lastValueFrom(createdUser));
   }
 
   @Post('type')
@@ -124,7 +131,13 @@ export class UserController implements OnModuleInit {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Internal server error.',
   })
-  async setUserType(@Body() setUserTypeParams: SetUserTypeModel) {
+  async setUserType(
+    @User() user: UserProto.User,
+    @Body() setUserTypeParams: SetUserTypeModel,
+  ) {
+    if (user.type !== UserProto.UserType.SUPERADMIN) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
     await lastValueFrom(
       this.userService.updateUser({
         userIdentifier: {
@@ -165,9 +178,13 @@ export class UserController implements OnModuleInit {
     description: 'Internal server error.',
   })
   async linkUserWithProjectId(
+    @User() user: UserProto.User,
     @Param('id') idStr: string,
     @Body() linkProjectBody: LinkProjectModel,
   ) {
+    if (user.type !== UserProto.UserType.SUPERADMIN) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
     const id = parseInt(idStr);
     if (Number.isNaN(id)) {
       throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);

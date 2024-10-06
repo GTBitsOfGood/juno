@@ -7,6 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { ApiKey } from './auth_common';
 
 export const protobufPackage = 'juno.jwt';
 
@@ -24,6 +25,7 @@ export interface ValidateJwtRequest {
 
 export interface ValidateJwtResponse {
   valid: boolean;
+  apiKey?: ApiKey | undefined;
 }
 
 export const JUNO_JWT_PACKAGE_NAME = 'juno.jwt';

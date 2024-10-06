@@ -1,6 +1,6 @@
 import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
-import { ApiKeyProto, UserProto } from 'juno-proto';
+import { ApiKeyProto, AuthCommonProto, UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { createHash, randomBytes } from 'crypto';
 import { status } from '@grpc/grpc-js';
@@ -17,6 +17,27 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     @Inject(UserProto.USER_AUTH_SERVICE_NAME)
     private userAuthClient: ClientGrpc,
   ) {}
+  async validateApiKey(
+    request: ApiKeyProto.ValidateApiKeyRequest,
+  ): Promise<ApiKeyProto.ValidateApiKeyResponse> {
+    const apiKeyHash = createHash('sha256')
+      .update(request.apiKey)
+      .digest('hex');
+    const apiKey = await lastValueFrom(
+      this.apiKeyDbService.getApiKey({
+        hash: apiKeyHash,
+      }),
+    );
+
+    if (!apiKey) {
+      throw new Error('Invalid API Key');
+    }
+
+    return {
+      valid: true,
+      key: apiKey,
+    };
+  }
 
   onModuleInit() {
     this.apiKeyDbService =
@@ -54,7 +75,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       apiKey: {
         hash: apiKeyHash,
         description: request.description,
-        scopes: [ApiKeyProto.ApiScope.FULL],
+        scopes: [AuthCommonProto.ApiScope.FULL],
         project: request.project,
         environment: request.environment,
       },

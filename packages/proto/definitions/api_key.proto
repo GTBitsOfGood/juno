@@ -3,17 +3,20 @@ syntax = "proto3";
 package juno.api_key;
 
 import "identifiers.proto";
+import "auth_common.proto";
 
 service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
 
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
+
+  rpc validateApiKey(ValidateApiKeyRequest) returns (ValidateApiKeyResponse);
 }
 
 service ApiKeyDbService {
-  rpc createApiKey(CreateApiKeyParams) returns (ApiKey);
-  rpc getApiKey(identifiers.ApiKeyIdentifier) returns (ApiKey);
-  rpc deleteApiKey(identifiers.ApiKeyIdentifier) returns (ApiKey);
+  rpc createApiKey(CreateApiKeyParams) returns (auth_common.ApiKey);
+  rpc getApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
+  rpc deleteApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
 }
 
 message IssueApiKeyRequest {
@@ -24,25 +27,18 @@ message IssueApiKeyRequest {
   string environment = 5;
 }
 
+message ValidateApiKeyRequest { string apiKey = 1; }
+message ValidateApiKeyResponse {
+  bool valid = 1;
+  auth_common.ApiKey key = 2;
+}
+
 message CreateApiKeyParams { ApiKeyNoId apiKey = 1; }
-
-enum ApiScope {
-  FULL = 0;
-}
-
-message ApiKey {
-  string id = 1;
-  string hash = 2;
-  string description = 3;
-  repeated ApiScope scopes = 4;
-  identifiers.ProjectIdentifier project = 5;
-  string environment = 6;
-}
 
 message ApiKeyNoId {
   string hash = 1;
   string description = 2;
-  repeated ApiScope scopes = 3;
+  repeated auth_common.ApiScope scopes = 3;
   identifiers.ProjectIdentifier project = 4;
   string environment = 5;
 }
