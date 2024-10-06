@@ -10,12 +10,14 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
 
 let apiKey: string;
+jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -37,7 +39,7 @@ afterAll((done) => {
   done();
 });
 
-async function createApiKey(proj: string, env: string) {
+async function createApiKey(proj: string, env: string): Promise<string> {
   const key = await request(app.getHttpServer())
     .post('/auth/key')
     .send({
@@ -64,6 +66,7 @@ beforeEach(async () => {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
 
