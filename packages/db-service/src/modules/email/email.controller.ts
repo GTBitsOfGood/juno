@@ -189,7 +189,6 @@ export class EmailController implements EmailDbServiceController {
   async getEmailDomain(
     request: EmailProto.EmailDomainRequest,
   ): Promise<EmailProto.EmailDomain> {
-    console.log('getEmailDomain', request);
     const domain = await this.emailService.emailDomain({
       domain: request.domain,
     });

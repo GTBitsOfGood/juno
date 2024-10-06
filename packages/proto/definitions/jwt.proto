@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package juno.jwt;
 
+import "identifiers.proto";
+import "auth_common.proto";
+
 service JwtService {
   rpc createJwt(CreateJwtRequest) returns (CreateJwtResponse);
   rpc validateJwt(ValidateJwtRequest) returns (ValidateJwtResponse);
@@ -11,4 +14,7 @@ message CreateJwtRequest { string api_key = 1; }
 message CreateJwtResponse { string jwt = 1; }
 
 message ValidateJwtRequest { string jwt = 2; }
-message ValidateJwtResponse { bool valid = 1; }
+message ValidateJwtResponse { 
+  bool valid = 1;
+  optional auth_common.ApiKey apiKey = 2;
+}

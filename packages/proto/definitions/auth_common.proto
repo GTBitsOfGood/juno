@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package juno.auth_common;
+
+import "identifiers.proto";
+
+enum ApiScope {
+  FULL = 0;
+}
+
+message ApiKey {
+  string id = 1;
+  string hash = 2;
+  string description = 3;
+  repeated ApiScope scopes = 4;
+  identifiers.ProjectIdentifier project = 5;
+  string environment = 6;
+}

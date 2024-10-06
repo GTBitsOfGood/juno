@@ -83,7 +83,8 @@ export interface RegisterSenderResponse {
 
 export interface AuthenticateDomainRequest {
   domain: string;
-  subdomain: string;
+  subdomain?: string | undefined;
+  configId: number;
 }
 
 export interface AuthenticateDomainResponse {

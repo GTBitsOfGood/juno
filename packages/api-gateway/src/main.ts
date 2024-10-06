@@ -26,8 +26,8 @@ async function bootstrap() {
     .setDescription('Juno Public API Docs')
     .setVersion('1.0')
     .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'JWT Token',
+      { type: 'http', scheme: 'bearer', bearerFormat: 'API Key' },
+      'API Key',
     )
 
     .build();

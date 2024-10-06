@@ -4,7 +4,6 @@ import {
   RequestMethod,
   MiddlewareConsumer,
 } from '@nestjs/common';
-import { ProjectLinkingMiddleware } from '../../middleware/project.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -16,12 +15,16 @@ import {
   JwtProtoFile,
   UserProto,
   UserProtoFile,
+  ApiKeyProto,
+  ApiKeyProtoFile,
 } from 'juno-proto';
 import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
+import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
 
 const { USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
 const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
+const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
 // TODO: Make this module Auth protected
 @Module({
@@ -37,6 +40,15 @@ const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
           url: process.env.AUTH_SERVICE_ADDR,
           package: JUNO_JWT_PACKAGE_NAME,
           protoPath: JwtProtoFile,
+        },
+      },
+      {
+        name: API_KEY_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: JUNO_API_KEY_PACKAGE_NAME,
+          protoPath: ApiKeyProtoFile,
         },
       },
       {
@@ -64,7 +76,7 @@ const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 export class ProjectModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(ProjectLinkingMiddleware)
+      .apply(ApiKeyMiddleware)
       .forRoutes(
         { path: 'project/id/:id/user', method: RequestMethod.PUT },
         { path: 'project/name/:name/user', method: RequestMethod.PUT },

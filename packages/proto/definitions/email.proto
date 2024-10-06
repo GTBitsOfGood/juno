@@ -87,7 +87,8 @@ message RegisterSenderResponse {
 
 message AuthenticateDomainRequest {
   string domain = 1;
-  string subdomain = 2;
+  optional string subdomain = 2;
+  int64 configId = 3;
 }
 
 message AuthenticateDomainResponse {

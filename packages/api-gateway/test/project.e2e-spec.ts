@@ -13,11 +13,11 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
-let token: string | undefined = undefined;
+let apiKey: string | undefined = undefined;
 
 jest.setTimeout(15000);
 
-async function JWTForProjectName(projectName: string): Promise<string> {
+async function APIKeyForProjectName(projectName: string): Promise<string> {
   const key = await request(app.getHttpServer())
     .post('/auth/key')
     .send({
@@ -29,14 +29,7 @@ async function JWTForProjectName(projectName: string): Promise<string> {
       },
     });
 
-  const apiKey = key.body['apiKey'];
-
-  const jwt = await request(app.getHttpServer())
-    .post('/auth/jwt')
-    .set('Authorization', `Bearer ${apiKey}`)
-    .send();
-
-  return jwt.body['token'];
+  return key.body['apiKey'];
 }
 
 beforeAll(async () => {
@@ -75,8 +68,8 @@ beforeEach(async () => {
 
   await app.init();
 
-  if (!token) {
-    token = await JWTForProjectName('test-seed-project');
+  if (!apiKey) {
+    apiKey = await APIKeyForProjectName('test-seed-project');
   }
 });
 
@@ -241,10 +234,10 @@ describe('Project Update Routes', () => {
       });
 
     const userId = user.body['id'];
-    const token = await JWTForProjectName('link-valid');
+    const apiKey = await APIKeyForProjectName('link-valid');
     await request(app.getHttpServer())
       .put(`/project/id/${projectId}/user`)
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         id: userId,
       })
@@ -260,10 +253,10 @@ describe('Project Update Routes', () => {
         name: 'link-valid2',
       });
     const projectId = project.body['id'];
-    const token = await JWTForProjectName('link-valid2');
+    const apiKey = await APIKeyForProjectName('link-valid2');
     await request(app.getHttpServer())
       .put(`/project/id/${projectId}/user`)
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         email: 'test@user.com',
       })
@@ -273,7 +266,7 @@ describe('Project Update Routes', () => {
   it('Link user with project id using non-number project id param', async () => {
     await request(app.getHttpServer())
       .put('/project/id/abc/user')
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         email: 'test@user.com',
       })
@@ -282,8 +275,8 @@ describe('Project Update Routes', () => {
 
   it('Link user with project id using non-number user id input', async () => {
     await request(app.getHttpServer())
-      .put('/project/id/1/user')
-      .set('Authorization', 'Bearer ' + token)
+      .put('/project/id/0/user')
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         id: 'abc',
       })
@@ -292,8 +285,8 @@ describe('Project Update Routes', () => {
 
   it('Link user with project id using invalid user email input', async () => {
     const resp = await request(app.getHttpServer())
-      .put('/project/id/1/user')
-      .set('Authorization', 'Bearer ' + token)
+      .put('/project/id/0/user')
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         email: 'abc',
       })
@@ -304,7 +297,7 @@ describe('Project Update Routes', () => {
   // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/id/1/user')
-  // .set('Authorization', 'Bearer ' + token)
+  // .set('Authorization', 'Bearer '+ apiKey)
   //     .send({
   //       id: 'abc',
   //     })
@@ -316,7 +309,7 @@ describe('Project Update Routes', () => {
   // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/id/1/user')
-  // .set('Authorization', 'Bearer ' + token)
+  // .set('Authorization', 'Bearer '+ apiKey)
   //     .send({
   //       email: 'abc',
   //     })
@@ -326,8 +319,8 @@ describe('Project Update Routes', () => {
 
   it('Link user with project name using valid user id input', async () => {
     await request(app.getHttpServer())
-      .put('/project/name/testProject/user')
-      .set('Authorization', 'Bearer ' + token)
+      .put('/project/name/test-seed-project/user')
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         id: '1',
       })
@@ -337,7 +330,7 @@ describe('Project Update Routes', () => {
   it('Link user with project name using valid user email input', async () => {
     await request(app.getHttpServer())
       .put('/project/name/test-seed-project/user')
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         email: 'test@user.com',
       })
@@ -347,7 +340,7 @@ describe('Project Update Routes', () => {
   it('Link user with project name using non-number user id input', async () => {
     const resp = await request(app.getHttpServer())
       .put('/project/name/test-seed-project/user')
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         id: 'abc',
       })
@@ -358,7 +351,7 @@ describe('Project Update Routes', () => {
   it('Link user with project name using invalid user email input', async () => {
     const resp = await request(app.getHttpServer())
       .put('/project/name/test-seed-project/user')
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         email: 'abc',
       })
@@ -369,7 +362,7 @@ describe('Project Update Routes', () => {
   // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/name/testProject/user')
-  // .set('Authorization', 'Bearer ' + token)
+  // .set('Authorization', 'Bearer '+ apiKey)
   //     .send({
   //       id: 'abc',
   //     })
@@ -381,7 +374,7 @@ describe('Project Update Routes', () => {
   // const token = apiKeyForProject(projectId);
   //   await request(app.getHttpServer())
   //     .put('/project/name/testProject/user')
-  // .set('Authorization', 'Bearer ' + token)
+  // .set('Authorization', 'Bearer '+ apiKey)
   //     .send({
   //       email: 'abc',
   //     })
@@ -486,46 +479,46 @@ describe('Project Linking Middleware', () => {
       })
       .expect(401);
   });
-  it('Invalid jwt for /project/id/:id/user route', async () => {
+  it('Invalid api key for /project/id/:id/user route', async () => {
     await request(app.getHttpServer())
       .put(`/project/id/1/user`)
-      .set('Authorization', 'Bearer invalid-jwt')
+      .set('Authorization', 'Bearer invalid-api key')
       .send({
         id: '1',
       })
       .expect(401);
   });
-  it('Invalid jwt for /project/name/:name/user route', async () => {
+  it('Invalid api key for /project/name/:name/user route', async () => {
     await request(app.getHttpServer())
       .put('/project/name/middleware/user')
-      .set('Authorization', 'Bearer invalid-jwt')
+      .set('Authorization', 'Bearer invalid-api key')
       .send({
         id: '1',
       })
       .expect(401);
   });
-  it('Invalid jwt for /user/id/:id/project route', async () => {
+  it('Invalid api key for /user/id/:id/project route', async () => {
     await request(app.getHttpServer())
       .put(`/user/id/1/project`)
-      .set('Authorization', 'Bearer invalid-jwt')
+      .set('Authorization', 'Bearer invalid-api key')
       .send({
         name: 'middleware',
       })
       .expect(401);
   });
-  it('Valid jwt for /project/id/:id/user route', async () => {
+  it('Valid api key for /project/id/:id/user route', async () => {
     await request(app.getHttpServer())
       .put(`/project/id/0/user`)
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         id: '1',
       })
       .expect(200);
   });
-  it('Valid jwt for /project/name/:name/user route', async () => {
+  it('Valid api key for /project/name/:name/user route', async () => {
     await request(app.getHttpServer())
       .put('/project/name/test-seed-project/user')
-      .set('Authorization', 'Bearer ' + token)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
         id: '1',
       })

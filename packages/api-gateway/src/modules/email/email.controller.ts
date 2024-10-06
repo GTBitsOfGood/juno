@@ -18,7 +18,7 @@ import {
   SendEmailResponse,
   VerifyDomainModel,
 } from 'src/models/email.dto';
-import { EmailProto } from 'juno-proto';
+import { AuthCommonProto, EmailProto } from 'juno-proto';
 import { validateOrReject } from 'class-validator';
 
 import {
@@ -30,6 +30,7 @@ import {
   ApiOperation,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
+import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { EMAIL_SERVICE_NAME } = EmailProto;
 
@@ -58,7 +59,10 @@ export class EmailController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post('/register-sender')
-  async registerSenderAddress(@Body('') params: RegisterEmailModel) {
+  async registerSenderAddress(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Body('') params: RegisterEmailModel,
+  ) {
     return new RegisterEmailResponse(params.email);
   }
 
@@ -73,6 +77,7 @@ export class EmailController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Bad request' })
   @Post('/register-domain')
   async registerEmailDomain(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body() req: RegisterDomainModel,
   ): Promise<RegisterDomainResponse> {
     if (!req.domain) {
@@ -85,6 +90,7 @@ export class EmailController implements OnModuleInit {
     const res = this.emailService.authenticateDomain({
       domain: req.domain,
       subdomain: req.subdomain,
+      configId: apiKey.project.id,
     });
 
     return new RegisterDomainResponse(await lastValueFrom(res));
@@ -102,6 +108,7 @@ export class EmailController implements OnModuleInit {
   @ApiNotFoundResponse({ description: 'No domain registered' })
   @Post('/verify-domain')
   async verifySenderDomain(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body() req: VerifyDomainModel,
   ): Promise<RegisterDomainResponse> {
     if (!req.domain || req.domain.length == 0) {

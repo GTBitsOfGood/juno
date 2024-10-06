@@ -44,7 +44,7 @@ export class EmailService implements OnModuleInit {
         domain: req.domain,
         subdomain: req.subdomain,
         sendgridId: 0,
-        configId: 0,
+        configId: req.configId,
       });
       return {
         statusCode: 201,
@@ -70,6 +70,13 @@ export class EmailService implements OnModuleInit {
       );
 
       const records: EmailProto.SendGridDnsRecords = response.data.dns;
+
+      this.emailService.createEmailDomain({
+        domain: req.domain,
+        subdomain: req.subdomain,
+        sendgridId: response.data.id,
+        configId: req.configId,
+      });
 
       return {
         statusCode: response.status,

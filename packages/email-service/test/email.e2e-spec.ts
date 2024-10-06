@@ -77,6 +77,7 @@ describe('Email Service Authenticate Domain Tests', () => {
           {
             domain: 'example.com',
             subdomain: 'mail',
+            configId: 0,
           },
           (err: any, response: EmailProto.AuthenticateDomainResponse) => {
             if (err) {
@@ -102,6 +103,7 @@ describe('Email Service Authenticate Domain Tests', () => {
           {
             domain: '',
             subdomain: '',
+            configId: 0,
           },
           (err: any, response: EmailProto.AuthenticateDomainResponse) => {
             if (err) {

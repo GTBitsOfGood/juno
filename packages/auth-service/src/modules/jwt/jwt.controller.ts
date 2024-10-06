@@ -61,7 +61,10 @@ export class JWTController implements JwtProto.JwtServiceController {
       );
 
       if (apiKey) {
-        return { valid: true };
+        return {
+          valid: true,
+          apiKey,
+        };
       }
       return { valid: false };
     } catch (e) {
