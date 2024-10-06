@@ -78,6 +78,7 @@ describe('Email Service Authenticate Domain Tests', () => {
             domain: 'example.com',
             subdomain: 'mail',
             configId: 0,
+            configEnvironment: 'prod',
           },
           (err: any, response: EmailProto.AuthenticateDomainResponse) => {
             if (err) {
@@ -104,6 +105,7 @@ describe('Email Service Authenticate Domain Tests', () => {
             domain: '',
             subdomain: '',
             configId: 0,
+            configEnvironment: 'prod',
           },
           (err: any, response: EmailProto.AuthenticateDomainResponse) => {
             if (err) {
@@ -142,6 +144,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeNull();
@@ -159,6 +163,8 @@ describe('Email Service Send Email Tests', () => {
           sender: null,
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -176,6 +182,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: null },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -193,6 +201,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: '' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -210,6 +220,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: null,
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -227,6 +239,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [],
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -244,6 +258,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: null }],
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -261,6 +277,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: '' }],
           content: [{ type: 'text/plain', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -278,6 +296,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: null,
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -295,6 +315,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -312,6 +334,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: null, value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -329,6 +353,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: 'text/plain', value: null }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -346,6 +372,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: '', value: 'Test email' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();
@@ -363,6 +391,8 @@ describe('Email Service Send Email Tests', () => {
           sender: { email: 'testSender@gmail.com' },
           recipients: [{ email: 'testRecipient@gmail.com' }],
           content: [{ type: 'text/plain', value: '' }],
+          configId: 0,
+          configEnvironment: 'prod',
         },
         (err, resp) => {
           expect(err).toBeDefined();

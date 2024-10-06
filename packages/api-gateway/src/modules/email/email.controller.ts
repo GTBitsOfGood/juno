@@ -16,6 +16,7 @@ import {
   RegisterEmailResponse,
   SendEmailModel,
   SendEmailResponse,
+  SetupEmailServiceModel,
   VerifyDomainModel,
 } from 'src/models/email.dto';
 import { AuthCommonProto, EmailProto } from 'juno-proto';
@@ -50,6 +51,29 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
+    summary: 'Sets up an email service with the given Sendgrid API Key',
+  })
+  @ApiCreatedResponse({
+    description: 'Email Service setup successfully',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @Post('/setup')
+  async setup(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Body('') params: SetupEmailServiceModel,
+  ) {
+    await lastValueFrom(
+      this.emailService.setup({
+        sendgridKey: params.sendgridKey,
+        projectId: apiKey.project.id,
+        environment: apiKey.environment,
+      }),
+    );
+    return {};
+  }
+
+  @ApiOperation({
     summary: 'Registers a sender email address.',
   })
   @ApiCreatedResponse({
@@ -63,6 +87,16 @@ export class EmailController implements OnModuleInit {
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body('') params: RegisterEmailModel,
   ) {
+    await lastValueFrom(
+      this.emailService.registerSender({
+        fromName: params.name,
+        fromEmail: params.email,
+        replyTo: params.replyTo ?? params.email,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment,
+      }),
+    );
+
     return new RegisterEmailResponse(params.email);
   }
 
@@ -91,6 +125,7 @@ export class EmailController implements OnModuleInit {
       domain: req.domain,
       subdomain: req.subdomain,
       configId: apiKey.project.id,
+      configEnvironment: apiKey.environment,
     });
 
     return new RegisterDomainResponse(await lastValueFrom(res));
@@ -120,6 +155,8 @@ export class EmailController implements OnModuleInit {
 
     const res = this.emailService.verifyDomain({
       domain: req.domain,
+      configId: apiKey.project.id,
+      configEnvironment: apiKey.environment,
     });
 
     return new RegisterDomainResponse(await lastValueFrom(res));
@@ -135,7 +172,10 @@ export class EmailController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post('/send')
-  async sendEmail(@Body() req: SendEmailModel): Promise<SendEmailResponse> {
+  async sendEmail(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Body() req: SendEmailModel,
+  ): Promise<SendEmailResponse> {
     if (!req) {
       throw new HttpException(
         'Missing email parameters',
@@ -161,6 +201,8 @@ export class EmailController implements OnModuleInit {
             name: req.sender.name,
           },
           content: req.content,
+          configId: apiKey.project.id,
+          configEnvironment: apiKey.environment,
         }),
       ),
     );

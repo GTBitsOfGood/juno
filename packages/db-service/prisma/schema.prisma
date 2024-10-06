@@ -21,11 +21,11 @@ model User {
 }
 
 model Project {
-  id           Int                 @id @default(autoincrement())
-  name         String              @unique
+  id           Int                  @id @default(autoincrement())
+  name         String               @unique
   apiKeys      ApiKey[]
   users        User[]
-  emailService EmailServiceConfig?
+  emailService EmailServiceConfig[]
   fileService  FileServiceConfig?
 }
 
@@ -50,20 +50,35 @@ enum Role {
 }
 
 model EmailServiceConfig {
-  id      Int                           @id
-  emails  EmailServiceConfigAndSender[]
-  domains EmailDomain[]
-  Project Project                       @relation(fields: [id], references: [id])
+  id             Int
+  environment    String @default("")
+  sendgridApiKey String @default("")
+  emails         EmailServiceConfigAndSender[]
+  domains        EmailServiceConfigAndDomain[]
+  Project        Project                       @relation(fields: [id], references: [id])
+
+  @@id([id, environment])
 }
 
 model EmailServiceConfigAndSender {
-  config   EmailServiceConfig @relation(fields: [configId], references: [id])
-  configId Int // relation scalar field (used in the `@relation` attribute above)
-  sender   EmailSender        @relation(fields: [username, domain], references: [username, domain])
-  username String
-  domain   String
+  config    EmailServiceConfig @relation(fields: [configId, configEnv], references: [id, environment])
+  configId  Int // relation scalar field (used in the `@relation` attribute above)
+  configEnv String
+  sender    EmailSender        @relation(fields: [username, domain], references: [username, domain])
+  username  String
+  domain    String
 
-  @@id([configId, username, domain])
+  @@id([configId, configEnv, username, domain])
+}
+
+model EmailServiceConfigAndDomain {
+  config    EmailServiceConfig @relation(fields: [configId, configEnv], references: [id, environment])
+  configId  Int // relation scalar field (used in the `@relation` attribute above)
+  configEnv String
+  domain    EmailDomain        @relation(fields: [domainStr], references: [domain])
+  domainStr String
+
+  @@id([configId, configEnv, domainStr])
 }
 
 model EmailSender {
@@ -77,10 +92,10 @@ model EmailSender {
 }
 
 model EmailDomain {
-  domain          String               @id()
+  domain          String                        @id()
   subdomain       String
   sendgridId      Int
-  attachedConfigs EmailServiceConfig[]
+  attachedConfigs EmailServiceConfigAndDomain[]
   EmailSender     EmailSender[]
 }
 

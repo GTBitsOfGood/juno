@@ -13,6 +13,45 @@ import {
 @EmailProto.EmailDbServiceControllerMethods()
 export class EmailController implements EmailDbServiceController {
   constructor(private readonly emailService: EmailService) {}
+  async createEmailServiceConfig(
+    request: EmailProto.CreateEmailServiceConfigRequest,
+  ): Promise<EmailProto.EmailServiceConfig> {
+    const config = await this.emailService.createEmailServiceConfig({
+      environment: request.environment,
+      sendgridApiKey: request.sendgridKey,
+      Project: {
+        connect: {
+          id: Number(request.projectId),
+        },
+      },
+    });
+
+    return {
+      id: config.id,
+      environment: config.environment,
+      sendgridKey: config.sendgridApiKey,
+      senders: [],
+      domains: [],
+    };
+  }
+  async getEmailServiceConfig(
+    request: EmailProto.GetEmailServiceConfigRequest,
+  ): Promise<EmailProto.EmailServiceConfig> {
+    const config = await this.emailService.getEmailServiceConfig({
+      id_environment: {
+        id: Number(request.id),
+        environment: request.environment,
+      },
+    });
+
+    return {
+      id: config.id,
+      environment: config.environment,
+      sendgridKey: config.sendgridApiKey,
+      senders: [],
+      domains: [],
+    };
+  }
 
   async getEmailSender(
     identifier: IdentifierProto.EmailSenderIdentifier,
@@ -43,13 +82,19 @@ export class EmailController implements EmailDbServiceController {
   async createEmailSender(
     request: EmailProto.CreateEmailSenderRequest,
   ): Promise<EmailSender> {
-    await this.emailService.createOrGetEmailServiceConfig({
-      Project: {
-        connect: {
-          id: Number(request.configId),
-        },
+    const config = await this.emailService.getEmailServiceConfig({
+      id_environment: {
+        id: Number(request.configId),
+        environment: request.configEnvironment,
       },
     });
+
+    if (!config) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Config not found',
+      });
+    }
 
     try {
       const existing = await this.emailService.emailSender({
@@ -59,9 +104,11 @@ export class EmailController implements EmailDbServiceController {
         },
       });
 
-      const mapped = existing.attachedConfigs.map((config) => config.configId);
+      const mapped = existing.attachedConfigs.map(
+        (config) => `${config.configId}_${config.configEnv}`,
+      );
 
-      if (mapped.includes(Number(request.configId))) {
+      if (mapped.includes(`${request.configId}_${request.configEnvironment}`)) {
         throw new RpcException({
           code: status.ALREADY_EXISTS,
           message: 'Sender already exists',
@@ -77,15 +124,17 @@ export class EmailController implements EmailDbServiceController {
       username: request.username,
       attachedConfigs: {
         connectOrCreate: {
-          where: {
-            configId_username_domain: {
-              configId: Number(request.configId),
-              username: request.username,
-              domain: request.domain,
-            },
-          },
           create: {
             configId: Number(request.configId),
+            configEnv: request.configEnvironment,
+          },
+          where: {
+            configId_configEnv_username_domain: {
+              configId: Number(request.configId),
+              configEnv: request.configEnvironment,
+              domain: request.domain,
+              username: request.username,
+            },
           },
         },
       },
@@ -139,6 +188,7 @@ export class EmailController implements EmailDbServiceController {
     const emailSender = await this.emailService.deleteEmailSender(
       emailParams,
       request.configId,
+      request.configEnvironment,
     );
 
     return {
@@ -156,21 +206,37 @@ export class EmailController implements EmailDbServiceController {
   async createEmailDomain(
     request: EmailProto.CreateEmailDomainRequest,
   ): Promise<EmailProto.EmailDomain> {
-    await this.emailService.createOrGetEmailServiceConfig({
-      Project: {
-        connect: {
-          id: Number(request.configId),
-        },
+    const config = await this.emailService.getEmailServiceConfig({
+      id_environment: {
+        id: Number(request.configId),
+        environment: request.configEnvironment,
       },
     });
+
+    if (!config) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Config not found',
+      });
+    }
 
     const emailDomain = await this.emailService.createEmailDomain({
       domain: request.domain,
       subdomain: request.subdomain,
       sendgridId: request.sendgridId,
       attachedConfigs: {
-        connect: {
-          id: Number(request.configId),
+        connectOrCreate: {
+          create: {
+            configId: Number(request.configId),
+            configEnv: request.configEnvironment,
+          },
+          where: {
+            configId_configEnv_domainStr: {
+              configId: Number(request.configId),
+              configEnv: request.configEnvironment,
+              domainStr: request.domain,
+            },
+          },
         },
       },
     });
@@ -180,7 +246,8 @@ export class EmailController implements EmailDbServiceController {
       sendgridId: emailDomain.sendgridId,
       projects: emailDomain.attachedConfigs.map((config) => {
         return {
-          id: config.id,
+          id: config.configId,
+          environment: config.configEnv,
         };
       }),
     };
@@ -204,7 +271,8 @@ export class EmailController implements EmailDbServiceController {
       sendgridId: domain.sendgridId,
       projects: domain.attachedConfigs.map((config) => {
         return {
-          id: config.id,
+          id: config.configId,
+          environment: config.configEnv,
         };
       }),
     };

@@ -8,6 +8,11 @@ import { status } from '@grpc/grpc-js';
 @EmailProto.EmailServiceControllerMethods()
 export class EmailController implements EmailProto.EmailServiceController {
   constructor(private readonly emailService: EmailService) {}
+  async setup(
+    request: EmailProto.SetupRequest,
+  ): Promise<EmailProto.SetupResponse> {
+    return this.emailService.setup(request);
+  }
 
   async authenticateDomain(
     @Body() req: EmailProto.AuthenticateDomainRequest,

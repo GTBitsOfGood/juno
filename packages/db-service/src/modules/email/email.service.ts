@@ -7,6 +7,7 @@ const senderWithConfigIds = {
     attachedConfigs: {
       select: {
         configId: true,
+        configEnv: true,
       },
     },
   },
@@ -16,7 +17,8 @@ const domainWithConfigIds = {
   include: {
     attachedConfigs: {
       select: {
-        id: true,
+        configId: true,
+        configEnv: true,
       },
     },
   },
@@ -93,11 +95,13 @@ export class EmailService {
   async deleteEmailSender(
     where: Prisma.EmailSenderWhereUniqueInput,
     configId: number,
+    configEnv: string,
   ): Promise<EmailSenderWithConfigIds> {
     await this.prisma.emailServiceConfigAndSender.delete({
       where: {
-        configId_username_domain: {
+        configId_configEnv_username_domain: {
           configId: Number(configId),
+          configEnv,
           username: where.username_domain.username,
           domain: where.username_domain.domain,
         },
@@ -119,7 +123,7 @@ export class EmailService {
       create: input,
       update: {
         attachedConfigs: {
-          connect: input.attachedConfigs.connect,
+          connectOrCreate: input.attachedConfigs.connectOrCreate,
         },
       },
       ...domainWithConfigIds,
@@ -143,15 +147,11 @@ export class EmailService {
     });
   }
 
-  async createOrGetEmailServiceConfig(
-    input: Prisma.EmailServiceConfigCreateInput,
+  async getEmailServiceConfig(
+    input: Prisma.EmailServiceConfigWhereUniqueInput,
   ): Promise<EmailServiceConfig> {
-    return this.prisma.emailServiceConfig.upsert({
-      create: input,
-      where: {
-        id: input.Project.connect.id,
-      },
-      update: {},
+    return this.prisma.emailServiceConfig.findUnique({
+      where: input,
     });
   }
 

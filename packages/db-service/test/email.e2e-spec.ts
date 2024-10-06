@@ -108,6 +108,7 @@ describe('DB Service Email Tests', () => {
           username: 'tester123',
           domain: 'testdomain',
           configId: 0,
+          configEnvironment: 'prod',
         },
 
         (err) => {
@@ -128,6 +129,7 @@ describe('DB Service Email Tests', () => {
           username: 'tester123',
           domain: 'testdomain',
           configId: 0,
+          configEnvironment: 'prod',
         },
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -148,6 +150,7 @@ describe('DB Service Email Tests', () => {
           username: 'tester1234',
           domain: 'testdomain',
           configId: 0,
+          configEnvironment: 'prod',
         },
 
         (err, resp) => {
@@ -167,6 +170,7 @@ describe('DB Service Email Tests', () => {
             domain: resultingEmail.domain,
           },
           configId: 0,
+          configEnvironment: 'prod',
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
@@ -188,6 +192,7 @@ describe('DB Service Email Tests', () => {
             domain: 'nonexistent',
           },
           configId: 0,
+          configEnvironment: 'prod',
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (err, resp) => {
@@ -207,6 +212,7 @@ describe('DB Service Email Tests', () => {
           username: 'tester12345',
           domain: 'testdomain',
           configId: 0,
+          configEnvironment: 'prod',
         },
 
         (err, resp: EmailSender) => {
@@ -272,6 +278,7 @@ describe('DB Service Email Tests', () => {
           username: 'tester123456',
           domain: 'testdomain',
           configId: 0,
+          configEnvironment: 'prod',
         },
 
         (err, resp: EmailSender) => {
