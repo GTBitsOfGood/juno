@@ -5,6 +5,7 @@ package juno.email;
 import "identifiers.proto";
 
 service EmailService {
+  rpc setup(SetupRequest) returns (SetupResponse);
   rpc sendEmail(SendEmailRequest) returns (SendEmailResponse);
   rpc registerSender(RegisterSenderRequest) returns (RegisterSenderResponse);
   rpc authenticateDomain(AuthenticateDomainRequest)
@@ -19,6 +20,9 @@ service EmailDbService {
   rpc deleteEmailSender(DeleteEmailSenderRequest) returns (EmailSender);
   rpc getEmailDomain(EmailDomainRequest) returns (EmailDomain);
   rpc createEmailDomain(CreateEmailDomainRequest) returns (EmailDomain);
+  rpc createEmailServiceConfig(CreateEmailServiceConfigRequest)
+      returns (EmailServiceConfig);
+  rpc getEmailServiceConfig(GetEmailServiceConfigRequest) returns (EmailServiceConfig);
 }
 
 message EmailSender {
@@ -34,6 +38,8 @@ message SendEmailRequest {
   repeated EmailRecipient bcc = 3;
   SenderInfo sender = 4;
   repeated EmailContent content = 5;
+  int64 configId = 6;
+  string configEnvironment = 7;
 }
 
 message SenderInfo {
@@ -58,6 +64,7 @@ message CreateEmailSenderRequest {
   int64 configId = 2;
   optional string description = 3;
   string domain = 4;
+  string configEnvironment = 5;
 }
 
 message EmailUpdateParams { optional string description = 1; }
@@ -70,6 +77,7 @@ message UpdateEmailSenderRequest {
 message DeleteEmailSenderRequest {
   identifiers.EmailSenderIdentifier emailSenderIdentifier = 1;
   int64 configId = 2;
+  string configEnvironment = 3;
 }
 
 message SendEmailSenderRequestResponse { bool success = 1; }
@@ -78,6 +86,8 @@ message RegisterSenderRequest {
   string from_email = 1;
   string from_name = 2;
   string reply_to = 3;
+  int64 configId = 4;
+  string configEnvironment = 5;
 }
 
 message RegisterSenderResponse {
@@ -89,6 +99,7 @@ message AuthenticateDomainRequest {
   string domain = 1;
   optional string subdomain = 2;
   int64 configId = 3;
+  string configEnvironment = 4;
 }
 
 message AuthenticateDomainResponse {
@@ -125,13 +136,48 @@ message CreateEmailDomainRequest {
   string subdomain = 2;
   int64 sendgridId = 3;
   int64 configId = 4;
+  string configEnvironment = 5;
 }
 
-message VerifyDomainRequest { string domain = 1; }
+message VerifyDomainRequest { 
+  string domain = 1; 
+  int64 configId = 2;
+  string configEnvironment = 3;
+}
 
 message VerifyDomainResponse {
   int64 id = 1;
   bool valid = 2;
   SendGridDnsRecords records = 3;
   int32 statusCode = 4;
+}
+
+message CreateEmailServiceConfigRequest {
+  int64 projectId = 1;
+  string environment = 2;
+  string sendgridKey = 3;
+}
+
+message EmailServiceConfig {
+  int64 id = 1;
+  string environment = 2;
+  string sendgridKey = 3;
+  repeated EmailDomain domains = 4;
+  repeated EmailSender senders = 5;
+}
+
+message SetupRequest {
+  int64 projectId = 1;
+  string environment = 2;
+  string sendgridKey = 3;
+}
+
+message SetupResponse {
+  bool success = 1;
+  EmailServiceConfig config = 2;
+}
+
+message GetEmailServiceConfigRequest {
+  int64 id = 1;
+  string environment = 2;
 }

@@ -19,6 +19,22 @@ export class RegisterEmailModel {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'The name to assosicate with the email',
+  })
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'email',
+    description: 'The email to reply-to',
+  })
+  @IsOptional()
+  @IsEmail()
+  replyTo?: string;
 }
 
 export class RegisterEmailResponse {
@@ -32,6 +48,15 @@ export class RegisterEmailResponse {
   constructor(email: string) {
     this.email = email;
   }
+}
+
+export class SetupEmailServiceModel {
+  @ApiProperty({
+    type: 'string',
+    description: 'The sendgrid API Key to use',
+  })
+  @IsNotEmpty()
+  sendgridKey: string;
 }
 
 class EmailRecipient {

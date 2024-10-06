@@ -10,13 +10,14 @@ import * as request from 'supertest';
 import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
 
-let token: string;
 let apiKey: string;
+jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -38,6 +39,21 @@ afterAll((done) => {
   done();
 });
 
+async function createApiKey(proj: string, env: string): Promise<string> {
+  const key = await request(app.getHttpServer())
+    .post('/auth/key')
+    .send({
+      email: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+      environment: env,
+      project: {
+        name: proj,
+      },
+    });
+
+  return key.body['apiKey'];
+}
+
 beforeEach(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -50,30 +66,63 @@ beforeEach(async () => {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
 
-  if (!token) {
-    const key = await request(app.getHttpServer())
-      .post('/auth/key')
-      .send({
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
-        environment: 'prod',
-        project: {
-          name: 'test-seed-project',
-        },
-      });
-
-    apiKey = key.body['apiKey'];
-
-    const jwt = await request(app.getHttpServer())
-      .post('/auth/jwt')
-      .set('Authorization', `Bearer ${apiKey}`)
-      .send();
-
-    token = jwt.body['token'];
+  if (!apiKey) {
+    apiKey = await createApiKey('test-seed-project', 'prod');
   }
+});
+
+describe('Email Service Setup Routes', () => {
+  it('Creates a new service for a different env', async () => {
+    const apiKey = await createApiKey('test-seed-project', 'dev');
+    await request(app.getHttpServer())
+      .post('/email/setup')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        sendgridKey: 'test-key-dev-env',
+      })
+      .expect(201);
+
+    // make sure this worked by registering a domain
+    return request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        domain: 'example.com',
+        subdomain: 'sub',
+      })
+      .expect(201);
+  });
+
+  it('Fails without a sendgridKey', async () => {
+    const apiKey = await createApiKey('test-seed-project', 'dev2');
+    return request(app.getHttpServer())
+      .post('/email/setup')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({})
+      .expect(400);
+  });
+
+  it('Fails when called without an API Key', () => {
+    return request(app.getHttpServer())
+      .post('/email/setup')
+      .send({
+        sendgridKey: 'test-key',
+      })
+      .expect(401);
+  });
+  it('Fails when called with an invalid API Key', () => {
+    return request(app.getHttpServer())
+      .post('/email/setup')
+      .set('Authorization', 'Bearer invalid.api.key')
+      .send({
+        sendgridKey: 'test-key',
+      })
+      .expect(401);
+  });
 });
 
 describe('Email Registration Routes', () => {
@@ -89,6 +138,7 @@ describe('Email Registration Routes', () => {
       .set('Authorization', 'Bearer ' + apiKey)
       .send({
         email: 'invalidemail', // Malformed email
+        name: 'name',
       })
       .expect(400);
   });
@@ -97,6 +147,7 @@ describe('Email Registration Routes', () => {
       .post('/email/register-sender')
       .send({
         email: 'validemail@example.com',
+        name: 'name',
       })
       .expect(401);
   });
@@ -106,6 +157,7 @@ describe('Email Registration Routes', () => {
       .set('Authorization', 'Bearer invalid.api.key')
       .send({
         email: 'validemail@example.com',
+        name: 'name',
       })
       .expect(401);
   });
@@ -116,6 +168,7 @@ describe('Email Registration Routes', () => {
       .set('Authorization', 'Bearer ' + apiKey)
       .send({
         email: 'validemail@example.com',
+        name: 'name',
       })
       .expect(201); // Assuming the server responds with 201 Created on successful registration
   });

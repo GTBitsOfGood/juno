@@ -24,6 +24,8 @@ export interface SendEmailRequest {
   bcc: EmailRecipient[];
   sender: SenderInfo | undefined;
   content: EmailContent[];
+  configId: number;
+  configEnvironment: string;
 }
 
 export interface SenderInfo {
@@ -50,6 +52,7 @@ export interface CreateEmailSenderRequest {
   configId: number;
   description?: string | undefined;
   domain: string;
+  configEnvironment: string;
 }
 
 export interface EmailUpdateParams {
@@ -64,6 +67,7 @@ export interface UpdateEmailSenderRequest {
 export interface DeleteEmailSenderRequest {
   emailSenderIdentifier: EmailSenderIdentifier | undefined;
   configId: number;
+  configEnvironment: string;
 }
 
 export interface SendEmailSenderRequestResponse {
@@ -74,6 +78,8 @@ export interface RegisterSenderRequest {
   fromEmail: string;
   fromName: string;
   replyTo: string;
+  configId: number;
+  configEnvironment: string;
 }
 
 export interface RegisterSenderResponse {
@@ -85,6 +91,7 @@ export interface AuthenticateDomainRequest {
   domain: string;
   subdomain?: string | undefined;
   configId: number;
+  configEnvironment: string;
 }
 
 export interface AuthenticateDomainResponse {
@@ -123,10 +130,13 @@ export interface CreateEmailDomainRequest {
   subdomain: string;
   sendgridId: number;
   configId: number;
+  configEnvironment: string;
 }
 
 export interface VerifyDomainRequest {
   domain: string;
+  configId: number;
+  configEnvironment: string;
 }
 
 export interface VerifyDomainResponse {
@@ -136,9 +146,41 @@ export interface VerifyDomainResponse {
   statusCode: number;
 }
 
+export interface CreateEmailServiceConfigRequest {
+  projectId: number;
+  environment: string;
+  sendgridKey: string;
+}
+
+export interface EmailServiceConfig {
+  id: number;
+  environment: string;
+  sendgridKey: string;
+  domains: EmailDomain[];
+  senders: EmailSender[];
+}
+
+export interface SetupRequest {
+  projectId: number;
+  environment: string;
+  sendgridKey: string;
+}
+
+export interface SetupResponse {
+  success: boolean;
+  config: EmailServiceConfig | undefined;
+}
+
+export interface GetEmailServiceConfigRequest {
+  id: number;
+  environment: string;
+}
+
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
+  setup(request: SetupRequest): Observable<SetupResponse>;
+
   sendEmail(request: SendEmailRequest): Observable<SendEmailResponse>;
 
   registerSender(
@@ -153,6 +195,10 @@ export interface EmailServiceClient {
 }
 
 export interface EmailServiceController {
+  setup(
+    request: SetupRequest,
+  ): Promise<SetupResponse> | Observable<SetupResponse> | SetupResponse;
+
   sendEmail(
     request: SendEmailRequest,
   ):
@@ -185,6 +231,7 @@ export interface EmailServiceController {
 export function EmailServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
+      'setup',
       'sendEmail',
       'registerSender',
       'authenticateDomain',
@@ -230,6 +277,14 @@ export interface EmailDbServiceClient {
   getEmailDomain(request: EmailDomainRequest): Observable<EmailDomain>;
 
   createEmailDomain(request: CreateEmailDomainRequest): Observable<EmailDomain>;
+
+  createEmailServiceConfig(
+    request: CreateEmailServiceConfigRequest,
+  ): Observable<EmailServiceConfig>;
+
+  getEmailServiceConfig(
+    request: GetEmailServiceConfigRequest,
+  ): Observable<EmailServiceConfig>;
 }
 
 export interface EmailDbServiceController {
@@ -256,6 +311,20 @@ export interface EmailDbServiceController {
   createEmailDomain(
     request: CreateEmailDomainRequest,
   ): Promise<EmailDomain> | Observable<EmailDomain> | EmailDomain;
+
+  createEmailServiceConfig(
+    request: CreateEmailServiceConfigRequest,
+  ):
+    | Promise<EmailServiceConfig>
+    | Observable<EmailServiceConfig>
+    | EmailServiceConfig;
+
+  getEmailServiceConfig(
+    request: GetEmailServiceConfigRequest,
+  ):
+    | Promise<EmailServiceConfig>
+    | Observable<EmailServiceConfig>
+    | EmailServiceConfig;
 }
 
 export function EmailDbServiceControllerMethods() {
@@ -267,6 +336,8 @@ export function EmailDbServiceControllerMethods() {
       'deleteEmailSender',
       'getEmailDomain',
       'createEmailDomain',
+      'createEmailServiceConfig',
+      'getEmailServiceConfig',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

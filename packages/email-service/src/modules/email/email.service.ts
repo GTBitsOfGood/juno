@@ -22,6 +22,21 @@ export class EmailService implements OnModuleInit {
       );
   }
 
+  async setup(
+    request: EmailProto.SetupRequest,
+  ): Promise<EmailProto.SetupResponse> {
+    const config = await lastValueFrom(
+      this.emailService.createEmailServiceConfig(request),
+    );
+    if (!config) {
+      throw new RpcException('Failed to create email service config');
+    }
+    return {
+      success: true,
+      config,
+    };
+  }
+
   async authenticateDomain(
     req: EmailProto.AuthenticateDomainRequest,
   ): Promise<EmailProto.AuthenticateDomainResponse> {
@@ -29,7 +44,14 @@ export class EmailService implements OnModuleInit {
       throw new RpcException('Cannot register domain (no domain supplied)');
     }
 
-    const sendGridApiKey = process.env.SENDGRID_API_KEY;
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: Number(req.configId),
+        environment: req.configEnvironment,
+      }),
+    );
+
+    const sendGridApiKey = config.sendgridKey;
 
     if (!sendGridApiKey) {
       throw new RpcException(
@@ -45,6 +67,7 @@ export class EmailService implements OnModuleInit {
         subdomain: req.subdomain,
         sendgridId: 0,
         configId: req.configId,
+        configEnvironment: req.configEnvironment,
       });
       return {
         statusCode: 201,
@@ -76,6 +99,7 @@ export class EmailService implements OnModuleInit {
         subdomain: req.subdomain,
         sendgridId: response.data.id,
         configId: req.configId,
+        configEnvironment: req.configEnvironment,
       });
 
       return {
@@ -91,9 +115,18 @@ export class EmailService implements OnModuleInit {
   }
 
   async sendEmail(request: EmailProto.SendEmailRequest): Promise<void> {
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: request.configId,
+        environment: request.configEnvironment,
+      }),
+    );
+
+    const sendGridApiKey = config.sendgridKey;
     // SendGrid Client for future integration with API
     // Conditional statement used for testing without actually calling Sendgrid. Remove when perform actual integration
-    if (process.env.SENDGRID_API_KEY && process.env.NODE_ENV != 'test') {
+    if (process.env.NODE_ENV != 'test') {
+      this.sendgrid.setApiKey(sendGridApiKey);
       await this.sendgrid.send({
         personalizations: [
           {
@@ -126,8 +159,15 @@ export class EmailService implements OnModuleInit {
     if (!req.replyTo) {
       throw new RpcException('Cannot register sender (no reply to specified)');
     }
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: req.configId,
+        environment: req.configEnvironment,
+      }),
+    );
 
-    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    const sendgridApiKey = config.sendgridKey;
+
     const sendgridUrl = 'https://api.sendgrid.com/v3/verified_senders';
 
     if (!sendgridApiKey) {
@@ -171,18 +211,22 @@ export class EmailService implements OnModuleInit {
   async verifyDomain(
     req: EmailProto.VerifyDomainRequest,
   ): Promise<EmailProto.VerifyDomainResponse> {
-    console.log(`verifying`);
     const domain = await lastValueFrom(
       this.emailService.getEmailDomain({
         domain: req.domain,
       }),
     );
 
-    console.log(`verifying: ${JSON.stringify(domain)}`);
-
     const id = domain.sendgridId;
 
-    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: req.configId,
+        environment: req.configEnvironment,
+      }),
+    );
+
+    const sendgridApiKey = config.sendgridKey;
     const sendgridUrl = `https://api.sendgrid.com/v3/whitelabel/domains/${id}/val`;
 
     if (!sendgridApiKey) {

@@ -25,6 +25,21 @@ async function main() {
     },
   });
 
+  await prisma.emailServiceConfig.upsert({
+    where: {
+      id_environment: {
+        environment: 'prod',
+        id: 0,
+      },
+    },
+    update: {},
+    create: {
+      id: 0,
+      environment: 'prod',
+      sendgridApiKey: 'test-key',
+    },
+  });
+
   await prisma.emailDomain.upsert({
     where: { domain: 'testdomain' },
     update: {},
@@ -33,8 +48,18 @@ async function main() {
       subdomain: 'testsubdomain',
       sendgridId: 0,
       attachedConfigs: {
-        create: {
-          id: 0,
+        connectOrCreate: {
+          create: {
+            configId: 0,
+            configEnv: 'prod',
+          },
+          where: {
+            configId_configEnv_domainStr: {
+              configId: 0,
+              configEnv: 'prod',
+              domainStr: 'testdomain',
+            },
+          },
         },
       },
     },
