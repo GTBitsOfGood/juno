@@ -103,14 +103,14 @@ describe('Email Registration Routes', () => {
   it('Registration endpoint called with an invalid API Key', () => {
     return request(app.getHttpServer())
       .post('/email/register-sender')
-      .set('Authorization', 'Bearer invalid.jwt.token')
+      .set('Authorization', 'Bearer invalid.api.key')
       .send({
         email: 'validemail@example.com',
       })
       .expect(401);
   });
   it('Registration endpoint called with a correct payload (header + body)', () => {
-    // Assuming 'valid.jwt.token' is a placeholder for a valid API Key obtained in a way relevant to your test setup
+    // Assuming 'valid.api.key' is a placeholder for a valid API Key obtained in a way relevant to your test setup
     return request(app.getHttpServer())
       .post('/email/register-sender')
       .set('Authorization', 'Bearer ' + apiKey)
@@ -136,7 +136,7 @@ describe('Email Sending Route', () => {
   it('should return 401 when API Key is invalid', async () => {
     return request(app.getHttpServer())
       .post('/email/send')
-      .set('Authorization', 'Bearer invalid_token')
+      .set('Authorization', 'Bearer invalid_key')
       .send({
         sender: { email: 'testSender@gmail.com' },
         recipients: [{ email: 'testRecipient@gmail.com' }],
@@ -463,7 +463,7 @@ describe('Domain Registration Routes', () => {
   it('Registration endpoint called with an invalid API Key', () => {
     return request(app.getHttpServer())
       .post('/email/register-domain')
-      .set('Authorization', 'Bearer invalid.jwt.token')
+      .set('Authorization', 'Bearer invalid.api.key')
       .send({
         domain: 'example.com',
         subdomain: 'sub',

@@ -112,7 +112,7 @@ export class UserController implements OnModuleInit {
   @ApiOperation({
     summary: 'Update user type.',
     description:
-      'Updates the user type for an existing user. User type can be thought of as a role with role-based permissions, e.g. SUPERADMIN could have permissions an ADMIN would not.',
+      'Updates the user type for an existing user. User type can be thought of as a role with role-based permissions, e.g. SUPERADMIN could have permissions an ADMIN would not. Only SUPERADMIN users can set types',
   })
   @ApiBody({
     type: SetUserTypeModel,

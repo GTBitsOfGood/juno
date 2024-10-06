@@ -36,7 +36,7 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
       }
       const token = this.extractTokenFromHeader(req);
       if (!token) {
-        throw new Error('Api Key not found');
+        throw new Error('API Key not found');
       }
 
       const apiKeyValidation = this.apiKeyService.validateApiKey({
