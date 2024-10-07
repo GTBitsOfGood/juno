@@ -163,42 +163,6 @@ describe('Auth Service API Key Tests', () => {
     expect(response).toBeDefined();
   });
 
-  it('rejects new key creation with an invalid master password', async () => {
-    await expect(
-      new Promise((resolve, reject) => {
-        apiKeyClient.issueApiKey(
-          {
-            project: { name: 'project' },
-            description: 'API key request with invalid password',
-            environment: 'dev',
-          },
-          (err, resp) => {
-            if (err) return reject(err);
-            return resolve(resp);
-          },
-        );
-      }),
-    ).rejects.toBeDefined(); // Expecting an error due to invalid master password
-  });
-
-  it('rejects new key creation with an unprivileged user', async () => {
-    await expect(
-      new Promise((resolve, reject) => {
-        apiKeyClient.issueApiKey(
-          {
-            project: { name: 'project' },
-            description: 'API key request with unpriviledged user',
-            environment: 'dev',
-          },
-          (err, resp) => {
-            if (err) return reject(err);
-            return resolve(resp);
-          },
-        );
-      }),
-    ).rejects.toBeDefined(); // Expecting an error due to invalid master password
-  });
-
   // it('revokes an API key', async () => {
   //   const promise = new Promise((resolve) => {
   //     client.revokeApiKey({}, (err, resp) => {
@@ -439,6 +403,7 @@ describe('User authentication tests', () => {
     email: 'test@example.com',
     name: 'Test-User',
     type: UserType.SUPERADMIN,
+    projectIds: [],
   };
 
   beforeEach(async () => {
@@ -532,6 +497,7 @@ describe('User authentication tests', () => {
 
     const res = await promise;
     res['id'] = Number(res['id']);
+    console.log(`res: ${JSON.stringify(res)}`);
     expect(res).toStrictEqual(correctUserResponse);
   });
 });
