@@ -79,7 +79,7 @@ export class AuthController implements OnModuleInit {
       type: 'string',
     },
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('API_Key')
   async getJWT(@Headers('Authorization') apiKey?: string) {
     const key = apiKey?.replace('Bearer ', '');
     if (key === undefined) {
@@ -157,7 +157,7 @@ export class AuthController implements OnModuleInit {
       type: 'string',
     },
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('API_Key')
   @Delete('/key')
   async deleteApiKey(@Headers('Authorization') apiKey?: string) {
     const key = apiKey?.replace('Bearer ', '');
