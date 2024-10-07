@@ -214,6 +214,7 @@ describe('DB Service User Tests', () => {
           expect(resp['email']).toBe('test@test.com');
           expect(resp['name']).toBe('some-name');
           expect(resp['type']).toBe(UserType.SUPERADMIN);
+          expect(resp['projectIds'].map((id) => Number(id))).toStrictEqual([1]);
           resolve({});
         },
       );

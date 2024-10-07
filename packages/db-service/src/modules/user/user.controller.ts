@@ -69,7 +69,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
-      projectIds: [],
+      projectIds: [1],
     };
   }
 

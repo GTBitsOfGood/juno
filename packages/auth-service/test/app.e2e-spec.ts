@@ -17,7 +17,7 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-import { User, UserType } from 'juno-proto/dist/gen/user';
+import { UserType } from 'juno-proto/dist/gen/user';
 import { sign } from 'jsonwebtoken';
 import { createHash, randomBytes } from 'crypto';
 
@@ -398,12 +398,11 @@ describe('Auth Service JWT Tests', () => {
 describe('User authentication tests', () => {
   let client: any;
 
-  const correctUserResponse: User = {
+  const correctUserResponse = {
     id: 1,
     email: 'test@example.com',
     name: 'Test-User',
     type: UserType.SUPERADMIN,
-    projectIds: [],
   };
 
   beforeEach(async () => {
