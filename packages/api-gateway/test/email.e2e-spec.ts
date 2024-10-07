@@ -42,9 +42,9 @@ afterAll((done) => {
 async function createApiKey(proj: string, env: string): Promise<string> {
   const key = await request(app.getHttpServer())
     .post('/auth/key')
+    .set('X-User-Email', ADMIN_EMAIL)
+    .set('X-User-Password', ADMIN_PASSWORD)
     .send({
-      email: ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
       environment: env,
       project: {
         name: proj,

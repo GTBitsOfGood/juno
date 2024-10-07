@@ -53,22 +53,6 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async issueApiKey(
     request: ApiKeyProto.IssueApiKeyRequest,
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
-    // TODO: Validate user type before generating key (only linked admin or any superadmin)
-
-    const user = await lastValueFrom(
-      this.userAuthService.authenticate({
-        email: request.email,
-        password: request.password,
-      }),
-    );
-
-    if (!user || user.type !== UserProto.UserType.SUPERADMIN) {
-      throw new RpcException({
-        code: status.PERMISSION_DENIED,
-        message: 'User not permitted to generate keys',
-      });
-    }
-
     const rawApiKey = randomBytes(32).toString('hex');
     const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
     const key = this.apiKeyDbService.createApiKey({

@@ -14,8 +14,6 @@ export const protobufPackage = 'juno.api_key';
 
 export interface IssueApiKeyRequest {
   project: ProjectIdentifier | undefined;
-  email: string;
-  password: string;
   description: string;
   environment: string;
 }

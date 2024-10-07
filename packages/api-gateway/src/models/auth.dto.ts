@@ -3,14 +3,6 @@ import { IsNotEmpty } from 'class-validator';
 import { ApiKeyProto, IdentifierProto, JwtProto } from 'juno-proto';
 
 export class IssueApiKeyRequest {
-  @ApiProperty({ description: 'Issuing user email' })
-  @IsNotEmpty()
-  email: string;
-
-  @ApiProperty({ description: 'Issuing user password' })
-  @IsNotEmpty()
-  password: string;
-
   @ApiProperty({ description: 'Optional description for key' })
   description?: string | undefined;
 

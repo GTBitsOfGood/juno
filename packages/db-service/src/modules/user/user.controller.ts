@@ -43,6 +43,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
+      projectIds: user.allowedProjects.map((project) => project.id),
     };
   }
 
@@ -68,6 +69,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
+      projectIds: [1],
     };
   }
 
@@ -84,6 +86,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
+      projectIds: user.allowedProjects.map((project) => project.id),
     };
   }
 
@@ -97,6 +100,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
+      projectIds: user.allowedProjects.map((project) => project.id),
     };
   }
 
@@ -112,6 +116,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       ...updated,
       type: this.mapPrismaRoleToRPC(updated.type),
+      projectIds: updated.allowedProjects.map((project) => project.id),
     };
   }
 }

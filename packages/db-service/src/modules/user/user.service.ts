@@ -2,6 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
+const userWithProjectIds = {
+  include: {
+    allowedProjects: {
+      select: {
+        id: true,
+      },
+    },
+  },
+};
+
+type UserWithProjectIds = Prisma.UserGetPayload<typeof userWithProjectIds>;
+
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
@@ -22,9 +34,10 @@ export class UserService {
     });
   }
 
-  async user(lookup: Prisma.UserWhereUniqueInput): Promise<User> {
+  async user(lookup: Prisma.UserWhereUniqueInput): Promise<UserWithProjectIds> {
     return this.prisma.user.findUnique({
       where: lookup,
+      ...userWithProjectIds,
     });
   }
 
@@ -37,16 +50,20 @@ export class UserService {
   async updateUser(
     user: Prisma.UserWhereUniqueInput,
     update: Prisma.UserUpdateInput,
-  ): Promise<User> {
+  ): Promise<UserWithProjectIds> {
     return this.prisma.user.update({
       where: user,
       data: update,
+      ...userWithProjectIds,
     });
   }
 
-  async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
+  async deleteUser(
+    where: Prisma.UserWhereUniqueInput,
+  ): Promise<UserWithProjectIds> {
     return this.prisma.user.delete({
       where,
+      ...userWithProjectIds,
     });
   }
 }

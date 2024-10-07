@@ -17,7 +17,7 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-import { User, UserType } from 'juno-proto/dist/gen/user';
+import { UserType } from 'juno-proto/dist/gen/user';
 import { sign } from 'jsonwebtoken';
 import { createHash, randomBytes } from 'crypto';
 
@@ -150,8 +150,6 @@ describe('Auth Service API Key Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },
@@ -163,46 +161,6 @@ describe('Auth Service API Key Tests', () => {
     });
 
     expect(response).toBeDefined();
-  });
-
-  it('rejects new key creation with an invalid master password', async () => {
-    await expect(
-      new Promise((resolve, reject) => {
-        apiKeyClient.issueApiKey(
-          {
-            project: { name: 'project' },
-            email: 'test@example.com',
-            password: 'notthepassword123',
-            description: 'API key request with invalid password',
-            environment: 'dev',
-          },
-          (err, resp) => {
-            if (err) return reject(err);
-            return resolve(resp);
-          },
-        );
-      }),
-    ).rejects.toBeDefined(); // Expecting an error due to invalid master password
-  });
-
-  it('rejects new key creation with an unprivileged user', async () => {
-    await expect(
-      new Promise((resolve, reject) => {
-        apiKeyClient.issueApiKey(
-          {
-            project: { name: 'project' },
-            email: 'test2@example.com',
-            password: 'password123',
-            description: 'API key request with unpriviledged user',
-            environment: 'dev',
-          },
-          (err, resp) => {
-            if (err) return reject(err);
-            return resolve(resp);
-          },
-        );
-      }),
-    ).rejects.toBeDefined(); // Expecting an error due to invalid master password
   });
 
   // it('revokes an API key', async () => {
@@ -243,8 +201,6 @@ describe('Auth Service JWT Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },
@@ -321,8 +277,6 @@ describe('Auth Service JWT Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },
@@ -407,8 +361,6 @@ describe('Auth Service JWT Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },
@@ -446,7 +398,7 @@ describe('Auth Service JWT Tests', () => {
 describe('User authentication tests', () => {
   let client: any;
 
-  const correctUserResponse: User = {
+  const correctUserResponse = {
     id: 1,
     email: 'test@example.com',
     name: 'Test-User',
@@ -544,6 +496,7 @@ describe('User authentication tests', () => {
 
     const res = await promise;
     res['id'] = Number(res['id']);
+    console.log(`res: ${JSON.stringify(res)}`);
     expect(res).toStrictEqual(correctUserResponse);
   });
 });
