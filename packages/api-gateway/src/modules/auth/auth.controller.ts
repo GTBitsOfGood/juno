@@ -20,35 +20,44 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
-import { ApiKeyProto, JwtProto } from 'juno-proto';
-import { ApiKeyServiceClient } from 'juno-proto/dist/gen/api_key';
-import { JwtServiceClient } from 'juno-proto/dist/gen/jwt';
+import { ApiKeyProto, JwtProto, ProjectProto, UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
+import { User } from 'src/decorators/user.decorator';
 import {
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   IssueJWTResponse,
 } from 'src/models/auth.dto';
+import { userLinkedToProject } from 'src/user_project_validator';
 
 const { JWT_SERVICE_NAME } = JwtProto;
 const { API_KEY_SERVICE_NAME } = ApiKeyProto;
+const { PROJECT_SERVICE_NAME } = ProjectProto;
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController implements OnModuleInit {
-  private jwtService: JwtServiceClient;
-  private apiKeyService: ApiKeyServiceClient;
+  private jwtService: JwtProto.JwtServiceClient;
+  private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
+  private projectService: ProjectProto.ProjectServiceClient;
 
   constructor(
     @Inject(JWT_SERVICE_NAME) private jwtClient: ClientGrpc,
     @Inject(API_KEY_SERVICE_NAME) private apiClient: ClientGrpc,
+    @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.jwtService =
-      this.jwtClient.getService<JwtServiceClient>(JWT_SERVICE_NAME);
+      this.jwtClient.getService<JwtProto.JwtServiceClient>(JWT_SERVICE_NAME);
     this.apiKeyService =
-      this.apiClient.getService<ApiKeyServiceClient>(API_KEY_SERVICE_NAME);
+      this.apiClient.getService<ApiKeyProto.ApiKeyServiceClient>(
+        API_KEY_SERVICE_NAME,
+      );
+    this.projectService =
+      this.projectClient.getService<ProjectProto.ProjectServiceClient>(
+        PROJECT_SERVICE_NAME,
+      );
   }
 
   @Post('/jwt')
@@ -106,7 +115,20 @@ export class AuthController implements OnModuleInit {
   })
   @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
-  async createApiKey(@Body() issueApiKeyRequest: IssueApiKeyRequest) {
+  async createApiKey(
+    @User() user: UserProto.User,
+    @Body() issueApiKeyRequest: IssueApiKeyRequest,
+  ) {
+    const linked = await userLinkedToProject({
+      project: issueApiKeyRequest.project,
+      user,
+      projectClient: this.projectService,
+    });
+    if (!linked || user.type == UserProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can create API Keys',
+      );
+    }
     const obs = this.apiKeyService.issueApiKey({
       description: issueApiKeyRequest.description,
       environment: issueApiKeyRequest.environment,

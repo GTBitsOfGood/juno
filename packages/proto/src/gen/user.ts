@@ -23,6 +23,7 @@ export interface User {
   email: string;
   name: string;
   type: UserType;
+  projectIds: number[];
 }
 
 export interface UserPasswordHash {

@@ -8,13 +8,21 @@ import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { UserController } from './user.controller';
-import { UserProto, UserProtoFile, JwtProto, JwtProtoFile } from 'juno-proto';
+import {
+  UserProto,
+  UserProtoFile,
+  JwtProto,
+  JwtProtoFile,
+  ProjectProto,
+  ProjectProtoFile,
+} from 'juno-proto';
 
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
 
 const { USER_SERVICE_NAME, USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } =
   UserProto;
+const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 @Module({
   imports: [
@@ -47,6 +55,15 @@ const { USER_SERVICE_NAME, USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } =
           url: process.env.AUTH_SERVICE_ADDR,
           package: JUNO_USER_PACKAGE_NAME,
           protoPath: UserProtoFile,
+        },
+      },
+      {
+        name: PROJECT_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.DB_SERVICE_ADDR,
+          package: JUNO_PROJECT_PACKAGE_NAME,
+          protoPath: ProjectProtoFile,
         },
       },
     ]),

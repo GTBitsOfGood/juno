@@ -122,7 +122,10 @@ export class ProjectController implements OnModuleInit {
     @Body() params: CreateProjectModel,
   ) {
     if (user.type !== UserProto.UserType.SUPERADMIN) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        'Only Superadmins can create projects',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     const project = this.projectService.createProject({
       name: params.name,

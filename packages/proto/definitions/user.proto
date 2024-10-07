@@ -23,6 +23,7 @@ message User {
   string email = 2;
   string name = 3;
   UserType type = 4;
+  repeated int64 projectIds = 5;
 }
 
 message UserPasswordHash { string hash = 1; }

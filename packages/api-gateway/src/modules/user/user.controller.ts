@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiResponse,
@@ -19,7 +20,7 @@ import {
   ApiHeader,
 } from '@nestjs/swagger';
 import { ClientGrpc } from '@nestjs/microservices';
-import { UserProto } from 'juno-proto';
+import { ProjectProto, UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import {
   CreateUserModel,
@@ -28,20 +29,30 @@ import {
   UserResponse,
 } from 'src/models/user.dto';
 import { User } from 'src/decorators/user.decorator';
+import { userLinkedToProject } from 'src/user_project_validator';
 
 const { USER_SERVICE_NAME } = UserProto;
+const { PROJECT_SERVICE_NAME } = ProjectProto;
 
 @ApiTags('user')
 @Controller('user')
 export class UserController implements OnModuleInit {
   private userService: UserProto.UserServiceClient;
+  private projectService: ProjectProto.ProjectServiceClient;
 
-  constructor(@Inject(USER_SERVICE_NAME) private userClient: ClientGrpc) {}
+  constructor(
+    @Inject(USER_SERVICE_NAME) private userClient: ClientGrpc,
+    @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
+  ) {}
 
   onModuleInit() {
     this.userService =
       this.userClient.getService<UserProto.UserServiceClient>(
         USER_SERVICE_NAME,
+      );
+    this.projectService =
+      this.projectClient.getService<ProjectProto.ProjectServiceClient>(
+        PROJECT_SERVICE_NAME,
       );
   }
 
@@ -114,7 +125,7 @@ export class UserController implements OnModuleInit {
     @User() user: UserProto.User,
     @Body() params: CreateUserModel,
   ) {
-    if (user.type !== UserProto.UserType.SUPERADMIN) {
+    if (user.type == UserProto.UserType.USER) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
     const createdUser = this.userService.createUser({
@@ -231,12 +242,21 @@ export class UserController implements OnModuleInit {
     @Param('id') idStr: string,
     @Body() linkProjectBody: LinkProjectModel,
   ) {
-    if (user.type !== UserProto.UserType.SUPERADMIN) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
     const id = parseInt(idStr);
     if (Number.isNaN(id)) {
       throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);
+    }
+    const linked = await userLinkedToProject({
+      project: {
+        id,
+      },
+      user,
+      projectClient: this.projectService,
+    });
+    if (!linked || user.type == UserProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can link Users to Projects',
+      );
     }
     const project = this.userService.linkProject({
       user: {
