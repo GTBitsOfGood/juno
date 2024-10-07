@@ -35,7 +35,7 @@ import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { EMAIL_SERVICE_NAME } = EmailProto;
 
-@ApiBearerAuth()
+@ApiBearerAuth('API_Key')
 @ApiTags('email')
 @Controller('email')
 export class EmailController implements OnModuleInit {
