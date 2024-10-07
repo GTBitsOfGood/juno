@@ -23,6 +23,7 @@ export interface SendEmailRequest {
   cc: EmailRecipient[];
   bcc: EmailRecipient[];
   sender: SenderInfo | undefined;
+  subject: string;
   content: EmailContent[];
   configId: number;
   configEnvironment: string;

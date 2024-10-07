@@ -175,6 +175,14 @@ export class SendEmailModel {
   sender: EmailSender | undefined;
 
   @ApiProperty({
+    type: 'string',
+    example: 'Email subject',
+    description: 'The subject of the email',
+  })
+  @IsNotEmpty()
+  subject: string;
+
+  @ApiProperty({
     type: [EmailContent],
     description: 'List of MIME content to send in the email',
   })

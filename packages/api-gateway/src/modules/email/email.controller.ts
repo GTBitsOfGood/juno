@@ -200,6 +200,7 @@ export class EmailController implements OnModuleInit {
             email: req.sender.email,
             name: req.sender.name,
           },
+          subject: req.subject,
           content: req.content,
           configId: apiKey.project.id,
           configEnvironment: apiKey.environment,
