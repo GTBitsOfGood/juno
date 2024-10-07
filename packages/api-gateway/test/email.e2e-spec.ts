@@ -182,6 +182,7 @@ describe('Email Sending Route', () => {
         sender: { email: 'testSender@gmail.com' },
         recipients: [{ email: 'testRecipient@gmail.com' }],
         content: [{ type: 'text/plain', value: 'Test email' }],
+        subject: 'Test email',
       })
       .expect(401);
   });
@@ -194,6 +195,7 @@ describe('Email Sending Route', () => {
         sender: { email: 'testSender@gmail.com' },
         recipients: [{ email: 'testRecipient@gmail.com' }],
         content: [{ type: 'text/plain', value: 'Test email' }],
+        subject: 'Test email',
       })
       .expect(401);
   });
@@ -205,6 +207,7 @@ describe('Email Sending Route', () => {
       .send({
         sender: { email: 'testSender@gmail.com' },
         recipients: [{ email: 'testRecipient@gmail.com' }],
+        subject: 'Test email',
         content: [{ type: 'text/plain', value: 'Test email' }],
       })
       .expect(201);
@@ -219,6 +222,7 @@ describe('Email Sending Route', () => {
         recipients: [
           { email: 'testRecipient@gmail.com', name: 'RecipientName' },
         ],
+        subject: 'Test email',
         content: [{ type: 'text/plain', value: 'Test email' }],
       })
       .expect(201);
@@ -234,6 +238,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [{ type: 'text/plain', value: 'Test email' }],
       })
       .expect(201);
@@ -249,6 +254,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -268,6 +274,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
         cc: [{ email: 'testRecipient1@gmail.com', name: 'RecipientName1' }],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -287,6 +294,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
         bcc: [{ email: 'testRecipient1@gmail.com', name: 'RecipientName1' }],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -313,6 +321,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -331,6 +340,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -349,6 +359,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -367,6 +378,7 @@ describe('Email Sending Route', () => {
           { email: '', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -385,6 +397,7 @@ describe('Email Sending Route', () => {
           { email: 'invalid-email', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -403,6 +416,7 @@ describe('Email Sending Route', () => {
           { email: null, name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -421,6 +435,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: '', value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -439,6 +454,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: null, value: 'Test email' },
           { type: 'text/plain', value: 'Test email' },
@@ -457,6 +473,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: '' },
           { type: 'text/plain', value: 'Test email' },
@@ -475,6 +492,7 @@ describe('Email Sending Route', () => {
           { email: 'testRecipient1@gmail.com', name: 'RecipientName1' },
           { email: 'testRecipient2@gmail.com', name: 'RecipientName2' },
         ],
+        subject: 'Test email',
         content: [
           { type: 'text/plain', value: null },
           { type: 'text/plain', value: 'Test email' },

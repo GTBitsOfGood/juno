@@ -4,6 +4,7 @@ import { SendGridService } from 'src/sendgrid.service';
 import axios from 'axios';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { MailDataRequired } from '@sendgrid/mail';
 
 const { EMAIL_DB_SERVICE_NAME } = EmailProto;
 
@@ -126,24 +127,24 @@ export class EmailService implements OnModuleInit {
     // SendGrid Client for future integration with API
     // Conditional statement used for testing without actually calling Sendgrid. Remove when perform actual integration
     if (process.env.NODE_ENV != 'test') {
-      this.sendgrid.setApiKey(sendGridApiKey);
-      await this.sendgrid.send({
-        personalizations: [
-          {
-            to: request.recipients,
-            cc: request.cc,
-            bcc: request.bcc,
+      const sendgrid = new SendGridService();
+      sendgrid.setApiKey(sendGridApiKey);
+      try {
+        const data: MailDataRequired = {
+          to: request.recipients,
+          cc: request.cc,
+          bcc: request.bcc,
+          from: {
+            email: request.sender.email,
+            name: request.sender.name,
           },
-        ],
-        from: {
-          email: request.sender.email,
-          name: request.sender.name,
-        },
-        content: [
-          request.content[0],
-          ...request.content.slice(1, request.content.length),
-        ],
-      });
+          subject: request.subject,
+          content: [request.content[0], ...request.content.splice(1)],
+        };
+        await sendgrid.send(data);
+      } catch (err) {
+        throw new RpcException(JSON.stringify(err));
+      }
     }
   }
 

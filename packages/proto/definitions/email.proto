@@ -22,7 +22,8 @@ service EmailDbService {
   rpc createEmailDomain(CreateEmailDomainRequest) returns (EmailDomain);
   rpc createEmailServiceConfig(CreateEmailServiceConfigRequest)
       returns (EmailServiceConfig);
-  rpc getEmailServiceConfig(GetEmailServiceConfigRequest) returns (EmailServiceConfig);
+  rpc getEmailServiceConfig(GetEmailServiceConfigRequest)
+      returns (EmailServiceConfig);
 }
 
 message EmailSender {
@@ -37,9 +38,10 @@ message SendEmailRequest {
   repeated EmailRecipient cc = 2;
   repeated EmailRecipient bcc = 3;
   SenderInfo sender = 4;
-  repeated EmailContent content = 5;
-  int64 configId = 6;
-  string configEnvironment = 7;
+  string subject = 5;
+  repeated EmailContent content = 6;
+  int64 configId = 7;
+  string configEnvironment = 8;
 }
 
 message SenderInfo {
@@ -139,8 +141,8 @@ message CreateEmailDomainRequest {
   string configEnvironment = 5;
 }
 
-message VerifyDomainRequest { 
-  string domain = 1; 
+message VerifyDomainRequest {
+  string domain = 1;
   int64 configId = 2;
   string configEnvironment = 3;
 }
