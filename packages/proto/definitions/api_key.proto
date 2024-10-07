@@ -21,10 +21,8 @@ service ApiKeyDbService {
 
 message IssueApiKeyRequest {
   identifiers.ProjectIdentifier project = 1;
-  string email = 2;
-  string password = 3;
-  string description = 4;
-  string environment = 5;
+  string description = 2;
+  string environment = 3;
 }
 
 message ValidateApiKeyRequest { string apiKey = 1; }

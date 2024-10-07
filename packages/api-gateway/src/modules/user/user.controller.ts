@@ -16,6 +16,7 @@ import {
   ApiParam,
   ApiBody,
   ApiOperation,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { ClientGrpc } from '@nestjs/microservices';
 import { UserProto } from 'juno-proto';
@@ -79,6 +80,22 @@ export class UserController implements OnModuleInit {
 
   @Post()
   @ApiOperation({ summary: 'Create a new user.' })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBody({ type: CreateUserModel, description: 'The user details' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -113,6 +130,22 @@ export class UserController implements OnModuleInit {
     summary: 'Update user type.',
     description:
       'Updates the user type for an existing user. User type can be thought of as a role with role-based permissions, e.g. SUPERADMIN could have permissions an ADMIN would not. Only SUPERADMIN users can set types',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
   })
   @ApiBody({
     type: SetUserTypeModel,
@@ -160,6 +193,22 @@ export class UserController implements OnModuleInit {
     name: 'id',
     description: 'User ID being linked to a project',
     type: String,
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
   })
   @ApiBody({
     type: LinkProjectModel,

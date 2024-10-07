@@ -20,9 +20,9 @@ jest.setTimeout(15000);
 async function APIKeyForProjectName(projectName: string): Promise<string> {
   const key = await request(app.getHttpServer())
     .post('/auth/key')
+    .set('X-User-Email', ADMIN_EMAIL)
+    .set('X-User-Password', ADMIN_PASSWORD)
     .send({
-      email: ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
       environment: 'prod',
       project: {
         name: projectName,
@@ -387,9 +387,9 @@ describe('Project API Key Routes', () => {
   it('Create an API key for a project with valid inputs', async () => {
     const resp = await request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
         environment: 'prod',
         project: {
           name: 'test-seed-project',
@@ -402,9 +402,9 @@ describe('Project API Key Routes', () => {
   it('Deletes an API key for a project with valid inputs', async () => {
     const resp = await request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
         environment: 'prod',
         project: {
           name: 'test-seed-project',
@@ -424,9 +424,9 @@ describe('Project API Key Routes', () => {
   it('Create an API Key for a project with invalid user/pass', async () => {
     await request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', 'not-a-pass')
       .send({
-        email: ADMIN_EMAIL,
-        password: 'not-a-pass',
         environment: 'prod',
         project: {
           name: 'test-seed-project',

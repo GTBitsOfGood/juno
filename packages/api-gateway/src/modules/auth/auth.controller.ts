@@ -88,12 +88,26 @@ export class AuthController implements OnModuleInit {
     description: 'The API Key has been successfully created',
     type: IssueApiKeyResponse,
   })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
   async createApiKey(@Body() issueApiKeyRequest: IssueApiKeyRequest) {
     const obs = this.apiKeyService.issueApiKey({
-      email: issueApiKeyRequest.email,
-      password: issueApiKeyRequest.password,
       description: issueApiKeyRequest.description,
       environment: issueApiKeyRequest.environment,
       project: issueApiKeyRequest.project,

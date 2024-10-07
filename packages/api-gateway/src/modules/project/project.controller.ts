@@ -19,7 +19,7 @@ import {
   ProjectResponse,
 } from 'src/models/project.dto';
 import { AuthCommonProto, ProjectProto, UserProto } from 'juno-proto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 
@@ -91,6 +91,22 @@ export class ProjectController implements OnModuleInit {
   @Post()
   @ApiOperation({
     summary: 'Creates a new project with the specified parameters.',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,

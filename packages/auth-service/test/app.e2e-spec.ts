@@ -150,8 +150,6 @@ describe('Auth Service API Key Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },
@@ -171,8 +169,6 @@ describe('Auth Service API Key Tests', () => {
         apiKeyClient.issueApiKey(
           {
             project: { name: 'project' },
-            email: 'test@example.com',
-            password: 'notthepassword123',
             description: 'API key request with invalid password',
             environment: 'dev',
           },
@@ -191,8 +187,6 @@ describe('Auth Service API Key Tests', () => {
         apiKeyClient.issueApiKey(
           {
             project: { name: 'project' },
-            email: 'test2@example.com',
-            password: 'password123',
             description: 'API key request with unpriviledged user',
             environment: 'dev',
           },
@@ -243,8 +237,6 @@ describe('Auth Service JWT Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },
@@ -321,8 +313,6 @@ describe('Auth Service JWT Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },
@@ -407,8 +397,6 @@ describe('Auth Service JWT Tests', () => {
       apiKeyClient.issueApiKey(
         {
           project: { name: 'project' },
-          email: 'test@example.com',
-          password: 'password123',
           description: 'Valid API key',
           environment: 'dev',
         },

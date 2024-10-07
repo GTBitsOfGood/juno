@@ -56,37 +56,37 @@ describe('Auth Key Verification Routes', () => {
   it('Invalid email parameter when getting auth key', () => {
     return request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', 'invalid-email@gmail.com')
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
-        email: 'invalid-email@gmail.com',
-        password: ADMIN_PASSWORD,
         environment: 'prod',
         project: {
           name: 'test-seed-project',
         },
       })
-      .expect(500);
+      .expect(401);
   });
 
   it('Invalid password parameter when generating auth key', () => {
     return request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', 'invalid-password')
       .send({
-        email: ADMIN_EMAIL,
-        password: 'invalid-password',
         environment: 'prod',
         project: {
           name: 'test-seed-project',
         },
       })
-      .expect(500);
+      .expect(401);
   });
 
   it('Different environment parameter to /auth/key', () => {
     return request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
         environment: 'staging',
         project: {
           name: 'test-seed-project',
@@ -98,9 +98,9 @@ describe('Auth Key Verification Routes', () => {
   it('Invalid project name when generating auth key', () => {
     return request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
         environment: 'prod',
         project: {
           name: 'invalid-project-name',
@@ -134,9 +134,9 @@ describe('JWT Verification Routes', () => {
   it('Expired JWT api key', async () => {
     const key = await request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
         environment: 'prod',
         project: {
           name: 'test-seed-project',
@@ -162,9 +162,9 @@ describe('JWT Verification Routes', () => {
   it('Expected valid request for auth key and jwt generation', async () => {
     const key = await request(app.getHttpServer())
       .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
       .send({
-        email: ADMIN_EMAIL,
-        password: ADMIN_PASSWORD,
         environment: 'prod',
         project: {
           name: 'test-seed-project',
