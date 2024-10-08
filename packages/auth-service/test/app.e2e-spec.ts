@@ -496,7 +496,6 @@ describe('User authentication tests', () => {
 
     const res = await promise;
     res['id'] = Number(res['id']);
-    console.log(`res: ${JSON.stringify(res)}`);
     expect(res).toStrictEqual(correctUserResponse);
   });
 });

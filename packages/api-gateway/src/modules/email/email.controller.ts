@@ -94,6 +94,12 @@ export class EmailController implements OnModuleInit {
         replyTo: params.replyTo ?? params.email,
         configId: apiKey.project.id,
         configEnvironment: apiKey.environment,
+        nickname: params.nickname ?? params.name,
+        address: params.address,
+        city: params.city,
+        state: params.state,
+        zip: params.zip,
+        country: params.country,
       }),
     );
 
@@ -121,14 +127,16 @@ export class EmailController implements OnModuleInit {
       );
     }
 
-    const res = this.emailService.authenticateDomain({
-      domain: req.domain,
-      subdomain: req.subdomain,
-      configId: apiKey.project.id,
-      configEnvironment: apiKey.environment,
-    });
+    const res = await lastValueFrom(
+      this.emailService.authenticateDomain({
+        domain: req.domain,
+        subdomain: req.subdomain,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment,
+      }),
+    );
 
-    return new RegisterDomainResponse(await lastValueFrom(res));
+    return new RegisterDomainResponse(res);
   }
 
   @ApiOperation({
