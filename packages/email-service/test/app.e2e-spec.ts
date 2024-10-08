@@ -77,6 +77,11 @@ describe('Email Service Sender Registration Tests', () => {
             replyTo: 'example@example.com',
             configId: 0,
             configEnvironment: 'prod',
+            address: 'address',
+            city: 'city',
+            state: 'state',
+            country: 'country',
+            zip: 'zip',
           },
           (err: any, response: EmailProto.RegisterSenderResponse) => {
             if (err) {
@@ -102,6 +107,11 @@ describe('Email Service Sender Registration Tests', () => {
           replyTo: '',
           configId: 0,
           configEnvironment: 'prod',
+          address: 'address',
+          city: 'city',
+          state: 'state',
+          country: 'country',
+          zip: 'zip',
         },
         (err: any, response: EmailProto.RegisterSenderResponse) => {
           if (err) {

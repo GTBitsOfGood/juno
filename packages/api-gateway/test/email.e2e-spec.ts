@@ -139,6 +139,11 @@ describe('Email Registration Routes', () => {
       .send({
         email: 'invalidemail', // Malformed email
         name: 'name',
+        address: 'address',
+        city: 'city',
+        state: 'state',
+        country: 'country',
+        zip: 'zip',
       })
       .expect(400);
   });
@@ -148,6 +153,11 @@ describe('Email Registration Routes', () => {
       .send({
         email: 'validemail@example.com',
         name: 'name',
+        address: 'address',
+        city: 'city',
+        state: 'state',
+        country: 'country',
+        zip: 'zip',
       })
       .expect(401);
   });
@@ -158,6 +168,11 @@ describe('Email Registration Routes', () => {
       .send({
         email: 'validemail@example.com',
         name: 'name',
+        address: 'address',
+        city: 'city',
+        state: 'state',
+        country: 'country',
+        zip: 'zip',
       })
       .expect(401);
   });
@@ -169,6 +184,11 @@ describe('Email Registration Routes', () => {
       .send({
         email: 'validemail@example.com',
         name: 'name',
+        address: 'address',
+        city: 'city',
+        state: 'state',
+        country: 'country',
+        zip: 'zip',
       })
       .expect(201); // Assuming the server responds with 201 Created on successful registration
   });

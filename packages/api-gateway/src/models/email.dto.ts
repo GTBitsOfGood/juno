@@ -35,6 +35,54 @@ export class RegisterEmailModel {
   @IsOptional()
   @IsEmail()
   replyTo?: string;
+
+  @ApiProperty({
+    type: 'string',
+    description:
+      'The nickname to assosicate with the sender (only visible in sendgrid)',
+  })
+  @IsOptional()
+  nickname: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: '123 Main St.',
+    description: 'The address to assosicate with the sender',
+  })
+  @IsNotEmpty()
+  address: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'Atlanta',
+    description: 'The city to assosicate with the sender',
+  })
+  @IsNotEmpty()
+  city: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'GA',
+    description: 'The state to assosicate with the sender',
+  })
+  @IsNotEmpty()
+  state: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: '30332',
+    description: 'The zip code to assosicate with the sender',
+  })
+  @IsNotEmpty()
+  zip: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'USA',
+    description: 'The country to assosicate with the sender',
+  })
+  @IsNotEmpty()
+  country: string;
 }
 
 export class RegisterEmailResponse {
@@ -249,7 +297,7 @@ export class RegisterDomainResponse {
       | EmailProto.AuthenticateDomainResponse
       | EmailProto.VerifyDomainResponse,
   ) {
-    this.id = res.id;
+    this.id = Number(res.id);
     this.valid = `${res.valid}`;
     this.records = new SendGridDNSResponse(res.records);
     this.statusCode = res.statusCode;

@@ -5,16 +5,14 @@ import axios from 'axios';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { MailDataRequired } from '@sendgrid/mail';
+import { status } from '@grpc/grpc-js';
 
 const { EMAIL_DB_SERVICE_NAME } = EmailProto;
 
 @Injectable()
 export class EmailService implements OnModuleInit {
   private emailService: EmailProto.EmailDbServiceClient;
-  constructor(
-    private sendgrid: SendGridService,
-    @Inject(EMAIL_DB_SERVICE_NAME) private emailClient: ClientGrpc,
-  ) {}
+  constructor(@Inject(EMAIL_DB_SERVICE_NAME) private emailClient: ClientGrpc) {}
 
   onModuleInit() {
     this.emailService =
@@ -30,7 +28,10 @@ export class EmailService implements OnModuleInit {
       this.emailService.createEmailServiceConfig(request),
     );
     if (!config) {
-      throw new RpcException('Failed to create email service config');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Failed to create email service config',
+      });
     }
     return {
       success: true,
@@ -93,15 +94,21 @@ export class EmailService implements OnModuleInit {
         },
       );
 
-      const records: EmailProto.SendGridDnsRecords = response.data.dns;
+      const records: EmailProto.SendGridDnsRecords = {
+        dkim1: response.data.dns.dkim1,
+        dkim2: response.data.dns.dkim2,
+        mailCname: response.data.dns.mail_cname,
+      };
 
-      this.emailService.createEmailDomain({
-        domain: req.domain,
-        subdomain: req.subdomain,
-        sendgridId: response.data.id,
-        configId: req.configId,
-        configEnvironment: req.configEnvironment,
-      });
+      // await lastValueFrom(
+      //   this.emailService.createEmailDomain({
+      //     domain: req.domain,
+      //     subdomain: req.subdomain,
+      //     sendgridId: response.data.id,
+      //     configId: req.configId,
+      //     configEnvironment: req.configEnvironment,
+      //   }),
+      // );
 
       return {
         statusCode: response.status,
@@ -110,8 +117,13 @@ export class EmailService implements OnModuleInit {
         records,
       };
     } catch (error) {
-      console.error('Error registering domain:', error);
-      throw new RpcException('Failed to register domain');
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: JSON.stringify(error),
+      });
     }
   }
 
@@ -143,7 +155,10 @@ export class EmailService implements OnModuleInit {
         };
         await sendgrid.send(data);
       } catch (err) {
-        throw new RpcException(JSON.stringify(err));
+        throw new RpcException({
+          code: status.INVALID_ARGUMENT,
+          message: JSON.stringify(err),
+        });
       }
     }
   }
@@ -183,13 +198,20 @@ export class EmailService implements OnModuleInit {
         message: 'test register success',
       };
     }
+
     try {
       const res = await axios.post(
         sendgridUrl,
         {
-          fromEmail: req.fromEmail,
-          fromName: req.fromName,
-          replyTo: req.replyTo,
+          nickname: req.nickname ?? req.fromName,
+          from_email: req.fromEmail,
+          from_name: req.fromName,
+          reply_to: req.replyTo,
+          address: req.address,
+          city: req.city,
+          state: req.state,
+          zip: req.zip,
+          country: req.country,
         },
         {
           headers: {
@@ -204,8 +226,10 @@ export class EmailService implements OnModuleInit {
         message: 'Sender registered successfully',
       };
     } catch (err) {
-      console.error('error registering sender:', err);
-      throw new RpcException('Unable to register sender');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: JSON.stringify(err),
+      });
     }
   }
 
@@ -263,7 +287,6 @@ export class EmailService implements OnModuleInit {
         records,
       };
     } catch (error) {
-      console.error('Error registering domain:', error);
       throw new RpcException('Failed to register domain');
     }
   }

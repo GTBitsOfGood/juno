@@ -81,6 +81,12 @@ export interface RegisterSenderRequest {
   replyTo: string;
   configId: number;
   configEnvironment: string;
+  nickname: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
 }
 
 export interface RegisterSenderResponse {

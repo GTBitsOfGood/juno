@@ -240,6 +240,7 @@ export class EmailController implements EmailDbServiceController {
         },
       },
     });
+
     return {
       domain: emailDomain.domain,
       subdomain: emailDomain.subdomain,

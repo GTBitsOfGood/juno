@@ -90,6 +90,12 @@ message RegisterSenderRequest {
   string reply_to = 3;
   int64 configId = 4;
   string configEnvironment = 5;
+  string nickname = 6;
+  string address = 7;
+  string city = 8;
+  string state = 9;
+  string country = 10;
+  string zip = 11;
 }
 
 message RegisterSenderResponse {
