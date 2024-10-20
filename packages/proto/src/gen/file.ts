@@ -10,15 +10,38 @@ import { Observable } from 'rxjs';
 
 export const protobufPackage = 'juno.file_service.file';
 
-export interface File {}
+export interface File {
+  bucket: string;
+  config: string;
+  filePath: string;
+  metadata: string;
+}
 
-export interface GetFileRequest {}
+export interface GetFileRequest {
+  bucket: string;
+  config: string;
+  filePath: string;
+}
 
-export interface CreateFileRequest {}
+export interface CreateFileRequest {
+  bucket: string;
+  config: string;
+  filePath: string;
+  metadata: string;
+}
 
-export interface UpdateFileRequest {}
+export interface UpdateFileRequest {
+  bucket: string;
+  config: string;
+  filePath: string;
+  metadata: string;
+}
 
-export interface DeleteFileRequest {}
+export interface DeleteFileRequest {
+  bucket: string;
+  config: string;
+  filePath: string;
+}
 
 export const JUNO_FILE_SERVICE_FILE_PACKAGE_NAME = 'juno.file_service.file';
 

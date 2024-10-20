@@ -11,12 +11,35 @@ service FileDbService {
   rpc updateFile(UpdateFileRequest) returns (File);
 }
 
-message File {}
+message File {
+  string bucket = 1;
+  string config = 2;
+  string filePath = 3;
+  string metadata = 4;
+}
 
-message GetFileRequest {}
+message GetFileRequest {
+  string bucket = 1;
+  string config = 2;
+  string filePath = 3;
+}
 
-message CreateFileRequest {}
+message CreateFileRequest {
+  string bucket = 1;
+  string config = 2;
+  string filePath = 3;
+  string metadata = 4;
+}
 
-message UpdateFileRequest {}
+message UpdateFileRequest {
+  string bucket = 1;
+  string config = 2;
+  string filePath = 3;
+  string metadata = 4;
+}
 
-message DeleteFileRequest {}
+message DeleteFileRequest {
+  string bucket = 1;
+  string config = 2;
+  string filePath = 3;
+}
