@@ -138,21 +138,21 @@ describe('DB Service File Tests', () => {
           metadata: 'Test metadata',
         },
 
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
-          resolve(resp);
+          resolve({});
         },
       );
     });
 
-    const resultingFile = (await promise) as any;
+    await promise;
 
     const deletionPromise = new Promise((resolve) => {
       fileClient.deleteFile(
         {
-          bucketName: resultingFile.bucketName,
-          configId: resultingFile.configId,
-          filePath: resultingFile.path,
+          bucketName: 'To be deleted',
+          configId: 1,
+          filePath: 'Test/file/path/delete',
         },
         (err) => {
           expect(err).toBeNull();
@@ -192,21 +192,21 @@ describe('DB Service File Tests', () => {
           metadata: 'Test metadata',
         },
 
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
-          resolve(resp);
+          resolve({});
         },
       );
     });
 
-    const resultingFile = (await promise) as any;
+    await promise;
 
     const updatePromise = new Promise((resolve) => {
       fileClient.updateFile(
         {
-          bucketName: resultingFile.bucketName,
-          configId: resultingFile.configId,
-          filePath: resultingFile.path,
+          bucketName: 'To be updated',
+          configId: 1,
+          filePath: 'Test/file/path/update',
           metadata: 'New metadata',
         },
         (err) => {
@@ -262,7 +262,7 @@ describe('DB Service File Tests', () => {
         {
           bucketName: resultingFile.bucketName,
           configId: resultingFile.configId,
-          filePath: resultingFile.path,
+          filePath: resultingFile.filePath,
         },
         (err) => {
           expect(err).toBeNull();
