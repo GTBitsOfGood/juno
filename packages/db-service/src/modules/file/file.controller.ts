@@ -5,6 +5,7 @@ import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { FileDbServiceController } from 'juno-proto/dist/gen/file';
 import { Prisma } from '@prisma/client';
+import { validateFileId } from 'src/utility/validate';
 
 @Controller()
 @FileProto.FileDbServiceControllerMethods()
@@ -14,11 +15,9 @@ export class FileController implements FileDbServiceController {
   async createFile(
     request: FileProto.CreateFileRequest,
   ): Promise<FileProto.File> {
-    const duplicateFile = await this.fileService.getFile(
-      request.bucketName,
-      request.configId,
-      request.filePath,
-    );
+    validateFileId(request.fileId);
+
+    const duplicateFile = await this.fileService.getFile(request.fileId);
 
     if (duplicateFile) {
       throw new RpcException({
@@ -28,25 +27,23 @@ export class FileController implements FileDbServiceController {
     }
 
     const file = await this.fileService.createFile(
-      request.bucketName,
-      request.configId,
-      request.filePath,
+      request.fileId,
       request.metadata,
     );
 
     return {
-      bucketName: file.bucketName,
-      configId: file.configId,
-      filePath: file.path,
+      fileId: {
+        bucketName: file.bucketName,
+        configId: file.configId,
+        path: file.path,
+      },
       metadata: file.metadata,
     };
   }
   async getFile(request: FileProto.GetFileRequest): Promise<FileProto.File> {
-    const file = await this.fileService.getFile(
-      request.bucketName,
-      request.configId,
-      request.filePath,
-    );
+    validateFileId(request.fileId);
+
+    const file = await this.fileService.getFile(request.fileId);
 
     if (!file) {
       throw new RpcException({
@@ -56,9 +53,11 @@ export class FileController implements FileDbServiceController {
     }
 
     return {
-      bucketName: file.bucketName,
-      configId: file.configId,
-      filePath: file.path,
+      fileId: {
+        bucketName: file.bucketName,
+        configId: file.configId,
+        path: file.path,
+      },
       metadata: file.metadata,
     };
   }
@@ -66,18 +65,20 @@ export class FileController implements FileDbServiceController {
   async updateFile(
     request: FileProto.UpdateFileRequest,
   ): Promise<FileProto.File> {
+    validateFileId(request.fileId);
+
     try {
       const file = await this.fileService.updateFile(
-        request.bucketName,
-        request.configId,
-        request.filePath,
+        request.fileId,
         request.metadata,
       );
 
       return {
-        bucketName: file.bucketName,
-        configId: file.configId,
-        filePath: file.path,
+        fileId: {
+          bucketName: file.bucketName,
+          configId: file.configId,
+          path: file.path,
+        },
         metadata: file.metadata,
       };
     } catch (e) {
@@ -96,16 +97,16 @@ export class FileController implements FileDbServiceController {
   async deleteFile(
     request: FileProto.DeleteFileRequest,
   ): Promise<FileProto.File> {
+    validateFileId(request.fileId);
+
     try {
-      const file = await this.fileService.deleteFile(
-        request.bucketName,
-        request.configId,
-        request.filePath,
-      );
+      const file = await this.fileService.deleteFile(request.fileId);
       return {
-        bucketName: file.bucketName,
-        configId: file.configId,
-        filePath: file.path,
+        fileId: {
+          bucketName: file.bucketName,
+          configId: file.configId,
+          path: file.path,
+        },
         metadata: file.metadata,
       };
     } catch (e) {

@@ -1,55 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { FileServiceFile } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+import { IdentifierProto } from 'juno-proto';
 
 @Injectable()
 export class FileService {
   constructor(private prisma: PrismaService) {}
 
   async createFile(
-    bucketName: string,
-    configId: number,
-    filePath: string,
+    fileId: IdentifierProto.FileIdentifier,
     metadata: string,
   ): Promise<FileServiceFile> {
     return this.prisma.fileServiceFile.create({
       data: {
-        path: filePath,
-        configId: configId,
-        bucketName: bucketName,
+        ...fileId,
         metadata: metadata,
       },
     });
   }
 
   async getFile(
-    bucketName: string,
-    configId: number,
-    filePath: string,
+    fileId: IdentifierProto.FileIdentifier,
   ): Promise<FileServiceFile> {
     return this.prisma.fileServiceFile.findUnique({
       where: {
         path_bucketName_configId: {
-          path: filePath,
-          bucketName: bucketName,
-          configId: configId,
+          ...fileId,
         },
       },
     });
   }
 
   async updateFile(
-    bucketName: string,
-    configId: number,
-    filePath: string,
+    fileId: IdentifierProto.FileIdentifier,
     metadata: string,
   ): Promise<FileServiceFile> {
     return this.prisma.fileServiceFile.update({
       where: {
         path_bucketName_configId: {
-          path: filePath,
-          bucketName: bucketName,
-          configId: configId,
+          ...fileId,
         },
       },
       data: {
@@ -59,16 +48,12 @@ export class FileService {
   }
 
   async deleteFile(
-    bucketName: string,
-    configId: number,
-    filePath: string,
+    fileId: IdentifierProto.FileIdentifier,
   ): Promise<FileServiceFile> {
     return await this.prisma.fileServiceFile.delete({
       where: {
         path_bucketName_configId: {
-          path: filePath,
-          bucketName: bucketName,
-          configId: configId,
+          ...fileId,
         },
       },
     });

@@ -91,9 +91,11 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.createFile(
         {
-          bucketName: 'Test Bucket',
-          configId: 1,
-          filePath: 'Test/file/path',
+          fileId: {
+            bucketName: 'Test Bucket',
+            configId: 1,
+            path: 'Test/file/path',
+          },
           metadata: 'Test metadata',
         },
 
@@ -112,9 +114,11 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.createFile(
         {
-          bucketName: 'Test Bucket',
-          configId: 1,
-          filePath: 'Test/file/path',
+          fileId: {
+            bucketName: 'Test Bucket',
+            configId: 1,
+            path: 'Test/file/path',
+          },
           metadata: 'Test metadata',
         },
 
@@ -132,9 +136,11 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.createFile(
         {
-          bucketName: 'To be deleted',
-          configId: 1,
-          filePath: 'Test/file/path/delete',
+          fileId: {
+            bucketName: 'To be deleted',
+            configId: 1,
+            path: 'Test/file/path/delete',
+          },
           metadata: 'Test metadata',
         },
 
@@ -150,9 +156,11 @@ describe('DB Service File Tests', () => {
     const deletionPromise = new Promise((resolve) => {
       fileClient.deleteFile(
         {
-          bucketName: 'To be deleted',
-          configId: 1,
-          filePath: 'Test/file/path/delete',
+          fileId: {
+            bucketName: 'To be deleted',
+            configId: 1,
+            path: 'Test/file/path/delete',
+          },
         },
         (err) => {
           expect(err).toBeNull();
@@ -168,9 +176,11 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.deleteFile(
         {
-          bucketName: 'File does not exist',
-          configId: 1,
-          filePath: 'Test/file/path/not-exist',
+          fileId: {
+            bucketName: 'File does not exist',
+            configId: 1,
+            path: 'Test/file/path/not-exist',
+          },
         },
         (err) => {
           expect(err).not.toBeNull();
@@ -186,9 +196,11 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.createFile(
         {
-          bucketName: 'To be updated',
-          configId: 1,
-          filePath: 'Test/file/path/update',
+          fileId: {
+            bucketName: 'To be updated',
+            configId: 1,
+            path: 'Test/file/path/update',
+          },
           metadata: 'Test metadata',
         },
 
@@ -204,9 +216,11 @@ describe('DB Service File Tests', () => {
     const updatePromise = new Promise((resolve) => {
       fileClient.updateFile(
         {
-          bucketName: 'To be updated',
-          configId: 1,
-          filePath: 'Test/file/path/update',
+          fileId: {
+            bucketName: 'To be updated',
+            configId: 1,
+            path: 'Test/file/path/update',
+          },
           metadata: 'New metadata',
         },
         (err) => {
@@ -223,9 +237,11 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.updateFile(
         {
-          bucketName: 'File does not exist',
-          configId: 1,
-          filePath: 'Test/file/path/not-exist',
+          fileId: {
+            bucketName: 'File does not exist',
+            configId: 1,
+            path: 'Test/file/path/not-exist',
+          },
           metadata: 'New metadata',
         },
         (err) => {
@@ -242,27 +258,31 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.createFile(
         {
-          bucketName: 'To be retrieved',
-          configId: 1,
-          filePath: 'Test/file/path/get',
+          fileId: {
+            bucketName: 'To be retrieved',
+            configId: 1,
+            path: 'Test/file/path/get',
+          },
           metadata: 'Test metadata',
         },
 
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
-          resolve(resp);
+          resolve({});
         },
       );
     });
 
-    const resultingFile = (await promise) as any;
+    await promise;
 
     const getPromise = new Promise((resolve) => {
       fileClient.getFile(
         {
-          bucketName: resultingFile.bucketName,
-          configId: resultingFile.configId,
-          filePath: resultingFile.filePath,
+          fileId: {
+            bucketName: 'To be retrieved',
+            configId: 1,
+            path: 'Test/file/path/get',
+          },
         },
         (err) => {
           expect(err).toBeNull();
@@ -278,9 +298,11 @@ describe('DB Service File Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.getFile(
         {
-          bucketName: 'File does not exist',
-          configId: 3,
-          filePath: 'Test/file/path/not-exist',
+          fileId: {
+            bucketName: 'File does not exist',
+            configId: 3,
+            path: 'Test/file/path/not-exist',
+          },
         },
         (err) => {
           expect(err).not.toBeNull();

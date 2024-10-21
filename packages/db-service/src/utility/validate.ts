@@ -112,3 +112,12 @@ export function validateApiKeydentifier(
     };
   }
 }
+
+export function validateFileId(id: IdentifierProto.FileIdentifier) {
+  if (!id.bucketName || !id.configId || !id.path) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'bucketName, configId, and path must all be passed in',
+    });
+  }
+}
