@@ -12,34 +12,24 @@ service FileDbService {
 }
 
 message File {
-  string bucketName = 1;
-  int32 configId = 2;
-  string filePath = 3;
+  identifiers.FileIdentifier fileId = 1;
   string metadata = 4;
 }
 
 message GetFileRequest {
-  string bucketName = 1;
-  int32 configId = 2;
-  string filePath = 3;
+  identifiers.FileIdentifier fileId = 1;
 }
 
 message CreateFileRequest {
-  string bucketName = 1;
-  int32 configId = 2;
-  string filePath = 3;
+  identifiers.FileIdentifier fileId = 1;
   string metadata = 4;
 }
 
 message UpdateFileRequest {
-  string bucketName = 1;
-  int32 configId = 2;
-  string filePath = 3;
+  identifiers.FileIdentifier fileId = 1;
   string metadata = 4;
 }
 
 message DeleteFileRequest {
-  string bucketName = 1;
-  int32 configId = 2;
-  string filePath = 3;
+  identifiers.FileIdentifier fileId = 1;
 }
