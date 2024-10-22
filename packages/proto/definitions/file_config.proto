@@ -11,12 +11,23 @@ service FileServiceFileServiceConfigDbService {
   rpc updateConfig(UpdateFileServiceConfigRequest) returns (FileServiceConfig);
 }
 
-message FileServiceConfig {}
+message FileServiceConfig {
+  string id = 1;
+}
 
-message GetFileServiceConfigRequest {}
+message GetFileServiceConfigRequest {
+  string id = 1;
+}
 
-message CreateFileServiceConfigRequest {}
+message CreateFileServiceConfigRequest {
+  FileServiceConfig config = 1;
+}
 
-message UpdateFileServiceConfigRequest {}
+message UpdateFileServiceConfigRequest {
+  string id = 1;
+  FileServiceConfig config = 2;
+}
 
-message DeleteFileServiceConfigRequest {}
+message DeleteFileServiceConfigRequest {
+  string id = 1;
+}
