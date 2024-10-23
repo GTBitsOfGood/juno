@@ -1,37 +1,45 @@
 import { Controller } from '@nestjs/common';
-import { IdentifierProto, EmailProto } from 'juno-proto';
-import { EmailService } from './email.service';
-import { validateEmailSenderIdentifier } from 'src/utility/validate';
+import { IdentifierProto, FileProviderProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import {
-  EmailSender,
-  EmailDbServiceController,
-} from 'juno-proto/dist/gen/email';
+import { FileProviderDbServiceController } from 'juno-proto/dist/gen/file_provider';
+import { Observable } from 'rxjs';
+import { FileProviderService } from './file_provider.service';
 
 @Controller()
-@EmailProto.EmailDbServiceControllerMethods()
-export class EmailController implements EmailDbServiceController {
-  constructor(private readonly emailService: EmailService) {}
-  async createEmailServiceConfig(
-    request: EmailProto.CreateEmailServiceConfigRequest,
-  ): Promise<EmailProto.EmailServiceConfig> {
-    const config = await this.emailService.createEmailServiceConfig({
-      environment: request.environment,
-      sendgridApiKey: request.sendgridKey,
-      Project: {
-        connect: {
-          id: Number(request.projectId),
-        },
-      },
-    });
-
-    return {
-      id: config.id,
-      environment: config.environment,
-      sendgridKey: config.sendgridApiKey,
-      senders: [],
-      domains: [],
-    };
+@FileProviderProto.FileProviderDbServiceControllerMethods()
+export class FileProviderController implements FileProviderDbServiceController {
+  constructor(private readonly fileProviderService: FileProviderService) {}
+  getProvider(
+    request: FileProviderProto.GetFileProviderRequest,
+  ):
+    | Promise<FileProviderProto.FileProvider>
+    | Observable<FileProviderProto.FileProvider>
+    | FileProviderProto.FileProvider {
+    throw new Error('Method not implemented.');
+  }
+  createProvider(
+    request: FileProviderProto.CreateFileProviderRequest,
+  ):
+    | Promise<FileProviderProto.FileProvider>
+    | Observable<FileProviderProto.FileProvider>
+    | FileProviderProto.FileProvider {
+    throw new Error('Method not implemented.');
+  }
+  deleteProvider(
+    request: FileProviderProto.DeleteFileProviderRequest,
+  ):
+    | Promise<FileProviderProto.FileProvider>
+    | Observable<FileProviderProto.FileProvider>
+    | FileProviderProto.FileProvider {
+    throw new Error('Method not implemented.');
+  }
+  updateProvider(
+    request: FileProviderProto.UpdateFileProviderRequest,
+  ):
+    | Promise<FileProviderProto.FileProvider>
+    | Observable<FileProviderProto.FileProvider>
+    | FileProviderProto.FileProvider {
+    throw new Error('Method not implemented.');
   }
 }
