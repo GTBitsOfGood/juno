@@ -23,6 +23,11 @@
 
 This is what project teams and API customers interface with. The Gateway guards all sensitive endpoints and utilizes a combination of the feature services described below and the auth service to call subsequent features.
 
+## OpenAPI Documentation
+We utilize Nest's [OpenAPI](https://docs.nestjs.com/openapi/introduction) support to autogenerate web documentation for all Juno HTTP endpoints.
+
+When running Juno locally, the documentation can be found under `localhost:<api-gateway port from docker>/docs`. Note that the api-gateway port is *not* the isolated docker port (e.g. port 3000) but the exposed host port. 
+
 ## Package Structure
 
 Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a standard 3-tier architecture: controllers, service layer, and data access layer. The documentation is fairly comprehensive and a recommended read, but here are the highlights:
