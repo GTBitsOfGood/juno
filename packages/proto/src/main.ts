@@ -25,3 +25,4 @@ export const ResetProtoFile = getProtoFilePath('reset_db.proto');
 export const EmailProtoFile = getProtoFilePath('email.proto');
 export const LoggingProtoFile = getProtoFilePath('logging.proto');
 export const AuthCommonProtoFile = getProtoFilePath('auth_common.proto');
+export const FileProviderFile = getProtoFilePath('file_provider.proto');
