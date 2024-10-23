@@ -13,6 +13,9 @@ service FileServiceFileServiceConfigDbService {
 
 message FileServiceConfig {
   string id = 1;
+  repeated FileServiceBucket buckets = 2;
+  Project project = 3;
+  repeated FileServiceFile files = 4;
 }
 
 message GetFileServiceConfigRequest {

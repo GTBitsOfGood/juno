@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestMicroservice } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
   FileServiceConfig,
-  FileServiceConfigRequest,
   FileServiceConfigProtoFile,
 } from 'juno-proto';
 
 let app: INestMicroservice;
+let createdConfigId: string;
 
 jest.setTimeout(15000);
 
@@ -22,7 +22,7 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: ['juno.file.service.config'],
+      package: ['juno.file_service.config'],
       protoPath: [FileServiceConfigProtoFile],
       url: process.env.DB_SERVICE_ADDR,
     },
@@ -38,7 +38,7 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  app.close();
+  await app.close();
 });
 
 describe('File Service Config Tests', () => {
@@ -59,6 +59,8 @@ describe('File Service Config Tests', () => {
         {
           config: {
             projectId: '1',
+            buckets: FileServiceBucket[],
+            files: [],
           },
         },
         (err, res) => {
@@ -82,6 +84,8 @@ describe('File Service Config Tests', () => {
           {
             config: {
               projectId: '1',
+              buckets: [],
+              files: [],
             },
           },
           (err, res) => {
@@ -112,6 +116,9 @@ describe('File Service Config Tests', () => {
       );
     });
 
+    expect(deleteResponse).toHaveProperty('id', createdConfigId);
+  });
+
   it('deletes a nonexistent config', async () => {
     try {
       await new Promise((resolve, reject) => {
@@ -138,6 +145,8 @@ describe('File Service Config Tests', () => {
           id: createdConfigId,
           config: {
             projectId: '1',
+            buckets: [],
+            files: [],
           },
         },
         (err, res) => {
