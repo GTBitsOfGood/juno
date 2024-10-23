@@ -21,7 +21,7 @@ message FileProvider {
 }
 
 message GetFileProviderRequest {
-  string provider_id = 1;
+  string provider_name = 1;
 }
 
 message CreateFileProviderRequest {
@@ -39,5 +39,5 @@ message UpdateFileProviderRequest {
 }
 
 message DeleteFileProviderRequest {
-  string provider_id = 1;
+  string provider_name = 1;
 }

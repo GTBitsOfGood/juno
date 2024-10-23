@@ -10,36 +10,50 @@ import { FileProviderService } from './file_provider.service';
 @FileProviderProto.FileProviderDbServiceControllerMethods()
 export class FileProviderController implements FileProviderDbServiceController {
   constructor(private readonly fileProviderService: FileProviderService) {}
-  getProvider(
+  async getProvider(
     request: FileProviderProto.GetFileProviderRequest,
-  ):
-    | Promise<FileProviderProto.FileProvider>
-    | Observable<FileProviderProto.FileProvider>
-    | FileProviderProto.FileProvider {
-    throw new Error('Method not implemented.');
+  ): Promise<FileProviderProto.FileProvider> {
+    if (!request.providerName || request.providerName === '') {
+      throw new RpcException('Provider ID is invalid');
+    }
+    const fileProvider = await this.fileProviderService.getProvider(request);
+    return fileProvider;
   }
-  createProvider(
+  async createProvider(
     request: FileProviderProto.CreateFileProviderRequest,
-  ):
-    | Promise<FileProviderProto.FileProvider>
-    | Observable<FileProviderProto.FileProvider>
-    | FileProviderProto.FileProvider {
-    throw new Error('Method not implemented.');
+  ): Promise<FileProviderProto.FileProvider> {
+    if (
+      !request.providerName ||
+      !request.accessKey ||
+      !request.bucket ||
+      !request.metadata
+    ) {
+      throw new RpcException('Invalid parameters');
+    }
+    const fileProvider = await this.fileProviderService.createProvider(request);
+    return fileProvider;
   }
-  deleteProvider(
+  async deleteProvider(
     request: FileProviderProto.DeleteFileProviderRequest,
-  ):
-    | Promise<FileProviderProto.FileProvider>
-    | Observable<FileProviderProto.FileProvider>
-    | FileProviderProto.FileProvider {
-    throw new Error('Method not implemented.');
+  ): Promise<FileProviderProto.FileProvider> {
+    if (!request.providerName || request.providerName === '') {
+      throw new RpcException('Provider ID is invalid');
+    }
+    const fileProvider = await this.fileProviderService.deleteProvider(request);
+    return fileProvider;
   }
-  updateProvider(
+  async updateProvider(
     request: FileProviderProto.UpdateFileProviderRequest,
-  ):
-    | Promise<FileProviderProto.FileProvider>
-    | Observable<FileProviderProto.FileProvider>
-    | FileProviderProto.FileProvider {
-    throw new Error('Method not implemented.');
+  ): Promise<FileProviderProto.FileProvider> {
+    if (
+      !request.providerName ||
+      !request.accessKey ||
+      !request.bucket ||
+      !request.metadata
+    ) {
+      throw new RpcException('Invalid parameters');
+    }
+    const fileProvider = await this.fileProviderService.updateProvider(request);
+    return fileProvider;
   }
 }
