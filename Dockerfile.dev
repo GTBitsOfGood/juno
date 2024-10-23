@@ -12,9 +12,6 @@ RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 # TODO: Switch over to minimal node installation
 FROM node:18 as deps
 
-# TODO: move over to direct wget (no more npm usage)
-RUN npm install -g pnpm
-
 # pnpm needs to be added to the global path
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -40,9 +37,6 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install -r --frozen-lockf
 
 # TODO: Switch over to a minimal node installation
 FROM node:18 as base-service
-
-# TODO: Move over to a direct wget (no more npm usage)
-RUN npm install -g pnpm
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
