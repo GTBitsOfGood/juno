@@ -27,3 +27,9 @@ message ApiKeyIdentifier {
     string hash = 2;
   }
 }
+
+message FileIdentifier {
+  string bucketName = 1;
+  int32 configId = 2;
+  string path = 3;
+}
