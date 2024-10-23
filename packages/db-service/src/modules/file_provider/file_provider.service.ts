@@ -1,27 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { FileProviderProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class FileProviderService {
   constructor(private prisma: PrismaService) {}
 
-  //   async createEmailSender(
-  //     input: Prisma.EmailSenderCreateInput,
-  //   ): Promise<EmailSenderWithConfigIds> {
-  //     return this.prisma.emailSender.upsert({
-  //       where: {
-  //         username_domain: {
-  //           username: input.username,
-  //           domain: input.domainItem.connect.domain,
-  //         },
-  //       },
-  //       create: input,
-  //       update: {
-  //         attachedConfigs: {
-  //           connectOrCreate: input.attachedConfigs.connectOrCreate,
-  //         },
-  //       },
-  //       ...senderWithConfigIds,
-  //     });
-  //   }
+  async createProvider(
+    req: FileProviderProto.CreateFileProviderRequest,
+  ): Promise<FileProviderProto.FileProvider> {}
+
+  async getProvider(
+    req: FileProviderProto.GetFileProviderRequest,
+  ): Promise<FileProviderProto.FileProvider> {}
+
+  async updateProvider(
+    req: FileProviderProto.UpdateFileProviderRequest,
+  ): Promise<FileProviderProto.FileProvider> {}
+
+  async deleteProvider(
+    req: FileProviderProto.DeleteFileProviderRequest,
+  ): Promise<FileProviderProto.FileProvider> {}
 }
