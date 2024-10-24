@@ -4,6 +4,8 @@ package juno.file_service.provider;
 
 import "identifiers.proto";
 
+import "file_bucket.proto";
+
 service FileProviderDbService {
   rpc getProvider(GetFileProviderRequest) returns (FileProvider);
   rpc createProvider(CreateFileProviderRequest) returns (FileProvider);
@@ -11,12 +13,31 @@ service FileProviderDbService {
   rpc updateProvider(UpdateFileProviderRequest) returns (FileProvider);
 }
 
-message FileProvider {}
+message FileProvider {
+  string provider_name = 1;
+  string access_key = 2;
+  string metadata = 3;
+  repeated config.Bucket bucket = 4;
+}
 
-message GetFileProviderRequest {}
+message GetFileProviderRequest {
+  string provider_name = 1;
+}
 
-message CreateFileProviderRequest {}
+message CreateFileProviderRequest {
+  string provider_name = 1;
+  string access_key = 2;
+  string metadata = 3;
+  repeated config.Bucket bucket = 4;
+}
 
-message UpdateFileProviderRequest {}
+message UpdateFileProviderRequest {
+  string provider_name = 1;
+  string access_key = 2;
+  string metadata = 3;
+  repeated config.Bucket bucket = 4;
+}
 
-message DeleteFileProviderRequest {}
+message DeleteFileProviderRequest {
+  string provider_name = 1;
+}
