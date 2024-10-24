@@ -74,7 +74,7 @@ export class FileProviderService {
       accessKey: fileProvider.accessKey,
       metadata: fileProvider.metadata,
       providerName: fileProvider.name,
-      bucket: [],
+      bucket: buckets,
     };
   }
 
