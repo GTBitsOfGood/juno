@@ -8,6 +8,7 @@ export * as ResetProto from './gen/reset_db';
 export * as EmailProto from './gen/email';
 export * as LoggingProto from './gen/logging';
 export * as AuthCommonProto from './gen/auth_common';
+export * as FileBucketProto from './gen/file_bucket';
 
 import { join } from 'path';
 
@@ -25,3 +26,4 @@ export const ResetProtoFile = getProtoFilePath('reset_db.proto');
 export const EmailProtoFile = getProtoFilePath('email.proto');
 export const LoggingProtoFile = getProtoFilePath('logging.proto');
 export const AuthCommonProtoFile = getProtoFilePath('auth_common.proto');
+export const FileBucketProtoFile = getProtoFilePath('file_bucket.proto');

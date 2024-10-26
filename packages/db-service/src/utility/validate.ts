@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { IdentifierProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { config } from 'process';
 
 export function validateProjectIdentifier(
   identifier: IdentifierProto.ProjectIdentifier,
@@ -111,4 +112,28 @@ export function validateApiKeydentifier(
       hash: identifier.hash,
     };
   }
+}
+
+export function validateFileBucketIdentifier(
+  identifier: IdentifierProto.FileBucketIdentifier
+) {
+  if (!identifier.name || !identifier.configId) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Both name and configId must be provided',
+    });
+  }
+
+}
+
+export function validateBucket(
+  bucket: IdentifierProto.FileBucketIdentifier
+) {
+  if (!bucket.name || !bucket.configId || !bucket.fileProviderName || !bucket.files || !bucket.metadata) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Name, configID, filedProviderName, files, and metadata must be provided',
+    });
+  }
+
 }
