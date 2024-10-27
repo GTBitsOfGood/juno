@@ -11,6 +11,12 @@ import {
   FileProviderProtoFile,
 } from 'juno-proto';
 import { AppModule } from 'src/app.module';
+import {
+  CreateFileProviderRequest,
+  DeleteFileProviderRequest,
+  GetFileProviderRequest,
+  UpdateFileProviderRequest,
+} from 'juno-proto/dist/gen/file_provider';
 
 let app: INestMicroservice;
 
@@ -89,161 +95,220 @@ describe('File Provider Tests', () => {
   });
 
   it('Creating a file provider correctly', async () => {
-    const promise = new Promise((resolve) =>
-      fileProviderClient.createProvider(
-        {
-          providerName: 'Test Provider',
-          accessKey: 'Test access key',
-          metadata: 'Test metadata',
-        },
+    const createRequest: CreateFileProviderRequest = {
+      providerName: 'Test Provider',
+      accessKey: 'Test access key',
+      metadata: 'Test metadata',
+      bucket: [],
+    };
+
+    const promise = new Promise((resolve) => {
+      fileProviderClient.createProvider(createRequest),
         (err: Error) => {
           expect(err).toBeNull();
           resolve({});
-        },
-      ),
-    );
+        };
+    });
+
     await promise;
   });
 
   it('Creating a duplicate file provider', async () => {
-    const promise = new Promise((resolve) => {
-      fileProviderClient.createProvider({
-        providerName: 'Duplicate Provider',
-        accessKey: 'Test access key',
-        metadata: 'Test metadata',
-      });
+    const createRequest: CreateFileProviderRequest = {
+      providerName: 'Duplicate Provider',
+      accessKey: 'Test access key',
+      metadata: 'Test metadata',
+      bucket: [],
+    };
 
-      fileProviderClient.createProvider(
-        {
-          providerName: 'Duplicate Provider',
-          accessKey: 'Test access key',
-          metadata: 'Test metadata',
-        },
+    const promise1 = new Promise((resolve) => {
+      fileProviderClient.createProvider(createRequest),
+        (err: Error) => {
+          expect(err).toBeNull();
+          resolve({});
+        };
+    });
+
+    await promise1;
+
+    const promise2 = new Promise((resolve) => {
+      fileProviderClient.createProvider(createRequest),
         (err: Error) => {
           expect(err).not.toBeNull();
           resolve({});
-        },
-      );
+        };
     });
-    await promise;
+
+    await promise2;
   });
 
   it('Deleting a file provider', async () => {
-    const promise = new Promise((resolve) => {
-      fileProviderClient.createProvider({
-        providerName: 'Test Provider',
-        accessKey: 'Test access key',
-        metadata: 'Test metadata',
-      });
+    const createRequest: CreateFileProviderRequest = {
+      providerName: 'Test Provider',
+      accessKey: 'Test access key',
+      metadata: 'Test metadata',
+      bucket: [],
+    };
 
-      fileProviderClient.deleteProvider(
-        {
-          providerName: 'Test Provider',
-        },
+    const promise1 = new Promise((resolve) => {
+      fileProviderClient.createProvider(createRequest),
         (err: Error) => {
           expect(err).toBeNull();
           resolve({});
-        },
-      );
+        };
     });
 
-    await promise;
+    await promise1;
+
+    const deleteRequest: DeleteFileProviderRequest = {
+      providerName: 'Test Provider',
+    };
+
+    const promise2 = new Promise((resolve) => {
+      fileProviderClient.deleteProvider(deleteRequest),
+        (err: Error) => {
+          expect(err).toBeNull();
+          resolve({});
+        };
+    });
+
+    await promise2;
   });
 
   it('Deleting a nonexistent file provider', async () => {
+    const deleteRequest: DeleteFileProviderRequest = {
+      providerName: 'Test Provider',
+    };
+
     const promise = new Promise((resolve) => {
-      fileProviderClient.deleteProvider(
-        {
-          providerName: 'Test Provider',
-        },
+      fileProviderClient.deleteProvider(deleteRequest),
         (err: Error) => {
           expect(err).not.toBeNull();
           resolve({});
-        },
-      );
+        };
     });
+
     await promise;
   });
 
   it('Updating a file provider', async () => {
-    const promise = new Promise((resolve) => {
-      fileProviderClient.createProvider({
-        providerName: 'Test Provider',
-        accessKey: 'Test access key',
-        metadata: 'Test metadata',
-      });
+    const createRequest: CreateFileProviderRequest = {
+      providerName: 'Test Provider',
+      accessKey: 'Test access key',
+      metadata: 'Test metadata',
+      bucket: [],
+    };
 
-      fileProviderClient.updateProvider(
-        {
-          providerName: 'Test Provider',
-          accessKey: 'New access key',
-          metadata: 'Test metadata',
-        },
+    const promise1 = new Promise((resolve) => {
+      fileProviderClient.createProvider(createRequest),
         (err: Error) => {
           expect(err).toBeNull();
           resolve({});
-        },
-      );
+        };
     });
-    await promise;
+
+    await promise1;
+
+    const updateRequest: UpdateFileProviderRequest = {
+      providerName: 'Test Provider',
+      accessKey: 'New access key',
+      metadata: 'Test metadata',
+      bucket: [],
+    };
+
+    const promise2 = new Promise((resolve) => {
+      fileProviderClient.updateProvider(updateRequest),
+        (err: Error) => {
+          expect(err).toBeNull();
+          resolve({});
+        };
+    });
+
+    await promise2;
   });
 
   it('Updating a file provider', async () => {
-    const promise = new Promise((resolve) => {
-      fileProviderClient.createProvider({
-        providerName: 'Test Provider',
-        accessKey: 'Test access key',
-        metadata: 'Test metadata',
-      });
+    const createRequest: CreateFileProviderRequest = {
+      providerName: 'Test Provider',
+      accessKey: 'Test access key',
+      metadata: 'Test metadata',
+      bucket: [],
+    };
 
-      fileProviderClient.updateProvider(
-        {
-          providerName: 'Test Provider',
-          accessKey: 'Test access key',
-          metadata: 'New metadata',
-        },
+    const promise1 = new Promise((resolve) => {
+      fileProviderClient.createProvider(createRequest),
         (err: Error) => {
           expect(err).toBeNull();
           resolve({});
-        },
-      );
+        };
     });
-    await promise;
+
+    await promise1;
+
+    const updateRequest: UpdateFileProviderRequest = {
+      providerName: 'Test Provider',
+      accessKey: 'Test access key',
+      metadata: 'New metadata',
+      bucket: [],
+    };
+
+    const promise2 = new Promise((resolve) => {
+      fileProviderClient.updateProvider(updateRequest),
+        (err: Error) => {
+          expect(err).toBeNull();
+          resolve({});
+        };
+    });
+
+    await promise2;
   });
 
   it('Reading a nonexistent file provider', async () => {
+    const getRequest: GetFileProviderRequest = {
+      providerName: 'Test Provider',
+    };
+
     const promise = new Promise((resolve) => {
-      fileProviderClient.getProvider(
-        {
-          providerName: 'Test Provider',
-        },
+      fileProviderClient.getProvider(getRequest),
         (err: Error) => {
           expect(err).not.toBeNull();
           resolve({});
-        },
-      );
+        };
     });
+
     await promise;
   });
 
   it('Reading a file provider', async () => {
-    const promise = new Promise((resolve) => {
-      fileProviderClient.createProvider({
-        providerName: 'Test Provider',
-        accessKey: 'Test access key',
-        metadata: 'Test metadata',
-      });
+    const createRequest: CreateFileProviderRequest = {
+      providerName: 'Test Provider',
+      accessKey: 'Test access key',
+      metadata: 'Test metadata',
+      bucket: [],
+    };
 
-      fileProviderClient.getProvider(
-        {
-          providerName: 'Test Provider',
-        },
+    const promise1 = new Promise((resolve) => {
+      fileProviderClient.createProvider(createRequest),
         (err: Error) => {
           expect(err).toBeNull();
           resolve({});
-        },
-      );
+        };
     });
-    await promise;
+
+    await promise1;
+
+    const getRequest: GetFileProviderRequest = {
+      providerName: 'Test Provider',
+    };
+
+    const promise2 = new Promise((resolve) => {
+      fileProviderClient.getProvider(getRequest),
+        (err: Error) => {
+          expect(err).toBeNull();
+          resolve({});
+        };
+    });
+
+    await promise2;
   });
 });
