@@ -89,7 +89,7 @@ describe('File Provider Tests', () => {
   });
 
   it('Creating a file provider correctly', async () => {
-    await new Promise((resolve) =>
+    const promise = new Promise((resolve) =>
       fileProviderClient.createProvider(
         {
           providerName: 'Test Provider',
@@ -97,16 +97,17 @@ describe('File Provider Tests', () => {
           metadata: 'Test metadata',
           bucket: [],
         },
-        (err) => {
+        (err: Error) => {
           expect(err).toBeNull();
           resolve({});
         },
       ),
     );
+    await promise;
   });
 
   it('Creating a duplicate file provider', async () => {
-    await new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       fileProviderClient.createProvider({
         providerName: 'Duplicate Provider',
         accessKey: 'Test access key',
@@ -121,16 +122,17 @@ describe('File Provider Tests', () => {
           metadata: 'Test metadata',
           bucket: [],
         },
-        (err) => {
-          expect(err).toBeDefined();
+        (err: Error) => {
+          expect(err).not.toBeNull();
           resolve({});
         },
       );
     });
+    await promise;
   });
 
   it('Deleting a file provider', async () => {
-    await new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       fileProviderClient.createProvider({
         providerName: 'Test Provider',
         accessKey: 'Test access key',
@@ -142,30 +144,33 @@ describe('File Provider Tests', () => {
         {
           providerName: 'Test Provider',
         },
-        (err) => {
+        (err: Error) => {
           expect(err).toBeNull();
           resolve({});
         },
       );
     });
+
+    await promise;
   });
 
   it('Deleting a nonexistent file provider', async () => {
-    await new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       fileProviderClient.deleteProvider(
         {
           providerName: 'Test Provider',
         },
-        (err) => {
-          expect(err).toBeDefined();
+        (err: Error) => {
+          expect(err).not.toBeNull();
           resolve({});
         },
       );
     });
+    await promise;
   });
 
   it('Updating a file provider', async () => {
-    await new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       fileProviderClient.createProvider({
         providerName: 'Test Provider',
         accessKey: 'Test access key',
@@ -180,16 +185,17 @@ describe('File Provider Tests', () => {
           metadata: 'Test metadata',
           bucket: [],
         },
-        (err) => {
+        (err: Error) => {
           expect(err).toBeNull();
           resolve({});
         },
       );
     });
+    await promise;
   });
 
   it('Updating a file provider', async () => {
-    await new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       fileProviderClient.createProvider({
         providerName: 'Test Provider',
         accessKey: 'Test access key',
@@ -204,30 +210,32 @@ describe('File Provider Tests', () => {
           metadata: 'New metadata',
           bucket: [],
         },
-        (err) => {
+        (err: Error) => {
           expect(err).toBeNull();
           resolve({});
         },
       );
     });
+    await promise;
   });
 
   it('Reading a nonexistent file provider', async () => {
-    await new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       fileProviderClient.getProvider(
         {
           providerName: 'Test Provider',
         },
-        (err) => {
-          expect(err).toBeDefined();
+        (err: Error) => {
+          expect(err).not.toBeNull();
           resolve({});
         },
       );
     });
+    await promise;
   });
 
   it('Reading a file provider', async () => {
-    await new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
       fileProviderClient.createProvider({
         providerName: 'Test Provider',
         accessKey: 'Test access key',
@@ -239,11 +247,12 @@ describe('File Provider Tests', () => {
         {
           providerName: 'Test Provider',
         },
-        (err) => {
+        (err: Error) => {
           expect(err).toBeNull();
           resolve({});
         },
       );
     });
+    await promise;
   });
 });
