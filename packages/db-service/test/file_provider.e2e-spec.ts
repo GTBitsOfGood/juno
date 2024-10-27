@@ -95,7 +95,6 @@ describe('File Provider Tests', () => {
           providerName: 'Test Provider',
           accessKey: 'Test access key',
           metadata: 'Test metadata',
-          bucket: [],
         },
         (err: Error) => {
           expect(err).toBeNull();
@@ -112,7 +111,6 @@ describe('File Provider Tests', () => {
         providerName: 'Duplicate Provider',
         accessKey: 'Test access key',
         metadata: 'Test metadata',
-        bucket: [],
       });
 
       fileProviderClient.createProvider(
@@ -120,7 +118,6 @@ describe('File Provider Tests', () => {
           providerName: 'Duplicate Provider',
           accessKey: 'Test access key',
           metadata: 'Test metadata',
-          bucket: [],
         },
         (err: Error) => {
           expect(err).not.toBeNull();
@@ -137,7 +134,6 @@ describe('File Provider Tests', () => {
         providerName: 'Test Provider',
         accessKey: 'Test access key',
         metadata: 'Test metadata',
-        bucket: [],
       });
 
       fileProviderClient.deleteProvider(
@@ -175,7 +171,6 @@ describe('File Provider Tests', () => {
         providerName: 'Test Provider',
         accessKey: 'Test access key',
         metadata: 'Test metadata',
-        bucket: [],
       });
 
       fileProviderClient.updateProvider(
@@ -183,7 +178,6 @@ describe('File Provider Tests', () => {
           providerName: 'Test Provider',
           accessKey: 'New access key',
           metadata: 'Test metadata',
-          bucket: [],
         },
         (err: Error) => {
           expect(err).toBeNull();
@@ -200,7 +194,6 @@ describe('File Provider Tests', () => {
         providerName: 'Test Provider',
         accessKey: 'Test access key',
         metadata: 'Test metadata',
-        bucket: [],
       });
 
       fileProviderClient.updateProvider(
@@ -208,7 +201,6 @@ describe('File Provider Tests', () => {
           providerName: 'Test Provider',
           accessKey: 'Test access key',
           metadata: 'New metadata',
-          bucket: [],
         },
         (err: Error) => {
           expect(err).toBeNull();
@@ -240,7 +232,6 @@ describe('File Provider Tests', () => {
         providerName: 'Test Provider',
         accessKey: 'Test access key',
         metadata: 'Test metadata',
-        bucket: [],
       });
 
       fileProviderClient.getProvider(
