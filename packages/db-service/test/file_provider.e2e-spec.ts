@@ -104,6 +104,7 @@ describe('File Provider Tests', () => {
 
     const promise = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -122,6 +123,7 @@ describe('File Provider Tests', () => {
 
     const promise1 = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -131,6 +133,7 @@ describe('File Provider Tests', () => {
 
     const promise2 = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err: Error) => {
+        console.error(err);
         expect(err).not.toBeNull();
         resolve({});
       });
@@ -149,6 +152,7 @@ describe('File Provider Tests', () => {
 
     const promise1 = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -162,6 +166,7 @@ describe('File Provider Tests', () => {
 
     const promise2 = new Promise((resolve) => {
       fileProviderClient.deleteProvider(deleteRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -177,6 +182,7 @@ describe('File Provider Tests', () => {
 
     const promise = new Promise((resolve) => {
       fileProviderClient.deleteProvider(deleteRequest, (err: Error) => {
+        console.error(err);
         expect(err).not.toBeNull();
         resolve({});
       });
@@ -195,6 +201,7 @@ describe('File Provider Tests', () => {
 
     const promise1 = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -211,6 +218,7 @@ describe('File Provider Tests', () => {
 
     const promise2 = new Promise((resolve) => {
       fileProviderClient.updateProvider(updateRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -229,6 +237,7 @@ describe('File Provider Tests', () => {
 
     const promise1 = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -245,6 +254,7 @@ describe('File Provider Tests', () => {
 
     const promise2 = new Promise((resolve) => {
       fileProviderClient.updateProvider(updateRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -260,6 +270,7 @@ describe('File Provider Tests', () => {
 
     const promise = new Promise((resolve) => {
       fileProviderClient.getProvider(getRequest, (err: Error) => {
+        console.error(err);
         expect(err).not.toBeNull();
         resolve({});
       });
@@ -278,6 +289,7 @@ describe('File Provider Tests', () => {
 
     const promise1 = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
@@ -291,6 +303,7 @@ describe('File Provider Tests', () => {
 
     const promise2 = new Promise((resolve) => {
       fileProviderClient.getProvider(getRequest, (err: Error) => {
+        console.error(err);
         expect(err).toBeNull();
         resolve({});
       });
