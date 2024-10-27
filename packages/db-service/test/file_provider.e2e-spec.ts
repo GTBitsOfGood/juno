@@ -103,11 +103,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.createProvider(createRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise;
@@ -122,21 +121,19 @@ describe('File Provider Tests', () => {
     };
 
     const promise1 = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.createProvider(createRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise1;
 
     const promise2 = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest),
-        (err: Error) => {
-          expect(err).not.toBeNull();
-          resolve({});
-        };
+      fileProviderClient.createProvider(createRequest, (err: Error) => {
+        expect(err).not.toBeNull();
+        resolve({});
+      });
     });
 
     await promise2;
@@ -151,11 +148,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise1 = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.createProvider(createRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise1;
@@ -165,11 +161,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise2 = new Promise((resolve) => {
-      fileProviderClient.deleteProvider(deleteRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.deleteProvider(deleteRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise2;
@@ -181,11 +176,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise = new Promise((resolve) => {
-      fileProviderClient.deleteProvider(deleteRequest),
-        (err: Error) => {
-          expect(err).not.toBeNull();
-          resolve({});
-        };
+      fileProviderClient.deleteProvider(deleteRequest, (err: Error) => {
+        expect(err).not.toBeNull();
+        resolve({});
+      });
     });
 
     await promise;
@@ -200,11 +194,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise1 = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.createProvider(createRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise1;
@@ -217,11 +210,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise2 = new Promise((resolve) => {
-      fileProviderClient.updateProvider(updateRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.updateProvider(updateRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise2;
@@ -236,11 +228,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise1 = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.createProvider(createRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise1;
@@ -253,11 +244,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise2 = new Promise((resolve) => {
-      fileProviderClient.updateProvider(updateRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.updateProvider(updateRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise2;
@@ -269,11 +259,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise = new Promise((resolve) => {
-      fileProviderClient.getProvider(getRequest),
-        (err: Error) => {
-          expect(err).not.toBeNull();
-          resolve({});
-        };
+      fileProviderClient.getProvider(getRequest, (err: Error) => {
+        expect(err).not.toBeNull();
+        resolve({});
+      });
     });
 
     await promise;
@@ -288,11 +277,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise1 = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.createProvider(createRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise1;
@@ -302,11 +290,10 @@ describe('File Provider Tests', () => {
     };
 
     const promise2 = new Promise((resolve) => {
-      fileProviderClient.getProvider(getRequest),
-        (err: Error) => {
-          expect(err).toBeNull();
-          resolve({});
-        };
+      fileProviderClient.getProvider(getRequest, (err: Error) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
     });
 
     await promise2;
