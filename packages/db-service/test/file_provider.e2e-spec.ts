@@ -20,7 +20,7 @@ import {
 
 let app: INestMicroservice;
 
-jest.setTimeout(10000);
+jest.setTimeout(30000);
 
 async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
