@@ -3,8 +3,11 @@ syntax = "proto3";
 package juno.file_service.config;
 
 import "identifiers.proto";
+import "project.proto";
+import "file_bucket.proto";
+import "file.proto";
 
-service FileServiceFileServiceConfigDbService {
+service FileServiceConfigDbService {
   rpc getConfig(GetFileServiceConfigRequest) returns (FileServiceConfig);
   rpc createConfig(CreateFileServiceConfigRequest) returns (FileServiceConfig);
   rpc deleteConfig(DeleteFileServiceConfigRequest) returns (FileServiceConfig);
@@ -12,25 +15,27 @@ service FileServiceFileServiceConfigDbService {
 }
 
 message FileServiceConfig {
-  string id = 1;
-  repeated FileServiceBucket buckets = 2;
-  Project project = 3;
-  repeated FileServiceFile files = 4;
+  int64 id = 1;
+  repeated file_bucket.Bucket buckets = 2;
+  project.Project project = 3;
+  repeated file.File files = 4;
 }
 
 message GetFileServiceConfigRequest {
-  string id = 1;
+  int64 id = 1;
 }
 
 message CreateFileServiceConfigRequest {
-  FileServiceConfig config = 1;
+  int64 project_id = 1;
+  repeated file_bucket.Bucket buckets = 2;
 }
 
 message UpdateFileServiceConfigRequest {
-  string id = 1;
-  FileServiceConfig config = 2;
+  int64 id = 1;
+  repeated file_bucket.Bucket buckets = 2;
+  repeated file.File files = 3;
 }
 
 message DeleteFileServiceConfigRequest {
-  string id = 1;
+  int64 id = 1;
 }

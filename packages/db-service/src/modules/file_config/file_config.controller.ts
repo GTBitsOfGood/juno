@@ -2,18 +2,18 @@ import { Controller } from '@nestjs/common';
 import { FileServiceConfigService } from './file_config.service';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { FileProto as ConfigProto } from 'juno-proto';
+import { FileConfigProto } from 'juno-proto';
 import { FileServiceConfigDbServiceController } from 'juno-proto/dist/gen/file_config';
 import { Prisma } from '@prisma/client';
 
 @Controller()
-@ConfigProto.FileServiceFileServiceConfigDbServiceControllerMethods()
+@FileConfigProto.FileServiceFileServiceConfigDbServiceControllerMethods()
 export class FileConfigController implements FileServiceConfigDbServiceController {
   constructor(private readonly fileServiceConfigService: FileServiceConfigService) {}
 
   async createConfig(
-    request: ConfigProto.CreateFileServiceConfigRequest,
-  ): Promise<ConfigProto.FileServiceConfig> {
+    request: FileConfigProto.CreateFileServiceConfigRequest,
+  ): Promise<FileConfigProto.FileServiceConfig> {
     const configId = request.config.id;
 
     const existingConfig = await this.fileServiceConfigService.getConfig(configId);
@@ -29,7 +29,7 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
     return config;
   }
 
-  async getConfig(request: ConfigProto.GetFileServiceConfigRequest): Promise<ConfigProto.FileServiceConfig> {
+  async getConfig(request: FileConfigProto.GetFileServiceConfigRequest): Promise<FileConfigProto.FileServiceConfig> {
 
     const config = await this.fileServiceConfigService.getConfig(request.id);
     if (!config) {
@@ -43,8 +43,8 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
   }
 
   async updateConfig(
-    request: ConfigProto.UpdateFileServiceConfigRequest,
-  ): Promise<ConfigProto.FileServiceConfig> {
+    request: FileConfigProto.UpdateFileServiceConfigRequest,
+  ): Promise<FileConfigProto.FileServiceConfig> {
 
     try {
       const config = await this.fileServiceConfigService.updateConfig(
@@ -68,8 +68,8 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
   }
 
   async deleteConfig(
-    request: ConfigProto.DeleteFileServiceConfigRequest,
-  ): Promise<ConfigProto.FileServiceConfig> {
+    request: FileConfigProto.DeleteFileServiceConfigRequest,
+  ): Promise<FileConfigProto.FileServiceConfig> {
 
     try {
       const config = await this.fileServiceConfigService.deleteConfig(request.id);

@@ -6,6 +6,7 @@ import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
   FileServiceConfig,
+  FileServiceBucket,
   FileServiceConfigProtoFile,
 } from 'juno-proto';
 
