@@ -27,7 +27,7 @@ export class FileBucketService {
         input: FileBucketProto.CreateBucketRequest,
     ) {
             const { name, fileProviderName, configId, FileServiceFile } = input
-            const newBucket = await this.prisma.fileServiceBucket.create({
+            return await this.prisma.fileServiceBucket.create({
                 data: {
                     name,
                     fileProviderName,
