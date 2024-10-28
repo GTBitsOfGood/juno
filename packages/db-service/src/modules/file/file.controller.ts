@@ -16,29 +16,37 @@ export class FileController implements FileDbServiceController {
     request: FileProto.CreateFileRequest,
   ): Promise<FileProto.File> {
     validateFileId(request.fileId);
-
-    const duplicateFile = await this.fileService.getFile(request.fileId);
-
-    if (duplicateFile) {
-      throw new RpcException({
-        code: status.ALREADY_EXISTS,
-        message: 'File already exists',
-      });
+    try {
+      const file = await this.fileService.createFile(
+        request.fileId,
+        request.metadata,
+      );
+      return {
+        fileId: {
+          bucketName: file.bucketName,
+          configId: file.configId,
+          path: file.path,
+        },
+        metadata: file.metadata,
+      };
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') {
+          throw new RpcException({
+            code: status.ALREADY_EXISTS,
+            message: 'File already exists',
+          });
+        }
+        if (err.code === 'P2003') {
+          throw new RpcException({
+            code: status.INVALID_ARGUMENT,
+            message: 'Config or Bucket does not exist',
+          });
+        }
+      } else {
+        throw err;
+      }
     }
-
-    const file = await this.fileService.createFile(
-      request.fileId,
-      request.metadata,
-    );
-
-    return {
-      fileId: {
-        bucketName: file.bucketName,
-        configId: file.configId,
-        path: file.path,
-      },
-      metadata: file.metadata,
-    };
   }
   async getFile(request: FileProto.GetFileRequest): Promise<FileProto.File> {
     validateFileId(request.fileId);
@@ -81,15 +89,17 @@ export class FileController implements FileDbServiceController {
         },
         metadata: file.metadata,
       };
-    } catch (e) {
+    } catch (err) {
       if (
-        e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2001'
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2025'
       ) {
         throw new RpcException({
           code: status.NOT_FOUND,
           message: 'File not found',
         });
+      } else {
+        throw err;
       }
     }
   }
@@ -109,15 +119,17 @@ export class FileController implements FileDbServiceController {
         },
         metadata: file.metadata,
       };
-    } catch (e) {
+    } catch (err) {
       if (
-        e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2001'
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2025'
       ) {
         throw new RpcException({
           code: status.NOT_FOUND,
           message: 'File not found',
         });
+      } else {
+        throw err;
       }
     }
   }
