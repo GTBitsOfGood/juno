@@ -3,10 +3,6 @@ import { FileBucketProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { BucketBucketDbServiceController } from 'juno-proto/dist/gen/file_bucket';
 import { FileBucketService } from './file_bucket.service';
-import {
-    validateFileBucketIdentifier,
-    validateBucket
-} from 'src/utility/validate';
 import { status } from '@grpc/grpc-js';
 
 @Controller()
@@ -14,9 +10,14 @@ import { status } from '@grpc/grpc-js';
 export class FileBucketController implements BucketBucketDbServiceController {
     constructor(private readonly fileBucketService: FileBucketService) { }
     async getBucket(
-        request: FileBucketProto.GetFileBucketRequest,
-    ): Promise<FileBucketProto.FileBucket> {
-        validateFileBucketIdentifier(request);
+        request: FileBucketProto.GetBucketRequest,
+    ): Promise<FileBucketProto.Bucket> {
+        if (!request.name || !request.configId) {
+            throw new RpcException({
+                code: status.INVALID_ARGUMENT,
+                message: 'Both name and configId must be provided',
+            });
+        }
         const fileBucket = await this.fileBucketService.getBucket(request);
         if (!fileBucket) {
             throw new RpcException({
@@ -27,21 +28,38 @@ export class FileBucketController implements BucketBucketDbServiceController {
         return fileBucket;
     }
     async createBucket(
-        request: FileBucketProto.CreateFileBucketRequest,
-    ): Promise<FileBucketProto.FileBucket> {
-        validateBucket(request)
-        return this.fileBucketService.createBucket(request);
+        request: FileBucketProto.CreateBucketRequest,
+    ): Promise<FileBucketProto.Bucket> {
+        if (!request.name || !request.configId
+            || !request.fileProviderName || !request.FileServiceFile) {
+            throw new RpcException({
+                code: status.INVALID_ARGUMENT,
+                message: 'Name, configId, file provider name, files, and metadata must be provided',
+            });
+        }
+        const res = await this.fileBucketService.createBucket(request);
+        return res
     }
     async deleteBucket(
-        request: FileBucketProto.DeleteFileBucketRequest,
-    ): Promise<FileBucketProto.FileBucket> {
-        validateFileBucketIdentifier(request);
+        request: FileBucketProto.DeleteBucketRequest,
+    ): Promise<FileBucketProto.Bucket> {
+        if (!request.name || !request.configId) {
+            throw new RpcException({
+                code: status.INVALID_ARGUMENT,
+                message: 'Both name and configId must be provided',
+            });
+        }
         return this.fileBucketService.deleteBucket(request);
     }
     async updateBucket(
-        request: FileBucketProto.UpdateFileBucketRequest,
-    ): Promise<FileBucketProto.FileBucket> {
-        validateFileBucketIdentifier(request);
+        request: FileBucketProto.UpdateBucketRequest,
+    ): Promise<FileBucketProto.Bucket> {
+        if (!request.name || !request.configId || !request.fileProviderName) {
+            throw new RpcException({
+                code: status.INVALID_ARGUMENT,
+                message: 'Name, configId, and updated metadata must be provided',
+            });
+        }
         return this.fileBucketService.updateBucket(request);
     }
 }

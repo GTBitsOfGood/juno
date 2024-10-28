@@ -19,9 +19,7 @@ import {
   EmailProto,
   EmailProtoFile,
   FileBucketProto,
-  FileBucketProtoFile,
-  FileProto,
-  FileProtoFile,
+  FileBucketProtoFile
 } from 'juno-proto';
 import { CustomRpcExceptionFilter } from './global-exception.filter';
 
@@ -42,7 +40,6 @@ async function bootstrap() {
           ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
           EmailProto.JUNO_EMAIL_PACKAGE_NAME,
           FileBucketProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
-          FileProto.JUNO_FILE_SERVICE_FILE_PACKAGE_NAME,
         ],
         protoPath: [
           UserProtoFile,
@@ -52,8 +49,7 @@ async function bootstrap() {
           ResetProtoFile,
           ApiKeyProtoFile,
           EmailProtoFile,
-          FileBucketProtoFile,
-          FileProtoFile,
+          FileBucketProtoFile
         ],
         url: process.env.DB_SERVICE_ADDR,
       },

@@ -113,27 +113,3 @@ export function validateApiKeydentifier(
     };
   }
 }
-
-export function validateFileBucketIdentifier(
-  identifier: IdentifierProto.FileBucketIdentifier
-) {
-  if (!identifier.name || !identifier.configId) {
-    throw new RpcException({
-      code: status.INVALID_ARGUMENT,
-      message: 'Both name and configId must be provided',
-    });
-  }
-
-}
-
-export function validateBucket(
-  bucket: IdentifierProto.FileBucketIdentifier
-) {
-  if (!bucket.name || !bucket.configId || !bucket.fileProviderName || !bucket.files || !bucket.metadata) {
-    throw new RpcException({
-      code: status.INVALID_ARGUMENT,
-      message: 'Name, configID, filedProviderName, files, and metadata must be provided',
-    });
-  }
-
-}

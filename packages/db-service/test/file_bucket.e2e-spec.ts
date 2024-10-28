@@ -30,12 +30,12 @@ async function initApp() {
         transport: Transport.GRPC,
         options: {
             package: [
-                FileBucketProto.JUNO_FILE_BUCKET_PACKAGE_NAME,
+                FileBucketProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
                 ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
             ],
             protoPath: [
-                FileBucketProto
-        ResetProtoFile,
+                FileBucketProtoFile,
+                ResetProtoFile,
             ],
             url: process.env.DB_SERVICE_ADDR,
         },
@@ -79,30 +79,31 @@ describe('DB Service File Bucket Tests', () => {
     beforeEach(() => {
         const proto = ProtoLoader.loadSync([
             FileBucketProtoFile,
+            IdentifiersProtoFile,
         ]) as any;
 
         const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-        fileBucketClient = new protoGRPC.juno.file_bucket.BucketBucketDbService(
+        fileBucketClient = new protoGRPC.juno.file_service.config.BucketBucketDbService(
             process.env.DB_SERVICE_ADDR,
             GRPC.credentials.createInsecure(),
         );
     });
-    // Logic for cleaning up created project ids.
-    let createdProjectIds: number[] = [];
+
+    let createdBuckets: any[] = [];
     afterEach(async () => {
         await Promise.all(
-            createdProjectIds.map(
-                (id) =>
+            createdBuckets.map(
+                (name, configId) =>
                     new Promise((resolve, reject) => {
-                        projectClient.deleteProject({ id: id }, (err, resp) => {
+                        fileBucketClient.deleteProject({ name, configId }, (err, resp) => {
                             if (err) reject(err);
                             else resolve(resp);
                         });
                     }),
             ),
         );
-        createdProjectIds = [];
+        createdBuckets = [];
     });
 
     it('creates a new bucket', async () => {
@@ -116,6 +117,7 @@ describe('DB Service File Bucket Tests', () => {
                 },
                 (err, resp) => {
                     expect(err).toBeNull();
+                    createdBuckets.push((resp.name, resp.configId));
                     resolve({});
                 },
             );
@@ -203,9 +205,12 @@ describe('DB Service File Bucket Tests', () => {
                 {
                     name: 'updater',
                     configId: 10,
+                    fileProviderName: "testfileprovider",
+
                 },
                 (err, resp) => {
                     expect(err).toBeNull();
+                    createdBuckets.push((resp.name, resp.configId));
                     resolve({});
                 },
             );
@@ -217,6 +222,7 @@ describe('DB Service File Bucket Tests', () => {
                 {
                     name: 'notupdatable',
                     configId: 5,
+                    fileProviderName: "testfileprovider",
 
                 },
                 (err, resp) => {
@@ -247,11 +253,10 @@ describe('DB Service File Bucket Tests', () => {
                 {
                     name: 'reader',
                     configId: 15,
-                    fileProviderName: "testfileprovider",
-                    files: []
                 },
                 (err, resp) => {
                     expect(err).toBeNull();
+                    createdBuckets.push((resp.name, resp.configId));
                     resolve({});
                 },
             );

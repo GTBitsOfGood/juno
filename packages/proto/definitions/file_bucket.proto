@@ -17,7 +17,7 @@ message Bucket {
   string name = 1;
   int64 configId = 2;
   string fileProviderName = 3;
-  repeated FileServiceFile files = 4;
+  repeated identifiers.FileIdentifier FileServiceFile = 4;
 }
 
 message GetBucketRequest {
@@ -29,14 +29,13 @@ message CreateBucketRequest {
   string name = 1;
   int64 configId = 2;
   string fileProviderName = 3;
-  repeated FileServiceFile files = 4;
-  string metadata = 5;
+  repeated file.File FileServiceFile = 4;
 }
 
 message UpdateBucketRequest {
   string name = 1;
   int64 configId = 2;
-  string metadata = 3;
+  string fileProviderName = 3;
 }
 
 message DeleteBucketRequest {
