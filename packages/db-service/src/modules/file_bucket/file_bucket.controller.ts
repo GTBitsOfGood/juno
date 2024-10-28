@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { FileBucketProto } from 'juno-proto';
+import { FileBucketProto, IdentifierProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { BucketBucketDbServiceController } from 'juno-proto/dist/gen/file_bucket';
 import { FileBucketService } from './file_bucket.service';
@@ -30,15 +30,35 @@ export class FileBucketController implements BucketBucketDbServiceController {
     async createBucket(
         request: FileBucketProto.CreateBucketRequest,
     ): Promise<FileBucketProto.Bucket> {
-        if (!request.name || !request.configId
-            || !request.fileProviderName || !request.FileServiceFile) {
+        if (
+            !request.name ||
+            !request.configId ||
+            !request.fileProviderName
+        ) {
             throw new RpcException({
                 code: status.INVALID_ARGUMENT,
-                message: 'Name, configId, file provider name, files, and metadata must be provided',
+                message:
+                    'Name, configId, file provider name, files, and metadata must be provided',
             });
         }
-        const res = await this.fileBucketService.createBucket(request);
-        return res
+        type ResType = {
+            name: string;
+            configId: number;
+            fileProviderName: string;
+            FileServiceFile?: Array<IdentifierProto.FileIdentifier>;  // Include FileServiceFile as optional
+        };
+        //attach foreign keys to config, file provider, and fileservice file when we have access to foreign keys
+        const res: ResType = await this.fileBucketService.createBucket(request);
+        if (!res.FileServiceFile) {
+            res.FileServiceFile = []
+        }
+        const returning: FileBucketProto.Bucket = {
+            name: res.name,
+            configId: res.configId,
+            fileProviderName: res.fileProviderName,
+            FileServiceFile: res.FileServiceFile
+        }
+        return returning;
     }
     async deleteBucket(
         request: FileBucketProto.DeleteBucketRequest,

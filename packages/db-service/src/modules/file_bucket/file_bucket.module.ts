@@ -4,7 +4,7 @@ import { FileBucketService } from './file_bucket.service';
 import { PrismaService } from 'src/prisma.service';
 
 @Module({
-    controllers: [FileBucketController],
-    providers: [FileBucketService, PrismaService],
+  controllers: [FileBucketController],
+  providers: [FileBucketService, PrismaService],
 })
-export class FileBucketModule { }
+export class FileBucketModule {}

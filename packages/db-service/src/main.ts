@@ -52,7 +52,7 @@ async function bootstrap() {
           ResetProtoFile,
           ApiKeyProtoFile,
           EmailProtoFile,
-          FileBucketProtoFile
+          FileBucketProtoFile,
         ],
         url: process.env.DB_SERVICE_ADDR,
       },

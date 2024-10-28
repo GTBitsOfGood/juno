@@ -15,30 +15,30 @@ service BucketBucketDbService {
 
 message Bucket {
   string name = 1;
-  int64 configId = 2;
+  int32 configId = 2;
   string fileProviderName = 3;
   repeated identifiers.FileIdentifier FileServiceFile = 4;
 }
 
 message GetBucketRequest {
   string name = 1;
-  int64 configId = 2;
+  int32 configId = 2;
 }
 
 message CreateBucketRequest {
   string name = 1;
-  int64 configId = 2;
+  int32 configId = 2;
   string fileProviderName = 3;
   repeated file.File FileServiceFile = 4;
 }
 
 message UpdateBucketRequest {
   string name = 1;
-  int64 configId = 2;
+  int32 configId = 2;
   string fileProviderName = 3;
 }
 
 message DeleteBucketRequest {
   string name = 1;
-  int64 configId = 2;
+  int32 configId = 2;
 }

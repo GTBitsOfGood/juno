@@ -26,4 +26,4 @@ import { FileModule } from './modules/file/file.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
