@@ -74,8 +74,10 @@ afterEach(async () => {
 
 describe('DB Service File Tests', () => {
   let fileClient: any;
+  const bucketName = 'Test Bucket';
+  const configId = 1;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
 
     const fileProtoGRPC = GRPC.loadPackageDefinition(fileProto) as any;
@@ -84,6 +86,22 @@ describe('DB Service File Tests', () => {
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
+    const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
+    const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
+
+    const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+    await new Promise((resolve) => {
+      resetClient.resetDb({}, () => {
+        resolve(0);
+      });
+    });
+
+    // Todo: Add bucket and config creation here
   });
 
   it('Creates file correctly', async () => {
@@ -92,9 +110,9 @@ describe('DB Service File Tests', () => {
       fileClient.createFile(
         {
           fileId: {
-            bucketName: 'Test Bucket',
-            configId: 1,
-            path: 'Test/file/path',
+            bucketName: bucketName,
+            configId: configId,
+            path: 'Test/file/path/create',
           },
           metadata: 'Test metadata',
         },
@@ -110,26 +128,45 @@ describe('DB Service File Tests', () => {
   });
 
   it('Cannot create a duplicate file', async () => {
-    // Create email linked to test project
-    const promise = new Promise((resolve) => {
+    const promise1 = new Promise((resolve) => {
       fileClient.createFile(
         {
           fileId: {
-            bucketName: 'Test Bucket',
-            configId: 1,
-            path: 'Test/file/path',
+            bucketName: bucketName,
+            configId: configId,
+            path: 'Test/file/path/create',
           },
           metadata: 'Test metadata',
         },
 
         (err) => {
-          expect(err).not.toBeNull();
+          expect(err).toBeNull();
           resolve({});
         },
       );
     });
 
-    await promise;
+    await promise1;
+
+    const promise2 = new Promise((resolve) => {
+      fileClient.createFile(
+        {
+          fileId: {
+            bucketName: bucketName,
+            configId: configId,
+            path: 'Test/file/path/create',
+          },
+          metadata: 'Test metadata',
+        },
+
+        (err) => {
+          expect(err).toHaveProperty('code', GRPC.status.ALREADY_EXISTS);
+          resolve({});
+        },
+      );
+    });
+
+    await promise2;
   });
 
   it('Can delete a file that exists', async () => {
@@ -137,8 +174,8 @@ describe('DB Service File Tests', () => {
       fileClient.createFile(
         {
           fileId: {
-            bucketName: 'To be deleted',
-            configId: 1,
+            bucketName: bucketName,
+            configId: configId,
             path: 'Test/file/path/delete',
           },
           metadata: 'Test metadata',
@@ -157,8 +194,8 @@ describe('DB Service File Tests', () => {
       fileClient.deleteFile(
         {
           fileId: {
-            bucketName: 'To be deleted',
-            configId: 1,
+            bucketName: bucketName,
+            configId: configId,
             path: 'Test/file/path/delete',
           },
         },
@@ -178,12 +215,12 @@ describe('DB Service File Tests', () => {
         {
           fileId: {
             bucketName: 'File does not exist',
-            configId: 1,
+            configId: 2,
             path: 'Test/file/path/not-exist',
           },
         },
         (err) => {
-          expect(err).not.toBeNull();
+          expect(err).toHaveProperty('code', GRPC.status.NOT_FOUND);
           resolve({});
         },
       );
@@ -197,8 +234,8 @@ describe('DB Service File Tests', () => {
       fileClient.createFile(
         {
           fileId: {
-            bucketName: 'To be updated',
-            configId: 1,
+            bucketName: bucketName,
+            configId: configId,
             path: 'Test/file/path/update',
           },
           metadata: 'Test metadata',
@@ -217,8 +254,8 @@ describe('DB Service File Tests', () => {
       fileClient.updateFile(
         {
           fileId: {
-            bucketName: 'To be updated',
-            configId: 1,
+            bucketName: bucketName,
+            configId: configId,
             path: 'Test/file/path/update',
           },
           metadata: 'New metadata',
@@ -239,13 +276,13 @@ describe('DB Service File Tests', () => {
         {
           fileId: {
             bucketName: 'File does not exist',
-            configId: 1,
+            configId: 3,
             path: 'Test/file/path/not-exist',
           },
           metadata: 'New metadata',
         },
         (err) => {
-          expect(err).not.toBeNull();
+          expect(err).toHaveProperty('code', GRPC.status.NOT_FOUND);
           resolve({});
         },
       );
@@ -259,8 +296,8 @@ describe('DB Service File Tests', () => {
       fileClient.createFile(
         {
           fileId: {
-            bucketName: 'To be retrieved',
-            configId: 1,
+            bucketName: bucketName,
+            configId: configId,
             path: 'Test/file/path/get',
           },
           metadata: 'Test metadata',
@@ -279,8 +316,8 @@ describe('DB Service File Tests', () => {
       fileClient.getFile(
         {
           fileId: {
-            bucketName: 'To be retrieved',
-            configId: 1,
+            bucketName: bucketName,
+            configId: configId,
             path: 'Test/file/path/get',
           },
         },
@@ -300,12 +337,12 @@ describe('DB Service File Tests', () => {
         {
           fileId: {
             bucketName: 'File does not exist',
-            configId: 3,
+            configId: 4,
             path: 'Test/file/path/not-exist',
           },
         },
         (err) => {
-          expect(err).not.toBeNull();
+          expect(err).toHaveProperty('code', GRPC.status.NOT_FOUND);
           resolve({});
         },
       );
