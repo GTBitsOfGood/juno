@@ -31,26 +31,26 @@ export class FileBucketService {
                     name: input.name,
                     configId: input.configId,
                     fileProviderName: input.fileProviderName,
-                    FileServiceFile: {
-                        connectOrCreate: input.FileServiceFile.map(file => ({
-                            where: {
-                                path_bucketName_configId: {
-                                    path: file.fileId.path,
-                                    bucketName: file.fileId.bucketName,
-                                    configId: file.fileId.configId as number,
-                                },
-                            },
-                            create: {
-                                path: file.fileId.path,
-                                bucketName: file.fileId.bucketName,
-                                configId: file.fileId.configId as number,
-                                metadata: file.metadata,
-                                config: {
-                                    connect: { id: file.fileId.configId as number }
-                                },
-                            },
-                        })),
-                    },
+                    // FileServiceFile: {
+                    // connectOrCreate: input.FileServiceFile.map(file => ({
+                    //     where: {
+                    //         path_bucketName_configId: {
+                    //             path: file.fileId.path,
+                    //             bucketName: file.fileId.bucketName,
+                    //             configId: file.fileId.configId as number,
+                    //         },
+                    //     },
+                    //     create: {
+                    //         path: file.fileId.path,
+                    //         bucketName: file.fileId.bucketName,
+                    //         configId: file.fileId.configId as number,
+                    //         metadata: file.metadata,
+                    //         config: {
+                    //             connect: { id: file.fileId.configId as number }
+                    //         },
+                    //     },
+                    // })),
+                    // },
                     config: {
                         connect: { id: input.configId }
                     },
