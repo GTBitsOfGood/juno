@@ -11,19 +11,19 @@ export class FileProviderService {
   async createProvider(
     req: FileProviderProto.CreateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    const buckets = req.bucket.map((bucket: any, idx: number) => {
-      // bucket name and configid should be changed once bucket is implemented
-      return { name: bucket.name, configId: idx };
-    });
+    // const buckets = req.bucket.map((bucket: any, idx: number) => {
+    //   // bucket name and configid should be changed once bucket is implemented
+    //   return { name: bucket.name, configId: idx };
+    // });
 
     const fileProvider = await this.prisma.fileProvider.create({
       data: {
         accessKey: req.accessKey,
         name: req.providerName,
         metadata: req.metadata,
-        FileServiceBucket: {
-          create: buckets,
-        },
+        // FileServiceBucket: {
+        //   create: buckets,
+        // },
       },
     });
 
@@ -32,7 +32,8 @@ export class FileProviderService {
       metadata: fileProvider.metadata,
       providerName: fileProvider.name,
       //   will have to fix once buckets are properly updated in proto
-      bucket: buckets as Bucket[],
+      // bucket: buckets as Bucket[],
+      bucket: [],
     };
   }
 
@@ -54,19 +55,19 @@ export class FileProviderService {
   async updateProvider(
     req: FileProviderProto.UpdateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    const buckets = req.bucket.map((bucket: any, idx: number) => {
-      // bucket name and configid should be changed once bucket is implemented
-      return { name: bucket.name, configId: idx };
-    });
+    // const buckets = req.bucket.map((bucket: any, idx: number) => {
+    //   // bucket name and configid should be changed once bucket is implemented
+    //   return { name: bucket.name, configId: idx };
+    // });
 
     const fileProvider = await this.prisma.fileProvider.update({
       where: { name: req.providerName },
       data: {
         metadata: req.metadata,
         accessKey: req.accessKey,
-        FileServiceBucket: {
-          create: buckets,
-        },
+        // FileServiceBucket: {
+        //   create: buckets,
+        // },
       },
     });
 
@@ -74,7 +75,8 @@ export class FileProviderService {
       accessKey: fileProvider.accessKey,
       metadata: fileProvider.metadata,
       providerName: fileProvider.name,
-      bucket: buckets,
+      // bucket: buckets,
+      bucket: [],
     };
   }
 
