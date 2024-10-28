@@ -96,7 +96,7 @@ describe('File Provider Tests', () => {
 
   it('Creating a file provider correctly', async () => {
     const createRequest: CreateFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider1',
       accessKey: 'Test access key',
       metadata: 'Test metadata',
       bucket: [],
@@ -153,7 +153,7 @@ describe('File Provider Tests', () => {
 
   it('Deleting a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider2',
       accessKey: 'Test access key',
       metadata: 'Test metadata',
       bucket: [],
@@ -173,7 +173,7 @@ describe('File Provider Tests', () => {
     await promise1;
 
     const deleteRequest: DeleteFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider2',
     };
 
     const promise2 = new Promise((resolve, reject) => {
@@ -192,7 +192,7 @@ describe('File Provider Tests', () => {
 
   it('Deleting a nonexistent file provider', async () => {
     const deleteRequest: DeleteFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider3',
     };
 
     const promise = new Promise((resolve, reject) => {
@@ -211,7 +211,7 @@ describe('File Provider Tests', () => {
 
   it('Updating a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider4',
       accessKey: 'Test access key',
       metadata: 'Test metadata',
       bucket: [],
@@ -231,7 +231,7 @@ describe('File Provider Tests', () => {
     await promise1;
 
     const updateRequest: UpdateFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider4',
       accessKey: 'New access key',
       metadata: 'Test metadata',
       bucket: [],
@@ -253,7 +253,7 @@ describe('File Provider Tests', () => {
 
   it('Updating a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider5',
       accessKey: 'Test access key',
       metadata: 'Test metadata',
       bucket: [],
@@ -273,7 +273,7 @@ describe('File Provider Tests', () => {
     await promise1;
 
     const updateRequest: UpdateFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider5',
       accessKey: 'Test access key',
       metadata: 'New metadata',
       bucket: [],
@@ -295,7 +295,7 @@ describe('File Provider Tests', () => {
 
   it('Reading a nonexistent file provider', async () => {
     const getRequest: GetFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider6',
     };
 
     const promise = new Promise((resolve, reject) => {
@@ -314,7 +314,7 @@ describe('File Provider Tests', () => {
 
   it('Reading a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider7',
       accessKey: 'Test access key',
       metadata: 'Test metadata',
       bucket: [],
@@ -334,7 +334,7 @@ describe('File Provider Tests', () => {
     await promise1;
 
     const getRequest: GetFileProviderRequest = {
-      providerName: 'Test Provider',
+      providerName: 'Test Provider7',
     };
 
     const promise2 = new Promise((resolve, reject) => {
