@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {} from '@prisma/client';
 import { FileProviderProto } from 'juno-proto';
-import { Bucket } from 'juno-proto/dist/gen/file_bucket';
+// import { Bucket } from 'juno-proto/dist/gen/file_bucket';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
