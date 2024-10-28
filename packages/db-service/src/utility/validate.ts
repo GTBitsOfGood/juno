@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client';
 import { IdentifierProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { config } from 'process';
 
 export function validateProjectIdentifier(
   identifier: IdentifierProto.ProjectIdentifier,

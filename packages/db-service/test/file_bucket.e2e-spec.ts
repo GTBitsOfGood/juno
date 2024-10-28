@@ -6,12 +6,8 @@ import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
   IdentifiersProtoFile,
-  ProjectProto,
-  ProjectProtoFile,
   ResetProto,
   ResetProtoFile,
-  UserProto,
-  UserProtoFile,
   FileBucketProto,
   FileBucketProtoFile,
 } from 'juno-proto';
@@ -130,7 +126,7 @@ describe('DB Service File Bucket Tests', () => {
           fileProviderName: 'testfileprovider',
           files: [],
         },
-        (err, resp) => {
+        (err) => {
           expect(err).not.toBeNull();
           resolve({});
         },
@@ -147,7 +143,7 @@ describe('DB Service File Bucket Tests', () => {
           fileProviderName: 'testfileprovider',
           files: [],
         },
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },
@@ -159,7 +155,7 @@ describe('DB Service File Bucket Tests', () => {
           name: 'deleter',
           configId: 1,
         },
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },
@@ -174,7 +170,7 @@ describe('DB Service File Bucket Tests', () => {
           name: 'test',
           configId: 1000,
         },
-        (err, resp) => {
+        (err) => {
           expect(err).not.toBeNull();
           resolve({});
         },
@@ -191,7 +187,7 @@ describe('DB Service File Bucket Tests', () => {
           fileProviderName: 'testfileprovider',
           files: [],
         },
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },
@@ -220,7 +216,7 @@ describe('DB Service File Bucket Tests', () => {
           configId: 5,
           fileProviderName: 'testfileprovider',
         },
-        (err, resp) => {
+        (err) => {
           expect(err).not.toBeNull();
           resolve({});
         },
@@ -234,7 +230,7 @@ describe('DB Service File Bucket Tests', () => {
           name: 'notupdatable',
           configId: 5,
         },
-        (err, resp) => {
+        (err) => {
           expect(err).not.toBeNull();
           resolve({});
         },
@@ -261,7 +257,7 @@ describe('DB Service File Bucket Tests', () => {
           name: 'reader',
           configId: 15,
         },
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },

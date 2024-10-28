@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { FileBucketProto, IdentifierProto } from 'juno-proto';
 
@@ -24,7 +23,7 @@ export class FileBucketService {
     );
   }
   async createBucket(input: FileBucketProto.CreateBucketRequest) {
-    const { name, fileProviderName, configId, FileServiceFile } = input;
+    const { name, fileProviderName, configId } = input;
     return await this.prisma.fileServiceBucket.create({
       data: {
         name,

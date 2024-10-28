@@ -48,13 +48,13 @@ export class FileBucketController implements BucketBucketDbServiceController {
     if (!res.FileServiceFile) {
       res.FileServiceFile = [];
     }
-    const returning: FileBucketProto.Bucket = {
+
+    return {
       name: res.name,
       configId: res.configId,
       fileProviderName: res.fileProviderName,
       FileServiceFile: res.FileServiceFile,
-    };
-    return returning;
+    } as FileBucketProto.Bucket;
   }
   async deleteBucket(
     request: FileBucketProto.DeleteBucketRequest,
