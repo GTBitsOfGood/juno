@@ -26,7 +26,7 @@ export class FileProviderController implements FileProviderDbServiceController {
       !request.bucket ||
       !request.metadata
     ) {
-      throw new RpcException('Invalid parameters');
+      throw new RpcException('The given parameters are invalid!');
     }
     const fileProvider = await this.fileProviderService.createProvider(request);
     return fileProvider;
@@ -49,7 +49,7 @@ export class FileProviderController implements FileProviderDbServiceController {
       !request.bucket ||
       !request.metadata
     ) {
-      throw new RpcException('Invalid parameters');
+      throw new RpcException('The given parameters are invalid!');
     }
     const fileProvider = await this.fileProviderService.updateProvider(request);
     return fileProvider;
