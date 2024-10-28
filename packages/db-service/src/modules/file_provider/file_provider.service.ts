@@ -11,87 +11,107 @@ export class FileProviderService {
   async createProvider(
     req: FileProviderProto.CreateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    // const buckets = req.bucket.map((bucket: any, idx: number) => {
-    //   // bucket name and configid should be changed once bucket is implemented
-    //   return { name: bucket.name, configId: idx };
-    // });
+    try {
+      // const buckets = req.bucket.map((bucket: any, idx: number) => {
+      //   // bucket name and configid should be changed once bucket is implemented
+      //   return { name: bucket.name, configId: idx };
+      // });
 
-    const fileProvider = await this.prisma.fileProvider.create({
-      data: {
-        accessKey: req.accessKey,
-        name: req.providerName,
-        metadata: req.metadata,
-        // FileServiceBucket: {
-        //   create: buckets,
-        // },
-      },
-    });
+      const fileProvider = await this.prisma.fileProvider.create({
+        data: {
+          accessKey: req.accessKey,
+          name: req.providerName,
+          metadata: req.metadata,
+          // FileServiceBucket: {
+          //   create: buckets,
+          // },
+        },
+      });
 
-    return {
-      accessKey: fileProvider.accessKey,
-      metadata: fileProvider.metadata,
-      providerName: fileProvider.name,
-      //   will have to fix once buckets are properly updated in proto
-      // bucket: buckets as Bucket[],
-      bucket: [],
-    };
+      return {
+        accessKey: fileProvider.accessKey,
+        metadata: fileProvider.metadata,
+        providerName: fileProvider.name,
+        //   will have to fix once buckets are properly updated in proto
+        // bucket: buckets as Bucket[],
+        bucket: [],
+      };
+    } catch (error) {
+      console.error('Error creating file provider:', error);
+      throw error;
+    }
   }
 
   async getProvider(
     req: FileProviderProto.GetFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    const fileProvider = await this.prisma.fileProvider.findFirst({
-      where: { name: req.providerName },
-    });
+    try {
+      const fileProvider = await this.prisma.fileProvider.findFirst({
+        where: { name: req.providerName },
+      });
 
-    return {
-      accessKey: fileProvider.accessKey,
-      metadata: fileProvider.metadata,
-      providerName: fileProvider.name,
-      bucket: [],
-    };
+      return {
+        accessKey: fileProvider.accessKey,
+        metadata: fileProvider.metadata,
+        providerName: fileProvider.name,
+        bucket: [],
+      };
+    } catch (error) {
+      console.error('Error getting file provider:', error);
+      throw error;
+    }
   }
 
   async updateProvider(
     req: FileProviderProto.UpdateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    // const buckets = req.bucket.map((bucket: any, idx: number) => {
-    //   // bucket name and configid should be changed once bucket is implemented
-    //   return { name: bucket.name, configId: idx };
-    // });
+    try {
+      // const buckets = req.bucket.map((bucket: any, idx: number) => {
+      //   // bucket name and configid should be changed once bucket is implemented
+      //   return { name: bucket.name, configId: idx };
+      // });
 
-    const fileProvider = await this.prisma.fileProvider.update({
-      where: { name: req.providerName },
-      data: {
-        metadata: req.metadata,
-        accessKey: req.accessKey,
-        // FileServiceBucket: {
-        //   create: buckets,
-        // },
-      },
-    });
+      const fileProvider = await this.prisma.fileProvider.update({
+        where: { name: req.providerName },
+        data: {
+          metadata: req.metadata,
+          accessKey: req.accessKey,
+          // FileServiceBucket: {
+          //   create: buckets,
+          // },
+        },
+      });
 
-    return {
-      accessKey: fileProvider.accessKey,
-      metadata: fileProvider.metadata,
-      providerName: fileProvider.name,
-      // bucket: buckets,
-      bucket: [],
-    };
+      return {
+        accessKey: fileProvider.accessKey,
+        metadata: fileProvider.metadata,
+        providerName: fileProvider.name,
+        // bucket: buckets,
+        bucket: [],
+      };
+    } catch (error) {
+      console.error('Error updating file provider:', error);
+      throw error;
+    }
   }
 
   async deleteProvider(
     req: FileProviderProto.DeleteFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    const fileProvider = await this.prisma.fileProvider.delete({
-      where: { name: req.providerName },
-    });
+    try {
+      const fileProvider = await this.prisma.fileProvider.delete({
+        where: { name: req.providerName },
+      });
 
-    return {
-      accessKey: fileProvider.accessKey,
-      metadata: fileProvider.metadata,
-      providerName: fileProvider.name,
-      bucket: [],
-    };
+      return {
+        accessKey: fileProvider.accessKey,
+        metadata: fileProvider.metadata,
+        providerName: fileProvider.name,
+        bucket: [],
+      };
+    } catch (error) {
+      console.error('Error deleting file provider:', error);
+      throw error;
+    }
   }
 }
