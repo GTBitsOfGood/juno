@@ -146,6 +146,7 @@ export class EmailService implements OnModuleInit {
           to: request.recipients,
           cc: request.cc,
           bcc: request.bcc,
+          replyToList: request.replyToList,
           from: {
             email: request.sender.email,
             name: request.sender.name,

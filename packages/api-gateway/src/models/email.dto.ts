@@ -194,8 +194,8 @@ export class SendEmailModel {
     type: [EmailRecipient],
     description: 'List of recipients for the email',
   })
-  @ArrayNotEmpty()
   @ValidateNested({ each: true })
+  @IsOptional()
   @Type(() => EmailRecipient)
   recipients: EmailRecipient[];
 
@@ -216,6 +216,15 @@ export class SendEmailModel {
   @IsOptional()
   @Type(() => EmailRecipient)
   bcc: EmailRecipient[] = [];
+
+  @ApiProperty({
+    type: [EmailRecipient],
+    description: 'List of emails to add to the Reply To list of the email',
+  })
+  @ValidateNested({ each: true })
+  @IsOptional()
+  @Type(() => EmailRecipient)
+  replyToList: EmailRecipient[] = [];
 
   @ApiProperty({ type: EmailSender, description: 'The sender of the email' })
   @ValidateNested({ each: true })
