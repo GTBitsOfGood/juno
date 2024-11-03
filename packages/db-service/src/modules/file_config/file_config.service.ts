@@ -86,7 +86,7 @@ export class FileServiceConfigService {
   }
 
   async deleteConfig(configId: string): Promise<FileServiceConfig> {
-    return this.prisma.FileServiceConfig.delete({
+    return this.prisma.fileServiceConfig.delete({
       where: {
         id: configId,
       },

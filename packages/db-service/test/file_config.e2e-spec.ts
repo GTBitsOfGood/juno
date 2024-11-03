@@ -6,7 +6,6 @@ import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
   FileServiceConfig,
-  FileServiceBucket,
   FileServiceConfigProtoFile,
 } from 'juno-proto';
 
@@ -60,7 +59,7 @@ describe('File Service Config Tests', () => {
         {
           config: {
             projectId: '1',
-            buckets: FileServiceBucket[],
+            buckets: [],
             files: [],
           },
         },
