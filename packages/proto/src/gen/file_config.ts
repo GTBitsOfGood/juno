@@ -7,22 +7,40 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { File } from './file';
+import { Bucket } from './file_bucket';
 
 export const protobufPackage = 'juno.file_service.config';
 
-export interface FileServiceConfig {}
+export interface FileServiceConfig {
+  id: number;
+  buckets: Bucket[];
+  files: File[];
+}
 
-export interface GetFileServiceConfigRequest {}
+export interface GetFileServiceConfigRequest {
+  id: number;
+}
 
-export interface CreateFileServiceConfigRequest {}
+export interface CreateFileServiceConfigRequest {
+  projectId: number;
+  buckets: Bucket[];
+  files: File[];
+}
 
-export interface UpdateFileServiceConfigRequest {}
+export interface UpdateFileServiceConfigRequest {
+  id: number;
+  buckets: Bucket[];
+  files: File[];
+}
 
-export interface DeleteFileServiceConfigRequest {}
+export interface DeleteFileServiceConfigRequest {
+  id: number;
+}
 
 export const JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME = 'juno.file_service.config';
 
-export interface FileServiceFileServiceConfigDbServiceClient {
+export interface FileServiceConfigDbServiceClient {
   getConfig(
     request: GetFileServiceConfigRequest,
   ): Observable<FileServiceConfig>;
@@ -40,7 +58,7 @@ export interface FileServiceFileServiceConfigDbServiceClient {
   ): Observable<FileServiceConfig>;
 }
 
-export interface FileServiceFileServiceConfigDbServiceController {
+export interface FileServiceConfigDbServiceController {
   getConfig(
     request: GetFileServiceConfigRequest,
   ):
@@ -70,7 +88,7 @@ export interface FileServiceFileServiceConfigDbServiceController {
     | FileServiceConfig;
 }
 
-export function FileServiceFileServiceConfigDbServiceControllerMethods() {
+export function FileServiceConfigDbServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       'getConfig',
@@ -83,7 +101,7 @@ export function FileServiceFileServiceConfigDbServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcMethod('FileServiceFileServiceConfigDbService', method)(
+      GrpcMethod('FileServiceConfigDbService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -95,7 +113,7 @@ export function FileServiceFileServiceConfigDbServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcStreamMethod('FileServiceFileServiceConfigDbService', method)(
+      GrpcStreamMethod('FileServiceConfigDbService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -104,5 +122,4 @@ export function FileServiceFileServiceConfigDbServiceControllerMethods() {
   };
 }
 
-export const FILE_SERVICE_FILE_SERVICE_CONFIG_DB_SERVICE_NAME =
-  'FileServiceFileServiceConfigDbService';
+export const FILE_SERVICE_CONFIG_DB_SERVICE_NAME = 'FileServiceConfigDbService';

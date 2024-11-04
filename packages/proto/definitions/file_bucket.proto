@@ -3,6 +3,8 @@ syntax = "proto3";
 package juno.file_service.config;
 
 import "identifiers.proto";
+import "file.proto";
+
 
 service BucketBucketDbService {
   rpc getBucket(GetBucketRequest) returns (Bucket);
@@ -11,12 +13,32 @@ service BucketBucketDbService {
   rpc updateBucket(UpdateBucketRequest) returns (Bucket);
 }
 
-message Bucket {}
+message Bucket {
+  string name = 1;
+  int32 configId = 2;
+  string fileProviderName = 3;
+  repeated identifiers.FileIdentifier FileServiceFile = 4;
+}
 
-message GetBucketRequest {}
+message GetBucketRequest {
+  string name = 1;
+  int32 configId = 2;
+}
 
-message CreateBucketRequest {}
+message CreateBucketRequest {
+  string name = 1;
+  int32 configId = 2;
+  string fileProviderName = 3;
+  repeated file.File FileServiceFile = 4;
+}
 
-message UpdateBucketRequest {}
+message UpdateBucketRequest {
+  string name = 1;
+  int32 configId = 2;
+  string fileProviderName = 3;
+}
 
-message DeleteBucketRequest {}
+message DeleteBucketRequest {
+  string name = 1;
+  int32 configId = 2;
+}
