@@ -12,7 +12,7 @@ export class FileBucketController implements BucketBucketDbServiceController {
   async getBucket(
     request: FileBucketProto.GetBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
-    if (!request.name || !request.configId) {
+    if (!request.name || request.configId == undefined) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: 'Both name and configId must be provided',
@@ -30,7 +30,11 @@ export class FileBucketController implements BucketBucketDbServiceController {
   async createBucket(
     request: FileBucketProto.CreateBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
-    if (!request.name || !request.configId || !request.fileProviderName) {
+    if (
+      !request.name ||
+      request.configId == undefined ||
+      !request.fileProviderName
+    ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message:
@@ -59,7 +63,7 @@ export class FileBucketController implements BucketBucketDbServiceController {
   async deleteBucket(
     request: FileBucketProto.DeleteBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
-    if (!request.name || !request.configId) {
+    if (!request.name || request.configId == undefined) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: 'Both name and configId must be provided',
@@ -70,7 +74,11 @@ export class FileBucketController implements BucketBucketDbServiceController {
   async updateBucket(
     request: FileBucketProto.UpdateBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
-    if (!request.name || !request.configId || !request.fileProviderName) {
+    if (
+      !request.name ||
+      request.configId == undefined ||
+      !request.fileProviderName
+    ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: 'Name, configId, and updated metadata must be provided',

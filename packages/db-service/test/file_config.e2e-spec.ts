@@ -81,6 +81,19 @@ function tryCreateConfig(configClient: any) {
   });
 }
 
+function tryDeleteConfig(configClient: any) {
+  return new Promise<void>((resolve) => {
+    configClient.deleteConfig(
+      {
+        id: 0,
+      },
+      () => {
+        resolve();
+      },
+    );
+  });
+}
+
 describe('File Service Config Tests', () => {
   let configClient: any;
 
@@ -95,6 +108,7 @@ describe('File Service Config Tests', () => {
   });
 
   it('creates a new file service config', async () => {
+    await tryDeleteConfig(configClient);
     const response: FileConfigProto.FileServiceConfig = await new Promise(
       (resolve, reject) => {
         configClient.createConfig(

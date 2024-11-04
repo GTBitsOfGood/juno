@@ -28,7 +28,7 @@ export class FileBucketService {
       data: {
         name,
         fileProviderName,
-        configId,
+        configId: Number(configId),
         //add fileservicefile after having access to files
       },
     });
@@ -42,7 +42,7 @@ export class FileBucketService {
         where: {
           name_configId: {
             name: request.name,
-            configId: request.configId,
+            configId: Number(request.configId),
           },
         },
         data: {
@@ -63,7 +63,7 @@ export class FileBucketService {
         where: {
           name_configId: {
             name: request.name,
-            configId: request.configId,
+            configId: Number(request.configId),
           },
         },
         include: {

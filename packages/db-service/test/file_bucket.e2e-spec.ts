@@ -40,15 +40,16 @@ async function initApp() {
 }
 
 beforeAll(async () => {
-  const app = await initApp();
-
+  app = await initApp();
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
 
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
   const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
+
   await new Promise((resolve) => {
     resetClient.resetDb({}, () => {
       resolve(0);
@@ -83,29 +84,15 @@ describe('DB Service File Bucket Tests', () => {
       );
   });
 
-  let createdBuckets: any[] = [];
-  afterEach(async () => {
-    await Promise.all(
-      createdBuckets.map(
-        (name, configId) =>
-          new Promise((resolve, reject) => {
-            fileBucketClient.deleteProject({ name, configId }, (err, resp) => {
-              if (err) reject(err);
-              else resolve(resp);
-            });
-          }),
-      ),
-    );
-    createdBuckets = [];
-  });
+  const createdBuckets: any[] = [];
 
   it('creates a new bucket', async () => {
     await new Promise((resolve) => {
       fileBucketClient.createBucket(
         {
           name: 'test',
-          configId: 1,
-          fileProviderName: 'testfileprovider',
+          configId: 0,
+          fileProviderName: 'test-provider',
           files: [],
         },
         (err, resp) => {
@@ -122,8 +109,8 @@ describe('DB Service File Bucket Tests', () => {
       fileBucketClient.createBucket(
         {
           name: 'test',
-          configId: 1,
-          fileProviderName: 'testfileprovider',
+          configId: 0,
+          fileProviderName: 'test-provider',
           files: [],
         },
         (err) => {
@@ -139,8 +126,8 @@ describe('DB Service File Bucket Tests', () => {
       fileBucketClient.createBucket(
         {
           name: 'deleter',
-          configId: 1,
-          fileProviderName: 'testfileprovider',
+          configId: 0,
+          fileProviderName: 'test-provider',
           files: [],
         },
         (err) => {
@@ -153,7 +140,7 @@ describe('DB Service File Bucket Tests', () => {
       fileBucketClient.deleteBucket(
         {
           name: 'deleter',
-          configId: 1,
+          configId: 0,
         },
         (err) => {
           expect(err).toBeNull();
@@ -183,8 +170,8 @@ describe('DB Service File Bucket Tests', () => {
       fileBucketClient.createBucket(
         {
           name: 'updater',
-          configId: 10,
-          fileProviderName: 'testfileprovider',
+          configId: 0,
+          fileProviderName: 'test-provider',
           files: [],
         },
         (err) => {
@@ -197,8 +184,8 @@ describe('DB Service File Bucket Tests', () => {
       fileBucketClient.updateBucket(
         {
           name: 'updater',
-          configId: 10,
-          fileProviderName: 'testfileprovider',
+          configId: 0,
+          fileProviderName: 'test-provider',
         },
         (err, resp) => {
           expect(err).toBeNull();
@@ -214,7 +201,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'notupdatable',
           configId: 5,
-          fileProviderName: 'testfileprovider',
+          fileProviderName: 'test-provider',
         },
         (err) => {
           expect(err).not.toBeNull();
@@ -242,7 +229,8 @@ describe('DB Service File Bucket Tests', () => {
       fileBucketClient.createBucket(
         {
           name: 'reader',
-          configId: 15,
+          configId: 0,
+          fileProviderName: 'test-provider',
         },
         (err, resp) => {
           expect(err).toBeNull();
@@ -255,7 +243,7 @@ describe('DB Service File Bucket Tests', () => {
       fileBucketClient.getBucket(
         {
           name: 'reader',
-          configId: 15,
+          configId: 0,
         },
         (err) => {
           expect(err).toBeNull();
