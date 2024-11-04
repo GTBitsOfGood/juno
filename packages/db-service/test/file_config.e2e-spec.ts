@@ -4,7 +4,7 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { FileServiceConfig, FileServiceConfigProtoFile } from 'juno-proto';
+import { FileConfigProto, FileConfigProtoFile } from 'juno-proto';
 
 let app: INestMicroservice;
 let createdConfigId: string;
@@ -19,8 +19,8 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: ['juno.file_service.config'],
-      protoPath: [FileServiceConfigProtoFile],
+      package: [FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME],
+      protoPath: [FileConfigProtoFile],
       url: process.env.DB_SERVICE_ADDR,
     },
   });
@@ -42,7 +42,7 @@ describe('File Service Config Tests', () => {
   let configClient: any;
 
   beforeEach(() => {
-    const proto = ProtoLoader.loadSync([FileServiceConfigProtoFile]) as any;
+    const proto = ProtoLoader.loadSync([FileConfigProtoFile]) as any;
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
     configClient =
       new protoGRPC.juno.file_service.config.FileServiceFileServiceConfigDbService(
@@ -52,25 +52,27 @@ describe('File Service Config Tests', () => {
   });
 
   it('creates a new file service config', async () => {
-    const response: FileServiceConfig = await new Promise((resolve, reject) => {
-      configClient.createConfig(
-        {
-          config: {
-            projectId: '1',
-            buckets: [],
-            files: [],
+    const response: FileConfigProto.FileServiceConfig = await new Promise(
+      (resolve, reject) => {
+        configClient.createConfig(
+          {
+            config: {
+              projectId: '1',
+              buckets: [],
+              files: [],
+            },
           },
-        },
-        (err, res) => {
-          if (err) {
-            reject(err);
-          } else {
-            createdConfigId = res.id;
-            resolve(res);
-          }
-        },
-      );
-    });
+          (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              createdConfigId = res.id;
+              resolve(res);
+            }
+          },
+        );
+      },
+    );
 
     expect(response).toHaveProperty('id');
   });
@@ -171,7 +173,7 @@ describe('File Service Config Tests', () => {
   });
 
   it('reading a config', async () => {
-    const readResponse: FileServiceConfig = await new Promise(
+    const readResponse: FileConfigProto.FileServiceConfig = await new Promise(
       (resolve, reject) => {
         configClient.getConfig({ id: createdConfigId }, (err, res) => {
           if (err) {
