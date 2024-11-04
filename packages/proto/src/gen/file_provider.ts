@@ -7,18 +7,38 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { Bucket } from './file_bucket';
 
 export const protobufPackage = 'juno.file_service.provider';
 
-export interface FileProvider {}
+export interface FileProvider {
+  providerName: string;
+  accessKey: string;
+  metadata: string;
+  bucket: Bucket[];
+}
 
-export interface GetFileProviderRequest {}
+export interface GetFileProviderRequest {
+  providerName: string;
+}
 
-export interface CreateFileProviderRequest {}
+export interface CreateFileProviderRequest {
+  providerName: string;
+  accessKey: string;
+  metadata: string;
+  bucket: Bucket[];
+}
 
-export interface UpdateFileProviderRequest {}
+export interface UpdateFileProviderRequest {
+  providerName: string;
+  accessKey: string;
+  metadata: string;
+  bucket: Bucket[];
+}
 
-export interface DeleteFileProviderRequest {}
+export interface DeleteFileProviderRequest {
+  providerName: string;
+}
 
 export const JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME =
   'juno.file_service.provider';

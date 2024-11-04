@@ -3,13 +3,12 @@ import { FileServiceConfigService } from './file_config.service';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { FileConfigProto } from 'juno-proto';
-import { FileServiceConfigDbServiceController } from 'juno-proto/dist/gen/file_config';
 import { Prisma } from '@prisma/client';
 
 @Controller()
 @FileConfigProto.FileServiceConfigDbServiceControllerMethods()
 export class FileConfigController
-  implements FileServiceConfigDbServiceController
+  implements FileConfigProto.FileServiceConfigDbServiceController
 {
   constructor(
     private readonly fileServiceConfigService: FileServiceConfigService,
@@ -18,7 +17,7 @@ export class FileConfigController
   async createConfig(
     request: FileConfigProto.CreateFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-    const configId = request.id.toString();
+    const configId = request.projectId.toString();
 
     const existingConfig =
       await this.fileServiceConfigService.getConfig(configId);
@@ -31,7 +30,11 @@ export class FileConfigController
 
     const config = await this.fileServiceConfigService.createConfig(request);
 
-    return config;
+    return {
+      id: config.id,
+      files: [],
+      buckets: [],
+    };
   }
 
   async getConfig(
@@ -47,7 +50,11 @@ export class FileConfigController
       });
     }
 
-    return config;
+    return {
+      id: config.id,
+      files: [],
+      buckets: [],
+    };
   }
 
   async updateConfig(
@@ -59,7 +66,11 @@ export class FileConfigController
         request,
       );
 
-      return config;
+      return {
+        id: config.id,
+        files: [],
+        buckets: [],
+      };
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
@@ -84,7 +95,11 @@ export class FileConfigController
       const config = await this.fileServiceConfigService.deleteConfig(
         request.id.toString(),
       );
-      return config;
+      return {
+        id: config.id,
+        files: [],
+        buckets: [],
+      };
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&

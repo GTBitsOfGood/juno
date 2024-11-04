@@ -28,4 +28,8 @@ export interface ApiKeyIdentifier {
   hash?: string | undefined;
 }
 
+export interface FileConfigIdentifier {
+  id: number;
+}
+
 export const JUNO_IDENTIFIERS_PACKAGE_NAME = 'juno.identifiers';

@@ -1,39 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { FileServiceConfig } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-import { ConfigProto } from 'juno-proto';
+import { FileConfigProto } from 'juno-proto';
 
 @Injectable()
 export class FileServiceConfigService {
   constructor(private prisma: PrismaService) {}
 
   async createConfig(
-    configData: ConfigProto.CreateFileServiceConfigRequest,
+    configData: FileConfigProto.CreateFileServiceConfigRequest,
   ): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.create({
       data: {
-        id: configData.id,
-        buckets: {
-          create: configData.buckets.map((bucket) => ({
-            bucketName: bucket.bucketName,
-          })),
-        },
-        project: {
+        Project: {
           connect: {
-            id: configData.id,
+            id: configData.projectId,
           },
         },
-        files: {
-          create:
-            configData.files?.map((file) => ({
-              fileId: {
-                path: file.fileId.path,
-                bucketName: file.fileId.bucketName,
-                configId: file.fileId.configId,
-              },
-              metadata: file.metadata,
-            })) || [],
-        },
+      },
+      include: {
+        Project: true,
+        buckets: true,
+        FileServiceFile: true,
       },
     });
   }
@@ -44,16 +32,16 @@ export class FileServiceConfigService {
         id: Number(configId),
       },
       include: {
+        Project: true,
         buckets: true,
-        project: true,
-        files: true,
+        FileServiceFile: true,
       },
     });
   }
 
   async updateConfig(
     configId: string,
-    configData: ConfigProto.UpdateFileServiceConfigRequest,
+    configData: FileConfigProto.UpdateFileServiceConfigRequest,
   ): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.update({
       where: {
@@ -62,27 +50,32 @@ export class FileServiceConfigService {
       data: {
         buckets: {
           deleteMany: {},
-          create: configData.buckets.map((bucket) => ({
-            bucketName: bucket.bucketName,
-          })),
+          // create: configData.buckets.map((bucket) => ({
+          //   bucketName: bucket.bucketName,
+          // })),
         },
-        project: {
+        Project: {
           connect: {
             id: configData.id,
           },
         },
-        files: {
+        FileServiceFile: {
           deleteMany: {},
-          create:
-            configData.files?.map((file) => ({
-              fileId: {
-                path: file.fileId.path,
-                bucketName: file.fileId.bucketName,
-                configId: file.fileId.configId,
-              },
-              metadata: file.metadata,
-            })) || [],
+          // create:
+          //   configData.files?.map((file) => ({
+          //     fileId: {
+          //       path: file.fileId.path,
+          //       bucketName: file.fileId.bucketName,
+          //       configId: file.fileId.configId,
+          //     },
+          //     metadata: file.metadata,
+          //   })) || [],
         },
+      },
+      include: {
+        Project: true,
+        buckets: true,
+        FileServiceFile: true,
       },
     });
   }
@@ -91,6 +84,11 @@ export class FileServiceConfigService {
     return this.prisma.fileServiceConfig.delete({
       where: {
         id: Number(configId),
+      },
+      include: {
+        Project: true,
+        buckets: true,
+        FileServiceFile: true,
       },
     });
   }
