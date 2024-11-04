@@ -28,6 +28,12 @@ export interface ApiKeyIdentifier {
   hash?: string | undefined;
 }
 
+export interface FileIdentifier {
+  bucketName: string;
+  configId: number;
+  path: string;
+}
+
 export interface FileConfigIdentifier {
   id: number;
 }

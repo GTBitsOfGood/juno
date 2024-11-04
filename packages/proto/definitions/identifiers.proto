@@ -28,6 +28,10 @@ message ApiKeyIdentifier {
   }
 }
 
-message FileConfigIdentifier {
-  int64 id = 1;
+message FileIdentifier {
+  string bucketName = 1;
+  int32 configId = 2;
+  string path = 3;
 }
+
+message FileConfigIdentifier { int64 id = 1; }

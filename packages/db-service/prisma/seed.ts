@@ -64,6 +64,28 @@ async function main() {
       },
     },
   });
+
+  await prisma.fileServiceConfig.upsert({
+    where: {
+      id: 0,
+    },
+    update: {},
+    create: {
+      id: 0,
+    },
+  });
+
+  await prisma.fileProvider.upsert({
+    where: {
+      name: 'test-provider',
+    },
+    update: {},
+    create: {
+      name: 'test-provider',
+      accessKey: 'test-key',
+      metadata: '',
+    },
+  });
 }
 
 main()
