@@ -14,7 +14,7 @@ export class FileServiceConfigService {
       data: {
         Project: {
           connect: {
-            id: configData.projectId,
+            id: Number(configData.projectId),
           },
         },
       },
@@ -26,7 +26,7 @@ export class FileServiceConfigService {
     });
   }
 
-  async getConfig(configId: string): Promise<FileServiceConfig | null> {
+  async getConfig(configId: number): Promise<FileServiceConfig | null> {
     return this.prisma.fileServiceConfig.findUnique({
       where: {
         id: Number(configId),
@@ -40,7 +40,7 @@ export class FileServiceConfigService {
   }
 
   async updateConfig(
-    configId: string,
+    configId: number,
     configData: FileConfigProto.UpdateFileServiceConfigRequest,
   ): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.update({
@@ -56,7 +56,7 @@ export class FileServiceConfigService {
         },
         Project: {
           connect: {
-            id: configData.id,
+            id: Number(configData.id),
           },
         },
         FileServiceFile: {
@@ -80,7 +80,7 @@ export class FileServiceConfigService {
     });
   }
 
-  async deleteConfig(configId: string): Promise<FileServiceConfig> {
+  async deleteConfig(configId: number): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.delete({
       where: {
         id: Number(configId),

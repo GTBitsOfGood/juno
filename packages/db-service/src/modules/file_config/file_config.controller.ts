@@ -17,11 +17,18 @@ export class FileConfigController
   async createConfig(
     request: FileConfigProto.CreateFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-    const configId = request.projectId.toString();
+    const configId = request.projectId;
 
-    const existingConfig =
-      await this.fileServiceConfigService.getConfig(configId);
-    if (existingConfig) {
+    try {
+      const existingConfig =
+        await this.fileServiceConfigService.getConfig(configId);
+      if (existingConfig) {
+        throw new RpcException({
+          code: status.ALREADY_EXISTS,
+          message: 'Config already exists',
+        });
+      }
+    } catch (error) {
       throw new RpcException({
         code: status.ALREADY_EXISTS,
         message: 'Config already exists',
@@ -40,9 +47,7 @@ export class FileConfigController
   async getConfig(
     request: FileConfigProto.GetFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-    const config = await this.fileServiceConfigService.getConfig(
-      request.id.toString(),
-    );
+    const config = await this.fileServiceConfigService.getConfig(request.id);
     if (!config) {
       throw new RpcException({
         code: status.NOT_FOUND,
@@ -62,7 +67,7 @@ export class FileConfigController
   ): Promise<FileConfigProto.FileServiceConfig> {
     try {
       const config = await this.fileServiceConfigService.updateConfig(
-        request.id.toString(),
+        request.id,
         request,
       );
 
@@ -93,7 +98,7 @@ export class FileConfigController
   ): Promise<FileConfigProto.FileServiceConfig> {
     try {
       const config = await this.fileServiceConfigService.deleteConfig(
-        request.id.toString(),
+        request.id,
       );
       return {
         id: config.id,

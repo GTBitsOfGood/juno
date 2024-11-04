@@ -4,10 +4,15 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { FileConfigProto, FileConfigProtoFile } from 'juno-proto';
+import {
+  FileConfigProto,
+  FileConfigProtoFile,
+  ResetProto,
+  ResetProtoFile,
+} from 'juno-proto';
 
 let app: INestMicroservice;
-let createdConfigId: string;
+let createdConfigId: number;
 
 jest.setTimeout(15000);
 
@@ -19,8 +24,11 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME],
-      protoPath: [FileConfigProtoFile],
+      package: [
+        FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
+        ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
+      ],
+      protoPath: [FileConfigProtoFile, ResetProtoFile],
       url: process.env.DB_SERVICE_ADDR,
     },
   });
@@ -32,11 +40,46 @@ async function initApp() {
 
 beforeAll(async () => {
   app = await initApp();
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
+  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
+  });
+
+  app.close();
+});
+
+beforeEach(async () => {
+  app = await initApp();
 });
 
 afterEach(async () => {
   await app.close();
 });
+
+function tryCreateConfig(configClient: any) {
+  return new Promise<void>((resolve) => {
+    configClient.createConfig(
+      {
+        projectId: 0,
+        buckets: [],
+        files: [],
+      },
+      () => {
+        resolve();
+      },
+    );
+  });
+}
 
 describe('File Service Config Tests', () => {
   let configClient: any;
@@ -56,11 +99,9 @@ describe('File Service Config Tests', () => {
       (resolve, reject) => {
         configClient.createConfig(
           {
-            config: {
-              projectId: '1',
-              buckets: [],
-              files: [],
-            },
+            projectId: 0,
+            buckets: [],
+            files: [],
           },
           (err, res) => {
             if (err) {
@@ -82,11 +123,9 @@ describe('File Service Config Tests', () => {
       await new Promise((resolve, reject) => {
         configClient.createConfig(
           {
-            config: {
-              projectId: '1',
-              buckets: [],
-              files: [],
-            },
+            projectId: 0,
+            buckets: [],
+            files: [],
           },
           (err, res) => {
             if (err) {
@@ -103,6 +142,7 @@ describe('File Service Config Tests', () => {
   });
 
   it('deletes a config', async () => {
+    await tryCreateConfig(configClient);
     const deleteResponse = await new Promise((resolve, reject) => {
       configClient.deleteConfig({ id: createdConfigId }, (err, res) => {
         if (err) {
@@ -119,13 +159,16 @@ describe('File Service Config Tests', () => {
   it('deletes a nonexistent config', async () => {
     try {
       await new Promise((resolve, reject) => {
-        configClient.deleteConfig({ id: 'nonexistent-id' }, (err, res) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(res);
-          }
-        });
+        configClient.deleteConfig(
+          { id: createdConfigId + 1000000 },
+          (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          },
+        );
       });
     } catch (err) {
       expect(err).toBeDefined();
@@ -133,15 +176,13 @@ describe('File Service Config Tests', () => {
   });
 
   it('updates a config', async () => {
+    await tryCreateConfig(configClient);
     const updateResponse = await new Promise((resolve, reject) => {
       configClient.updateConfig(
         {
           id: createdConfigId,
-          config: {
-            projectId: '1',
-            buckets: [],
-            files: [],
-          },
+          buckets: [],
+          files: [],
         },
         (err, res) => {
           if (err) {
@@ -159,7 +200,7 @@ describe('File Service Config Tests', () => {
   it('reading a nonexistent config', async () => {
     try {
       await new Promise((resolve, reject) => {
-        configClient.getConfig({ id: 'nonexistent-id' }, (err, res) => {
+        configClient.getConfig({ id: createdConfigId + 10000 }, (err, res) => {
           if (err) {
             reject(err);
           } else {
@@ -173,6 +214,7 @@ describe('File Service Config Tests', () => {
   });
 
   it('reading a config', async () => {
+    await tryCreateConfig(configClient);
     const readResponse: FileConfigProto.FileServiceConfig = await new Promise(
       (resolve, reject) => {
         configClient.getConfig({ id: createdConfigId }, (err, res) => {
