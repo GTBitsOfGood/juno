@@ -18,6 +18,8 @@ import {
   ApiKeyProtoFile,
   EmailProto,
   EmailProtoFile,
+  FileConfigProto,
+  FileConfigProtoFile,
   FileProviderProto,
   FileProviderProtoFile,
 } from 'juno-proto';
@@ -39,6 +41,7 @@ async function bootstrap() {
           ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
           ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
           EmailProto.JUNO_EMAIL_PACKAGE_NAME,
+          FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
           FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
         ],
         protoPath: [
@@ -49,6 +52,7 @@ async function bootstrap() {
           ResetProtoFile,
           ApiKeyProtoFile,
           EmailProtoFile,
+          FileConfigProtoFile,
           FileProviderProtoFile,
         ],
         url: process.env.DB_SERVICE_ADDR,

@@ -27,3 +27,7 @@ message ApiKeyIdentifier {
     string hash = 2;
   }
 }
+
+message FileConfigIdentifier {
+  int64 id = 1;
+}
