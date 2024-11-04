@@ -8,15 +8,20 @@ import { Prisma } from '@prisma/client';
 
 @Controller()
 @FileConfigProto.FileServiceConfigDbServiceControllerMethods()
-export class FileConfigController implements FileServiceConfigDbServiceController {
-  constructor(private readonly fileServiceConfigService: FileServiceConfigService) {}
+export class FileConfigController
+  implements FileServiceConfigDbServiceController
+{
+  constructor(
+    private readonly fileServiceConfigService: FileServiceConfigService,
+  ) {}
 
   async createConfig(
     request: FileConfigProto.CreateFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
     const configId = request.id.toString();
 
-    const existingConfig = await this.fileServiceConfigService.getConfig(configId);
+    const existingConfig =
+      await this.fileServiceConfigService.getConfig(configId);
     if (existingConfig) {
       throw new RpcException({
         code: status.ALREADY_EXISTS,
@@ -29,8 +34,12 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
     return config;
   }
 
-  async getConfig(request: FileConfigProto.GetFileServiceConfigRequest): Promise<FileConfigProto.FileServiceConfig> {
-    const config = await this.fileServiceConfigService.getConfig(request.id.toString());
+  async getConfig(
+    request: FileConfigProto.GetFileServiceConfigRequest,
+  ): Promise<FileConfigProto.FileServiceConfig> {
+    const config = await this.fileServiceConfigService.getConfig(
+      request.id.toString(),
+    );
     if (!config) {
       throw new RpcException({
         code: status.NOT_FOUND,
@@ -52,7 +61,10 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
 
       return config;
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2001') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2001'
+      ) {
         throw new RpcException({
           code: status.NOT_FOUND,
           message: 'Config not found',
@@ -69,10 +81,15 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
     request: FileConfigProto.DeleteFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
     try {
-      const config = await this.fileServiceConfigService.deleteConfig(request.id.toString());
+      const config = await this.fileServiceConfigService.deleteConfig(
+        request.id.toString(),
+      );
       return config;
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2001') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2001'
+      ) {
         throw new RpcException({
           code: status.NOT_FOUND,
           message: 'Config not found',

@@ -4,10 +4,7 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import {
-  FileServiceConfig,
-  FileServiceConfigProtoFile,
-} from 'juno-proto';
+import { FileServiceConfig, FileServiceConfigProtoFile } from 'juno-proto';
 
 let app: INestMicroservice;
 let createdConfigId: string;
@@ -47,10 +44,11 @@ describe('File Service Config Tests', () => {
   beforeEach(() => {
     const proto = ProtoLoader.loadSync([FileServiceConfigProtoFile]) as any;
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-    configClient = new protoGRPC.juno.file_service.config.FileServiceFileServiceConfigDbService(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
+    configClient =
+      new protoGRPC.juno.file_service.config.FileServiceFileServiceConfigDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
   });
 
   it('creates a new file service config', async () => {
@@ -104,16 +102,13 @@ describe('File Service Config Tests', () => {
 
   it('deletes a config', async () => {
     const deleteResponse = await new Promise((resolve, reject) => {
-      configClient.deleteConfig(
-        { id: createdConfigId },
-        (err, res) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(res);
-          }
-        },
-      );
+      configClient.deleteConfig({ id: createdConfigId }, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
+      });
     });
 
     expect(deleteResponse).toHaveProperty('id', createdConfigId);
@@ -122,16 +117,13 @@ describe('File Service Config Tests', () => {
   it('deletes a nonexistent config', async () => {
     try {
       await new Promise((resolve, reject) => {
-        configClient.deleteConfig(
-          { id: 'nonexistent-id' },
-          (err, res) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
-          },
-        );
+        configClient.deleteConfig({ id: 'nonexistent-id' }, (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
       });
     } catch (err) {
       expect(err).toBeDefined();
@@ -165,16 +157,13 @@ describe('File Service Config Tests', () => {
   it('reading a nonexistent config', async () => {
     try {
       await new Promise((resolve, reject) => {
-        configClient.getConfig(
-          { id: 'nonexistent-id' },
-          (err, res) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
-          },
-        );
+        configClient.getConfig({ id: 'nonexistent-id' }, (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
       });
     } catch (err) {
       expect(err).toBeDefined();
@@ -182,18 +171,17 @@ describe('File Service Config Tests', () => {
   });
 
   it('reading a config', async () => {
-    const readResponse: FileServiceConfig = await new Promise((resolve, reject) => {
-      configClient.getConfig(
-        { id: createdConfigId },
-        (err, res) => {
+    const readResponse: FileServiceConfig = await new Promise(
+      (resolve, reject) => {
+        configClient.getConfig({ id: createdConfigId }, (err, res) => {
           if (err) {
             reject(err);
           } else {
             resolve(res);
           }
-        },
-      );
-    });
+        });
+      },
+    );
 
     expect(readResponse).toHaveProperty('id', createdConfigId);
   });

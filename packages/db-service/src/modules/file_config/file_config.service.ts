@@ -14,7 +14,7 @@ export class FileServiceConfigService {
       data: {
         id: configData.id,
         buckets: {
-          create: configData.buckets.map(bucket => ({
+          create: configData.buckets.map((bucket) => ({
             bucketName: bucket.bucketName,
           })),
         },
@@ -24,14 +24,15 @@ export class FileServiceConfigService {
           },
         },
         files: {
-          create: configData.files?.map(file => ({
-            fileId: {
-              path: file.fileId.path,
-              bucketName: file.fileId.bucketName,
-              configId: file.fileId.configId,
-            },
-            metadata: file.metadata,
-          })) || [],
+          create:
+            configData.files?.map((file) => ({
+              fileId: {
+                path: file.fileId.path,
+                bucketName: file.fileId.bucketName,
+                configId: file.fileId.configId,
+              },
+              metadata: file.metadata,
+            })) || [],
         },
       },
     });
@@ -61,7 +62,7 @@ export class FileServiceConfigService {
       data: {
         buckets: {
           deleteMany: {},
-          create: configData.buckets.map(bucket => ({
+          create: configData.buckets.map((bucket) => ({
             bucketName: bucket.bucketName,
           })),
         },
@@ -72,14 +73,15 @@ export class FileServiceConfigService {
         },
         files: {
           deleteMany: {},
-          create: configData.files?.map(file => ({
-            fileId: {
-              path: file.fileId.path,
-              bucketName: file.fileId.bucketName,
-              configId: file.fileId.configId,
-            },
-            metadata: file.metadata,
-          })) || [],
+          create:
+            configData.files?.map((file) => ({
+              fileId: {
+                path: file.fileId.path,
+                bucketName: file.fileId.bucketName,
+                configId: file.fileId.configId,
+              },
+              metadata: file.metadata,
+            })) || [],
         },
       },
     });
