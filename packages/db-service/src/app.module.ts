@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EmailModule } from './modules/email/email.module';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { FileConfigModule } from './modules/file_config/file_config.module';
+import { FileProviderModule } from './modules/file_provider/file_provider.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { FileConfigModule } from './modules/file_config/file_config.module';
     AuthModule,
     EmailModule,
     FileConfigModule,
+    FileProviderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,6 +9,7 @@ export * as EmailProto from './gen/email';
 export * as LoggingProto from './gen/logging';
 export * as AuthCommonProto from './gen/auth_common';
 export * as FileConfigProto from './gen/file_config';
+export * as FileProviderProto from './gen/file_provider';
 
 import { join } from 'path';
 
@@ -27,3 +28,4 @@ export const EmailProtoFile = getProtoFilePath('email.proto');
 export const LoggingProtoFile = getProtoFilePath('logging.proto');
 export const AuthCommonProtoFile = getProtoFilePath('auth_common.proto');
 export const FileConfigProtoFile = getProtoFilePath('file_config.proto');
+export const FileProviderProtoFile = getProtoFilePath('file_provider.proto');
