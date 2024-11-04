@@ -34,4 +34,8 @@ export interface FileIdentifier {
   path: string;
 }
 
+export interface FileConfigIdentifier {
+  id: number;
+}
+
 export const JUNO_IDENTIFIERS_PACKAGE_NAME = 'juno.identifiers';
