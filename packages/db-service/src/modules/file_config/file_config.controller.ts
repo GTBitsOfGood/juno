@@ -7,14 +7,14 @@ import { FileServiceConfigDbServiceController } from 'juno-proto/dist/gen/file_c
 import { Prisma } from '@prisma/client';
 
 @Controller()
-@FileConfigProto.FileServiceFileServiceConfigDbServiceControllerMethods()
+@FileConfigProto.FileServiceConfigDbServiceControllerMethods()
 export class FileConfigController implements FileServiceConfigDbServiceController {
   constructor(private readonly fileServiceConfigService: FileServiceConfigService) {}
 
   async createConfig(
     request: FileConfigProto.CreateFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-    const configId = request.config.id;
+    const configId = request.id.toString();
 
     const existingConfig = await this.fileServiceConfigService.getConfig(configId);
     if (existingConfig) {
@@ -24,14 +24,13 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
       });
     }
 
-    const config = await this.fileServiceConfigService.createConfig(request.config);
+    const config = await this.fileServiceConfigService.createConfig(request);
 
     return config;
   }
 
   async getConfig(request: FileConfigProto.GetFileServiceConfigRequest): Promise<FileConfigProto.FileServiceConfig> {
-
-    const config = await this.fileServiceConfigService.getConfig(request.id);
+    const config = await this.fileServiceConfigService.getConfig(request.id.toString());
     if (!config) {
       throw new RpcException({
         code: status.NOT_FOUND,
@@ -45,11 +44,10 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
   async updateConfig(
     request: FileConfigProto.UpdateFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-
     try {
       const config = await this.fileServiceConfigService.updateConfig(
-        request.id,
-        request.config,
+        request.id.toString(),
+        request,
       );
 
       return config;
@@ -70,9 +68,8 @@ export class FileConfigController implements FileServiceConfigDbServiceControlle
   async deleteConfig(
     request: FileConfigProto.DeleteFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-
     try {
-      const config = await this.fileServiceConfigService.deleteConfig(request.id);
+      const config = await this.fileServiceConfigService.deleteConfig(request.id.toString());
       return config;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2001') {

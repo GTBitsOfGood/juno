@@ -17,8 +17,8 @@ service FileServiceConfigDbService {
 message FileServiceConfig {
   int64 id = 1;
   repeated config.Bucket buckets = 2;
-  config.Project project = 3;
-  repeated config.File files = 4;
+  project.Project project = 3;
+  repeated file.File files = 4;
 }
 
 message GetFileServiceConfigRequest {
@@ -33,7 +33,7 @@ message CreateFileServiceConfigRequest {
 message UpdateFileServiceConfigRequest {
   int64 id = 1;
   repeated config.Bucket buckets = 2;
-  repeated config.File files = 3;
+  repeated file.File files = 3;
 }
 
 message DeleteFileServiceConfigRequest {

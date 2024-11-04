@@ -8,7 +8,7 @@ export class FileServiceConfigService {
   constructor(private prisma: PrismaService) {}
 
   async createConfig(
-    configData: ConfigProto.FileServiceConfig,
+    configData: ConfigProto.CreateFileServiceConfigRequest,
   ): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.create({
       data: {
@@ -20,27 +20,27 @@ export class FileServiceConfigService {
         },
         project: {
           connect: {
-            id: configData.project.id,
+            id: configData.id,
           },
         },
         files: {
-          create: configData.files.map(file => ({
+          create: configData.files?.map(file => ({
             fileId: {
               path: file.fileId.path,
               bucketName: file.fileId.bucketName,
               configId: file.fileId.configId,
             },
             metadata: file.metadata,
-          })),
+          })) || [],
         },
       },
     });
   }
 
-  async getConfig(configId: string): Promise<FileServiceConfig> {
+  async getConfig(configId: string): Promise<FileServiceConfig | null> {
     return this.prisma.fileServiceConfig.findUnique({
       where: {
-        id: configId,
+        id: Number(configId),
       },
       include: {
         buckets: true,
@@ -52,11 +52,11 @@ export class FileServiceConfigService {
 
   async updateConfig(
     configId: string,
-    configData: ConfigProto.FileServiceConfig,
+    configData: ConfigProto.UpdateFileServiceConfigRequest,
   ): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.update({
       where: {
-        id: configId,
+        id: Number(configId),
       },
       data: {
         buckets: {
@@ -67,19 +67,19 @@ export class FileServiceConfigService {
         },
         project: {
           connect: {
-            id: configData.project.id,
+            id: configData.id,
           },
         },
         files: {
           deleteMany: {},
-          create: configData.files.map(file => ({
+          create: configData.files?.map(file => ({
             fileId: {
               path: file.fileId.path,
               bucketName: file.fileId.bucketName,
               configId: file.fileId.configId,
             },
             metadata: file.metadata,
-          })),
+          })) || [],
         },
       },
     });
@@ -88,12 +88,8 @@ export class FileServiceConfigService {
   async deleteConfig(configId: string): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.delete({
       where: {
-        id: configId,
+        id: Number(configId),
       },
     });
-  }
-
-  get rawPrisma() {
-    return this.prisma;
   }
 }
