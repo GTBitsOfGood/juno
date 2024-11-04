@@ -45,7 +45,7 @@ describe('File Service Config Tests', () => {
     const proto = ProtoLoader.loadSync([FileConfigProtoFile]) as any;
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
     configClient =
-      new protoGRPC.juno.file_service.config.FileServiceFileServiceConfigDbService(
+      new protoGRPC.juno.file_service.config.FileServiceConfigDbService(
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
