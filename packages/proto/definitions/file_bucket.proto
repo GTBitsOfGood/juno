@@ -1,10 +1,9 @@
 syntax = "proto3";
 
-package juno.file_service.config;
+package juno.file_service.bucket;
 
 import "identifiers.proto";
 import "file.proto";
-
 
 service BucketBucketDbService {
   rpc getBucket(GetBucketRequest) returns (Bucket);

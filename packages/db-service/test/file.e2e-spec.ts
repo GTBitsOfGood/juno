@@ -32,7 +32,7 @@ async function initApp() {
       package: [
         JUNO_FILE_SERVICE_FILE_PACKAGE_NAME,
         JUNO_RESET_DB_PACKAGE_NAME,
-        FileBucketProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
+        FileBucketProto.JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
       ],
       protoPath: [FileProtoFile, ResetProtoFile, FileBucketProtoFile],
       url: process.env.DB_SERVICE_ADDR,
@@ -108,7 +108,7 @@ describe('DB Service File Tests', () => {
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
     const bucketClient =
-      new bucketProtoGRPC.juno.file_service.config.BucketBucketDbService(
+      new bucketProtoGRPC.juno.file_service.bucket.BucketBucketDbService(
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );

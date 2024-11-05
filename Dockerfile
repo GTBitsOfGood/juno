@@ -103,6 +103,20 @@ RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]
 
+FROM base-service as file-service
+
+WORKDIR /app
+
+COPY --from=deps /deploy/file-service/ ./file-service/
+
+WORKDIR /app/file-service
+
+EXPOSE 5000
+
+RUN pnpm build
+
+ENTRYPOINT ["pnpm", "start:prod"]
+
 FROM base-service as logging-service
 
 WORKDIR /app

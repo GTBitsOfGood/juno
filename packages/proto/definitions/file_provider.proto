@@ -17,7 +17,7 @@ message FileProvider {
   string provider_name = 1;
   string access_key = 2;
   string metadata = 3;
-  repeated config.Bucket bucket = 4;
+  repeated bucket.Bucket bucket = 4;
 }
 
 message GetFileProviderRequest {
@@ -28,14 +28,14 @@ message CreateFileProviderRequest {
   string provider_name = 1;
   string access_key = 2;
   string metadata = 3;
-  repeated config.Bucket bucket = 4;
+  repeated bucket.Bucket bucket = 4;
 }
 
 message UpdateFileProviderRequest {
   string provider_name = 1;
   string access_key = 2;
   string metadata = 3;
-  repeated config.Bucket bucket = 4;
+  repeated bucket.Bucket bucket = 4;
 }
 
 message DeleteFileProviderRequest {

@@ -46,7 +46,7 @@ async function bootstrap() {
           ApiKeyProto.JUNO_API_KEY_PACKAGE_NAME,
           EmailProto.JUNO_EMAIL_PACKAGE_NAME,
           FileProto.JUNO_FILE_SERVICE_FILE_PACKAGE_NAME,
-          FileBucketProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
+          FileBucketProto.JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
           FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
           FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
         ],

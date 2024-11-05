@@ -25,7 +25,7 @@ async function initApp() {
     transport: Transport.GRPC,
     options: {
       package: [
-        FileBucketProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
+        FileBucketProto.JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
         ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
       ],
       protoPath: [FileBucketProtoFile, ResetProtoFile],
@@ -78,7 +78,7 @@ describe('DB Service File Bucket Tests', () => {
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
     fileBucketClient =
-      new protoGRPC.juno.file_service.config.BucketBucketDbService(
+      new protoGRPC.juno.file_service.bucket.BucketBucketDbService(
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
