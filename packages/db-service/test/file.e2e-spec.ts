@@ -9,6 +9,8 @@ import {
   FileProto,
   ResetProto,
   ResetProtoFile,
+  FileBucketProtoFile,
+  FileBucketProto,
 } from 'juno-proto';
 import { AppModule } from 'src/app.module';
 
@@ -30,8 +32,9 @@ async function initApp() {
       package: [
         JUNO_FILE_SERVICE_FILE_PACKAGE_NAME,
         JUNO_RESET_DB_PACKAGE_NAME,
+        FileBucketProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
       ],
-      protoPath: [FileProtoFile, ResetProtoFile],
+      protoPath: [FileProtoFile, ResetProtoFile, FileBucketProtoFile],
       url: process.env.DB_SERVICE_ADDR,
     },
   });
@@ -75,7 +78,7 @@ afterEach(async () => {
 describe('DB Service File Tests', () => {
   let fileClient: any;
   const bucketName = 'Test Bucket';
-  const configId = 1;
+  const configId = 0;
 
   beforeEach(async () => {
     const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
@@ -101,7 +104,28 @@ describe('DB Service File Tests', () => {
       });
     });
 
-    // Todo: Add bucket and config creation here
+    // Create sample bucket
+    const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
+    const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
+    const bucketClient =
+      new bucketProtoGRPC.juno.file_service.config.BucketBucketDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    await new Promise((resolve) => {
+      bucketClient.createBucket(
+        {
+          name: bucketName,
+          configId: configId,
+          fileProviderName: 'test-provider',
+          files: [],
+        },
+        () => {
+          resolve(0);
+        },
+      );
+    });
   });
 
   it('Creates file correctly', async () => {
