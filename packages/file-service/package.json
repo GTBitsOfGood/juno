@@ -23,6 +23,7 @@
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org bits-of-good-development --project juno-email-service ./dist && sentry-cli sourcemaps upload --org bits-of-good-development --project juno-email-service ./dist"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.685.0",
     "@grpc/grpc-js": "^1.9.7",
     "@grpc/proto-loader": "^0.7.10",
     "@nestjs/common": "^10.0.0",

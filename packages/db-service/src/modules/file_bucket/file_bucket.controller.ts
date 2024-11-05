@@ -1,13 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { FileBucketProto, IdentifierProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
-import { BucketBucketDbServiceController } from 'juno-proto/dist/gen/file_bucket';
+import { BucketDbServiceController } from 'juno-proto/dist/gen/file_bucket';
 import { FileBucketService } from './file_bucket.service';
 import { status } from '@grpc/grpc-js';
 
 @Controller()
-@FileBucketProto.BucketBucketDbServiceControllerMethods()
-export class FileBucketController implements BucketBucketDbServiceController {
+@FileBucketProto.BucketDbServiceControllerMethods()
+export class FileBucketController implements BucketDbServiceController {
   constructor(private readonly fileBucketService: FileBucketService) {}
   async getBucket(
     request: FileBucketProto.GetBucketRequest,

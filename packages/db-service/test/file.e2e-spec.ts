@@ -108,7 +108,7 @@ describe('DB Service File Tests', () => {
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
     const bucketClient =
-      new bucketProtoGRPC.juno.file_service.bucket.BucketBucketDbService(
+      new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );

@@ -34,6 +34,14 @@ export interface DeleteFileRequest {
   fileId: FileIdentifier | undefined;
 }
 
+export interface UploadFileRequest {}
+
+export interface UploadFileResponse {}
+
+export interface DownloadFileRequest {}
+
+export interface DownloadFileResponse {}
+
 export const JUNO_FILE_SERVICE_FILE_PACKAGE_NAME = 'juno.file_service.file';
 
 export interface FileDbServiceClient {
@@ -97,3 +105,56 @@ export function FileDbServiceControllerMethods() {
 }
 
 export const FILE_DB_SERVICE_NAME = 'FileDbService';
+
+export interface FileServiceClient {
+  uploadFile(request: UploadFileRequest): Observable<UploadFileResponse>;
+
+  downloadFile(request: DownloadFileRequest): Observable<DownloadFileResponse>;
+}
+
+export interface FileServiceController {
+  uploadFile(
+    request: UploadFileRequest,
+  ):
+    | Promise<UploadFileResponse>
+    | Observable<UploadFileResponse>
+    | UploadFileResponse;
+
+  downloadFile(
+    request: DownloadFileRequest,
+  ):
+    | Promise<DownloadFileResponse>
+    | Observable<DownloadFileResponse>
+    | DownloadFileResponse;
+}
+
+export function FileServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ['uploadFile', 'downloadFile'];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('FileService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('FileService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const FILE_SERVICE_NAME = 'FileService';

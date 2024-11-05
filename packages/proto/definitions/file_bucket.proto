@@ -5,11 +5,16 @@ package juno.file_service.bucket;
 import "identifiers.proto";
 import "file.proto";
 
-service BucketBucketDbService {
+service BucketDbService {
   rpc getBucket(GetBucketRequest) returns (Bucket);
   rpc createBucket(CreateBucketRequest) returns (Bucket);
   rpc deleteBucket(DeleteBucketRequest) returns (Bucket);
   rpc updateBucket(UpdateBucketRequest) returns (Bucket);
+}
+
+service BucketFileService {
+  rpc registerBucket(RegisterBucketRequest) returns (Bucket);
+  rpc removeBucket(RemoveBucketRequest) returns (Bucket);
 }
 
 message Bucket {
@@ -41,3 +46,6 @@ message DeleteBucketRequest {
   string name = 1;
   int32 configId = 2;
 }
+
+message RegisterBucketRequest {}
+message RemoveBucketRequest {}

@@ -13,6 +13,11 @@ service FileProviderDbService {
   rpc updateProvider(UpdateFileProviderRequest) returns (FileProvider);
 }
 
+service FileProviderFileService {
+  rpc registerProvider(RegisterProviderRequest) returns (FileProvider);
+  rpc removeProvider(RegisterProviderRequest) returns (FileProvider);
+}
+
 message FileProvider {
   string provider_name = 1;
   string access_key = 2;
@@ -20,9 +25,7 @@ message FileProvider {
   repeated bucket.Bucket bucket = 4;
 }
 
-message GetFileProviderRequest {
-  string provider_name = 1;
-}
+message GetFileProviderRequest { string provider_name = 1; }
 
 message CreateFileProviderRequest {
   string provider_name = 1;
@@ -38,6 +41,8 @@ message UpdateFileProviderRequest {
   repeated bucket.Bucket bucket = 4;
 }
 
-message DeleteFileProviderRequest {
-  string provider_name = 1;
-}
+message DeleteFileProviderRequest { string provider_name = 1; }
+
+message RegisterProviderRequest {}
+
+message RemoveProviderRequest {}
