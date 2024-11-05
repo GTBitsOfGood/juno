@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { File } from './file';
 import { FileIdentifier } from './identifiers';
 
-export const protobufPackage = 'juno.file_service.config';
+export const protobufPackage = 'juno.file_service.bucket';
 
 export interface Bucket {
   name: string;
@@ -42,7 +42,7 @@ export interface DeleteBucketRequest {
   configId: number;
 }
 
-export const JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME = 'juno.file_service.config';
+export const JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME = 'juno.file_service.bucket';
 
 export interface BucketBucketDbServiceClient {
   getBucket(request: GetBucketRequest): Observable<Bucket>;

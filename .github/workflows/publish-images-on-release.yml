@@ -23,6 +23,7 @@ jobs:
             db-service,
             logging-service,
             email-service,
+            file-service,
           ]
     runs-on: ubuntu-latest
     steps:
