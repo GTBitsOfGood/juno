@@ -7,18 +7,32 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { FileIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.file_service.file';
 
-export interface File {}
+export interface File {
+  fileId: FileIdentifier | undefined;
+  metadata: string;
+}
 
-export interface GetFileRequest {}
+export interface GetFileRequest {
+  fileId: FileIdentifier | undefined;
+}
 
-export interface CreateFileRequest {}
+export interface CreateFileRequest {
+  fileId: FileIdentifier | undefined;
+  metadata: string;
+}
 
-export interface UpdateFileRequest {}
+export interface UpdateFileRequest {
+  fileId: FileIdentifier | undefined;
+  metadata: string;
+}
 
-export interface DeleteFileRequest {}
+export interface DeleteFileRequest {
+  fileId: FileIdentifier | undefined;
+}
 
 export const JUNO_FILE_SERVICE_FILE_PACKAGE_NAME = 'juno.file_service.file';
 
