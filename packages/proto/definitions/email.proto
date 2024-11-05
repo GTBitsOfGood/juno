@@ -42,6 +42,7 @@ message SendEmailRequest {
   repeated EmailContent content = 6;
   int64 configId = 7;
   string configEnvironment = 8;
+  repeated EmailRecipient reply_to_list = 9;
 }
 
 message SenderInfo {

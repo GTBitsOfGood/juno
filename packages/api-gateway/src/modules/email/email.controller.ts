@@ -208,6 +208,7 @@ export class EmailController implements OnModuleInit {
             email: req.sender.email,
             name: req.sender.name,
           },
+          replyToList: req.replyToList,
           subject: req.subject,
           content: req.content,
           configId: apiKey.project.id,

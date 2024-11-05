@@ -27,6 +27,7 @@ export interface SendEmailRequest {
   content: EmailContent[];
   configId: number;
   configEnvironment: string;
+  replyToList: EmailRecipient[];
 }
 
 export interface SenderInfo {
