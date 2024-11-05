@@ -11,14 +11,17 @@ service FileDbService {
   rpc updateFile(UpdateFileRequest) returns (File);
 }
 
+service FileService {
+  rpc uploadFile(UploadFileRequest) returns (UploadFileResponse);
+  rpc downloadFile(DownloadFileRequest) returns (DownloadFileResponse);
+}
+
 message File {
   identifiers.FileIdentifier fileId = 1;
   string metadata = 4;
 }
 
-message GetFileRequest {
-  identifiers.FileIdentifier fileId = 1;
-}
+message GetFileRequest { identifiers.FileIdentifier fileId = 1; }
 
 message CreateFileRequest {
   identifiers.FileIdentifier fileId = 1;
@@ -30,6 +33,12 @@ message UpdateFileRequest {
   string metadata = 4;
 }
 
-message DeleteFileRequest {
-  identifiers.FileIdentifier fileId = 1;
-}
+message DeleteFileRequest { identifiers.FileIdentifier fileId = 1; }
+
+message UploadFileRequest {}
+
+message UploadFileResponse {}
+
+message DownloadFileRequest {}
+
+message DownloadFileResponse {}

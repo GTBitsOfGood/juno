@@ -77,11 +77,10 @@ describe('DB Service File Bucket Tests', () => {
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-    fileBucketClient =
-      new protoGRPC.juno.file_service.bucket.BucketBucketDbService(
-        process.env.DB_SERVICE_ADDR,
-        GRPC.credentials.createInsecure(),
-      );
+    fileBucketClient = new protoGRPC.juno.file_service.bucket.BucketDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
   });
 
   const createdBuckets: any[] = [];

@@ -40,6 +40,10 @@ export interface DeleteFileProviderRequest {
   providerName: string;
 }
 
+export interface RegisterProviderRequest {}
+
+export interface RemoveProviderRequest {}
+
 export const JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME =
   'juno.file_service.provider';
 
@@ -106,3 +110,50 @@ export function FileProviderDbServiceControllerMethods() {
 }
 
 export const FILE_PROVIDER_DB_SERVICE_NAME = 'FileProviderDbService';
+
+export interface FileProviderFileServiceClient {
+  registerProvider(request: RegisterProviderRequest): Observable<FileProvider>;
+
+  removeProvider(request: RegisterProviderRequest): Observable<FileProvider>;
+}
+
+export interface FileProviderFileServiceController {
+  registerProvider(
+    request: RegisterProviderRequest,
+  ): Promise<FileProvider> | Observable<FileProvider> | FileProvider;
+
+  removeProvider(
+    request: RegisterProviderRequest,
+  ): Promise<FileProvider> | Observable<FileProvider> | FileProvider;
+}
+
+export function FileProviderFileServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ['registerProvider', 'removeProvider'];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('FileProviderFileService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('FileProviderFileService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const FILE_PROVIDER_FILE_SERVICE_NAME = 'FileProviderFileService';

@@ -42,9 +42,13 @@ export interface DeleteBucketRequest {
   configId: number;
 }
 
+export interface RegisterBucketRequest {}
+
+export interface RemoveBucketRequest {}
+
 export const JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME = 'juno.file_service.bucket';
 
-export interface BucketBucketDbServiceClient {
+export interface BucketDbServiceClient {
   getBucket(request: GetBucketRequest): Observable<Bucket>;
 
   createBucket(request: CreateBucketRequest): Observable<Bucket>;
@@ -54,7 +58,7 @@ export interface BucketBucketDbServiceClient {
   updateBucket(request: UpdateBucketRequest): Observable<Bucket>;
 }
 
-export interface BucketBucketDbServiceController {
+export interface BucketDbServiceController {
   getBucket(
     request: GetBucketRequest,
   ): Promise<Bucket> | Observable<Bucket> | Bucket;
@@ -72,7 +76,7 @@ export interface BucketBucketDbServiceController {
   ): Promise<Bucket> | Observable<Bucket> | Bucket;
 }
 
-export function BucketBucketDbServiceControllerMethods() {
+export function BucketDbServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       'getBucket',
@@ -85,7 +89,7 @@ export function BucketBucketDbServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcMethod('BucketBucketDbService', method)(
+      GrpcMethod('BucketDbService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -97,7 +101,7 @@ export function BucketBucketDbServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcStreamMethod('BucketBucketDbService', method)(
+      GrpcStreamMethod('BucketDbService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -106,4 +110,51 @@ export function BucketBucketDbServiceControllerMethods() {
   };
 }
 
-export const BUCKET_BUCKET_DB_SERVICE_NAME = 'BucketBucketDbService';
+export const BUCKET_DB_SERVICE_NAME = 'BucketDbService';
+
+export interface BucketFileServiceClient {
+  registerBucket(request: RegisterBucketRequest): Observable<Bucket>;
+
+  removeBucket(request: RemoveBucketRequest): Observable<Bucket>;
+}
+
+export interface BucketFileServiceController {
+  registerBucket(
+    request: RegisterBucketRequest,
+  ): Promise<Bucket> | Observable<Bucket> | Bucket;
+
+  removeBucket(
+    request: RemoveBucketRequest,
+  ): Promise<Bucket> | Observable<Bucket> | Bucket;
+}
+
+export function BucketFileServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ['registerBucket', 'removeBucket'];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('BucketFileService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('BucketFileService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const BUCKET_FILE_SERVICE_NAME = 'BucketFileService';
