@@ -66,24 +66,81 @@ describe('File Provider Tests', () => {
 
     // TODO once a controller is implemented, create the client for that service
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-    healthClient = new protoGRPC.grpc.health.v1.Health(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
+
+    // good to note that juno.file_service.provider is used because that is the proto package
+    // FileProviderFileService is the Grpc method name in gen/file_provider.ts
+    fileProviderClient =
+      new protoGRPC.juno.file_service.provider.FileProviderFileService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
   });
 
-  it('health check', async () => {
+  it('Register a provider with valid parameters', async () => {
+    const registerRequest = {
+      accesKey: 'accessKey',
+      baseUrl: 'https://aws.amazon.com',
+      providerName: 'test_provider',
+    };
     const response = await new Promise((resolve) => {
-      healthClient.Check(
-        {
-          service: 'juno-file-service',
-        },
-        (err: any, resp: any) => {
+      fileProviderClient.registerProvider(
+        registerRequest,
+        (err: Error, resp: any) => {
           expect(err).toBeNull();
           resolve(resp);
         },
       );
     });
     expect(response).toBeDefined();
+  });
+
+  it('Register a provider with empty accessKey', async () => {
+    const registerRequest = {
+      accessKey: '',
+      baseUrl: 'https://aws.amazon.com',
+      providerName: 'test_provider',
+    };
+    const response = await new Promise((resolve) => {
+      fileProviderClient.registerProvider(
+        registerRequest,
+        (err: Error, resp: any) => {
+          expect(err).not.toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+  });
+
+  it('Register a provider with empty base url', async () => {
+    const registerRequest = {
+      accesKey: 'accessKey',
+      baseUrl: '',
+      providerName: 'test_provider',
+    };
+    const response = await new Promise((resolve) => {
+      fileProviderClient.registerProvider(
+        registerRequest,
+        (err: Error, resp: any) => {
+          expect(err).not.toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+  });
+  it('Register a provider with empty provider name', async () => {
+    const registerRequest = {
+      accesKey: 'accessKey',
+      baseUrl: 'https://aws.amazon.com',
+      providerName: '',
+    };
+    const response = await new Promise((resolve) => {
+      fileProviderClient.registerProvider(
+        registerRequest,
+        (err: Error, resp: any) => {
+          expect(err).not.toBeNull();
+          resolve(resp);
+        },
+      );
+    });
   });
 });

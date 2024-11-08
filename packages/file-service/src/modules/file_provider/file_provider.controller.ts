@@ -16,9 +16,11 @@ export class FileProviderController
   ): Observable<FileProviderProto.FileProvider> {
     if (
       !request.accessKey ||
+      request.accessKey === '' ||
       !request.baseUrl ||
       request.baseUrl === '' ||
-      !request.providerName
+      !request.providerName ||
+      request.providerName === ''
     ) {
       throw new Error('Your input parameters are invalid.');
     }
@@ -34,7 +36,7 @@ export class FileProviderController
   removeProvider(
     request: FileProviderProto.RemoveProviderRequest,
   ): Observable<FileProviderProto.FileProvider> {
-    if (!request.providerName) {
+    if (!request.providerName || request.providerName === '') {
       throw new Error('Your provider name is invalid.');
     }
     const fileProvider = this.fileProviderDbService.deleteProvider({
