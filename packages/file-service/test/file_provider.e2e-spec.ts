@@ -5,7 +5,6 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
-  FileProtoFile,
   FileProviderProto,
   FileProviderProtoFile,
   ResetProtoFile,
@@ -24,7 +23,7 @@ async function initApp() {
     transport: Transport.GRPC,
     options: {
       package: [FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME],
-      protoPath: [FileProviderProtoFile, FileProtoFile],
+      protoPath: [FileProviderProtoFile],
       url: process.env.FILE_SERVICE_ADDR,
     },
   });
