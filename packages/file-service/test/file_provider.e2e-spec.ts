@@ -70,7 +70,7 @@ describe('File Provider Tests', () => {
     // FileProviderFileService is the Grpc method name in gen/file_provider.ts
     fileProviderClient =
       new protoGRPC.juno.file_service.provider.FileProviderFileService(
-        process.env.FILE_SERVICE_ADDR,
+        process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
   });
