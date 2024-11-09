@@ -70,7 +70,7 @@ describe('File Provider Tests', () => {
     // FileProviderFileService is the Grpc method name in gen/file_provider.ts
     fileProviderClient =
       new protoGRPC.juno.file_service.provider.FileProviderFileService(
-        process.env.DB_SERVICE_ADDR,
+        process.env.FILE_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
   });
@@ -99,7 +99,7 @@ describe('File Provider Tests', () => {
       baseUrl: 'https://aws.amazon.com',
       providerName: 'test_provider',
     };
-    const response = await new Promise((resolve) => {
+    await new Promise((resolve) => {
       fileProviderClient.registerProvider(
         registerRequest,
         (err: Error, resp: any) => {
@@ -116,7 +116,7 @@ describe('File Provider Tests', () => {
       baseUrl: '',
       providerName: 'test_provider',
     };
-    const response = await new Promise((resolve) => {
+    await new Promise((resolve) => {
       fileProviderClient.registerProvider(
         registerRequest,
         (err: Error, resp: any) => {
@@ -132,7 +132,7 @@ describe('File Provider Tests', () => {
       baseUrl: 'https://aws.amazon.com',
       providerName: '',
     };
-    const response = await new Promise((resolve) => {
+    await new Promise((resolve) => {
       fileProviderClient.registerProvider(
         registerRequest,
         (err: Error, resp: any) => {

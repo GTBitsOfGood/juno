@@ -5,7 +5,7 @@ import { FileProviderService } from './file_provider.service';
 import { Observable } from 'rxjs';
 
 @Controller()
-@FileProviderProto.FileProviderDbServiceControllerMethods()
+@FileProviderProto.FileProviderFileServiceControllerMethods()
 export class FileProviderController
   implements FileProviderFileServiceController
 {
