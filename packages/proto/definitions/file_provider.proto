@@ -20,7 +20,7 @@ service FileProviderFileService {
 
 message FileProvider {
   string provider_name = 1;
-  string access_key = 2;
+  string public_access_key = 2;
   string metadata = 3;
   repeated bucket.Bucket bucket = 4;
 }
@@ -29,24 +29,27 @@ message GetFileProviderRequest { string provider_name = 1; }
 
 message CreateFileProviderRequest {
   string provider_name = 1;
-  string access_key = 2;
-  string metadata = 3;
-  repeated bucket.Bucket bucket = 4;
+  string public_access_key = 2;
+  string private_access_key = 3; // need private access key to generate for first time
+  string metadata = 4;
+  repeated bucket.Bucket bucket = 5;
 }
 
 message UpdateFileProviderRequest {
   string provider_name = 1;
-  string access_key = 2;
-  string metadata = 3;
-  repeated bucket.Bucket bucket = 4;
+  optional string public_access_key = 2;
+  optional string private_access_key = 3;
+  optional string metadata = 4;
+  repeated bucket.Bucket bucket = 5;
 }
 
 message DeleteFileProviderRequest { string provider_name = 1; }
 
 message RegisterProviderRequest {
   string provider_name = 1;
-  string access_key = 2;
-  string baseUrl = 3;
+  string public_access_key = 2;
+  string private_access_key = 3; // need private access key to generate for first time
+  string baseUrl = 4;
 }
 
 message RemoveProviderRequest {

@@ -20,7 +20,12 @@ export class FileProviderController implements FileProviderDbServiceController {
   async createProvider(
     request: FileProviderProto.CreateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    if (!request.providerName || !request.accessKey || !request.metadata) {
+    if (
+      !request.providerName ||
+      !request.publicAccessKey ||
+      !request.privateAccessKey ||
+      !request.metadata
+    ) {
       throw new RpcException('The given parameters are invalid!');
     }
     const fileProvider = await this.fileProviderService.createProvider(request);
@@ -38,7 +43,12 @@ export class FileProviderController implements FileProviderDbServiceController {
   async updateProvider(
     request: FileProviderProto.UpdateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    if (!request.providerName || !request.accessKey || !request.metadata) {
+    if (
+      !request.providerName ||
+      !request.publicAccessKey ||
+      !request.privateAccessKey ||
+      !request.metadata
+    ) {
       throw new RpcException('The given parameters are invalid!');
     }
     const fileProvider = await this.fileProviderService.updateProvider(request);

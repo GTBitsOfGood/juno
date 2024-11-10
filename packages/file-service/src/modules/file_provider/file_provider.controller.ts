@@ -26,8 +26,10 @@ export class FileProviderController
     request: FileProviderProto.RegisterProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (
-      !request.accessKey ||
-      request.accessKey === '' ||
+      !request.publicAccessKey ||
+      request.publicAccessKey === '' ||
+      !request.privateAccessKey ||
+      request.privateAccessKey === '' ||
       !request.baseUrl ||
       request.baseUrl === '' ||
       !request.providerName ||
@@ -36,7 +38,8 @@ export class FileProviderController
       throw new Error('Your input parameters are invalid.');
     }
     const fileProviderRequest = this.fileProviderDbService.createProvider({
-      accessKey: request.accessKey,
+      publicAccessKey: request.publicAccessKey,
+      privateAccessKey: request.privateAccessKey,
       providerName: request.providerName,
       metadata: JSON.stringify({ endpoint: request.baseUrl }),
       bucket: [],
