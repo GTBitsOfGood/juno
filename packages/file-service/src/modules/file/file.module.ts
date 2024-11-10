@@ -8,22 +8,22 @@ import { FileProto, FileProtoFile } from 'juno-proto';
 const { FILE_DB_SERVICE_NAME, JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileProto;
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            envFilePath: join(__dirname, '../../../../../.env.local'),
-        }),
-        ClientsModule.register([
-            {
-                name: FILE_DB_SERVICE_NAME,
-                transport: Transport.GRPC,
-                options: {
-                    url: process.env.DB_SERVICE_ADDR,
-                    package: JUNO_FILE_SERVICE_FILE_PACKAGE_NAME,
-                    protoPath: FileProtoFile,
-                },
-            },
-        ]),
-    ],
-    controllers: [FileController],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: join(__dirname, '../../../../../.env.local'),
+    }),
+    ClientsModule.register([
+      {
+        name: FILE_DB_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.DB_SERVICE_ADDR,
+          package: JUNO_FILE_SERVICE_FILE_PACKAGE_NAME,
+          protoPath: FileProtoFile,
+        },
+      },
+    ]),
+  ],
+  controllers: [FileController],
 })
-export class FileModule { }
+export class FileModule {}
