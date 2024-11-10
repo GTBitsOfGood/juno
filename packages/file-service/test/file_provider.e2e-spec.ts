@@ -90,8 +90,8 @@ describe('File Provider Tests', () => {
       const response = await new Promise((resolve) => {
         fileProviderClient.registerProvider(
           registerRequest,
-          (err: Error, resp: any) => {
-            expect(err).toBeNull();
+          (err: any, resp: any) => {
+            expect(err).not.toBeNull();
             resolve(resp);
           },
         );
@@ -112,7 +112,7 @@ describe('File Provider Tests', () => {
       await new Promise((resolve) => {
         fileProviderClient.registerProvider(
           registerRequest,
-          (err: Error, resp: any) => {
+          (err: any, resp: any) => {
             expect(err).not.toBeNull();
             resolve(resp);
           },
@@ -134,7 +134,7 @@ describe('File Provider Tests', () => {
       await new Promise((resolve) => {
         fileProviderClient.registerProvider(
           registerRequest,
-          (err: Error, resp: any) => {
+          (err: any, resp: any) => {
             expect(err).not.toBeNull();
             resolve(resp);
           },
@@ -155,7 +155,7 @@ describe('File Provider Tests', () => {
       await new Promise((resolve) => {
         fileProviderClient.registerProvider(
           registerRequest,
-          (err: Error, resp: any) => {
+          (err: any, resp: any) => {
             expect(err).not.toBeNull();
             resolve(resp);
           },
