@@ -22,7 +22,7 @@ export class FileProviderController
       );
   }
 
-  registerProvider(
+  async registerProvider(
     request: FileProviderProto.RegisterProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (
