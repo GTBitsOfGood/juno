@@ -34,6 +34,10 @@ async function initApp() {
   return app;
 }
 
+beforeEach(async () => {
+  app = await initApp();
+});
+
 beforeAll(async () => {
   app = await initApp();
 
@@ -51,9 +55,10 @@ beforeAll(async () => {
       resolve(0);
     });
   });
+  app.close();
 });
 
-afterAll(() => {
+afterEach(() => {
   app.close();
 });
 
