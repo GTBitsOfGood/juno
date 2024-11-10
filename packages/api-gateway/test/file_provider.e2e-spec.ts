@@ -81,7 +81,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -95,7 +95,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -109,7 +109,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -123,7 +123,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -137,7 +137,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -151,7 +151,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
@@ -166,7 +166,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
@@ -181,7 +181,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
@@ -196,7 +196,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
@@ -211,7 +211,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file_provider')
+      .post('/file-provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(201);
