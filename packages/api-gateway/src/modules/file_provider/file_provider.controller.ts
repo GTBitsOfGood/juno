@@ -1,23 +1,20 @@
 import {
   Body,
   Controller,
-  Get,
-  HttpException,
   HttpStatus,
   Inject,
   OnModuleInit,
-  Param,
-  ParseIntPipe,
   Post,
-  Put,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { LinkUserModel, ProjectResponse } from 'src/models/project.dto';
 import { AuthCommonProto, FileProviderProto } from 'juno-proto';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiKey } from 'src/decorators/api_key.decorator';
-import { RegisterFileProviderModel } from 'src/models/file_provider.dto';
+import {
+  FileProviderResponse,
+  RegisterFileProviderModel,
+} from 'src/models/file_provider.dto';
 
 const { FILE_PROVIDER_FILE_SERVICE_NAME } = FileProviderProto;
 
@@ -46,13 +43,19 @@ export class FileProviderController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned the file provider associated with the given data',
-    type: ProjectResponse,
+    type: FileProviderResponse,
   })
   async registerFileProvider(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body('') params: RegisterFileProviderModel,
-  ): Promise<ProjectResponse> {
-    // const project = this.fileProviderService.registerProvider();
+  ): Promise<FileProviderResponse> {
+    const fileProvider = this.fileProviderService.registerProvider({
+      baseUrl: params.baseUrl,
+      providerName: params.providerName,
+      publicAccessKey: params.accessKey.publicAccessKey,
+      privateAccessKey: params.accessKey.privateAccessKey,
+    });
+    return new FileProviderResponse(await lastValueFrom(fileProvider));
     // return new ProjectResponse(await lastValueFrom(project));
   }
 }
