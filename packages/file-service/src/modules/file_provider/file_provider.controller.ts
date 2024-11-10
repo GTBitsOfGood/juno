@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { FileProviderProto } from 'juno-proto';
 import { FileProviderFileServiceController } from 'juno-proto/dist/gen/file_provider';
-import { FileProviderService } from './file_provider.service';
 import { Observable } from 'rxjs';
 
 @Controller()
@@ -10,7 +9,7 @@ export class FileProviderController
   implements FileProviderFileServiceController
 {
   private fileProviderDbService: FileProviderProto.FileProviderDbServiceClient;
-  constructor(private readonly fileProviderService: FileProviderService) {}
+  constructor() {}
   registerProvider(
     request: FileProviderProto.RegisterProviderRequest,
   ): Observable<FileProviderProto.FileProvider> {
