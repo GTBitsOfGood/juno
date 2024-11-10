@@ -1,4 +1,5 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { FileProviderProto } from 'juno-proto';
 import { FileProviderFileServiceController } from 'juno-proto/dist/gen/file_provider';
 import { Observable } from 'rxjs';
@@ -9,7 +10,18 @@ export class FileProviderController
   implements FileProviderFileServiceController
 {
   private fileProviderDbService: FileProviderProto.FileProviderDbServiceClient;
-  constructor() {}
+  constructor(
+    @Inject(FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME)
+    private fileProviderClient: ClientGrpc,
+  ) {}
+
+  onModuleInit() {
+    this.fileProviderDbService =
+      this.fileProviderClient.getService<FileProviderProto.FileProviderDbServiceClient>(
+        FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME,
+      );
+  }
+
   registerProvider(
     request: FileProviderProto.RegisterProviderRequest,
   ): Observable<FileProviderProto.FileProvider> {
