@@ -2,7 +2,7 @@ import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { FileProviderProto } from 'juno-proto';
 import { FileProviderFileServiceController } from 'juno-proto/dist/gen/file_provider';
-import { Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 
 @Controller()
 @FileProviderProto.FileProviderFileServiceControllerMethods()
@@ -24,7 +24,7 @@ export class FileProviderController
 
   registerProvider(
     request: FileProviderProto.RegisterProviderRequest,
-  ): Observable<FileProviderProto.FileProvider> {
+  ): Promise<FileProviderProto.FileProvider> {
     if (
       !request.accessKey ||
       request.accessKey === '' ||
@@ -35,24 +35,29 @@ export class FileProviderController
     ) {
       throw new Error('Your input parameters are invalid.');
     }
-    const fileProvider = this.fileProviderDbService.createProvider({
+    const fileProviderRequest = this.fileProviderDbService.createProvider({
       accessKey: request.accessKey,
       providerName: request.providerName,
       metadata: request.baseUrl,
       bucket: [],
     });
 
+    const fileProvider = lastValueFrom(fileProviderRequest);
+
     return fileProvider;
   }
   removeProvider(
     request: FileProviderProto.RemoveProviderRequest,
-  ): Observable<FileProviderProto.FileProvider> {
+  ): Promise<FileProviderProto.FileProvider> {
     if (!request.providerName || request.providerName === '') {
       throw new Error('Your provider name is invalid.');
     }
-    const fileProvider = this.fileProviderDbService.deleteProvider({
+
+    const fileProviderRequest = this.fileProviderDbService.deleteProvider({
       providerName: request.providerName,
     });
+
+    const fileProvider = lastValueFrom(fileProviderRequest);
 
     return fileProvider;
   }
