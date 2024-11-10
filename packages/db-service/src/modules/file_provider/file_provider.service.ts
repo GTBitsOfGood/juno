@@ -70,7 +70,7 @@ export class FileProviderService {
       // });
       const newData = {};
       for (const key of Object.keys(req)) {
-        if (req[key]) {
+        if (req[key] && key !== 'providerName') {
           newData[key] = req[key];
         }
       }
