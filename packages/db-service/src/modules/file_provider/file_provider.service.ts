@@ -19,8 +19,7 @@ export class FileProviderService {
 
       const fileProvider = await this.prisma.fileProvider.create({
         data: {
-          publicAccessKey: req.publicAccessKey,
-          privateAccessKey: req.privateAccessKey,
+          accessKey: req.accessKey,
           name: req.providerName,
           metadata: req.metadata,
           // FileServiceBucket: {
@@ -30,7 +29,6 @@ export class FileProviderService {
       });
 
       return {
-        publicAccessKey: fileProvider.publicAccessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         //   will have to fix once buckets are properly updated in proto
@@ -90,7 +88,6 @@ export class FileProviderService {
       });
 
       return {
-        publicAccessKey: fileProvider.publicAccessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         // bucket: buckets,
@@ -111,7 +108,6 @@ export class FileProviderService {
       });
 
       return {
-        publicAccessKey: fileProvider.publicAccessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         bucket: [],

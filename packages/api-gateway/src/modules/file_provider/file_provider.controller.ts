@@ -50,8 +50,10 @@ export class FileProviderController implements OnModuleInit {
     const fileProvider = this.fileProviderService.registerProvider({
       baseUrl: params.baseUrl,
       providerName: params.providerName,
-      publicAccessKey: params.accessKey.publicAccessKey,
-      privateAccessKey: params.accessKey.privateAccessKey,
+      accessKey: JSON.stringify({
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+      }),
     });
     return new FileProviderResponse(await lastValueFrom(fileProvider));
     // return new ProjectResponse(await lastValueFrom(project));

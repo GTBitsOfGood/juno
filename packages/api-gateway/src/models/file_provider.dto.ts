@@ -50,15 +50,11 @@ export class FileProviderResponse {
   @ApiProperty({ description: 'The unique provider name of the file provider' })
   providerName: string;
 
-  @ApiProperty({ description: 'The public access key of the file provider' })
-  publicAccessKey: string;
-
   @ApiProperty({ description: 'The metadata of the file provider' })
   metadata: string;
 
   constructor(fileProvider: FileProviderProto.FileProvider) {
     this.providerName = fileProvider.providerName;
-    this.publicAccessKey = fileProvider.publicAccessKey;
     this.metadata = fileProvider.metadata;
   }
 }

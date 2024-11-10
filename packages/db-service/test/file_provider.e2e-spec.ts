@@ -97,8 +97,10 @@ describe('File Provider Tests', () => {
   it('Creating a file provider correctly', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider1',
-      publicAccessKey: 'Test public access key',
-      privateAccessKey: 'Test private access key',
+      accessKey: JSON.stringify({
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+      }),
       metadata: 'Test metadata',
       bucket: [],
     };
@@ -116,8 +118,10 @@ describe('File Provider Tests', () => {
   it('Creating a duplicate file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Duplicate Provider',
-      publicAccessKey: 'Test public access key',
-      privateAccessKey: 'Test private access key',
+      accessKey: JSON.stringify({
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+      }),
       metadata: 'Test metadata',
       bucket: [],
     };
@@ -144,8 +148,10 @@ describe('File Provider Tests', () => {
   it('Deleting a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider2',
-      publicAccessKey: 'Test public access key',
-      privateAccessKey: 'Test private access key',
+      accessKey: JSON.stringify({
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+      }),
       metadata: 'Test metadata',
       bucket: [],
     };
@@ -188,11 +194,13 @@ describe('File Provider Tests', () => {
     await promise;
   });
 
-  it('Updating a file provider with new public access key', async () => {
+  it('Updating a file provider with new key', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider4',
-      publicAccessKey: 'Test public access key',
-      privateAccessKey: 'Test private access key',
+      accessKey: JSON.stringify({
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+      }),
       metadata: 'Test metadata',
       bucket: [],
     };
@@ -208,41 +216,10 @@ describe('File Provider Tests', () => {
 
     const updateRequest: UpdateFileProviderRequest = {
       providerName: 'Test Provider4',
-      publicAccessKey: 'New public access key',
-      bucket: [],
-    };
-
-    const promise2 = new Promise((resolve) => {
-      fileProviderClient.updateProvider(updateRequest, (err, resp) => {
-        expect(err).toBeNull();
-        resolve(resp);
-      });
-    });
-
-    await promise2;
-  });
-
-  it('Updating a file provider with new private access key', async () => {
-    const createRequest: CreateFileProviderRequest = {
-      providerName: 'Test Provider5',
-      publicAccessKey: 'Test public access key',
-      privateAccessKey: 'Test private access key',
-      metadata: 'Test metadata',
-      bucket: [],
-    };
-
-    const promise1 = new Promise((resolve) => {
-      fileProviderClient.createProvider(createRequest, (err, resp) => {
-        expect(err).toBeNull();
-        resolve(resp);
-      });
-    });
-
-    await promise1;
-
-    const updateRequest: UpdateFileProviderRequest = {
-      providerName: 'Test Provider5',
-      privateAccessKey: 'New private access key',
+      accessKey: JSON.stringify({
+        publicAccessKey: 'newAccessKey',
+        privateAccessKey: 'privateKey',
+      }),
       bucket: [],
     };
 
@@ -259,8 +236,10 @@ describe('File Provider Tests', () => {
   it('Updating a file provider with new metadata', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider6',
-      publicAccessKey: 'Test public access key',
-      privateAccessKey: 'Test private access key',
+      accessKey: JSON.stringify({
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+      }),
       metadata: 'Test metadata',
       bucket: [],
     };
@@ -308,8 +287,10 @@ describe('File Provider Tests', () => {
   it('Reading a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider8',
-      publicAccessKey: 'Test public access key',
-      privateAccessKey: 'Test private access key',
+      accessKey: JSON.stringify({
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+      }),
       metadata: 'Test metadata',
       bucket: [],
     };
