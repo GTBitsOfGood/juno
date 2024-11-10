@@ -52,7 +52,6 @@ export class FileProviderService {
       });
 
       return {
-        publicAccessKey: fileProvider.publicAccessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         bucket: [],

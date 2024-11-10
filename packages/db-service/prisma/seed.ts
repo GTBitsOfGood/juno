@@ -82,8 +82,7 @@ async function main() {
     update: {},
     create: {
       name: 'test-provider',
-      publicAccessKey: 'test-key',
-      privateAccessKey: 'test-private-key',
+      accessKey: 'test-key',
       metadata: '',
     },
   });
