@@ -17,18 +17,19 @@ import {
 
 const { FILE_PROVIDER_FILE_SERVICE_NAME } = FileProviderProto;
 
-@ApiTags('project')
-@Controller('project')
+@ApiTags('file_provider')
+@Controller('file_provider')
 export class FileProviderController implements OnModuleInit {
   private fileProviderService: FileProviderProto.FileProviderFileServiceClient;
 
   constructor(
-    @Inject(FILE_PROVIDER_FILE_SERVICE_NAME) private projectClient: ClientGrpc,
+    @Inject(FILE_PROVIDER_FILE_SERVICE_NAME)
+    private fileProviderClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.fileProviderService =
-      this.projectClient.getService<FileProviderProto.FileProviderFileServiceClient>(
+      this.fileProviderClient.getService<FileProviderProto.FileProviderFileServiceClient>(
         FILE_PROVIDER_FILE_SERVICE_NAME,
       );
   }
