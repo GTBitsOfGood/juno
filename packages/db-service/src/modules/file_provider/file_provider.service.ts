@@ -70,7 +70,9 @@ export class FileProviderService {
       // });
       const newData = {};
       for (const key of Object.keys(req)) {
-        newData[key] = req[key];
+        if (req[key]) {
+          newData[key] = req[key];
+        }
       }
       // const fileProvider = await this.prisma.fileProvider.update({
       //   where: { name: req.providerName },
