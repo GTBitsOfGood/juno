@@ -78,7 +78,7 @@ beforeAll(async () => {
   app.close();
 });
 
-afterAll(() => {
+afterEach(() => {
   app.close();
 });
 
