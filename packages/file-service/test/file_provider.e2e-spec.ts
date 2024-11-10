@@ -91,14 +91,14 @@ describe('File Provider Tests', () => {
         fileProviderClient.registerProvider(
           registerRequest,
           (err: any, resp: any) => {
-            expect(err).not.toBeNull();
+            expect(err).toBeUndefined();
             resolve(resp);
           },
         );
       });
       expect(response).toBeDefined();
     } catch (err) {
-      expect(err).toBeNull();
+      expect(err).toBeUndefined();
     }
   });
 
