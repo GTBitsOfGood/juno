@@ -109,7 +109,7 @@ model FileServiceConfig {
 model FileProvider {
   name              String              @id
   publicAccessKey   String
-  privateAccessKey  String?
+  privateAccessKey  String
   metadata          String
   FileServiceBucket FileServiceBucket[]
 }
