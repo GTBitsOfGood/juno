@@ -43,3 +43,5 @@ lerna-debug.log*
 .bitwarden.env
 juno-client-sdk/
 .env.dev.local
+.env.gh-actions.local
+.env.*
