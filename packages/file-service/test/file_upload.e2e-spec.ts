@@ -9,12 +9,15 @@ import {
   FileProto,
   ResetProtoFile,
   FileBucketProtoFile,
+  FileProviderProtoFile,
 } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
 const { JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileProto;
 
 let app: INestMicroservice;
+
+const TEST_SERVICE_ADDR = 'file-service:50003';
 
 jest.setTimeout(10000);
 
@@ -28,7 +31,7 @@ async function initApp() {
     options: {
       package: [JUNO_FILE_SERVICE_FILE_PACKAGE_NAME],
       protoPath: [FileProtoFile],
-      url: process.env.FILE_SERVICE_ADDR,
+      url: TEST_SERVICE_ADDR,
     },
   });
 
@@ -40,7 +43,7 @@ async function initApp() {
 }
 
 beforeAll(async () => {
-  const app = await initApp();
+  app = await initApp();
 
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
 
@@ -56,24 +59,22 @@ beforeAll(async () => {
       resolve(0);
     });
   });
-
-  app.close();
 });
 
-beforeEach(async () => {
-  app = await initApp();
-});
-
-afterEach(async () => {
-  app.close();
+afterAll(async () => {
+  await app.close();
 });
 
 describe('File Service File Upload Tests', () => {
   let fileClient: any;
-  const bucketName = 'Test Bucket';
+  const bucketName = 'test-uploads-bog-juno';
   const configId = 0;
-  const metadata = 'Metadata';
-  const accessKey = 'Access Key';
+  const providerName = 'backblazeb2';
+  const region = 'us-east-005';
+
+  const accessKeyId = process.env.accessKeyId;
+  const secretAccessKey = process.env.secretAccessKey;
+  const baseURL = process.env.baseURL;
 
   beforeEach(async () => {
     const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
@@ -81,7 +82,7 @@ describe('File Service File Upload Tests', () => {
     const fileProtoGRPC = GRPC.loadPackageDefinition(fileProto) as any;
 
     fileClient = new fileProtoGRPC.juno.file_service.file.FileService(
-      process.env.FILE_SERVICE_ADDR,
+      TEST_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
     const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -99,6 +100,32 @@ describe('File Service File Upload Tests', () => {
       });
     });
 
+    // Create sample provider
+    const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
+    const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
+    const providerClient =
+      new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    await new Promise((resolve) => {
+      providerClient.createProvider(
+        {
+          providerName: providerName,
+          accessKey: JSON.stringify({
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretAccessKey,
+          }),
+          metadata: JSON.stringify({ endpoint: baseURL }),
+          bucket: [],
+        },
+        () => {
+          resolve(0);
+        },
+      );
+    });
+
     // Create sample bucket
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
@@ -113,7 +140,7 @@ describe('File Service File Upload Tests', () => {
         {
           name: bucketName,
           configId: configId,
-          fileProviderName: 'test-provider',
+          fileProviderName: providerName,
           files: [],
         },
         () => {
@@ -127,10 +154,12 @@ describe('File Service File Upload Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.uploadFile(
         {
-          bucket: `{"name":${bucketName}, "configId":${configId}}`,
-          data: 'Test data',
-          fileName: 'Test file name',
-          provider: `{"metadata":${metadata}, "accessKey":${accessKey}}`,
+          bucketName: bucketName,
+          data: 'TestData',
+          fileName: 'TestFileName',
+          providerName: providerName,
+          configId: configId,
+          region: region,
         },
 
         (err: any) => {
@@ -147,10 +176,12 @@ describe('File Service File Upload Tests', () => {
     const promise1 = new Promise((resolve) => {
       fileClient.uploadFile(
         {
-          bucket: `{"name":${bucketName}, "configId":${configId}}`,
-          data: 'Test data',
-          fileName: 'Test file name',
-          provider: `{"metadata":${metadata}, "accessKey":${accessKey}}`,
+          bucketName: bucketName,
+          data: 'TestData',
+          fileName: 'TestFileName',
+          providerName: providerName,
+          configId: configId,
+          region: region,
         },
 
         (err: any) => {
@@ -165,10 +196,12 @@ describe('File Service File Upload Tests', () => {
     const promise2 = new Promise((resolve) => {
       fileClient.uploadFile(
         {
-          bucket: `{"name":${bucketName}, "configId":${configId}}`,
-          data: 'Test data',
-          fileName: 'Test file name',
-          provider: `{"metadata":${metadata}, "accessKey":${accessKey}}`,
+          bucketName: bucketName,
+          data: 'TestData',
+          fileName: 'TestFileName',
+          providerName: providerName,
+          configId: configId,
+          region: region,
         },
 
         (err: any) => {

@@ -96,6 +96,9 @@ services:
       NODE_ENV: test
       SENDGRID_API_KEY: test-key
       SENTRY_DSN: 'https://dcdd535795155f880fa5728fbcad0d57@o4506876382609408.ingest.us.sentry.io/4508246900277248'
+    env_file:
+      - path: ./.env.dev.local
+        required: false
     networks:
       - bog-api-net
     depends_on:

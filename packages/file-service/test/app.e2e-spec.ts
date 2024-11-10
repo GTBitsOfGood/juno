@@ -20,6 +20,8 @@ import {
 
 let app: INestMicroservice;
 
+const TEST_SERVICE_ADDR = 'file-service:50001';
+
 jest.setTimeout(15000);
 
 async function initApp() {
@@ -44,7 +46,7 @@ async function initApp() {
         FileProtoFile,
         HealthProtoFile,
       ],
-      url: process.env.FILE_SERVICE_ADDR,
+      url: TEST_SERVICE_ADDR,
     },
   });
 
@@ -73,8 +75,8 @@ beforeAll(async () => {
   });
 });
 
-afterAll(() => {
-  app.close();
+afterAll(async () => {
+  await app.close();
 });
 
 describe('File Service Tests', () => {
@@ -95,7 +97,7 @@ describe('File Service Tests', () => {
     // TODO once a controller is implemented, create the client for that service
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
     healthClient = new protoGRPC.grpc.health.v1.Health(
-      process.env.DB_SERVICE_ADDR,
+      TEST_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
   });

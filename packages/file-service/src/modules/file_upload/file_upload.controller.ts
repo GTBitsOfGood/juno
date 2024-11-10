@@ -1,5 +1,5 @@
 import { Controller, Inject } from '@nestjs/common';
-import { FileProto } from 'juno-proto';
+import { FileProto, FileProviderProto } from 'juno-proto';
 import { FileServiceController } from 'juno-proto/dist/gen/file';
 import { ClientGrpc } from '@nestjs/microservices';
 import { RpcException } from '@nestjs/microservices';
@@ -9,18 +9,28 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { lastValueFrom } from 'rxjs';
 
 const { FILE_DB_SERVICE_NAME } = FileProto;
+const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
 
 @Controller()
 @FileProto.FileServiceControllerMethods()
 export class FileUploadController implements FileServiceController {
   private fileDBService: FileProto.FileDbServiceClient;
+  private fileProviderDbService: FileProviderProto.FileProviderDbServiceClient;
 
-  constructor(@Inject(FILE_DB_SERVICE_NAME) private fileDBClient: ClientGrpc) {}
+  constructor(
+    @Inject(FILE_DB_SERVICE_NAME) private fileDBClient: ClientGrpc,
+    @Inject(FILE_PROVIDER_DB_SERVICE_NAME)
+    private fileProviderClient: ClientGrpc,
+  ) {}
 
   onModuleInit() {
     this.fileDBService =
       this.fileDBClient.getService<FileProto.FileDbServiceClient>(
         FILE_DB_SERVICE_NAME,
+      );
+    this.fileProviderDbService =
+      this.fileProviderClient.getService<FileProviderProto.FileProviderDbServiceClient>(
+        FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME,
       );
   }
 
@@ -36,61 +46,42 @@ export class FileUploadController implements FileServiceController {
   ): Promise<FileProto.UploadFileResponse> {
     if (
       !request ||
-      !request.bucket ||
-      request.bucket == '' ||
+      !request.bucketName ||
+      request.bucketName == '' ||
       !request.data ||
       request.data == '' ||
       !request.fileName ||
       request.fileName == '' ||
-      !request.provider ||
-      request.provider == ''
+      !request.providerName ||
+      request.providerName == '' ||
+      request.configId == undefined ||
+      (request.region && request.region == '')
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message:
-          'bucketName, data, fileName, and provider must all be passed in and not empty strings',
+          'bucketName, data, fileName, configId, and providerName must all be passed in and not empty strings',
       });
     }
 
-    const providerJson = JSON.parse(request.provider);
-    const bucketJson = JSON.parse(request.bucket);
-    const metadata = providerJson['metadata'];
-    const accessKey = providerJson['accessKey'];
-    const bucketName = bucketJson['name'];
-    const configId = bucketJson['configId'];
+    const region = request.region ? request.region : 'us-east-1';
 
-    if (!metadata || metadata == '') {
-      throw new RpcException({
-        code: status.INVALID_ARGUMENT,
-        message: 'metadata is not in provider or is empty string',
-      });
-    }
+    const provider = await lastValueFrom(
+      this.fileProviderDbService.getProvider({
+        providerName: request.providerName,
+      }),
+    );
+    const accessKey = provider['accessKey'];
+    const metadata = {
+      ...JSON.parse(provider['metadata']),
+      region: region,
+      credentials: JSON.parse(accessKey),
+    };
 
-    if (!accessKey || accessKey == '') {
-      throw new RpcException({
-        code: status.INVALID_ARGUMENT,
-        message: 'accessKey is not in provider or is empty string',
-      });
-    }
-
-    if (!bucketName || bucketName == '') {
-      throw new RpcException({
-        code: status.INVALID_ARGUMENT,
-        message: 'bucketName is not in bucket or is empty string',
-      });
-    }
-
-    if (configId == undefined) {
-      throw new RpcException({
-        code: status.INVALID_ARGUMENT,
-        message: 'configId is not in bucket',
-      });
-    }
-
-    const s3Client = new S3Client(JSON.parse(metadata));
+    const s3Client = new S3Client(metadata);
     const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: accessKey,
+      Bucket: request.bucketName,
+      Key: request.fileName,
     });
     const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
@@ -98,11 +89,11 @@ export class FileUploadController implements FileServiceController {
     await lastValueFrom(
       this.fileDBService.createFile({
         fileId: {
-          bucketName: bucketName,
-          configId: configId,
+          bucketName: request.bucketName,
+          configId: request.configId,
           path: request.fileName,
         },
-        metadata: metadata,
+        metadata: '',
       }),
     );
 

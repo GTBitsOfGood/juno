@@ -37,8 +37,10 @@ export interface DeleteFileRequest {
 export interface UploadFileRequest {
   fileName: string;
   data: string;
-  bucket: string;
-  provider: string;
+  bucketName: string;
+  providerName: string;
+  configId: number;
+  region?: string | undefined;
 }
 
 export interface UploadFileResponse {
