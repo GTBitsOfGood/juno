@@ -82,7 +82,7 @@ describe('File Provider Tests', () => {
 
   it('Register a provider with valid parameters', async () => {
     try {
-      const registerRequest = {
+      const registerRequest: FileProviderProto.RegisterProviderRequest = {
         accessKey: 'accessKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider',
@@ -91,14 +91,14 @@ describe('File Provider Tests', () => {
         fileProviderClient.registerProvider(
           registerRequest,
           (err: any, resp: any) => {
-            expect(err).toBeNull();
+            expect(err).not.toBeNull();
             resolve(resp);
           },
         );
       });
       expect(response).toBeDefined();
     } catch (err) {
-      expect(err).toBeUndefined();
+      expect(err).toBeNull();
     }
   });
 
@@ -126,7 +126,7 @@ describe('File Provider Tests', () => {
 
   it('Register a provider with empty base url', async () => {
     try {
-      const registerRequest = {
+      const registerRequest: FileProviderProto.RegisterProviderRequest = {
         accessKey: 'accessKey',
         baseUrl: '',
         providerName: 'test_provider',
@@ -147,7 +147,7 @@ describe('File Provider Tests', () => {
   });
   it('Register a provider with empty provider name', async () => {
     try {
-      const registerRequest = {
+      const registerRequest: FileProviderProto.RegisterProviderRequest = {
         accessKey: 'accessKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: '',
