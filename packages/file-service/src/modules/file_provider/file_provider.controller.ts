@@ -2,7 +2,7 @@ import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { FileProviderProto } from 'juno-proto';
 import { FileProviderFileServiceController } from 'juno-proto/dist/gen/file_provider';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 
 @Controller()
 @FileProviderProto.FileProviderFileServiceControllerMethods()
@@ -22,9 +22,9 @@ export class FileProviderController
       );
   }
 
-  registerProvider(
+  async registerProvider(
     request: FileProviderProto.RegisterProviderRequest,
-  ): Observable<FileProviderProto.FileProvider> {
+  ): Promise<FileProviderProto.FileProvider> {
     if (
       !request.accessKey ||
       request.accessKey === '' ||
@@ -35,12 +35,14 @@ export class FileProviderController
     ) {
       throw new Error('Your input parameters are invalid.');
     }
-    const fileProvider = this.fileProviderDbService.createProvider({
-      accessKey: request.accessKey,
-      providerName: request.providerName,
-      metadata: request.baseUrl,
-      bucket: [],
-    });
+    const fileProvider = await lastValueFrom(
+      this.fileProviderDbService.createProvider({
+        accessKey: request.accessKey,
+        providerName: request.providerName,
+        metadata: request.baseUrl,
+        bucket: [],
+      }),
+    );
 
     return fileProvider;
   }

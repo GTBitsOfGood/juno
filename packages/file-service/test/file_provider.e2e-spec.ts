@@ -14,6 +14,8 @@ let app: INestMicroservice;
 
 jest.setTimeout(15000);
 
+const TEST_SERVICE_ADDR = 'file-service:50002';
+
 async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -24,7 +26,7 @@ async function initApp() {
     options: {
       package: [FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME],
       protoPath: [FileProviderProtoFile],
-      url: process.env.FILE_SERVICE_ADDR,
+      url: TEST_SERVICE_ADDR,
     },
   });
 
@@ -33,10 +35,6 @@ async function initApp() {
   await app.listen();
   return app;
 }
-
-beforeEach(async () => {
-  app = await initApp();
-});
 
 beforeAll(async () => {
   app = await initApp();
@@ -55,11 +53,10 @@ beforeAll(async () => {
       resolve(0);
     });
   });
-  app.close();
 });
 
-afterEach(() => {
-  app.close();
+afterAll(async () => {
+  await app.close();
 });
 
 describe('File Provider Tests', () => {
@@ -75,7 +72,7 @@ describe('File Provider Tests', () => {
     // FileProviderFileService is the Grpc method name in gen/file_provider.ts
     fileProviderClient =
       new protoGRPC.juno.file_service.provider.FileProviderFileService(
-        process.env.FILE_SERVICE_ADDR,
+        TEST_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
   });
