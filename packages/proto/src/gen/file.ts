@@ -38,9 +38,16 @@ export interface UploadFileRequest {}
 
 export interface UploadFileResponse {}
 
-export interface DownloadFileRequest {}
+export interface DownloadFileRequest {
+  fileName: string;
+  data: string;
+  bucket: string;
+  provider: string;
+}
 
-export interface DownloadFileResponse {}
+export interface DownloadFileResponse {
+  url: string;
+}
 
 export const JUNO_FILE_SERVICE_FILE_PACKAGE_NAME = 'juno.file_service.file';
 

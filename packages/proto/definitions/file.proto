@@ -39,6 +39,12 @@ message UploadFileRequest {}
 
 message UploadFileResponse {}
 
-message DownloadFileRequest {}
+message DownloadFileRequest {  
+  string fileName = 1;
+  string data = 2;
+  string bucket = 3;
+  string provider = 4;}
 
-message DownloadFileResponse {}
+message DownloadFileResponse {
+  string url = 1;
+}
