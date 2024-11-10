@@ -35,7 +35,7 @@ import { ApiKeyProtoFile } from 'juno-proto';
   ],
   controllers: [FileProviderController],
 })
-export class FileProviderModule implements NestModule {
+export class FileProviderAPIModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(ApiKeyMiddleware)
