@@ -8,9 +8,8 @@ import {
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { AuthCommonProto, FileProviderProto } from 'juno-proto';
+import { FileProviderProto } from 'juno-proto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ApiKey } from 'src/decorators/api_key.decorator';
 import {
   FileProviderResponse,
   RegisterFileProviderModel,
@@ -46,7 +45,6 @@ export class FileProviderController implements OnModuleInit {
     type: FileProviderResponse,
   })
   async registerFileProvider(
-    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body('') params: RegisterFileProviderModel,
   ): Promise<FileProviderResponse> {
     const fileProvider = this.fileProviderService.registerProvider({
