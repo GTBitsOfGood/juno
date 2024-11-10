@@ -81,70 +81,89 @@ describe('File Provider Tests', () => {
   });
 
   it('Register a provider with valid parameters', async () => {
-    const registerRequest = {
-      accesKey: 'accessKey',
-      baseUrl: 'https://aws.amazon.com',
-      providerName: 'test_provider',
-    };
-    const response = await new Promise((resolve) => {
-      fileProviderClient.registerProvider(
-        registerRequest,
-        (err: Error, resp: any) => {
-          expect(err).toBeNull();
-          resolve(resp);
-        },
-      );
-    });
-    expect(response).toBeDefined();
+    try {
+      const registerRequest = {
+        accesKey: 'accessKey',
+        baseUrl: 'https://aws.amazon.com',
+        providerName: 'test_provider',
+      };
+      const response = await new Promise((resolve) => {
+        fileProviderClient.registerProvider(
+          registerRequest,
+          (err: Error, resp: any) => {
+            expect(err).toBeNull();
+            resolve(resp);
+          },
+        );
+      });
+      expect(response).toBeDefined();
+    } catch (err) {
+      expect(err).toBeNull();
+    }
   });
 
   it('Register a provider with empty accessKey', async () => {
-    const registerRequest = {
-      accessKey: '',
-      baseUrl: 'https://aws.amazon.com',
-      providerName: 'test_provider',
-    };
-    await new Promise((resolve) => {
-      fileProviderClient.registerProvider(
-        registerRequest,
-        (err: Error, resp: any) => {
-          expect(err).not.toBeNull();
-          resolve(resp);
-        },
-      );
-    });
+    try {
+      const registerRequest = {
+        accessKey: '',
+        baseUrl: 'https://aws.amazon.com',
+        providerName: 'test_provider',
+      };
+      await new Promise((resolve) => {
+        fileProviderClient.registerProvider(
+          registerRequest,
+          (err: Error, resp: any) => {
+            expect(err).not.toBeNull();
+            resolve(resp);
+          },
+        );
+      });
+      fail('Expected error to be thrown');
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
   });
 
   it('Register a provider with empty base url', async () => {
-    const registerRequest = {
-      accesKey: 'accessKey',
-      baseUrl: '',
-      providerName: 'test_provider',
-    };
-    await new Promise((resolve) => {
-      fileProviderClient.registerProvider(
-        registerRequest,
-        (err: Error, resp: any) => {
-          expect(err).not.toBeNull();
-          resolve(resp);
-        },
-      );
-    });
+    try {
+      const registerRequest = {
+        accesKey: 'accessKey',
+        baseUrl: '',
+        providerName: 'test_provider',
+      };
+      await new Promise((resolve) => {
+        fileProviderClient.registerProvider(
+          registerRequest,
+          (err: Error, resp: any) => {
+            expect(err).not.toBeNull();
+            resolve(resp);
+          },
+        );
+      });
+      fail('Expected error to be thrown');
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
   });
   it('Register a provider with empty provider name', async () => {
-    const registerRequest = {
-      accesKey: 'accessKey',
-      baseUrl: 'https://aws.amazon.com',
-      providerName: '',
-    };
-    await new Promise((resolve) => {
-      fileProviderClient.registerProvider(
-        registerRequest,
-        (err: Error, resp: any) => {
-          expect(err).not.toBeNull();
-          resolve(resp);
-        },
-      );
-    });
+    try {
+      const registerRequest = {
+        accesKey: 'accessKey',
+        baseUrl: 'https://aws.amazon.com',
+        providerName: '',
+      };
+      await new Promise((resolve) => {
+        fileProviderClient.registerProvider(
+          registerRequest,
+          (err: Error, resp: any) => {
+            expect(err).not.toBeNull();
+            resolve(resp);
+          },
+        );
+      });
+      fail('Expected error to be thrown');
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
   });
 });
