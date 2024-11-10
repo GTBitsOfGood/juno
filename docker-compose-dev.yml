@@ -99,6 +99,8 @@ services:
     env_file:
       - path: ./.env.dev.local
         required: false
+      - path: ./.env.gh-actions.local
+        required: false
     networks:
       - bog-api-net
     depends_on:
