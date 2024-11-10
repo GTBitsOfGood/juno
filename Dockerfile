@@ -45,6 +45,7 @@ RUN pnpm deploy --filter=auth-service --prod /deploy/auth-service
 RUN pnpm deploy --filter=db-service --prod /deploy/db-service
 RUN pnpm deploy --filter=email-service --prod /deploy/email-service
 RUN pnpm deploy --filter=logging-service --prod /deploy/logging-service
+RUN pnpm deploy --filter=file-service --prod /deploy/file-service
 
 # TODO: Switch over to a minimal node installation
 FROM node:18 as base-service
