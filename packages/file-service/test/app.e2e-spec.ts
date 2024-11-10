@@ -20,8 +20,6 @@ import {
 
 let app: INestMicroservice;
 
-const TEST_SERVICE_ADDR = 'file-service:50001';
-
 jest.setTimeout(15000);
 
 const TEST_SERVICE_ADDR = 'file-service:50001';
