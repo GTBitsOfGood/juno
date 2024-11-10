@@ -36,7 +36,6 @@ export interface DeleteFileRequest {
 
 export interface UploadFileRequest {
   fileName: string;
-  data: string;
   bucketName: string;
   providerName: string;
   configId: number;

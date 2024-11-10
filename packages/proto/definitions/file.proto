@@ -37,11 +37,10 @@ message DeleteFileRequest { identifiers.FileIdentifier fileId = 1; }
 
 message UploadFileRequest {
   string fileName = 1;
-  string data = 2;
-  string bucketName = 3;
-  string providerName = 4;
-  int32 configId = 5;
-  optional string region = 6;
+  string bucketName = 2;
+  string providerName = 3;
+  int32 configId = 4;
+  optional string region = 5;
 }
 
 message UploadFileResponse {

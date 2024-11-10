@@ -155,7 +155,6 @@ describe('File Service File Upload Tests', () => {
       fileClient.uploadFile(
         {
           bucketName: bucketName,
-          data: 'TestData',
           fileName: 'TestFileName',
           providerName: providerName,
           configId: configId,
@@ -177,7 +176,6 @@ describe('File Service File Upload Tests', () => {
       fileClient.uploadFile(
         {
           bucketName: bucketName,
-          data: 'TestData',
           fileName: 'TestFileName',
           providerName: providerName,
           configId: configId,
@@ -197,7 +195,6 @@ describe('File Service File Upload Tests', () => {
       fileClient.uploadFile(
         {
           bucketName: bucketName,
-          data: 'TestData',
           fileName: 'TestFileName',
           providerName: providerName,
           configId: configId,

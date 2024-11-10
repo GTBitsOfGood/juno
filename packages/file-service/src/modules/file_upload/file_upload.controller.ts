@@ -48,8 +48,6 @@ export class FileUploadController implements FileServiceController {
       !request ||
       !request.bucketName ||
       request.bucketName == '' ||
-      !request.data ||
-      request.data == '' ||
       !request.fileName ||
       request.fileName == '' ||
       !request.providerName ||
@@ -60,7 +58,7 @@ export class FileUploadController implements FileServiceController {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message:
-          'bucketName, data, fileName, configId, and providerName must all be passed in and not empty strings',
+          'bucketName, fileName, configId, and providerName must all be passed in and not empty strings',
       });
     }
 
