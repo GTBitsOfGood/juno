@@ -3,8 +3,8 @@ import { FileProto } from 'juno-proto';
 import { ClientGrpc } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RpcException } from '@nestjs/microservices';
-import { GetObjectCommand, S3Client, getSignedUrl } from '@aws-sdk';
-
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 const { FILE_DB_SERVICE_NAME } = FileProto;
 
 @Controller()
@@ -59,14 +59,15 @@ export class FileController implements FileProto.FileServiceController {
       configId: configId,
       path: fileName,
     };
-    await this.fileService.createFile(fileId, metadata);
+    const fileRequest = { fileId, metadata };
+    await this.fileService.createFile(fileRequest);
     //get url
     const getcommand = new GetObjectCommand({
       Bucket: bucketName,
       Key: fileName,
     });
-    const expiration = 3600;
-    return await getSignedUrl(client, getcommand, expiration);
+    const url = await getSignedUrl(client, getcommand, { expiresIn: 3600 });
+    return { url };
   }
 
   async uploadFile(
@@ -75,10 +76,11 @@ export class FileController implements FileProto.FileServiceController {
     //replace with upload file functionality
     if (!request) {
       throw new RpcException({
-        code: status.INVALID_ARGUMENT,
-        message: 'Must provide request information',
+        message: 'Must provide request',
       });
     }
-    return null;
+    throw new RpcException({
+      message: 'Upload File is not implemented',
+    });
   }
 }
