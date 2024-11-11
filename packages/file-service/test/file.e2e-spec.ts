@@ -14,6 +14,7 @@ import {
 import { AppModule } from './../src/app.module';
 
 const { JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileProto;
+const TEST_SERVICE_ADDR = 'file-service:50003';
 
 let app: INestMicroservice;
 
@@ -29,7 +30,7 @@ async function initApp() {
     options: {
       package: [JUNO_FILE_SERVICE_FILE_PACKAGE_NAME],
       protoPath: [FileProtoFile],
-      url: process.env.FILE_SERVICE_ADDR,
+      url: TEST_SERVICE_ADDR,
     },
   });
 
@@ -41,7 +42,7 @@ async function initApp() {
 }
 
 beforeAll(async () => {
-  const app = await initApp();
+  app = await initApp();
 
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
 
@@ -79,7 +80,7 @@ describe('Download File Tests', () => {
     const fileProtoGRPC = GRPC.loadPackageDefinition(fileProto) as any;
 
     fileClient = new fileProtoGRPC.juno.file_service.file.FileService(
-      process.env.FILE_SERVICE_ADDR,
+      TEST_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
     const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -130,6 +131,21 @@ describe('Download File Tests', () => {
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
+    //create bucket
+    await new Promise((resolve) => {
+      bucketClient.createBucket(
+        {
+          name: bucketName,
+          configId: configId,
+          fileProviderName: providerName,
+          files: [],
+        },
+        () => {
+          resolve(0);
+        },
+      );
+    });
+    //create file
     //Create file for this bucket
 
     await new Promise((resolve) => {
@@ -148,20 +164,6 @@ describe('Download File Tests', () => {
       );
     });
 
-
-    await new Promise((resolve) => {
-      bucketClient.createBucket(
-        {
-          name: bucketName,
-          configId: configId,
-          fileProviderName: providerName,
-          files: [],
-        },
-        () => {
-          resolve(0);
-        },
-      );
-    });
   });
 
   it('Does Not Download Nonexistent File', async () => {
