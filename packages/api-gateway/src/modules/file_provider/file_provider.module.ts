@@ -13,7 +13,12 @@ import {
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ApiKeyProtoFile } from 'juno-proto';
+import {
+  ApiKeyProtoFile,
+  FileProviderProto,
+  FileProviderProtoFile,
+} from 'juno-proto';
+import { FILE_PROVIDER_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_provider';
 
 // TODO: Make this module Auth protected
 @Module({
@@ -23,12 +28,12 @@ import { ApiKeyProtoFile } from 'juno-proto';
     }),
     ClientsModule.register([
       {
-        name: API_KEY_SERVICE_NAME,
+        name: FILE_PROVIDER_FILE_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: process.env.AUTH_SERVICE_ADDR,
-          package: JUNO_API_KEY_PACKAGE_NAME,
-          protoPath: ApiKeyProtoFile,
+          url: process.env.FILE_SERVICE_ADDR,
+          package: FileProviderProto.FILE_PROVIDER_FILE_SERVICE_NAME,
+          protoPath: FileProviderProtoFile,
         },
       },
     ]),
