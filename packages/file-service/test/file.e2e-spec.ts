@@ -9,6 +9,7 @@ import {
   FileProto,
   ResetProtoFile,
   FileBucketProtoFile,
+  FileProviderProtoFile
 } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
@@ -57,22 +58,21 @@ beforeAll(async () => {
     });
   });
 
-  app.close();
 });
 
-beforeEach(async () => {
-  app = await initApp();
-});
+afterAll(async () => {
+  await app.close();
+})
 
-afterEach(async () => {
-  app.close();
-});
 
 describe('Download File Tests', () => {
   let fileClient: any;
-  const bucketName = 'Test Bucket';
+  const bucketName = 'test-downloads-bog-juno';
   const configId = 0;
-
+  const providerName = 'backblazeb2'
+  const accessKeyId = process.env.accessKeyId;
+  const secretAccessKey = process.env.secretAccessKey;
+  const baseURL = process.env.baseURL;
   beforeEach(async () => {
     const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
 
@@ -97,6 +97,31 @@ describe('Download File Tests', () => {
       });
     });
 
+    const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
+    const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
+    const providerClient =
+      new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    await new Promise((resolve) => {
+      providerClient.createProvider(
+        {
+          providerName: providerName,
+          accessKey: JSON.stringify({
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretAccessKey,
+          }),
+          metadata: JSON.stringify({ endpoint: baseURL }),
+          bucket: [],
+        },
+        () => {
+          resolve(0);
+        },
+      );
+    });
+
     // Create sample bucket
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
@@ -105,13 +130,31 @@ describe('Download File Tests', () => {
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
+    //Create file for this bucket
+
+    await new Promise((resolve) => {
+      fileClient.createFile(
+        {
+          fileId: {
+            bucketName: bucketName,
+            configId: configId,
+            path: 'ValidFile',
+          },
+          metadata: '',
+        },
+        () => {
+          resolve(0);
+        },
+      );
+    });
+
 
     await new Promise((resolve) => {
       bucketClient.createBucket(
         {
           name: bucketName,
           configId: configId,
-          fileProviderName: 'Provider',
+          fileProviderName: providerName,
           files: [],
         },
         () => {
@@ -121,14 +164,36 @@ describe('Download File Tests', () => {
     });
   });
 
-  it('Downloads nonexistent File Successfully', async () => {
+  it('Does Not Download Nonexistent File', async () => {
     const promise = new Promise((resolve) => {
       fileClient.downloadFile(
         {
-          bucket: `{"name":${bucketName}, "configId":${configId}}`,
-          data: 'Metadata',
-          fileName: 'File1',
-          provider: `Provider`,
+          fileName: 'filedoesntexist',
+          bucket: bucketName,
+          provider: providerName,
+          configId: configId,
+        },
+
+        (err: any) => {
+          expect(err).not.toBeNull();
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
+  it('Downloads Existing File Successfully', async () => {
+
+
+    const promise = new Promise((resolve) => {
+      fileClient.downloadFile(
+        {
+          fileName: 'ValidFile',
+          bucket: bucketName,
+          provider: providerName,
+          configId: configId
         },
 
         (err: any) => {
@@ -139,43 +204,5 @@ describe('Download File Tests', () => {
     });
 
     await promise;
-  });
-
-  it('Downloads Existing File Successfully', async () => {
-    const promise1 = new Promise((resolve) => {
-      fileClient.downloadFile(
-        {
-          bucket: `{"name":${bucketName}, "configId":${configId}}`,
-          data: 'Metadata',
-          fileName: 'File2',
-          provider: 'Provider',
-        },
-
-        (err: any) => {
-          expect(err).toBeNull();
-          resolve({});
-        },
-      );
-    });
-
-    await promise1;
-
-    const promise2 = new Promise((resolve) => {
-      fileClient.downloadFile(
-        {
-          bucket: `{"name":${bucketName}, "configId":${configId}}`,
-          data: 'Metadata',
-          fileName: 'File2',
-          provider: 'Provider',
-        },
-
-        (err: any) => {
-          expect(err).toBeNull();
-          resolve({});
-        },
-      );
-    });
-
-    await promise2;
   });
 });

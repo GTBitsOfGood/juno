@@ -34,15 +34,17 @@ export interface DeleteFileRequest {
   fileId: FileIdentifier | undefined;
 }
 
-export interface UploadFileRequest {}
+export interface UploadFileRequest { }
 
-export interface UploadFileResponse {}
+export interface UploadFileResponse { }
 
 export interface DownloadFileRequest {
   fileName: string;
-  data: string;
-  bucket: string;
-  provider: string;
+  bucketName: string;
+  providerName: string;
+  configId: number;
+  region?: string | undefined;
+
 }
 
 export interface DownloadFileResponse {
