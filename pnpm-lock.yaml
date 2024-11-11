@@ -846,6 +846,13 @@ packages:
     resolution: {integrity: sha512-Xt3DV4DnAT3v2WURwzTxWQK34Ew+iiLzoUoguvLaZrVMFOqMMrwVjP+sizqIaHp1j7rGmFcN5I8saXnsDLuQLA==}
     engines: {node: '>=16.0.0'}
 
+  '@aws-sdk/core@3.686.0':
+    resolution:
+      {
+        integrity: sha512-Xt3DV4DnAT3v2WURwzTxWQK34Ew+iiLzoUoguvLaZrVMFOqMMrwVjP+sizqIaHp1j7rGmFcN5I8saXnsDLuQLA==,
+      }
+    engines: { node: '>=16.0.0' }
+
   '@aws-sdk/credential-provider-env@3.679.0':
     resolution: {integrity: sha512-EdlTYbzMm3G7VUNAMxr9S1nC1qUNqhKlAxFU8E7cKsAe8Bp29CD5HAs3POc56AVo9GC4yRIS+/mtlZSmrckzUA==}
     engines: {node: '>=16.0.0'}
@@ -914,6 +921,13 @@ packages:
     resolution: {integrity: sha512-YGHYqiyRiNNucmvLrfx3QxIkjSDWR/+cc72bn0lPvqFUQBRHZgmYQLxVYrVZSmRzzkH2FQ1HsZcXhOafLbq4vQ==}
     engines: {node: '>=16.0.0'}
 
+  '@aws-sdk/middleware-sdk-s3@3.687.0':
+    resolution:
+      {
+        integrity: sha512-YGHYqiyRiNNucmvLrfx3QxIkjSDWR/+cc72bn0lPvqFUQBRHZgmYQLxVYrVZSmRzzkH2FQ1HsZcXhOafLbq4vQ==,
+      }
+    engines: { node: '>=16.0.0' }
+
   '@aws-sdk/middleware-ssec@3.679.0':
     resolution: {integrity: sha512-4GNUxXbs1M71uFHRiCAZtN0/g23ogI9YjMe5isAuYMHXwDB3MhqF7usKf954mBP6tplvN44vYlbJ84faaLrTtg==}
     engines: {node: '>=16.0.0'}
@@ -930,6 +944,13 @@ packages:
     resolution: {integrity: sha512-RvG5R+XXl86ykwdfq2wuEOa0zJyZwJE4f0cuEt2ivMTfWsJZmwKielcTcjX8AeJTecW0iwukSZppT77lqG700Q==}
     engines: {node: '>=16.0.0'}
 
+  '@aws-sdk/s3-request-presigner@3.688.0':
+    resolution:
+      {
+        integrity: sha512-RvG5R+XXl86ykwdfq2wuEOa0zJyZwJE4f0cuEt2ivMTfWsJZmwKielcTcjX8AeJTecW0iwukSZppT77lqG700Q==,
+      }
+    engines: { node: '>=16.0.0' }
+
   '@aws-sdk/signature-v4-multi-region@3.685.0':
     resolution: {integrity: sha512-IHLwuAZGqfUWVrNqw0ugnBa7iL8uBP4x6A7bfBDXRXWCWjUCed/1/D//0lKDHwpFkV74fGW6KoBacnWSUlXmwA==}
     engines: {node: '>=16.0.0'}
@@ -937,6 +958,13 @@ packages:
   '@aws-sdk/signature-v4-multi-region@3.687.0':
     resolution: {integrity: sha512-vdOQHCRHJPX9mT8BM6xOseazHD6NodvHl9cyF5UjNtLn+gERRJEItIA9hf0hlt62odGD8Fqp+rFRuqdmbNkcNw==}
     engines: {node: '>=16.0.0'}
+
+  '@aws-sdk/signature-v4-multi-region@3.687.0':
+    resolution:
+      {
+        integrity: sha512-vdOQHCRHJPX9mT8BM6xOseazHD6NodvHl9cyF5UjNtLn+gERRJEItIA9hf0hlt62odGD8Fqp+rFRuqdmbNkcNw==,
+      }
+    engines: { node: '>=16.0.0' }
 
   '@aws-sdk/token-providers@3.679.0':
     resolution: {integrity: sha512-1/+Zso/x2jqgutKixYFQEGli0FELTgah6bm7aB+m2FAWH4Hz7+iMUsazg6nSWm714sG9G3h5u42Dmpvi9X6/hA==}
@@ -952,6 +980,13 @@ packages:
     resolution: {integrity: sha512-xFnrb3wxOoJcW2Xrh63ZgFo5buIu9DF7bOHnwoUxHdNpUXicUh0AHw85TjXxyxIAd0d1psY/DU7QHoNI3OswgQ==}
     engines: {node: '>=16.0.0'}
 
+  '@aws-sdk/types@3.686.0':
+    resolution:
+      {
+        integrity: sha512-xFnrb3wxOoJcW2Xrh63ZgFo5buIu9DF7bOHnwoUxHdNpUXicUh0AHw85TjXxyxIAd0d1psY/DU7QHoNI3OswgQ==,
+      }
+    engines: { node: '>=16.0.0' }
+
   '@aws-sdk/util-arn-parser@3.679.0':
     resolution: {integrity: sha512-CwzEbU8R8rq9bqUFryO50RFBlkfufV9UfMArHPWlo+lmsC+NlSluHQALoj6Jkq3zf5ppn1CN0c1DDLrEqdQUXg==}
     engines: {node: '>=16.0.0'}
@@ -963,6 +998,13 @@ packages:
   '@aws-sdk/util-format-url@3.686.0':
     resolution: {integrity: sha512-9doB6O4FAlnWZrvnFDUxTtSFtuL8kUqxlP00HTiDgL1uDJZ8e0S4gqjKR+9+N5goFtxGi7IJeNsDEz2H7imvgw==}
     engines: {node: '>=16.0.0'}
+
+  '@aws-sdk/util-format-url@3.686.0':
+    resolution:
+      {
+        integrity: sha512-9doB6O4FAlnWZrvnFDUxTtSFtuL8kUqxlP00HTiDgL1uDJZ8e0S4gqjKR+9+N5goFtxGi7IJeNsDEz2H7imvgw==,
+      }
+    engines: { node: '>=16.0.0' }
 
   '@aws-sdk/util-locate-window@3.679.0':
     resolution: {integrity: sha512-zKTd48/ZWrCplkXpYDABI74rQlbR0DNHs8nH95htfSLj9/mWRSwaGptoxwcihaq/77vi/fl2X3y0a1Bo8bt7RA==}
