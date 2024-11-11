@@ -13,7 +13,13 @@ import { FileModule } from './modules/file/file.module';
     HealthModule,
     FileUploadModule,
     FileProviderModule,
-  , FileModule],
+  ],
+=========
+import { FileModule } from './modules/file/file.module';
+
+@Module({
+  imports: [SentryModule.forRoot(), HealthModule, FileModule],
+>>>>>>>>> Temporary merge branch 2
   controllers: [AppController],
   providers: [AppService],
 })
