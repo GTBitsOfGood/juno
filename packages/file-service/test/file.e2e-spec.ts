@@ -14,7 +14,7 @@ import {
 import { AppModule } from './../src/app.module';
 
 const { JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileProto;
-const TEST_SERVICE_ADDR = 'file-service:50003';
+const TEST_SERVICE_ADDR = 'file-service:50004';
 
 let app: INestMicroservice;
 
