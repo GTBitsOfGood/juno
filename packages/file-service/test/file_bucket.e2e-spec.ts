@@ -3,7 +3,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
-import { FileBucketProtoFile } from 'juno-proto';
+import { FileBucketProtoFile, ResetProtoFile, FileProviderProtoFile, FileBucketProto } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
 const { JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileBucketProto;
@@ -58,6 +58,66 @@ describe('File Bucket Creation Tests', () => {
       TEST_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
+
+    const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+    const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
+    const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+    await new Promise((resolve) => {
+      resetClient.resetDb({}, () => {
+        resolve(0);
+      });
+    });
+
+    const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
+    const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
+    const providerClient =
+      new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    await new Promise((resolve) => {
+      providerClient.createProvider(
+        {
+          providerName: providerName,
+          accessKey: JSON.stringify({
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretAccessKey,
+          }),
+          metadata: JSON.stringify({ endpoint: baseURL }),
+          bucket: [],
+        },
+        () => {
+          resolve(0);
+        },
+      );
+    });
+
+    const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
+    const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
+    const bucketDbClient =
+      new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    await new Promise((resolve) => {
+      bucketDbClient.createBucket(
+        {
+          name: bucketName,
+          configId: configId,
+          fileProviderName: providerName,
+          files: [],
+        },
+        () => {
+          resolve(0);
+        },
+      );
+    });
   });
 
   it('Successfully creates a bucket', async () => {
