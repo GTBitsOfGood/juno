@@ -40,9 +40,15 @@ export interface DeleteFileProviderRequest {
   providerName: string;
 }
 
-export interface RegisterProviderRequest {}
+export interface RegisterProviderRequest {
+  providerName: string;
+  accessKey: string;
+  baseUrl: string;
+}
 
-export interface RemoveProviderRequest {}
+export interface RemoveProviderRequest {
+  providerName: string;
+}
 
 export const JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME =
   'juno.file_service.provider';
