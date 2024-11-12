@@ -32,14 +32,14 @@ export class FileController implements FileProto.FileServiceController {
   async downloadFile(
     request: FileProto.DownloadFileRequest,
   ): Promise<FileProto.DownloadFileResponse> {
-    console.log(request);
     if (
       !request ||
       !request.fileName ||
       !request.bucketName ||
       !request.providerName ||
-      !request.configId
+      request.configId == undefined
     ) {
+
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: 'Must provide filename, provider name, bucket name, and config id',
@@ -57,11 +57,11 @@ export class FileController implements FileProto.FileServiceController {
       providerName: providerName,
     }),
     );
-    const accessKey = provider['accessKey'];
+
     const metadata = {
       ...JSON.parse(provider['metadata']),
       region: region,
-      credentials: JSON.parse(accessKey),
+      credentials: JSON.parse(provider['accessKey']),
     };
     const client = new S3Client(metadata);
 
@@ -73,13 +73,24 @@ export class FileController implements FileProto.FileServiceController {
     };
     const fileRequest = { fileId };
     await this.fileDBService.getFile(fileRequest);
+
     //get url
-    const getcommand = new GetObjectCommand({
-      Bucket: bucketName,
-      Key: fileName,
-    });
-    const url = await getSignedUrl(client, getcommand, { expiresIn: 3600 });
-    return { url };
+    try {
+      const getcommand = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: fileName,
+      });
+
+      const url = await getSignedUrl(client, getcommand, { expiresIn: 3600 });
+
+      return { url };
+      
+    } catch (err) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Signed URL Not Found',
+      });
+    }
   }
 
   async uploadFile(

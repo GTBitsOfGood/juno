@@ -62,7 +62,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await app.close();
+  if (app) {
+    await app.close();
+  }
 })
 
 
@@ -123,7 +125,7 @@ describe('Download File Tests', () => {
       );
     });
 
-    // Create sample bucket
+    // Create bucket
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
     const bucketClient =
@@ -131,7 +133,6 @@ describe('Download File Tests', () => {
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
-    //create bucket
     await new Promise((resolve) => {
       bucketClient.createBucket(
         {
@@ -146,10 +147,13 @@ describe('Download File Tests', () => {
       );
     });
     //create file
-    //Create file for this bucket
-
+    const fileDbClient =
+      new fileProtoGRPC.juno.file_service.file.FileDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
     await new Promise((resolve) => {
-      fileClient.createFile(
+      fileDbClient.createFile(
         {
           fileId: {
             bucketName: bucketName,
@@ -171,8 +175,8 @@ describe('Download File Tests', () => {
       fileClient.downloadFile(
         {
           fileName: 'filedoesntexist',
-          bucket: bucketName,
-          provider: providerName,
+          bucketName: bucketName,
+          providerName: providerName,
           configId: configId,
         },
 
@@ -193,8 +197,8 @@ describe('Download File Tests', () => {
       fileClient.downloadFile(
         {
           fileName: 'ValidFile',
-          bucket: bucketName,
-          provider: providerName,
+          bucketName: bucketName,
+          providerName: providerName,
           configId: configId
         },
 
