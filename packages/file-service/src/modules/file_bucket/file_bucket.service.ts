@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { S3Client, CreateBucketCommand } from '@aws-sdk/client-s3';
+import { S3Client, CreateBucketCommand, DeleteBucketCommand } from '@aws-sdk/client-s3';
 import { FileBucketProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -23,9 +23,7 @@ export class FileBucketService {
     }
   }
 
-  async createBucket(
-    request: FileBucketProto.CreateBucketRequest,
-  ): Promise<FileBucketProto.Bucket> {
+  async registerBucket(request: FileBucketProto.RegisterBucketRequest): Promise<FileBucketProto.Bucket> {
     if (!this.s3Client) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
@@ -43,6 +41,27 @@ export class FileBucketService {
       throw new RpcException({
         code: status.INTERNAL,
         message: `Failed to create bucket: ${error.message}`,
+      });
+    }
+  }
+
+  async removeBucket(request: FileBucketProto.RemoveBucketRequest): Promise<void> {
+    if (!this.s3Client) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'S3 client not initialized',
+      });
+    }
+
+    try {
+      const deleteBucketCommand = new DeleteBucketCommand({ Bucket: request.name });
+      await this.s3Client.send(deleteBucketCommand);
+
+      await this.dbService.deleteBucket(request.configId);
+    } catch (error) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Failed to delete bucket: ${error.message}`,
       });
     }
   }

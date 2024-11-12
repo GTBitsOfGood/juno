@@ -8,10 +8,21 @@ export class FileBucketController {
 
   constructor(private readonly fileBucketService: FileBucketService) {}
 
-  async createBucket(request: FileBucketProto.CreateBucketRequest): Promise<{ success: boolean }> {
-    
+  async registerBucket(request: FileBucketProto.RegisterBucketRequest): Promise<{ success: boolean }> {
     try {
-      await this.fileBucketService.createBucket(request);
+      await this.fileBucketService.registerBucket(request);
+      return { success: true };
+    } catch (error) {
+      throw new RpcException({
+        code: error.code,
+        message: error.message,
+      });
+    }
+  }
+
+  async removeBucket(request: FileBucketProto.RemoveBucketRequest): Promise<{ success: boolean }> {
+    try {
+      await this.fileBucketService.removeBucket(request);
       return { success: true };
     } catch (error) {
       throw new RpcException({

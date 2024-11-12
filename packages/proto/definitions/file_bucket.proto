@@ -47,5 +47,14 @@ message DeleteBucketRequest {
   int32 configId = 2;
 }
 
-message RegisterBucketRequest {}
-message RemoveBucketRequest {}
+message RegisterBucketRequest {
+  string name = 1;
+  int32 configId = 2;
+  string fileProviderName = 3;
+  repeated file.File FileServiceFile = 4;
+}
+
+message RemoveBucketRequest {
+  string name = 1;
+  int32 configId = 2;
+}
