@@ -47,6 +47,14 @@ message UploadFileResponse {
   string url = 1;
 }
 
-message DownloadFileRequest {}
+message DownloadFileRequest {  
+  string fileName = 1;
+  string bucketName = 2;
+  string providerName = 3;
+  int32 configId = 4;
+  optional string region = 5;
+  }
 
-message DownloadFileResponse {}
+message DownloadFileResponse {
+  string url = 1;
+}
