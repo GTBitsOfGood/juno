@@ -5,7 +5,7 @@ import { status } from '@grpc/grpc-js';
 import { RpcException } from '@nestjs/microservices';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, firstValueFrom } from 'rxjs';
 
 const { FILE_DB_SERVICE_NAME } = FileProto;
 const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
@@ -72,7 +72,7 @@ export class FileController implements FileProto.FileServiceController {
       path: fileName,
     };
     const fileRequest = { fileId };
-    const file = await this.fileDBService.getFile(fileRequest);
+    const file = await firstValueFrom(this.fileDBService.getFile(fileRequest));
     if (!file) {
       throw new RpcException({
         code: status.NOT_FOUND,
