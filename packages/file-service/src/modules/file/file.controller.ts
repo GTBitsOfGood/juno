@@ -72,7 +72,13 @@ export class FileController implements FileProto.FileServiceController {
       path: fileName,
     };
     const fileRequest = { fileId };
-    await this.fileDBService.getFile(fileRequest);
+    const file = await this.fileDBService.getFile(fileRequest);
+    if (!file) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'File not found',
+      });
+    }
 
     //get url
     try {
@@ -84,7 +90,7 @@ export class FileController implements FileProto.FileServiceController {
       const url = await getSignedUrl(client, getcommand, { expiresIn: 3600 });
 
       return { url };
-      
+
     } catch (err) {
       throw new RpcException({
         code: status.NOT_FOUND,
