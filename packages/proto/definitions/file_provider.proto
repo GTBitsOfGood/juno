@@ -43,6 +43,12 @@ message UpdateFileProviderRequest {
 
 message DeleteFileProviderRequest { string provider_name = 1; }
 
-message RegisterProviderRequest {}
+message RegisterProviderRequest {
+  string provider_name = 1;
+  string access_key = 2;
+  string baseUrl = 3;
+}
 
-message RemoveProviderRequest {}
+message RemoveProviderRequest {
+  string provider_name = 1;
+}
