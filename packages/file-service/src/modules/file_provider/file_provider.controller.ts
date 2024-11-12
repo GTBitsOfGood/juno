@@ -7,12 +7,13 @@ import { lastValueFrom } from 'rxjs';
 @Controller()
 @FileProviderProto.FileProviderFileServiceControllerMethods()
 export class FileProviderController
-  implements FileProviderFileServiceController {
+  implements FileProviderFileServiceController
+{
   private fileProviderDbService: FileProviderProto.FileProviderDbServiceClient;
   constructor(
     @Inject(FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME)
     private fileProviderClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.fileProviderDbService =

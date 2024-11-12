@@ -4,7 +4,11 @@ import { FileServiceController } from 'juno-proto/dist/gen/file';
 import { ClientGrpc } from '@nestjs/microservices';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import {GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { lastValueFrom, firstValueFrom } from 'rxjs';
 
@@ -21,7 +25,7 @@ export class FileUploadController implements FileServiceController {
     @Inject(FILE_DB_SERVICE_NAME) private fileDBClient: ClientGrpc,
     @Inject(FILE_PROVIDER_DB_SERVICE_NAME)
     private fileProviderClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.fileDBService =
@@ -45,10 +49,10 @@ export class FileUploadController implements FileServiceController {
       !request.providerName ||
       request.configId == undefined
     ) {
-
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
-        message: 'Must provide filename, provider name, bucket name, and config id',
+        message:
+          'Must provide filename, provider name, bucket name, and config id',
       });
     }
 
@@ -59,9 +63,10 @@ export class FileUploadController implements FileServiceController {
     const region = request.region ? request.region : 'us-east-1';
 
     //Try connecting to s3 client
-    const provider = await lastValueFrom(this.fileProviderDbService.getProvider({
-      providerName: providerName,
-    }),
+    const provider = await lastValueFrom(
+      this.fileProviderDbService.getProvider({
+        providerName: providerName,
+      }),
     );
 
     const metadata = {
@@ -96,8 +101,8 @@ export class FileUploadController implements FileServiceController {
       const url = await getSignedUrl(client, getcommand, { expiresIn: 3600 });
 
       return { url };
-
     } catch (err) {
+      console.log(err);
       throw new RpcException({
         code: status.NOT_FOUND,
         message: 'Signed URL Not Found',

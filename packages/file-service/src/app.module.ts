@@ -11,9 +11,9 @@ import { FileProviderModule } from './modules/file_provider/file_provider.module
     SentryModule.forRoot(),
     HealthModule,
     FileUploadModule,
-    FileProviderModule
+    FileProviderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

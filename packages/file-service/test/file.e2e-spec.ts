@@ -9,7 +9,7 @@ import {
   FileProto,
   ResetProtoFile,
   FileBucketProtoFile,
-  FileProviderProtoFile
+  FileProviderProtoFile,
 } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
@@ -58,21 +58,19 @@ beforeAll(async () => {
       resolve(0);
     });
   });
-
 });
 
 afterAll(async () => {
   if (app) {
     await app.close();
   }
-})
-
+});
 
 describe('Download File Tests', () => {
   let fileClient: any;
   const bucketName = 'test-downloads-bog-juno';
   const configId = 0;
-  const providerName = 'backblazeb2'
+  const providerName = 'backblazeb2';
   const accessKeyId = process.env.accessKeyId;
   const secretAccessKey = process.env.secretAccessKey;
   const baseURL = process.env.baseURL;
@@ -147,11 +145,10 @@ describe('Download File Tests', () => {
       );
     });
     //create file
-    const fileDbClient =
-      new fileProtoGRPC.juno.file_service.file.FileDbService(
-        process.env.DB_SERVICE_ADDR,
-        GRPC.credentials.createInsecure(),
-      );
+    const fileDbClient = new fileProtoGRPC.juno.file_service.file.FileDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
     await new Promise((resolve) => {
       fileDbClient.createFile(
         {
@@ -167,7 +164,6 @@ describe('Download File Tests', () => {
         },
       );
     });
-
   });
 
   it('Does Not Download Nonexistent File', async () => {
@@ -191,15 +187,13 @@ describe('Download File Tests', () => {
   });
 
   it('Downloads Existing File Successfully', async () => {
-
-
     const promise = new Promise((resolve) => {
       fileClient.downloadFile(
         {
           fileName: 'ValidFile',
           bucketName: bucketName,
           providerName: providerName,
-          configId: configId
+          configId: configId,
         },
 
         (err: any) => {

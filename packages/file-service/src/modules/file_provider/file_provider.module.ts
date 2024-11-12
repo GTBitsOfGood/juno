@@ -25,4 +25,4 @@ import { FileProviderProto, FileProviderProtoFile } from 'juno-proto';
   ],
   controllers: [FileProviderController],
 })
-export class FileProviderModule { }
+export class FileProviderModule {}
