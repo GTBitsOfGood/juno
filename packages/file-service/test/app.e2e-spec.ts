@@ -76,7 +76,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  app.close();
+  if (app) {
+    await app.close();
+  }
 });
 
 describe('File Service Tests', () => {
