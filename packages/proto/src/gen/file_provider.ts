@@ -13,6 +13,7 @@ export const protobufPackage = 'juno.file_service.provider';
 
 export interface FileProvider {
   providerName: string;
+  accessKey: string;
   metadata: string;
   bucket: Bucket[];
 }
