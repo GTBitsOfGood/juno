@@ -31,6 +31,7 @@ export class FileProviderService {
       return {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
+        accessKey: fileProvider.accessKey,
         //   will have to fix once buckets are properly updated in proto
         // bucket: buckets as Bucket[],
         bucket: [],
@@ -53,6 +54,7 @@ export class FileProviderService {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         bucket: [],
+        accessKey: fileProvider.accessKey,
       };
     } catch (error) {
       console.error('Error getting file provider:', error);
@@ -92,6 +94,7 @@ export class FileProviderService {
       return {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
+        accessKey: fileProvider.accessKey,
         // bucket: buckets,
         bucket: [],
       };
@@ -112,6 +115,7 @@ export class FileProviderService {
       return {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
+        accessKey: fileProvider.accessKey,
         bucket: [],
       };
     } catch (error) {
