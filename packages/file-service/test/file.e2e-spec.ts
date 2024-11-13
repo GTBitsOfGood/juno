@@ -197,6 +197,7 @@ describe('Download File Tests', () => {
         },
 
         (err: any) => {
+          console.log(JSON.stringify(err));
           expect(err).toBeNull();
           resolve({});
         },
