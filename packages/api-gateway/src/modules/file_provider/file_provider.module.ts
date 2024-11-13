@@ -8,16 +8,9 @@ import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { FileProviderController } from './file_provider.controller';
 import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
-import {
-  API_KEY_SERVICE_NAME,
-  JUNO_API_KEY_PACKAGE_NAME,
-} from 'juno-proto/dist/gen/api_key';
+
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import {
-  ApiKeyProtoFile,
-  FileProviderProto,
-  FileProviderProtoFile,
-} from 'juno-proto';
+import { FileProviderProto, FileProviderProtoFile } from 'juno-proto';
 import { FILE_PROVIDER_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_provider';
 
 // TODO: Make this module Auth protected
