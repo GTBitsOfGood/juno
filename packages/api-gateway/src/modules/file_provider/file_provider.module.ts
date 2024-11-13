@@ -25,7 +25,7 @@ import { FILE_PROVIDER_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_provid
         transport: Transport.GRPC,
         options: {
           url: process.env.FILE_SERVICE_ADDR,
-          package: FileProviderProto.FILE_PROVIDER_FILE_SERVICE_NAME,
+          package: FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
           protoPath: FileProviderProtoFile,
         },
       },
