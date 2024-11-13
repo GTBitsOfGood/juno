@@ -41,7 +41,6 @@ export class FileUploadController implements FileServiceController {
   async downloadFile(
     request: FileProto.DownloadFileRequest,
   ): Promise<FileProto.DownloadFileResponse> {
-    console.log(request);
     if (
       !request ||
       !request.fileName ||
