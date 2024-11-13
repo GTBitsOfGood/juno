@@ -59,97 +59,82 @@ beforeAll(async () => {
       resolve(0);
     });
   });
+
+  const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
+
+  const fileProtoGRPC = GRPC.loadPackageDefinition(fileProto) as any;
+
+  fileClient = new fileProtoGRPC.juno.file_service.file.FileService(
+    TEST_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+
+  // Create sample provider
+  const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
+  const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
+  const providerClient =
+    new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+  await new Promise((resolve) => {
+    providerClient.createProvider(
+      {
+        providerName: providerName,
+        accessKey: JSON.stringify({
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+        }),
+        metadata: JSON.stringify({ endpoint: baseURL }),
+        bucket: [],
+      },
+      () => {
+        resolve(0);
+      },
+    );
+  });
+
+  // Create sample bucket
+  const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
+  const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
+  const bucketClient =
+    new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+  await new Promise((resolve) => {
+    bucketClient.createBucket(
+      {
+        name: bucketName,
+        configId: configId,
+        fileProviderName: providerName,
+        files: [],
+      },
+      () => {
+        resolve(0);
+      },
+    );
+  });
 });
 
 afterAll(async () => {
   await app.close();
 });
 
+let fileClient: any;
+
+const region = 'us-east-005';
+const bucketName = 'test-uploads-bog-juno';
+const configId = 0;
+const providerName = 'backblazeb2-upload';
+
+const accessKeyId = process.env.accessKeyId;
+const secretAccessKey = process.env.secretAccessKey;
+const baseURL = process.env.baseURL;
+
 describe('File Service File Upload Tests', () => {
-  let fileClient: any;
-  const bucketName = 'test-uploads-bog-juno';
-  const configId = 0;
-  const providerName = 'backblazeb2';
-  const region = 'us-east-005';
-
-  const accessKeyId = process.env.accessKeyId;
-  const secretAccessKey = process.env.secretAccessKey;
-  const baseURL = process.env.baseURL;
-
-  beforeEach(async () => {
-    const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
-
-    const fileProtoGRPC = GRPC.loadPackageDefinition(fileProto) as any;
-
-    fileClient = new fileProtoGRPC.juno.file_service.file.FileService(
-      TEST_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-    const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
-    const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
-
-    const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-
-    await new Promise((resolve) => {
-      resetClient.resetDb({}, () => {
-        resolve(0);
-      });
-    });
-
-    // Create sample provider
-    const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
-    const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
-    const providerClient =
-      new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
-        process.env.DB_SERVICE_ADDR,
-        GRPC.credentials.createInsecure(),
-      );
-
-    await new Promise((resolve) => {
-      providerClient.createProvider(
-        {
-          providerName: providerName,
-          accessKey: JSON.stringify({
-            accessKeyId: accessKeyId,
-            secretAccessKey: secretAccessKey,
-          }),
-          metadata: JSON.stringify({ endpoint: baseURL }),
-          bucket: [],
-        },
-        () => {
-          resolve(0);
-        },
-      );
-    });
-
-    // Create sample bucket
-    const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
-    const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
-    const bucketClient =
-      new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
-        process.env.DB_SERVICE_ADDR,
-        GRPC.credentials.createInsecure(),
-      );
-
-    await new Promise((resolve) => {
-      bucketClient.createBucket(
-        {
-          name: bucketName,
-          configId: configId,
-          fileProviderName: providerName,
-          files: [],
-        },
-        () => {
-          resolve(0);
-        },
-      );
-    });
-  });
-
   it('Uploads file correctly', async () => {
     const promise = new Promise((resolve) => {
       fileClient.uploadFile(
@@ -176,7 +161,7 @@ describe('File Service File Upload Tests', () => {
       fileClient.uploadFile(
         {
           bucketName: bucketName,
-          fileName: 'TestFileName',
+          fileName: 'TestFileDuplicate',
           providerName: providerName,
           configId: configId,
           region: region,
@@ -195,7 +180,7 @@ describe('File Service File Upload Tests', () => {
       fileClient.uploadFile(
         {
           bucketName: bucketName,
-          fileName: 'TestFileName',
+          fileName: 'TestFileDuplicate',
           providerName: providerName,
           configId: configId,
           region: region,

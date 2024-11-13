@@ -80,9 +80,10 @@ describe('File Provider Tests', () => {
   it('Register a provider with valid parameters', async () => {
     try {
       const registerRequest: FileProviderProto.RegisterProviderRequest = {
-        accessKey: 'accessKey',
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
-        providerName: 'test_provider',
+        providerName: 'test_provider_success',
       };
       const response = await new Promise((resolve) => {
         fileProviderClient.registerProvider(
@@ -99,10 +100,34 @@ describe('File Provider Tests', () => {
     }
   });
 
-  it('Register a provider with empty accessKey', async () => {
+  it('Register a provider with empty public access key', async () => {
     try {
-      const registerRequest = {
-        accessKey: '',
+      const registerRequest: FileProviderProto.RegisterProviderRequest = {
+        publicAccessKey: '',
+        privateAccessKey: 'privateKey',
+        baseUrl: 'https://aws.amazon.com',
+        providerName: 'test_provider',
+      };
+      await new Promise((resolve) => {
+        fileProviderClient.registerProvider(
+          registerRequest,
+          (err: any, resp: any) => {
+            expect(err).not.toBeNull();
+            resolve(resp);
+          },
+        );
+      });
+      fail('Expected error to be thrown');
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
+  });
+
+  it('Register a provider with empty private access key', async () => {
+    try {
+      const registerRequest: FileProviderProto.RegisterProviderRequest = {
+        publicAccessKey: 'accessKey',
+        privateAccessKey: '',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider',
       };
@@ -124,7 +149,8 @@ describe('File Provider Tests', () => {
   it('Register a provider with empty base url', async () => {
     try {
       const registerRequest: FileProviderProto.RegisterProviderRequest = {
-        accessKey: 'accessKey',
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
         baseUrl: '',
         providerName: 'test_provider',
       };
@@ -145,7 +171,8 @@ describe('File Provider Tests', () => {
   it('Register a provider with empty provider name', async () => {
     try {
       const registerRequest: FileProviderProto.RegisterProviderRequest = {
-        accessKey: 'accessKey',
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: '',
       };
