@@ -9,7 +9,12 @@ import {
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { FileProviderProto } from 'juno-proto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   FileProviderResponse,
   RegisterFileProviderModel,
@@ -17,8 +22,9 @@ import {
 
 const { FILE_PROVIDER_FILE_SERVICE_NAME } = FileProviderProto;
 
+@ApiBearerAuth('api_key')
 @ApiTags('file_provider')
-@Controller('file_provider')
+@Controller('file')
 export class FileProviderController implements OnModuleInit {
   private fileProviderService: FileProviderProto.FileProviderFileServiceClient;
 
@@ -34,7 +40,7 @@ export class FileProviderController implements OnModuleInit {
       );
   }
 
-  @Post('')
+  @Post('provider')
   @ApiOperation({ summary: 'Registers a File Provider.' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -48,12 +54,16 @@ export class FileProviderController implements OnModuleInit {
   async registerFileProvider(
     @Body('') params: RegisterFileProviderModel,
   ): Promise<FileProviderResponse> {
+    console.log(`params: ${JSON.stringify(params)}`);
+
     const fileProvider = this.fileProviderService.registerProvider({
       baseUrl: params.baseUrl,
       providerName: params.providerName,
       privateAccessKey: params.accessKey.privateAccessKey,
       publicAccessKey: params.accessKey.publicAccessKey,
     });
+
+    console.log(`provider: ${JSON.stringify(fileProvider)}`);
 
     return new FileProviderResponse(await lastValueFrom(fileProvider));
   }

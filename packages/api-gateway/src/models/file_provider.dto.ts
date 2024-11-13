@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { FileProviderProto } from 'juno-proto';
@@ -26,7 +26,6 @@ export class RegisterFileProviderModel {
     description: 'The access key to register with',
   })
   @IsNotEmpty()
-  @IsEmail()
   accessKey: AccessKey;
 
   @ApiProperty({

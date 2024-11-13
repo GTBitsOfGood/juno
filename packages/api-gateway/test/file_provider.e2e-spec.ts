@@ -81,7 +81,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -95,7 +95,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -109,7 +109,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -123,21 +123,23 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .send(fileProviderBody)
       .expect(401);
   });
 
   it('Valid file provider without auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .send(fileProviderBody)
       .expect(401);
   });
@@ -151,7 +153,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
@@ -166,7 +168,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
@@ -181,7 +183,7 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
@@ -196,22 +198,24 @@ describe('File Provider Verification Routes', () => {
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(400);
   });
 
   it('Valid file provider with auth key', async () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
     };
 
     return request(app.getHttpServer())
-      .post('/file-provider')
+      .post('/file/provider')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileProviderBody)
       .expect(201);

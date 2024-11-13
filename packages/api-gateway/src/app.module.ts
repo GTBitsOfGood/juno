@@ -4,7 +4,7 @@ import { ProjectModule } from './modules/project/project.module';
 import { UserModule } from './modules/user/user.module';
 import { EmailModule } from './modules/email/email.module';
 import { SentryModule } from '@sentry/nestjs/setup';
-import { FileProviderAPIModule } from './modules/file_provider/file_provider.module';
+import { FileProviderModule } from './modules/file_provider/file_provider.module';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { FileProviderAPIModule } from './modules/file_provider/file_provider.mod
     ProjectModule,
     UserModule,
     EmailModule,
-    FileProviderAPIModule,
+    FileProviderModule,
   ],
 })
 export class AppModule {}

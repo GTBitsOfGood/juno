@@ -50,10 +50,10 @@ import {
   ],
   controllers: [FileProviderController],
 })
-export class FileProviderAPIModule implements NestModule {
+export class FileProviderModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(ApiKeyMiddleware)
-      .forRoutes({ path: 'file-provider', method: RequestMethod.POST });
+      .forRoutes({ path: '/file/provider', method: RequestMethod.POST });
   }
 }
