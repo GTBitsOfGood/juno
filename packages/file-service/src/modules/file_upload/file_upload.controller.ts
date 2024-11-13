@@ -151,17 +151,24 @@ export class FileUploadController implements FileServiceController {
     });
     const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
-    // Save file to DB
-    await lastValueFrom(
-      this.fileDBService.createFile({
-        fileId: {
-          bucketName: request.bucketName,
-          configId: request.configId,
-          path: request.fileName,
-        },
-        metadata: '',
-      }),
-    );
+    try {
+      // Save file to DB
+      await lastValueFrom(
+        this.fileDBService.createFile({
+          fileId: {
+            bucketName: request.bucketName,
+            configId: request.configId,
+            path: request.fileName,
+          },
+          metadata: '',
+        }),
+      );
+    } catch (e) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Could not save file to database: ${e}`,
+      });
+    }
 
     return { url: url };
   }

@@ -83,7 +83,7 @@ describe('File Provider Tests', () => {
         publicAccessKey: 'accessKey',
         privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
-        providerName: 'test_provider',
+        providerName: 'test_provider_success',
       };
       const response = await new Promise((resolve) => {
         fileProviderClient.registerProvider(
