@@ -69,7 +69,7 @@ describe('File Service File Upload Tests', () => {
   let fileClient: any;
   const bucketName = 'test-uploads-bog-juno';
   const configId = 0;
-  const providerName = 'backblazeb2';
+  const providerName = 'backblazeb2-upload';
   const region = 'us-east-005';
 
   const accessKeyId = process.env.accessKeyId;

@@ -70,7 +70,7 @@ describe('Download File Tests', () => {
   let fileClient: any;
   const bucketName = 'test-downloads-bog-juno';
   const configId = 0;
-  const providerName = 'backblazeb2';
+  const providerName = 'backblazeb2-download';
   const accessKeyId = process.env.accessKeyId;
   const secretAccessKey = process.env.secretAccessKey;
   const baseURL = process.env.baseURL;
