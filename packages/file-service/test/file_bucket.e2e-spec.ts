@@ -59,11 +59,6 @@ describe('File Bucket Creation Tests', () => {
     const proto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
-    bucketClient = new protoGRPC.juno.file_service.bucket.BucketService(
-      TEST_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-
     const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
     const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
     const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
@@ -104,14 +99,14 @@ describe('File Bucket Creation Tests', () => {
 
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
-    const bucketDbClient =
+    const bucketClient =
       new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
         process.env.DB_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
       );
 
     await new Promise((resolve) => {
-      bucketDbClient.createBucket(
+      bucketClient.createBucket(
         {
           name: bucketName,
           configId: configId,
