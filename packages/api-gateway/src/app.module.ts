@@ -14,7 +14,7 @@ import { FileDownloadModule } from './modules/file_download/file_download.module
     UserModule,
     EmailModule,
     FileProviderModule,
-
+    FileDownloadModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

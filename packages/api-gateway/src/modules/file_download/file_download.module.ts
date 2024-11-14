@@ -10,11 +10,7 @@ import { FileDownloadController } from './file_download.controller';
 import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
 
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import {
-  ApiKeyProtoFile,
-  FileProto,
-  FileProtoFile,
-} from 'juno-proto';
+import { ApiKeyProtoFile, FileProto, FileProtoFile } from 'juno-proto';
 import { FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file';
 import {
   API_KEY_SERVICE_NAME,
