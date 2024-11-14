@@ -56,9 +56,6 @@ describe('File Bucket Creation Tests', () => {
   const baseURL = process.env.baseURL;
 
   beforeEach(async () => {
-    const proto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
-    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-
     const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
     const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
     const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
@@ -157,22 +154,6 @@ describe('File Bucket Creation Tests', () => {
   });
 
   it('Fails to create an already existing bucket', async () => {
-    const createBucketPromise1 = new Promise((resolve) => {
-      bucketClient.registerBucket(
-        {
-          name: bucketName,
-          configId: configId,
-          fileProviderName: providerName,
-        },
-        (err: any, response: any) => {
-          expect(err).toBeNull();
-          expect(response).toHaveProperty('success', true);
-          resolve({});
-        },
-      );
-    });
-    await createBucketPromise1;
-
     const createBucketPromise2 = new Promise((resolve) => {
       bucketClient.registerBucket(
         {
