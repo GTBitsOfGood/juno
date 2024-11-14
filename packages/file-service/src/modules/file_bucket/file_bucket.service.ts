@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import {
   S3Client,
   CreateBucketCommand,
@@ -10,19 +10,18 @@ import { status } from '@grpc/grpc-js';
 
 @Injectable()
 export class FileBucketService {
-  private s3Client: S3Client;
+  private s3Client: S3Client | null = null;
 
-  constructor() {
-    this.s3Client = null;
-  }
+  constructor(@Inject('DbService') private readonly dbService: any) {}
 
-  initializeS3Client(metadata: string) {
+  initializeS3Client(metadata: string): void {
     try {
-      this.s3Client = new S3Client(JSON.parse(metadata));
+      const config = JSON.parse(metadata);
+      this.s3Client = new S3Client(config);
     } catch (error) {
       throw new RpcException({
         code: status.INTERNAL,
-        message: `Failed to initialize S3 client: ${error.message}`, // Use the error message here
+        message: `Failed to initialize S3 client: ${error.message}`,
       });
     }
   }
@@ -46,6 +45,12 @@ export class FileBucketService {
       const dbBucket = await this.dbService.createBucket(request);
       return dbBucket;
     } catch (error) {
+      if (error.message.includes('Bucket already exists')) {
+        throw new RpcException({
+          code: status.ALREADY_EXISTS,
+          message: 'Bucket already exists',
+        });
+      }
       throw new RpcException({
         code: status.INTERNAL,
         message: `Failed to create bucket: ${error.message}`,
@@ -71,6 +76,12 @@ export class FileBucketService {
 
       await this.dbService.deleteBucket(request.configId);
     } catch (error) {
+      if (error.message.includes('NoSuchBucket')) {
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: 'Bucket not found',
+        });
+      }
       throw new RpcException({
         code: status.INTERNAL,
         message: `Failed to delete bucket: ${error.message}`,

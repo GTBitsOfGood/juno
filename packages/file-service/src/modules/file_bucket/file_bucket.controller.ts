@@ -16,7 +16,7 @@ export class FileBucketController {
     } catch (error) {
       throw new RpcException({
         code: error.code,
-        message: error.message,
+        message: `Failed to register bucket: ${error.message}`,
       });
     }
   }
@@ -30,7 +30,7 @@ export class FileBucketController {
     } catch (error) {
       throw new RpcException({
         code: error.code,
-        message: error.message,
+        message: `Failed to remove bucket: ${error.message}`,
       });
     }
   }

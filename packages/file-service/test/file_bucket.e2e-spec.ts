@@ -56,7 +56,8 @@ describe('File Bucket Creation Tests', () => {
   const baseURL = process.env.baseURL;
 
   beforeEach(async () => {
-    const resetProto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+    // Load Reset Proto
+    const resetProto = ProtoLoader.loadSync([ResetProtoFile]);
     const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
     const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
       process.env.DB_SERVICE_ADDR,
@@ -64,12 +65,10 @@ describe('File Bucket Creation Tests', () => {
     );
 
     await new Promise((resolve) => {
-      resetClient.resetDb({}, () => {
-        resolve(0);
-      });
+      resetClient.resetDb({}, () => resolve(0));
     });
 
-    const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
+    const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]);
     const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
     const providerClient =
       new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
@@ -80,53 +79,47 @@ describe('File Bucket Creation Tests', () => {
     await new Promise((resolve) => {
       providerClient.createProvider(
         {
-          providerName: providerName,
-          accessKey: JSON.stringify({
-            accessKeyId: accessKeyId,
-            secretAccessKey: secretAccessKey,
-          }),
+          providerName,
+          accessKey: JSON.stringify({ accessKeyId, secretAccessKey }),
           metadata: JSON.stringify({ endpoint: baseURL }),
           bucket: [],
         },
-        () => {
-          resolve(0);
-        },
+        () => resolve(0),
       );
     });
 
-    const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
+    const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]);
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
-    const bucketClient =
-      new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
-        process.env.DB_SERVICE_ADDR,
-        GRPC.credentials.createInsecure(),
-      );
+    bucketClient = new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
 
     await new Promise((resolve) => {
       bucketClient.createBucket(
         {
           name: bucketName,
-          configId: configId,
+          configId,
           fileProviderName: providerName,
           files: [],
         },
-        () => {
-          resolve(0);
-        },
+        () => resolve(0),
       );
     });
   });
 
   it('Successfully creates a bucket', async () => {
-    const createBucketPromise = new Promise((resolve) => {
+    const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
           name: bucketName,
-          configId: configId,
+          configId,
           fileProviderName: providerName,
         },
         (err: any, response: any) => {
-          expect(err).toBeNull();
+          if (err) {
+            return reject(err);
+          }
           expect(response).toHaveProperty('success', true);
           resolve({});
         },
@@ -140,7 +133,7 @@ describe('File Bucket Creation Tests', () => {
       bucketClient.registerBucket(
         {
           name: bucketName,
-          configId: configId,
+          configId,
           fileProviderName: 'invalidProvider',
         },
         (err: any) => {
@@ -158,7 +151,7 @@ describe('File Bucket Creation Tests', () => {
       bucketClient.registerBucket(
         {
           name: bucketName,
-          configId: configId,
+          configId,
           fileProviderName: providerName,
         },
         (err: any) => {
