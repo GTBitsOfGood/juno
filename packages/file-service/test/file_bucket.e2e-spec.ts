@@ -11,7 +11,7 @@ import {
 } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
-const { JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileBucketProto;
+const { JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME } = FileBucketProto;
 const TEST_SERVICE_ADDR = 'file-service:50003';
 let app: INestMicroservice;
 
@@ -25,7 +25,7 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [JUNO_FILE_SERVICE_FILE_PACKAGE_NAME],
+      package: [JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME],
       protoPath: [FileBucketProtoFile],
       url: TEST_SERVICE_ADDR,
     },
