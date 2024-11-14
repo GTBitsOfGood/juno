@@ -52,7 +52,6 @@ export interface DownloadFileRequest {
   providerName: string;
   configId: number;
   region?: string | undefined;
-
 }
 
 export interface DownloadFileResponse {

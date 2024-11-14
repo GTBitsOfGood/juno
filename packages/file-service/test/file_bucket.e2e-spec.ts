@@ -3,7 +3,12 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
-import { FileBucketProtoFile, ResetProtoFile, FileProviderProtoFile, FileBucketProto } from 'juno-proto';
+import {
+  FileBucketProtoFile,
+  ResetProtoFile,
+  FileProviderProtoFile,
+  FileBucketProto,
+} from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
 const { JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileBucketProto;

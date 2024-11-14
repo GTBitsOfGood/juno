@@ -5,10 +5,11 @@ import { RpcException } from '@nestjs/microservices';
 
 @Controller('file-bucket')
 export class FileBucketController {
-
   constructor(private readonly fileBucketService: FileBucketService) {}
 
-  async registerBucket(request: FileBucketProto.RegisterBucketRequest): Promise<{ success: boolean }> {
+  async registerBucket(
+    request: FileBucketProto.RegisterBucketRequest,
+  ): Promise<{ success: boolean }> {
     try {
       await this.fileBucketService.registerBucket(request);
       return { success: true };
@@ -20,7 +21,9 @@ export class FileBucketController {
     }
   }
 
-  async removeBucket(request: FileBucketProto.RemoveBucketRequest): Promise<{ success: boolean }> {
+  async removeBucket(
+    request: FileBucketProto.RemoveBucketRequest,
+  ): Promise<{ success: boolean }> {
     try {
       await this.fileBucketService.removeBucket(request);
       return { success: true };
