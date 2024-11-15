@@ -14,6 +14,9 @@ services:
       LOGGING_SERVICE_ADDR: logging-service:5000
       FILE_SERVICE_ADDR: file-service:5000
       SENTRY_DSN: 'https://895c35e671ebe116967d7818f6c99efb@o4506876382609408.ingest.us.sentry.io/4507926410559488'
+    env_file:
+      - path: ./.env.dev.local
+        required: false
     networks:
       - bog-api-net
     depends_on:
