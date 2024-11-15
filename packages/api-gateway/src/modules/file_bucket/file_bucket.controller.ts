@@ -18,21 +18,23 @@ import {
 import { RegisterFileBucketModel } from 'src/models/file_bucket.dto';
 import { FileBucketResponse } from 'src/models/file_bucket.dto';
 
-const { JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME } = FileBucketProto;
+const { BUCKET_FILE_SERVICE_NAME } = FileBucketProto;
 
 @ApiBearerAuth('api_key')
 @ApiTags('file_bucket')
 @Controller('file-bucket')
 export class FileBucketController implements OnModuleInit {
+  private fileBucketService: FileBucketProto.BucketFileServiceClient;
+
   constructor(
-    @Inject(JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME)
+    @Inject(BUCKET_FILE_SERVICE_NAME)
     private fileBucketClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.fileBucketService =
-      this.fileBucketClient.getService<FileBucketFileServiceClient>(
-        JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
+      this.fileBucketClient.getService<FileBucketProto.BucketFileServiceClient>(
+        BUCKET_FILE_SERVICE_NAME,
       );
   }
 
