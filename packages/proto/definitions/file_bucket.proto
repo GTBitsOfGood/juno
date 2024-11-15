@@ -33,7 +33,7 @@ message CreateBucketRequest {
   string name = 1;
   int32 configId = 2;
   string fileProviderName = 3;
-  repeated file.File FileServiceFile = 4;
+  repeated identifiers.FileIdentifier FileServiceFile = 4;
 }
 
 message UpdateBucketRequest {
@@ -51,7 +51,7 @@ message RegisterBucketRequest {
   string name = 1;
   int32 configId = 2;
   string fileProviderName = 3;
-  repeated file.File FileServiceFile = 4;
+  repeated identifiers.FileIdentifier FileServiceFile = 4;
 }
 
 message RemoveBucketRequest {
