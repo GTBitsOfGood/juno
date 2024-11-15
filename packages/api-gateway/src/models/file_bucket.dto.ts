@@ -31,7 +31,7 @@ export class RegisterFileBucketModel {
     type: [],
     description: 'The file identifiers linked to this bucket',
   })
-  FileServiceFile: IdentifierProto.FileIdentifier;
+  FileServiceFile: Array<IdentifierProto.FileIdentifier>;
 }
 
 export class FileBucketResponse {
@@ -63,13 +63,13 @@ export class FileBucketResponse {
     type: [],
     description: 'The list of file identifiers associated with the bucket',
   })
-  FileServiceFile: IdentifierProto.FileIdentifier;
+  FileServiceFile: Array<IdentifierProto.FileIdentifier>;
 
   constructor(bucketData: {
     name: string;
     configId: number;
     fileProviderName: string;
-    FileServiceFile: IdentifierProto.FileIdentifier;
+    FileServiceFile: Array<IdentifierProto.FileIdentifier>;
   }) {
     this.name = bucketData.name;
     this.configId = bucketData.configId;
