@@ -74,7 +74,7 @@ describe('Download File Tests', () => {
   const accessKeyId = process.env.accessKeyId;
   const secretAccessKey = process.env.secretAccessKey;
   const baseURL = process.env.baseURL;
-  beforeEach(async () => {
+  beforeAll(async () => {
     const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
 
     const fileProtoGRPC = GRPC.loadPackageDefinition(fileProto) as any;
