@@ -12,7 +12,7 @@ import {
 import { AppModule } from './../src/app.module';
 
 const { JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME } = FileBucketProto;
-const TEST_SERVICE_ADDR = 'file-service:50004';
+const TEST_SERVICE_ADDR = 'file-service:50005';
 let app: INestMicroservice;
 
 jest.setTimeout(10000);
