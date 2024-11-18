@@ -38,8 +38,8 @@ export class FileProviderController implements FileProviderDbServiceController {
   async updateProvider(
     request: FileProviderProto.UpdateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    if (!request.providerName || !request.accessKey || !request.metadata) {
-      throw new RpcException('The given parameters are invalid!');
+    if (!request.providerName && !request.accessKey && !request.metadata) {
+      throw new RpcException('You must update one of the attributes.');
     }
     const fileProvider = await this.fileProviderService.updateProvider(request);
     return fileProvider;

@@ -9,6 +9,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - uses: pnpm/action-setup@v4
+      - name: Setup Env File
+        env:
+          ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
+          SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+          BASE_URL: ${{ secrets.BASE_URL }}
+        run: |
+          echo "accessKeyId=$ACCESS_KEY_ID" >> .env.gh-actions.local
+          echo "secretAccessKey=$SECRET_ACCESS_KEY" >> .env.gh-actions.local
+          echo "baseURL=$BASE_URL" >> .env.gh-actions.local
       - name: Test
         run: pnpm test:e2e:api-gateway
 

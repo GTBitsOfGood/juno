@@ -29,9 +29,9 @@ export class FileProviderService {
       });
 
       return {
-        accessKey: fileProvider.accessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
+        accessKey: fileProvider.accessKey,
         //   will have to fix once buckets are properly updated in proto
         // bucket: buckets as Bucket[],
         bucket: [],
@@ -51,10 +51,10 @@ export class FileProviderService {
       });
 
       return {
-        accessKey: fileProvider.accessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         bucket: [],
+        accessKey: fileProvider.accessKey,
       };
     } catch (error) {
       console.error('Error getting file provider:', error);
@@ -70,22 +70,31 @@ export class FileProviderService {
       //   // bucket name and configid should be changed once bucket is implemented
       //   return { name: bucket.name, configId: idx };
       // });
-
+      const newData = {};
+      for (const key of Object.keys(req)) {
+        if (req[key] && key !== 'providerName') {
+          newData[key] = req[key];
+        }
+      }
+      // const fileProvider = await this.prisma.fileProvider.update({
+      //   where: { name: req.providerName },
+      //   data: {
+      //     metadata: req.metadata,
+      //     p: req.accessKey,
+      //     // FileServiceBucket: {
+      //     //   create: buckets,
+      //     // },
+      //   },
+      // });
       const fileProvider = await this.prisma.fileProvider.update({
         where: { name: req.providerName },
-        data: {
-          metadata: req.metadata,
-          accessKey: req.accessKey,
-          // FileServiceBucket: {
-          //   create: buckets,
-          // },
-        },
+        data: newData,
       });
 
       return {
-        accessKey: fileProvider.accessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
+        accessKey: fileProvider.accessKey,
         // bucket: buckets,
         bucket: [],
       };
@@ -104,9 +113,9 @@ export class FileProviderService {
       });
 
       return {
-        accessKey: fileProvider.accessKey,
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
+        accessKey: fileProvider.accessKey,
         bucket: [],
       };
     } catch (error) {

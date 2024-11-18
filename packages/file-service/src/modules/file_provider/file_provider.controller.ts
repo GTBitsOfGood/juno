@@ -1,8 +1,9 @@
 import { Controller, Inject } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { FileProviderProto } from 'juno-proto';
 import { FileProviderFileServiceController } from 'juno-proto/dist/gen/file_provider';
 import { lastValueFrom } from 'rxjs';
+import { status } from '@grpc/grpc-js';
 
 @Controller()
 @FileProviderProto.FileProviderFileServiceControllerMethods()
@@ -26,31 +27,50 @@ export class FileProviderController
     request: FileProviderProto.RegisterProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (
-      !request.accessKey ||
-      request.accessKey === '' ||
+      !request.publicAccessKey ||
+      request.publicAccessKey === '' ||
+      !request.privateAccessKey ||
+      request.privateAccessKey === '' ||
       !request.baseUrl ||
       request.baseUrl === '' ||
       !request.providerName ||
       request.providerName === ''
     ) {
-      throw new Error('Your input parameters are invalid.');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid argument',
+      });
     }
-    const fileProviderRequest = this.fileProviderDbService.createProvider({
-      accessKey: request.accessKey,
-      providerName: request.providerName,
-      metadata: JSON.stringify({ endpoint: request.baseUrl }),
-      bucket: [],
-    });
 
-    const fileProvider = lastValueFrom(fileProviderRequest);
+    try {
+      const fileProviderRequest = this.fileProviderDbService.createProvider({
+        accessKey: JSON.stringify({
+          publicAccessKey: request.publicAccessKey,
+          privateAccessKey: request.privateAccessKey,
+        }),
+        providerName: request.providerName,
+        metadata: JSON.stringify({ endpoint: request.baseUrl }),
+        bucket: [],
+      });
 
-    return fileProvider;
+      const fileProvider = lastValueFrom(fileProviderRequest);
+
+      return fileProvider;
+    } catch (error) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: error.message,
+      });
+    }
   }
   removeProvider(
     request: FileProviderProto.RemoveProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (!request.providerName || request.providerName === '') {
-      throw new Error('Your provider name is invalid.');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid argument',
+      });
     }
 
     const fileProviderRequest = this.fileProviderDbService.deleteProvider({
