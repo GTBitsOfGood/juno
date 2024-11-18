@@ -97,7 +97,7 @@ describe('File Bucket Creation Tests', () => {
         GRPC.credentials.createInsecure(),
       );
 
-    bucketClientDB =
+    bucketClient =
       new bucketProtoGRPC.juno.file_service.bucket.BucketFileService(
         process.env.FILE_SERVICE_ADDR,
         GRPC.credentials.createInsecure(),
