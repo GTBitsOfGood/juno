@@ -46,6 +46,7 @@ afterAll(async () => {
 });
 
 describe('File Bucket Creation Tests', () => {
+  let bucketClientDB: any;
   let bucketClient: any;
   const bucketName = 'test-bucket-juno';
   const configId = 1;
@@ -90,13 +91,20 @@ describe('File Bucket Creation Tests', () => {
 
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]);
     const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
-    bucketClient = new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
+    bucketClientDB =
+      new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    bucketClientDB =
+      new bucketProtoGRPC.juno.file_service.bucket.BucketFileService(
+        process.env.FILE_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
 
     await new Promise((resolve) => {
-      bucketClient.createBucket(
+      bucketClientDB.createBucket(
         {
           name: bucketName,
           configId,
