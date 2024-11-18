@@ -1,27 +1,58 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import {
   S3Client,
   CreateBucketCommand,
   DeleteBucketCommand,
 } from '@aws-sdk/client-s3';
-import { FileBucketProto } from 'juno-proto';
-import { RpcException } from '@nestjs/microservices';
+import { FileBucketProto, FileProviderProto } from 'juno-proto';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class FileBucketService {
-  private s3Client: S3Client | null = null;
+export class FileBucketService implements OnModuleInit {
+  private fileDBService: FileBucketProto.BucketDbServiceClient;
+  private fileProviderDBService: FileProviderProto.FileProviderDbServiceClient;
 
-  constructor(@Inject('DbService') private readonly dbService: any) {}
+  constructor(
+    @Inject(FileBucketProto.BUCKET_DB_SERVICE_NAME)
+    private fileDBClient: ClientGrpc,
+    @Inject(FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME)
+    private fileProviderDBClient: ClientGrpc,
+  ) {}
 
-  initializeS3Client(metadata: string): void {
+  onModuleInit() {
+    this.fileDBService =
+      this.fileDBClient.getService<FileBucketProto.BucketDbServiceClient>(
+        FileBucketProto.BUCKET_DB_SERVICE_NAME,
+      );
+    this.fileProviderDBService =
+      this.fileProviderDBClient.getService<FileProviderProto.FileProviderDbServiceClient>(
+        FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME,
+      );
+  }
+
+  async getS3ClientForProvider(
+    providerName: string,
+    region: string,
+  ): Promise<S3Client> {
     try {
-      const config = JSON.parse(metadata);
-      this.s3Client = new S3Client(config);
+      const provider = await lastValueFrom(
+        this.fileProviderDBService.getProvider({
+          providerName: providerName,
+        }),
+      );
+
+      const metadata = {
+        ...JSON.parse(provider.metadata),
+        region: region,
+        credentials: JSON.parse(provider.accessKey),
+      };
+      return new S3Client(metadata);
     } catch (error) {
       throw new RpcException({
         code: status.INTERNAL,
-        message: `Failed to initialize S3 client: ${error.message}`,
+        message: `Failed to initialize S3 client: ${error.message} `,
       });
     }
   }
@@ -29,20 +60,19 @@ export class FileBucketService {
   async registerBucket(
     request: FileBucketProto.RegisterBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
-    if (!this.s3Client) {
-      throw new RpcException({
-        code: status.FAILED_PRECONDITION,
-        message: 'S3 client not initialized',
-      });
-    }
-
     try {
+      const s3Client = await this.getS3ClientForProvider(
+        request.fileProviderName,
+        'us-east-1',
+      );
       const createBucketCommand = new CreateBucketCommand({
         Bucket: request.name,
       });
-      await this.s3Client.send(createBucketCommand);
+      await s3Client.send(createBucketCommand);
 
-      const dbBucket = await this.dbService.createBucket(request);
+      const dbBucket = await lastValueFrom(
+        this.fileDBService.createBucket(request),
+      );
       return dbBucket;
     } catch (error) {
       if (error.message.includes('Bucket already exists')) {
@@ -53,28 +83,30 @@ export class FileBucketService {
       }
       throw new RpcException({
         code: status.INTERNAL,
-        message: `Failed to create bucket: ${error.message}`,
+        message: `Failed to create bucket: ${error.message} `,
       });
     }
   }
 
   async removeBucket(
     request: FileBucketProto.RemoveBucketRequest,
-  ): Promise<void> {
-    if (!this.s3Client) {
-      throw new RpcException({
-        code: status.FAILED_PRECONDITION,
-        message: 'S3 client not initialized',
-      });
-    }
-
+  ): Promise<FileBucketProto.Bucket> {
     try {
+      const bucket = await lastValueFrom(
+        this.fileDBService.deleteBucket({
+          name: request.name,
+          configId: request.configId,
+        }),
+      );
+      const s3Client = await this.getS3ClientForProvider(
+        bucket.fileProviderName,
+        'us-east-1',
+      );
       const deleteBucketCommand = new DeleteBucketCommand({
         Bucket: request.name,
       });
-      await this.s3Client.send(deleteBucketCommand);
-
-      await this.dbService.deleteBucket(request.configId);
+      await s3Client.send(deleteBucketCommand);
+      return bucket;
     } catch (error) {
       if (error.message.includes('NoSuchBucket')) {
         throw new RpcException({
@@ -84,7 +116,7 @@ export class FileBucketService {
       }
       throw new RpcException({
         code: status.INTERNAL,
-        message: `Failed to delete bucket: ${error.message}`,
+        message: `Failed to delete bucket: ${error.message} `,
       });
     }
   }

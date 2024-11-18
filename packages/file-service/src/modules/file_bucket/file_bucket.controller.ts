@@ -3,16 +3,18 @@ import { FileBucketService } from './file_bucket.service';
 import { FileBucketProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 
-@Controller('file-bucket')
-export class FileBucketController {
+@Controller()
+@FileBucketProto.BucketFileServiceControllerMethods()
+export class FileBucketController
+  implements FileBucketProto.BucketFileServiceController
+{
   constructor(private readonly fileBucketService: FileBucketService) {}
 
   async registerBucket(
     request: FileBucketProto.RegisterBucketRequest,
-  ): Promise<{ success: boolean }> {
+  ): Promise<FileBucketProto.Bucket> {
     try {
-      await this.fileBucketService.registerBucket(request);
-      return { success: true };
+      return await this.fileBucketService.registerBucket(request);
     } catch (error) {
       throw new RpcException({
         code: error.code,
@@ -23,10 +25,9 @@ export class FileBucketController {
 
   async removeBucket(
     request: FileBucketProto.RemoveBucketRequest,
-  ): Promise<{ success: boolean }> {
+  ): Promise<FileBucketProto.Bucket> {
     try {
-      await this.fileBucketService.removeBucket(request);
-      return { success: true };
+      return await this.fileBucketService.removeBucket(request);
     } catch (error) {
       throw new RpcException({
         code: error.code,
