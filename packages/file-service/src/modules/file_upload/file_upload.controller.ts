@@ -62,36 +62,46 @@ export class FileUploadController implements FileServiceController {
     const region = request.region ? request.region : 'us-east-1';
 
     //Try connecting to s3 client
-    const provider = await lastValueFrom(
-      this.fileProviderDbService.getProvider({
-        providerName: providerName,
-      }),
-    );
 
-    const metadata = {
-      ...JSON.parse(provider['metadata']),
-      region: region,
-      credentials: JSON.parse(provider['accessKey']),
-    };
-    const client = new S3Client(metadata);
-
-    //Get File
-    const fileId = {
-      bucketName: bucketName,
-      configId: configId,
-      path: fileName,
-    };
-    const fileRequest = { fileId };
-    const file = await firstValueFrom(this.fileDBService.getFile(fileRequest));
-    if (!file) {
+    try {
+      //Get File
+      const fileId = {
+        bucketName: bucketName,
+        configId: configId,
+        path: fileName,
+      };
+      const fileRequest = { fileId };
+      const file = await firstValueFrom(
+        this.fileDBService.getFile(fileRequest),
+      );
+      if (!file) {
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: 'File not found',
+        });
+      }
+    } catch (e) {
+      console.log(e);
       throw new RpcException({
         code: status.NOT_FOUND,
-        message: 'File not found',
+        message: `File not found: ${e}`,
       });
     }
 
     //get url
     try {
+      const provider = await lastValueFrom(
+        this.fileProviderDbService.getProvider({
+          providerName: providerName,
+        }),
+      );
+
+      const metadata = {
+        ...JSON.parse(provider['metadata']),
+        region: region,
+        credentials: JSON.parse(provider['accessKey']),
+      };
+      const client = new S3Client(metadata);
       const getcommand = new GetObjectCommand({
         Bucket: bucketName,
         Key: fileName,
@@ -104,7 +114,7 @@ export class FileUploadController implements FileServiceController {
       console.log(err);
       throw new RpcException({
         code: status.NOT_FOUND,
-        message: 'Signed URL Not Found',
+        message: `Signed URL Not Found: ${err}`,
       });
     }
   }
@@ -130,27 +140,35 @@ export class FileUploadController implements FileServiceController {
       });
     }
 
-    const region = request.region ? request.region : 'us-east-1';
+    let url = '';
+    try {
+      const region = request.region ? request.region : 'us-east-1';
 
-    const provider = await lastValueFrom(
-      this.fileProviderDbService.getProvider({
-        providerName: request.providerName,
-      }),
-    );
-    const accessKey = provider['accessKey'];
-    const metadata = {
-      ...JSON.parse(provider['metadata']),
-      region: region,
-      credentials: JSON.parse(accessKey),
-    };
+      const provider = await lastValueFrom(
+        this.fileProviderDbService.getProvider({
+          providerName: request.providerName,
+        }),
+      );
+      const accessKey = provider['accessKey'];
+      const metadata = {
+        ...JSON.parse(provider['metadata']),
+        region: region,
+        credentials: JSON.parse(accessKey),
+      };
 
-    const s3Client = new S3Client(metadata);
-    const command = new PutObjectCommand({
-      Bucket: request.bucketName,
-      Key: request.fileName,
-    });
-    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-
+      const s3Client = new S3Client(metadata);
+      const command = new PutObjectCommand({
+        Bucket: request.bucketName,
+        Key: request.fileName,
+      });
+      url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    } catch (err) {
+      console.log(err);
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: `Could not create signed url: ${err}`,
+      });
+    }
     try {
       // Save file to DB
       await lastValueFrom(
