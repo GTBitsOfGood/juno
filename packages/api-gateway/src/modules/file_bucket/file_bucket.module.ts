@@ -40,7 +40,7 @@ import { BUCKET_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_bucket';
         name: BUCKET_FILE_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: process.env.BUCKET_SERVICE_ADDR,
+          url: process.env.FILE_SERVICE_ADDR,
           package: FileBucketProto.JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
           protoPath: FileBucketProtoFile,
         },

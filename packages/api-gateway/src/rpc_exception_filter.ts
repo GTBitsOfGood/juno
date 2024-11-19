@@ -59,6 +59,8 @@ function rpcStatusToHttp(rpc: status): number {
       return 404;
     case status.UNAUTHENTICATED:
       return 401;
+    case status.ALREADY_EXISTS:
+      return 409;
     default:
       return 500;
   }

@@ -75,7 +75,7 @@ export class FileBucketService implements OnModuleInit {
       );
       return dbBucket;
     } catch (error) {
-      if (error.message.includes('Bucket already exists')) {
+      if (error.message.toLowerCase().includes('you already own it')) {
         throw new RpcException({
           code: status.ALREADY_EXISTS,
           message: 'Bucket already exists',
