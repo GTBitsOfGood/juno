@@ -24,7 +24,7 @@ const { BUCKET_FILE_SERVICE_NAME } = FileBucketProto;
 
 @ApiBearerAuth('api_key')
 @ApiTags('file_bucket')
-@Controller('file-bucket')
+@Controller('file')
 export class FileBucketController implements OnModuleInit {
   private fileBucketService: FileBucketProto.BucketFileServiceClient;
 
