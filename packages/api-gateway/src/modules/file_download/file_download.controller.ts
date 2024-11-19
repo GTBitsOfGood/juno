@@ -40,7 +40,7 @@ export class FileDownloadController implements OnModuleInit {
       );
   }
 
-  @Post('file')
+  @Post('download')
   @ApiOperation({ summary: 'Downloads a file' })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,

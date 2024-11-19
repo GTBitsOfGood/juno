@@ -15,6 +15,7 @@ import {
 } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -151,6 +152,7 @@ beforeEach(async () => {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
 
@@ -172,7 +174,7 @@ describe('File Download Verification Routes', () => {
       .post('/file/download')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(req)
-      .expect(200);
+      .expect(201);
   });
   it('downloads file without api key', async () => {
     const req = {
