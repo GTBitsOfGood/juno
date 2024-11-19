@@ -160,6 +160,20 @@ beforeEach(async () => {
 });
 
 describe('File Download Verification Routes', () => {
+  it('downloads file with api key', async () => {
+    const req = {
+      bucketName: bucketName,
+      configId: configId,
+      fileName: validFile,
+      providerName: providerName,
+    };
+
+    return request(app.getHttpServer())
+      .post('/file/download')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send(req)
+      .expect(200);
+  });
   it('downloads file without api key', async () => {
     const req = {
       bucketName: bucketName,
