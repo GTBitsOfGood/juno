@@ -5,6 +5,7 @@ import { UserModule } from './modules/user/user.module';
 import { EmailModule } from './modules/email/email.module';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { FileProviderModule } from './modules/file_provider/file_provider.module';
+import { FileDownloadModule } from './modules/file_download/file_download.module';
 import { FileUploadModule } from './modules/file_upload/file_upload.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { FileUploadModule } from './modules/file_upload/file_upload.module';
     UserModule,
     EmailModule,
     FileProviderModule,
+    FileDownloadModule,
     FileUploadModule,
   ],
 })
