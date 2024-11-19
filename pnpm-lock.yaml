@@ -90,6 +90,9 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
     devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.685.0
+        version: 3.685.0
       '@nestjs/cli':
         specifier: ^10.0.0
         version: 10.4.5

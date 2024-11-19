@@ -7,6 +7,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
 import { FileProviderModule } from './modules/file_provider/file_provider.module';
 import { FileDownloadModule } from './modules/file_download/file_download.module';
 import { FileUploadModule } from './modules/file_upload/file_upload.module';
+import { FileBucketModule } from './modules/file_bucket/file_bucket.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { FileUploadModule } from './modules/file_upload/file_upload.module';
     FileProviderModule,
     FileDownloadModule,
     FileUploadModule,
+    FileBucketModule,
   ],
 })
 export class AppModule {}

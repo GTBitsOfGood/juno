@@ -17,7 +17,7 @@ export class FileBucketController
       return await this.fileBucketService.registerBucket(request);
     } catch (error) {
       throw new RpcException({
-        code: error.code,
+        code: error.error.code,
         message: `Failed to register bucket: ${error.message}`,
       });
     }
