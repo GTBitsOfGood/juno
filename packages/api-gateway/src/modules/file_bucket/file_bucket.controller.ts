@@ -15,8 +15,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { RegisterFileBucketModel } from 'src/models/file_bucket.dto';
-import { FileBucketResponse } from 'src/models/file_bucket.dto';
+import {
+  RegisterFileBucketModel,
+  FileBucketResponse,
+} from 'src/models/file_bucket.dto';
 
 const { BUCKET_FILE_SERVICE_NAME } = FileBucketProto;
 
@@ -52,17 +54,23 @@ export class FileBucketController implements OnModuleInit {
   async registerFileBucket(
     @Body() params: RegisterFileBucketModel,
   ): Promise<FileBucketResponse> {
-    console.log(`params: ${JSON.stringify(params)}`);
+    console.log(
+      `Received params for registering file bucket: ${JSON.stringify(params)}`,
+    );
 
-    const fileBucket = this.fileBucketService.registerBucket({
+    const grpcResponse = this.fileBucketService.registerBucket({
       name: params.name,
       configId: params.configId,
       fileProviderName: params.fileProviderName,
       FileServiceFile: params.FileServiceFile,
     });
 
-    console.log(`bucket: ${JSON.stringify(fileBucket)}`);
+    const bucketData = await lastValueFrom(grpcResponse);
 
-    return new FileBucketResponse(await lastValueFrom(fileBucket));
+    console.log(
+      `Received response from gRPC service: ${JSON.stringify(bucketData)}`,
+    );
+
+    return new FileBucketResponse(bucketData);
   }
 }

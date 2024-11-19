@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsString, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IdentifierProto } from 'juno-proto';
+import { FileBucketProto, IdentifierProto } from 'juno-proto';
 
 export class RegisterFileBucketModel {
   @ApiProperty({
@@ -28,10 +28,11 @@ export class RegisterFileBucketModel {
   fileProviderName: string;
 
   @ApiProperty({
-    type: [],
+    type: [Object],
     description: 'The file identifiers linked to this bucket',
   })
-  FileServiceFile: Array<IdentifierProto.FileIdentifier>;
+  @IsArray()
+  FileServiceFile: IdentifierProto.FileIdentifier[];
 }
 
 export class FileBucketResponse {
@@ -60,20 +61,16 @@ export class FileBucketResponse {
   fileProviderName: string;
 
   @ApiProperty({
-    type: [],
+    type: [Object],
     description: 'The list of file identifiers associated with the bucket',
   })
-  FileServiceFile: Array<IdentifierProto.FileIdentifier>;
+  @IsArray()
+  FileServiceFile: IdentifierProto.FileIdentifier[];
 
-  constructor(bucketData: {
-    name: string;
-    configId: number;
-    fileProviderName: string;
-    FileServiceFile: Array<IdentifierProto.FileIdentifier>;
-  }) {
-    this.name = bucketData.name;
-    this.configId = bucketData.configId;
-    this.fileProviderName = bucketData.fileProviderName;
-    this.FileServiceFile = bucketData.FileServiceFile;
+  constructor(fileBucket: FileBucketProto.Bucket) {
+    this.name = fileBucket.name;
+    this.configId = fileBucket.configId;
+    this.fileProviderName = fileBucket.fileProviderName;
+    this.FileServiceFile = fileBucket.FileServiceFile;
   }
 }

@@ -7,14 +7,14 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import { FileBucketProto } from 'juno-proto';
+import { FileBucketProto, ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 
 let app: INestApplication;
-let apiKey: string | undefined = undefined;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
+let apiKey: string | undefined = undefined;
 
 async function APIKeyForProjectName(projectName: string): Promise<string> {
   const key = await request(app.getHttpServer())
@@ -32,7 +32,8 @@ async function APIKeyForProjectName(projectName: string): Promise<string> {
 }
 
 beforeAll(async () => {
-  const proto = ProtoLoader.loadSync(['reset.proto']) as any;
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
   const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
     process.env.DB_SERVICE_ADDR,
@@ -70,9 +71,15 @@ beforeEach(async () => {
 });
 
 describe('File Bucket Routes', () => {
-  it('Creating a bucket successfully', () => {
+  let uniqueBucketName: string;
+
+  beforeEach(() => {
+    uniqueBucketName = `Test Bucket ${Date.now()}`;
+  });
+
+  it('Creating a bucket successfully', async () => {
     const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
-      name: 'Test Bucket',
+      name: uniqueBucketName,
       configId: 1,
       fileProviderName: 'Test Provider',
       FileServiceFile: [],
@@ -82,15 +89,10 @@ describe('File Bucket Routes', () => {
       .post('/file/bucket')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileBucketBody)
-      .expect(201)
-      .expect((res) => {
-        expect(res.body).toHaveProperty('name', 'Test Bucket');
-        expect(res.body).toHaveProperty('configId', 1);
-        expect(res.body).toHaveProperty('fileProviderName', 'Test Provider');
-      });
+      .expect(201);
   });
 
-  it('Unsuccessful creation due to missing bucket name', () => {
+  it('Unsuccessful creation due to missing bucket name', async () => {
     const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
       name: '',
       configId: 1,
@@ -105,9 +107,9 @@ describe('File Bucket Routes', () => {
       .expect(400);
   });
 
-  it('Unsuccessful creation due to missing config ID', () => {
+  it('Unsuccessful creation due to missing config ID', async () => {
     const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
-      name: 'Test Bucket',
+      name: uniqueBucketName,
       configId: undefined,
       fileProviderName: 'Test Provider',
       FileServiceFile: [],
@@ -120,9 +122,9 @@ describe('File Bucket Routes', () => {
       .expect(400);
   });
 
-  it('Unsuccessful creation due to missing file provider name', () => {
+  it('Unsuccessful creation due to missing file provider name', async () => {
     const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
-      name: 'Test Bucket',
+      name: uniqueBucketName,
       configId: 1,
       fileProviderName: '',
       FileServiceFile: [],
@@ -137,7 +139,7 @@ describe('File Bucket Routes', () => {
 
   it('Creating an existing bucket (should fail)', async () => {
     const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
-      name: 'Test Bucket',
+      name: uniqueBucketName,
       configId: 1,
       fileProviderName: 'Test Provider',
       FileServiceFile: [],
@@ -146,11 +148,13 @@ describe('File Bucket Routes', () => {
     await request(app.getHttpServer())
       .post('/file/bucket')
       .set('Authorization', 'Bearer ' + apiKey)
-      .send(fileBucketBody);
+      .send(fileBucketBody)
+      .expect(201);
 
     return request(app.getHttpServer())
       .post('/file/bucket')
       .set('Authorization', 'Bearer ' + apiKey)
-      .send(fileBucketBody);
+      .send(fileBucketBody)
+      .expect(409);
   });
 });

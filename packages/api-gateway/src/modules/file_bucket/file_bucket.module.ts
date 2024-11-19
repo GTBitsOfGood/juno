@@ -15,11 +15,11 @@ import {
   FileBucketProto,
   FileBucketProtoFile,
 } from 'juno-proto';
-import { JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME } from 'juno-proto/dist/gen/file_bucket';
 import {
   API_KEY_SERVICE_NAME,
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
+import { BUCKET_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_bucket';
 
 @Module({
   imports: [
@@ -37,7 +37,7 @@ import {
         },
       },
       {
-        name: JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
+        name: BUCKET_FILE_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
           url: process.env.BUCKET_SERVICE_ADDR,
@@ -53,6 +53,6 @@ export class FileBucketModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(ApiKeyMiddleware)
-      .forRoutes({ path: '/bucket/register', method: RequestMethod.POST });
+      .forRoutes({ path: '/file-bucket/bucket', method: RequestMethod.POST });
   }
 }
