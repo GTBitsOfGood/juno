@@ -53,6 +53,6 @@ export class FileBucketModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(ApiKeyMiddleware)
-      .forRoutes({ path: '/file-bucket/bucket', method: RequestMethod.POST });
+      .forRoutes({ path: '/file/bucket', method: RequestMethod.POST });
   }
 }
