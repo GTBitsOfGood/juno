@@ -7,7 +7,11 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import { FileBucketProto, ResetProtoFile } from 'juno-proto';
+import {
+  FileBucketProto,
+  ResetProtoFile,
+  FileProviderProtoFile,
+} from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 
@@ -15,6 +19,11 @@ let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
 let apiKey: string | undefined = undefined;
+
+const accessKeyId = process.env.accessKeyId;
+const secretAccessKey = process.env.secretAccessKey;
+const baseURL = process.env.baseURL;
+const providerName = 'backblazeb2-upload';
 
 async function APIKeyForProjectName(projectName: string): Promise<string> {
   const key = await request(app.getHttpServer())
@@ -39,10 +48,37 @@ beforeAll(async () => {
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
-  await new Promise((resolve) => {
-    resetClient.resetDb({}, () => {
+  await new Promise((resolve, reject) => {
+    resetClient.resetDb({}, (err: any) => {
+      if (err) return reject(err);
       resolve(0);
     });
+  });
+
+  const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
+  const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
+  const providerClient =
+    new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+  await new Promise((resolve, reject) => {
+    providerClient.createProvider(
+      {
+        providerName: providerName,
+        accessKey: JSON.stringify({
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+        }),
+        metadata: JSON.stringify({ endpoint: baseURL }),
+        bucket: [],
+      },
+      (err: any) => {
+        if (err) return reject(err);
+        resolve(0);
+      },
+    );
   });
 });
 
