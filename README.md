@@ -29,6 +29,11 @@ Packages are managed through [PNPM Workspaces](https://pnpm.io/workspaces). The 
 - [email-service](./packages/email-service/): A SendGrid-based central service for managing per-project mailing functionality with support for all major mailing providers.
 - [logging-service](./packages/logging-service/): A dedicated logging service for error and audit logs, including traces, metrics information, and sentry.io integration.
 
+## OpenAPI Documentation
+We utilize Nest's [OpenAPI](https://docs.nestjs.com/openapi/introduction) support to autogenerate web documentation for all Juno HTTP endpoints.
+
+When running Juno locally, the documentation can be found under `localhost:<api-gateway port from docker>/docs`. If using the deployment version of Juno, engineering leadership will provide you with a valid documentation page. Note that the api-gateway port is *not* the isolated docker port (e.g. port 3000) but the exposed host port. 
+
 ## Getting Started
 
 > [!WARNING]
