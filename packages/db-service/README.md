@@ -51,11 +51,15 @@ Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a st
 └── test
 ```
 
+## Database Overview
+![prisma-editor](https://github.com/user-attachments/assets/7e747dae-216c-4976-950b-9949ee9f5c86)
+
 ## Development
 
 Make sure to check out the [main installation instructions](https://github.com/GTBitsOfGood/juno/tree/ryder/documentation-overhaul) first!
 
 Run E2E tests in watch mode:
+
 
 ```
 api-gateway: `yarn test:e2e:api-gateway-live`
