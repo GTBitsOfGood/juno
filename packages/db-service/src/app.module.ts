@@ -12,7 +12,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
 import { FileBucketModule } from './modules/file_bucket/file_bucket.module';
 import { FileConfigModule } from './modules/file_config/file_config.module';
 import { FileProviderModule } from './modules/file_provider/file_provider.module';
-
+import { CounterModule } from './modules/counter/counter.module';
 @Module({
   imports: [
     SentryModule.forRoot(),
@@ -26,6 +26,7 @@ import { FileProviderModule } from './modules/file_provider/file_provider.module
     FileBucketModule,
     FileConfigModule,
     FileProviderModule,
+    CounterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

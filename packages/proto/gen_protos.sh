@@ -3,7 +3,6 @@
 EXEC_PATH=${EXEC_PATH-.}
 
 mkdir -p ${EXEC_PATH}/src/gen
-
 protoc \
     --plugin=${EXEC_PATH}/node_modules/.bin/protoc-gen-ts_proto \
     --ts_proto_out=${EXEC_PATH}/src/gen \

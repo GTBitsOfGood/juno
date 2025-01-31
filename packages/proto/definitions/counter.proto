@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package juno.counter;
+
+
+service CounterService {
+    rpc incrementCounter(IncrementCounterRequest) returns (IncrementCounterResponse);
+    rpc decrementCounter(IncrementCounterRequest) returns (IncrementCounterResponse);
+    rpc resetCounter(IncrementCounterRequest) returns (IncrementCounterResponse);
+    rpc getCounter(IncrementCounterRequest) returns (IncrementCounterResponse);
+}
+
+message IncrementCounterRequest {}
+message IncrementCounterResponse {}
+
+message DecrementCounterRequest {}
+message DecrementCounterResponse {}
+
+message ResetCounterRequest {}
+message ResetCounterResponse {}
+
+message GetCounterRequest {}
+message GetCounterResponse {
+    int64 response = 1;
+}

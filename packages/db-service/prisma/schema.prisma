@@ -134,3 +134,9 @@ model FileServiceFile {
 
   @@id([path, bucketName, configId])
 }
+
+//Counter 
+model Counter {
+  id String                     @id
+  value Int
+}
