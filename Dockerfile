@@ -12,13 +12,12 @@ RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 # TODO: Switch over to minimal node installation
 FROM node:18 as deps
 
-# TODO: move over to direct wget (no more npm usage)
-RUN npm install -g pnpm
-
 # pnpm needs to be added to the global path
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+
 RUN corepack enable
+RUN corepack prepare pnpm@10.0.0 --activate
 
 
 WORKDIR /app
@@ -57,6 +56,7 @@ RUN npm install -g pnpm @nestjs/cli
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+RUN corepack prepare pnpm@10.0.0 --activate
 
 COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
 

@@ -17,6 +17,8 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
+RUN corepack prepare pnpm@10.0.0 --activate
+
 
 WORKDIR /app
 
@@ -41,6 +43,7 @@ FROM node:18 as base-service
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+RUN corepack prepare pnpm@10.0.0 --activate
 
 COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
 
