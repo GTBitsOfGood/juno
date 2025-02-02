@@ -16,8 +16,8 @@ FROM node:18 as deps
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-npm install -g corepack@latest
-corepack prepare pnpm@10.0.0 --activate
+RUN corepack enable
+RUN corepack prepare pnpm@10.0.0 --activate
 
 
 WORKDIR /app
