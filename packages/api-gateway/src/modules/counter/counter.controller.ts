@@ -41,12 +41,12 @@ export class CounterController implements OnModuleInit {
     const counter = await this.counterService.resetCounter({ id:{id: id} });
     return new CounterResponse(counter);
   }
-  @Post(':id')
+  @Post('increment/:id')
   async incrementCounter(id: string): Promise<CounterResponse> {
     const counter = await this.counterService.incrementCounter({ id:{id: id} });
     return new CounterResponse(counter);
   }
-  @Post(':id')
+  @Post('decrement/:id')
   async decrementCounter(id: string): Promise<CounterResponse> {
     const counter = await this.counterService.decrementCounter({ id:{id: id} });
     return new CounterResponse(counter);
