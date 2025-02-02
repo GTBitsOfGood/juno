@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { CounterController } from './counter.controller';
 
 @Module({
-  controllers: [CounterController]
+  controllers: [CounterController],
 })
 export class CounterModule {}

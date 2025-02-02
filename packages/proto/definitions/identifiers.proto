@@ -35,3 +35,7 @@ message FileIdentifier {
 }
 
 message FileConfigIdentifier { int64 id = 1; }
+
+message CounterIdentifier {
+    string id = 1;
+}

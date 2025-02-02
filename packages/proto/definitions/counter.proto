@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package juno.counter;
+import "identifiers.proto";
 
 
 service CounterService {
@@ -10,16 +11,30 @@ service CounterService {
     rpc getCounter(IncrementCounterRequest) returns (IncrementCounterResponse);
 }
 
-message IncrementCounterRequest {}
-message IncrementCounterResponse {}
+message IncrementCounterRequest {
+    identifiers.CounterIdentifier id = 1;
+}
+message IncrementCounterResponse {
+    int64 value = 1;
+}
 
-message DecrementCounterRequest {}
-message DecrementCounterResponse {}
+message DecrementCounterRequest {
+    identifiers.CounterIdentifier id = 1;
+}
+message DecrementCounterResponse {
+    int64 value = 1;
+}
 
-message ResetCounterRequest {}
-message ResetCounterResponse {}
+message ResetCounterRequest {
+    identifiers.CounterIdentifier id = 1;
+}
+message ResetCounterResponse {
+    int64 value = 1;
+}
 
-message GetCounterRequest {}
+message GetCounterRequest {
+    identifiers.CounterIdentifier id = 1;
+}
 message GetCounterResponse {
-    int64 response = 1;
+    int64 value = 1;
 }
