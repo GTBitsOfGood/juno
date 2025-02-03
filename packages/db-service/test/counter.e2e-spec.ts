@@ -97,7 +97,7 @@ describe('DB Service Counter Tests', () => {
   });
   it('create a new counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.getCounter({id : {id : 'test_counter'}}, (err, resp) => {
+      counterClient.getCounter({ id: { id: 'test_counter' } }, (err, resp) => {
         expect(err).toBeNull();
         expect(resp['value']).toBe(0);
         resolve({});
@@ -108,44 +108,56 @@ describe('DB Service Counter Tests', () => {
 
   it('increment counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.incrementCounter({id : {id : 'test_counter'}}, (err, resp) => {
-        expect(err).toBeNull();
-        expect(resp['value']).toBe(1);
-        resolve({});
-      });
+      counterClient.incrementCounter(
+        { id: { id: 'test_counter' } },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['value']).toBe(1);
+          resolve({});
+        },
+      );
     });
     await promise;
   });
 
   it('increment counter 2 ', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.incrementCounter({id : {id : 'test_counter'}}, (err, resp) => {
-        expect(err).toBeNull();
-        expect(resp['value']).toBe(2);
-        resolve({});
-      });
+      counterClient.incrementCounter(
+        { id: { id: 'test_counter' } },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['value']).toBe(2);
+          resolve({});
+        },
+      );
     });
     await promise;
   });
 
   it('decrement counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.decrementCounter({id : {id : 'test_counter'}}, (err, resp) => {
-        expect(err).toBeNull();
-        expect(resp['value']).toBe(1);
-        resolve({});
-      });
+      counterClient.decrementCounter(
+        { id: { id: 'test_counter' } },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['value']).toBe(1);
+          resolve({});
+        },
+      );
     });
     await promise;
   });
 
   it('reset counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.resetCounter({id : {id : 'test_counter'}}, (err, resp) => {
-        expect(err).toBeNull();
-        expect(resp['value']).toBe(0);
-        resolve({});
-      });
+      counterClient.resetCounter(
+        { id: { id: 'test_counter' } },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['value']).toBe(0);
+          resolve({});
+        },
+      );
     });
     await promise;
   });

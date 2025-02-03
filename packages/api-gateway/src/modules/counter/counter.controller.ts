@@ -11,7 +11,7 @@ import {
 import { ClientGrpc } from '@nestjs/microservices';
 import { CounterProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
-import { CounterResponse} from 'src/models/counter.dto';
+import { CounterResponse } from 'src/models/counter.dto';
 
 const { COUNTER_SERVICE_NAME } = CounterProto;
 
@@ -33,23 +33,31 @@ export class CounterController implements OnModuleInit {
   @Get(':id')
   async getCounterById(@Param('id') id: string): Promise<CounterResponse> {
     //Super jank, { id:{id: id} } because returnin
-    const counter = await lastValueFrom(this.counterService.getCounter({ id: {id: id}}));
+    const counter = await lastValueFrom(
+      this.counterService.getCounter({ id: { id: id } }),
+    );
     return new CounterResponse(counter);
   }
 
   @Delete(':id')
   async resetCounter(@Param('id') id: string): Promise<CounterResponse> {
-    const counter = await lastValueFrom(this.counterService.resetCounter({ id:{id: id} }));
+    const counter = await lastValueFrom(
+      this.counterService.resetCounter({ id: { id: id } }),
+    );
     return new CounterResponse(counter);
   }
   @Patch('increment/:id')
   async incrementCounter(@Param('id') id: string): Promise<CounterResponse> {
-    const counter = await lastValueFrom(this.counterService.incrementCounter({ id:{id: id} }));
+    const counter = await lastValueFrom(
+      this.counterService.incrementCounter({ id: { id: id } }),
+    );
     return new CounterResponse(counter);
   }
   @Patch('decrement/:id')
   async decrementCounter(@Param('id') id: string): Promise<CounterResponse> {
-    const counter = await lastValueFrom(this.counterService.decrementCounter({ id:{id: id} }));
+    const counter = await lastValueFrom(
+      this.counterService.decrementCounter({ id: { id: id } }),
+    );
     return new CounterResponse(counter);
   }
 }

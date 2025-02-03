@@ -32,76 +32,84 @@ beforeAll(async () => {
 });
 
 afterAll((done) => {
-    app.close();
-    done();
-  });
+  app.close();
+  done();
+});
 
 beforeEach(async () => {
-const moduleFixture: TestingModule = await Test.createTestingModule({
+  const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-}).compile();
+  }).compile();
 
-app = moduleFixture.createNestApplication();
-app.useGlobalPipes(
+  app = moduleFixture.createNestApplication();
+  app.useGlobalPipes(
     new ValidationPipe({
-    transform: true,
+      transform: true,
     }),
-);
-app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-app.useGlobalFilters(new RpcExceptionFilter());
+  );
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
-await app.init();
+  await app.init();
 });
 
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
 
 describe('Counter Routes', () => {
-  it ('Get and create a counter', () => {
+  it('Get and create a counter', () => {
     return request(app.getHttpServer())
-    .get('/counter/counter_first')
-    .set('X-User-Email',ADMIN_EMAIL)
-    .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(200).then((response) => {
-      expect(response.body.value).toEqual(0);
-    });
-  })
-  it ("Increment aforementioned counter", () => {
+      .get('/counter/counter_first')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.value).toEqual(0);
+      });
+  });
+  it('Increment aforementioned counter', () => {
     return request(app.getHttpServer())
-    .patch('/counter/increment/counter_first')
-    .set('X-User-Email',ADMIN_EMAIL)
-    .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(200).then((response) => {
-      expect(response.body.value).toEqual(1);
-    });
-  })
-  it ("Increment aforementioned counter again", () => {
+      .patch('/counter/increment/counter_first')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.value).toEqual(1);
+      });
+  });
+  it('Increment aforementioned counter again', () => {
     return request(app.getHttpServer())
-    .patch('/counter/increment/counter_first')
-    .set('X-User-Email',ADMIN_EMAIL)
-    .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(200).then((response) => {
-      expect(response.body.value).toEqual(2);
-    });
-  })
-  it ("Decrement aforementioned counter", () => {
+      .patch('/counter/increment/counter_first')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.value).toEqual(2);
+      });
+  });
+  it('Decrement aforementioned counter', () => {
     return request(app.getHttpServer())
-    .patch('/counter/decrement/counter_first')
-    .set('X-User-Email',ADMIN_EMAIL)
-    .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(200).then((response) => {
-      expect(response.body.value).toEqual(1);
-    });
-  })
-  it ("Reset counter", async () => {
+      .patch('/counter/decrement/counter_first')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.value).toEqual(1);
+      });
+  });
+  it('Reset counter', async () => {
     const response = await request(app.getHttpServer())
-    .delete('/counter/counter_first')
-    .set('X-User-Email',ADMIN_EMAIL)
-    .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(200);
-    console.log("HERE")
-    console.log(response)
+      .delete('/counter/counter_first')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200);
+    console.log('HERE');
+    console.log(response);
     expect(response.body.value).toEqual(0);
-
-  })
-})
+  });
+});

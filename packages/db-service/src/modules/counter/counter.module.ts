@@ -5,6 +5,6 @@ import { PrismaService } from 'src/prisma.service';
 
 @Module({
   controllers: [CounterController],
-  providers: [CounterService, PrismaService]
+  providers: [CounterService, PrismaService],
 })
 export class CounterModule {}

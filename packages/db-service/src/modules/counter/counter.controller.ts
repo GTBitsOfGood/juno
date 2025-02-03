@@ -3,7 +3,9 @@ import { CounterService } from './counter.service';
 import { CounterProto } from 'juno-proto';
 @Controller('counter')
 @CounterProto.CounterServiceControllerMethods()
-export class CounterController implements CounterProto.CounterServiceController {
+export class CounterController
+  implements CounterProto.CounterServiceController
+{
   constructor(private readonly counterService: CounterService) {}
 
   async incrementCounter(
