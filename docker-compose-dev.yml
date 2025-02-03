@@ -27,8 +27,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'curl http://api-gateway:3000/ || exit 1']
       interval: 2s
-      timeout: 10s
-      retries: 10
+      timeout: 20s
+      retries: 20
 
   auth-service:
     build:
@@ -53,8 +53,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=auth-service:5000']
       interval: 2s
-      timeout: 10s
-      retries: 10
+      timeout: 20s
+      retries: 20
 
   email-service:
     build:
@@ -81,8 +81,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=email-service:5000']
       interval: 2s
-      timeout: 10s
-      retries: 10
+      timeout: 20s
+      retries: 20
 
   file-service:
     build:
@@ -114,8 +114,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=file-service:5000']
       interval: 2s
-      timeout: 10s
-      retries: 10
+      timeout: 20s
+      retries: 20
 
   logging-service:
     build:
@@ -138,8 +138,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=db-service:5000']
       interval: 2s
-      timeout: 10s
-      retries: 10
+      timeout: 20s
+      retries: 20
 
   db-service:
     build:
@@ -166,8 +166,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'grpc_health_probe -addr=db-service:5000']
       interval: 2s
-      timeout: 10s
-      retries: 10
+      timeout: 20s
+      retries: 20
 
   db:
     image: postgres
@@ -182,8 +182,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U user']
       interval: 2s
-      timeout: 5s
-      retries: 10
+      timeout: 20s
+      retries: 20
 
 networks:
   bog-api-net:

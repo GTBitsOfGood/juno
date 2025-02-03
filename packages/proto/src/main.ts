@@ -12,6 +12,7 @@ export * as FileProto from './gen/file';
 export * as FileBucketProto from './gen/file_bucket';
 export * as FileConfigProto from './gen/file_config';
 export * as FileProviderProto from './gen/file_provider';
+export * as CounterProto from './gen/counter';
 
 import { join } from 'path';
 
@@ -33,3 +34,4 @@ export const FileProtoFile = getProtoFilePath('file.proto');
 export const FileBucketProtoFile = getProtoFilePath('file_bucket.proto');
 export const FileConfigProtoFile = getProtoFilePath('file_config.proto');
 export const FileProviderProtoFile = getProtoFilePath('file_provider.proto');
+export const CounterProtoFile = getProtoFilePath('counter.proto');
