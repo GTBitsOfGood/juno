@@ -62,44 +62,46 @@ describe('Counter Routes', () => {
     .get('/counter/counter_first')
     .set('X-User-Email',ADMIN_EMAIL)
     .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(201).then((response) => {
-      expect(response.body.value).toEqual('0');
+    .send().expect(200).then((response) => {
+      expect(response.body.value).toEqual(0);
     });
   })
   it ("Increment aforementioned counter", () => {
     return request(app.getHttpServer())
-    .post('/counter/increment/counter_first')
+    .patch('/counter/increment/counter_first')
     .set('X-User-Email',ADMIN_EMAIL)
     .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(201).then((response) => {
-      expect(response.body.value).toEqual('1');
+    .send().expect(200).then((response) => {
+      expect(response.body.value).toEqual(1);
     });
   })
   it ("Increment aforementioned counter again", () => {
     return request(app.getHttpServer())
-    .post('/counter/increment/counter_first')
+    .patch('/counter/increment/counter_first')
     .set('X-User-Email',ADMIN_EMAIL)
     .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(201).then((response) => {
-      expect(response.body.value).toEqual('2');
+    .send().expect(200).then((response) => {
+      expect(response.body.value).toEqual(2);
     });
   })
   it ("Decrement aforementioned counter", () => {
     return request(app.getHttpServer())
-    .post('/counter/decrement/counter_first')
+    .patch('/counter/decrement/counter_first')
     .set('X-User-Email',ADMIN_EMAIL)
     .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(201).then((response) => {
-      expect(response.body.value).toEqual('1');
+    .send().expect(200).then((response) => {
+      expect(response.body.value).toEqual(1);
     });
   })
-  it ("Reset counter", () => {
-    return request(app.getHttpServer())
+  it ("Reset counter", async () => {
+    const response = await request(app.getHttpServer())
     .delete('/counter/counter_first')
     .set('X-User-Email',ADMIN_EMAIL)
     .set('X-User-Password', ADMIN_PASSWORD)
-    .send().expect(201).then((response) => {
-      expect(response.body.value).toEqual('0');
-    });
+    .send().expect(200);
+    console.log("HERE")
+    console.log(response)
+    expect(response.body.value).toEqual(0);
+
   })
 })

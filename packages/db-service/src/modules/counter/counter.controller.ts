@@ -10,7 +10,6 @@ export class CounterController implements CounterProto.CounterServiceController 
     req: CounterProto.IncrementCounterRequest,
   ): Promise<CounterProto.IncrementCounterResponse> {
     const counter = await this.counterService.incrementCounter(req.id.id);
-
     return { value: counter.value };
   }
 

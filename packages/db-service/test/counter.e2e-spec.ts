@@ -16,7 +16,6 @@ import {
   IdentifiersProtoFile,
   ResetProto,
 } from 'juno-proto';
-import { isReadable } from 'stream';
 
 const { JUNO_COUNTER_PACKAGE_NAME } = CounterProto;
 const { JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
@@ -98,7 +97,7 @@ describe('DB Service Counter Tests', () => {
   });
   it('create a new counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.createCounter('test_counter', (err, resp) => {
+      counterClient.getCounter({id : {id : 'test_counter'}}, (err, resp) => {
         expect(err).toBeNull();
         expect(resp['value']).toBe(0);
         resolve({});
@@ -109,9 +108,10 @@ describe('DB Service Counter Tests', () => {
 
   it('increment counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.incrementCounter('test_counter', (err, resp) => {
+      counterClient.incrementCounter({id : {id : 'test_counter'}}, (err, resp) => {
         expect(err).toBeNull();
         expect(resp['value']).toBe(1);
+        resolve({});
       });
     });
     await promise;
@@ -119,9 +119,10 @@ describe('DB Service Counter Tests', () => {
 
   it('increment counter 2 ', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.incrementCounter('test_counter', (err, resp) => {
+      counterClient.incrementCounter({id : {id : 'test_counter'}}, (err, resp) => {
         expect(err).toBeNull();
         expect(resp['value']).toBe(2);
+        resolve({});
       });
     });
     await promise;
@@ -129,9 +130,10 @@ describe('DB Service Counter Tests', () => {
 
   it('decrement counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.decrementCounter('test_counter', (err, resp) => {
+      counterClient.decrementCounter({id : {id : 'test_counter'}}, (err, resp) => {
         expect(err).toBeNull();
         expect(resp['value']).toBe(1);
+        resolve({});
       });
     });
     await promise;
@@ -139,9 +141,10 @@ describe('DB Service Counter Tests', () => {
 
   it('reset counter', async () => {
     const promise = new Promise((resolve) => {
-      counterClient.resetCounter('test_counter', (err, resp) => {
+      counterClient.resetCounter({id : {id : 'test_counter'}}, (err, resp) => {
         expect(err).toBeNull();
         expect(resp['value']).toBe(0);
+        resolve({});
       });
     });
     await promise;

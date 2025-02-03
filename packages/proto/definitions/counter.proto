@@ -15,26 +15,26 @@ message IncrementCounterRequest {
     identifiers.CounterIdentifier id = 1;
 }
 message IncrementCounterResponse {
-    int64 value = 1;
+    int32 value = 1;
 }
 
 message DecrementCounterRequest {
     identifiers.CounterIdentifier id = 1;
 }
 message DecrementCounterResponse {
-    int64 value = 1;
+    int32 value = 1;
 }
 
 message ResetCounterRequest {
     identifiers.CounterIdentifier id = 1;
 }
 message ResetCounterResponse {
-    int64 value = 1;
+    int32 value = 1;
 }
 
 message GetCounterRequest {
     identifiers.CounterIdentifier id = 1;
 }
 message GetCounterResponse {
-    int64 value = 1;
+    int32 value = 1;
 }
