@@ -34,4 +34,4 @@ export const FileProtoFile = getProtoFilePath('file.proto');
 export const FileBucketProtoFile = getProtoFilePath('file_bucket.proto');
 export const FileConfigProtoFile = getProtoFilePath('file_config.proto');
 export const FileProviderProtoFile = getProtoFilePath('file_provider.proto');
-export const CounterProtoFile = getProtoFilePath('counter.proto')
+export const CounterProtoFile = getProtoFilePath('counter.proto');
