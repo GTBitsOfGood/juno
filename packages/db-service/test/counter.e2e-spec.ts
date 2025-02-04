@@ -63,8 +63,10 @@ describe('Counter Service Tests', () => {
     const counterId = 'test-counter';
 
     const promise = new Promise((resolve) => {
-      counterClient.getCounter({ counterId }, (err) => {
-        resolve({});
+      counterClient.getCounter({ counterId }, (err, resp) => {
+        expect(err).toBeNull();
+        expect(resp).toHaveProperty('value');
+        resolve(resp);
       });
     });
 

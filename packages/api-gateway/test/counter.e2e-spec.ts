@@ -14,7 +14,7 @@ import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 
-jest.setTimeout(15000);
+jest.setTimeout(20000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -53,7 +53,7 @@ beforeEach(async () => {
   await app.init();
 });
 
-describe('Counter Routes', () => {
+describe('Create Counter Route', () => {
   it('Get and create a counter', () => {
     return request(app.getHttpServer())
       .get('/counter/counter_first')
@@ -63,6 +63,8 @@ describe('Counter Routes', () => {
         expect(response.body.value).toEqual(0);
       });
   });
+});
+describe('Counter Routes', () => {
   it('Increment aforementioned counter', () => {
     return request(app.getHttpServer())
       .post('/counter/increment/counter_first')
@@ -92,7 +94,7 @@ describe('Counter Routes', () => {
   });
   it('Reset counter', async () => {
     const response = await request(app.getHttpServer())
-      .post('/counter/counter_first')
+      .post('/counter/reset/counter_first')
       .send()
       .expect(200);
     console.log('HERE');

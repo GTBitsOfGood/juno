@@ -24,7 +24,7 @@ export class CounterService {
       },
       data: {
         value: {
-          increment: -1,
+          decrement: 1,
         },
       },
     });
