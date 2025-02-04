@@ -2,7 +2,6 @@ import {
   Controller,
   Inject,
   OnModuleInit,
-  Post,
   Get,
   Patch,
   Param,
