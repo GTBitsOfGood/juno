@@ -28,7 +28,7 @@ message FileProvider {
   string access_key = 2;
   string metadata = 3;
   repeated bucket.Bucket bucket = 4;
-  ProviderType provider_type = 5; 
+  ProviderType provider_type = 5;
 }
 
 message GetFileProviderRequest { string provider_name = 1; }
@@ -38,6 +38,7 @@ message CreateFileProviderRequest {
   string access_key = 2;
   string metadata = 3;
   repeated bucket.Bucket bucket = 4;
+  ProviderType type = 5;
 }
 
 message UpdateFileProviderRequest {
@@ -45,6 +46,7 @@ message UpdateFileProviderRequest {
   optional string access_key = 2;
   optional string metadata = 3;
   repeated bucket.Bucket bucket = 4;
+  optional ProviderType type = 5;
 }
 
 message DeleteFileProviderRequest { string provider_name = 1; }
@@ -56,6 +58,4 @@ message RegisterProviderRequest {
   string baseUrl = 4;
 }
 
-message RemoveProviderRequest {
-  string provider_name = 1;
-}
+message RemoveProviderRequest { string provider_name = 1; }

@@ -34,6 +34,7 @@ export interface CreateFileProviderRequest {
   accessKey: string;
   metadata: string;
   bucket: Bucket[];
+  type: ProviderType;
 }
 
 export interface UpdateFileProviderRequest {
@@ -41,6 +42,7 @@ export interface UpdateFileProviderRequest {
   accessKey?: string | undefined;
   metadata?: string | undefined;
   bucket: Bucket[];
+  type?: ProviderType | undefined;
 }
 
 export interface DeleteFileProviderRequest {
