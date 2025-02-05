@@ -39,6 +39,7 @@ export class FileConfigController
 
     return {
       id: config.id,
+      environment: config.environment,
       files: [],
       buckets: [],
     };
@@ -57,6 +58,7 @@ export class FileConfigController
 
     return {
       id: config.id,
+      environment: config.environment,
       files: [],
       buckets: [],
     };
@@ -66,13 +68,11 @@ export class FileConfigController
     request: FileConfigProto.UpdateFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
     try {
-      const config = await this.fileServiceConfigService.updateConfig(
-        request.id,
-        request,
-      );
+      const config = await this.fileServiceConfigService.updateConfig(request);
 
       return {
         id: config.id,
+        environment: config.environment,
         files: [],
         buckets: [],
       };
@@ -97,11 +97,10 @@ export class FileConfigController
     request: FileConfigProto.DeleteFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
     try {
-      const config = await this.fileServiceConfigService.deleteConfig(
-        request.id,
-      );
+      const config = await this.fileServiceConfigService.deleteConfig(request);
       return {
         id: config.id,
+        environment: config.environment,
         files: [],
         buckets: [],
       };

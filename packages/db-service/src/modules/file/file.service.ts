@@ -24,7 +24,7 @@ export class FileService {
   ): Promise<FileServiceFile> {
     return this.prisma.fileServiceFile.findUnique({
       where: {
-        path_bucketName_configId: {
+        path_bucketName_configId_configEnv: {
           ...fileId,
         },
       },
@@ -37,7 +37,7 @@ export class FileService {
   ): Promise<FileServiceFile> {
     return this.prisma.fileServiceFile.update({
       where: {
-        path_bucketName_configId: {
+        path_bucketName_configId_configEnv: {
           ...fileId,
         },
       },
@@ -52,7 +52,7 @@ export class FileService {
   ): Promise<FileServiceFile> {
     return await this.prisma.fileServiceFile.delete({
       where: {
-        path_bucketName_configId: {
+        path_bucketName_configId_configEnv: {
           ...fileId,
         },
       },

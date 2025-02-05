@@ -33,7 +33,8 @@ export class FileBucketController implements BucketDbServiceController {
     if (
       !request.name ||
       request.configId == undefined ||
-      !request.fileProviderName
+      !request.fileProviderName ||
+      request.configEnv == undefined
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
@@ -45,6 +46,7 @@ export class FileBucketController implements BucketDbServiceController {
       name: string;
       configId: number;
       fileProviderName: string;
+      configEnv: string;
       FileServiceFile?: Array<IdentifierProto.FileIdentifier>; // Include FileServiceFile as optional
     };
     //attach foreign keys to config, file provider, and fileservice file when we have access to foreign keys
@@ -56,6 +58,7 @@ export class FileBucketController implements BucketDbServiceController {
     return {
       name: res.name,
       configId: res.configId,
+      configEnv: res.configEnv,
       fileProviderName: res.fileProviderName,
       FileServiceFile: res.FileServiceFile,
     } as FileBucketProto.Bucket;
@@ -63,7 +66,7 @@ export class FileBucketController implements BucketDbServiceController {
   async deleteBucket(
     request: FileBucketProto.DeleteBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
-    if (!request.name || request.configId == undefined) {
+    if (!request.name || request.configId == undefined || !request.configEnv) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: 'Both name and configId must be provided',
@@ -77,7 +80,8 @@ export class FileBucketController implements BucketDbServiceController {
     if (
       !request.name ||
       request.configId == undefined ||
-      !request.fileProviderName
+      !request.fileProviderName ||
+      !request.configEnv
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,

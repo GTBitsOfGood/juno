@@ -31,11 +31,13 @@ export interface ApiKeyIdentifier {
 export interface FileIdentifier {
   bucketName: string;
   configId: number;
+  configEnv: string;
   path: string;
 }
 
 export interface FileConfigIdentifier {
   id: number;
+  environment: string;
 }
 
 export const JUNO_IDENTIFIERS_PACKAGE_NAME = 'juno.identifiers';

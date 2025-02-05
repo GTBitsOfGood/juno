@@ -26,6 +26,7 @@ export class FileController implements FileDbServiceController {
           bucketName: file.bucketName,
           configId: file.configId,
           path: file.path,
+          configEnv: file.configEnv,
         },
         metadata: file.metadata,
       };
@@ -65,6 +66,7 @@ export class FileController implements FileDbServiceController {
         bucketName: file.bucketName,
         configId: file.configId,
         path: file.path,
+        configEnv: file.configEnv,
       },
       metadata: file.metadata,
     };
@@ -86,6 +88,7 @@ export class FileController implements FileDbServiceController {
           bucketName: file.bucketName,
           configId: file.configId,
           path: file.path,
+          configEnv: file.configEnv,
         },
         metadata: file.metadata,
       };
@@ -116,6 +119,7 @@ export class FileController implements FileDbServiceController {
           bucketName: file.bucketName,
           configId: file.configId,
           path: file.path,
+          configEnv: file.configEnv,
         },
         metadata: file.metadata,
       };

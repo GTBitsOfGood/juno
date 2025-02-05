@@ -11,9 +11,10 @@ export class FileBucketService {
     return convertDbBucket(
       await this.prisma.fileServiceBucket.findUnique({
         where: {
-          name_configId: {
+          name_configId_configEnv: {
             name: request.name,
             configId: request.configId,
+            configEnv: request.configEnv,
           },
         },
         include: {
@@ -29,6 +30,7 @@ export class FileBucketService {
         name,
         fileProviderName,
         configId: Number(configId),
+        configEnv: input.configEnv,
         //add fileservicefile after having access to files
       },
     });
@@ -40,9 +42,10 @@ export class FileBucketService {
     return convertDbBucket(
       await this.prisma.fileServiceBucket.update({
         where: {
-          name_configId: {
+          name_configId_configEnv: {
             name: request.name,
             configId: Number(request.configId),
+            configEnv: request.configEnv,
           },
         },
         data: {
@@ -61,9 +64,10 @@ export class FileBucketService {
     return convertDbBucket(
       await this.prisma.fileServiceBucket.delete({
         where: {
-          name_configId: {
+          name_configId_configEnv: {
             name: request.name,
             configId: Number(request.configId),
+            configEnv: request.configEnv,
           },
         },
         include: {
@@ -81,12 +85,14 @@ const convertDbBucket = (bucket: any): FileBucketProto.Bucket => {
         path: file.path,
         configId: file.configId,
         bucketName: file.bucketName,
+        configEnv: file.configEnv,
       } as IdentifierProto.FileIdentifier,
     }));
 
   const res: FileBucketProto.Bucket = {
     name: bucket.name,
     configId: bucket.configId,
+    configEnv: bucket.configEnv,
     fileProviderName: bucket.fileProviderName,
     FileServiceFile: mappedFiles,
   };
