@@ -54,7 +54,10 @@ export class UserResponse {
 
   // Protobuf's Long requires extra transformation
   @Transform(({ value }) => value?.map((v: any) => v.low))
-  @ApiProperty({ description: "Project IDs associated with user", type: [Number] })
+  @ApiProperty({
+    description: 'Project IDs associated with user',
+    type: [Number],
+  })
   projectIds: number[];
 
   constructor(user: UserProto.User) {

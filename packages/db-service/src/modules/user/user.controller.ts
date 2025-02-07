@@ -10,7 +10,7 @@ import { status } from '@grpc/grpc-js';
 @Controller()
 @UserProto.UserServiceControllerMethods()
 export class UserController implements UserProto.UserServiceController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   private mapPrismaRoleToRPC(role: Role): UserProto.UserType {
     switch (role) {
