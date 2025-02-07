@@ -13,17 +13,19 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
+let counterId: string;
 
 jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
   const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
+
   await new Promise((resolve) => {
     resetClient.resetDb({}, () => {
       resolve(0);
@@ -51,52 +53,90 @@ beforeEach(async () => {
   app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
+
+  // Create a new counter for testing and store the generated ID
+  const response = await request(app.getHttpServer())
+    .post('/counter/0')
+    .send()
+    .expect(201);
+
+  counterId = response.body.counterId; // Store generated ID
+  expect(counterId).toBeDefined();
 });
 
-describe('Create Counter Route', () => {
-  it('Get and create a counter', () => {
-    return request(app.getHttpServer())
-      .get('/counter/test-counter')
-      .send()
-      .expect(200)
-      .then((response) => {
-        expect(response.body.value).toEqual(0);
-      });
-  });
-});
-describe('Counter Routes', () => {
-  it('Increment aforementioned counter', () => {
-    return request(app.getHttpServer())
-      .put('/counter/increment/test-counter')
-      .send()
-      .expect(200)
-      .then((response) => {
-        expect(response.body.value).toEqual(1);
-      });
-  });
-  it('Increment aforementioned counter again', () => {
-    return request(app.getHttpServer())
-      .put('/counter/increment/test-counter')
-      .send()
-      .expect(200)
-      .then((response) => {
-        expect(response.body.value).toEqual(2);
-      });
-  });
-  it('Decrement aforementioned counter', () => {
-    return request(app.getHttpServer())
-      .put('/counter/decrement/test-counter')
-      .send()
-      .expect(200)
-      .then((response) => {
-        expect(response.body.value).toEqual(1);
-      });
-  });
-  it('Reset counter', async () => {
+describe('Counter API Tests', () => {
+  it('creates a new counter', async () => {
     const response = await request(app.getHttpServer())
-      .put('/counter/reset/test-counter')
+      .post('/counter/0')
+      .send()
+      .expect(201);
+
+    expect(response.body).toHaveProperty('counterId');
+    expect(response.body.value).toBe(0);
+  });
+
+  it('retrieves the newly created counter', async () => {
+    const response = await request(app.getHttpServer())
+      .get(`/counter/${counterId}`)
       .send()
       .expect(200);
-    expect(response.body.value).toEqual(0);
+
+    expect(response.body.value).toBe(0);
+  });
+
+  it('increments the counter correctly', async () => {
+    const response = await request(app.getHttpServer())
+      .put(`/counter/increment/${counterId}`)
+      .send()
+      .expect(200);
+
+    expect(response.body.value).toBe(1);
+  });
+
+  it('decrements the counter correctly', async () => {
+    await request(app.getHttpServer()).put(`/counter/increment/${counterId}`);
+
+    const response = await request(app.getHttpServer())
+      .put(`/counter/decrement/${counterId}`)
+      .send()
+      .expect(200);
+
+    expect(response.body.value).toBe(0);
+  });
+
+  it('resets the counter to zero', async () => {
+    await request(app.getHttpServer()).put(`/counter/increment/${counterId}`);
+    await request(app.getHttpServer()).put(`/counter/increment/${counterId}`);
+
+    const response = await request(app.getHttpServer())
+      .put(`/counter/reset/${counterId}`)
+      .send()
+      .expect(200);
+
+    expect(response.body.value).toBe(0);
+  });
+
+  it('retrieves updated value after incrementing', async () => {
+    await request(app.getHttpServer()).put(`/counter/increment/${counterId}`);
+
+    const response = await request(app.getHttpServer())
+      .get(`/counter/${counterId}`)
+      .send()
+      .expect(200);
+
+    expect(response.body.value).toBe(1);
+  });
+
+  it('handles multiple increments correctly', async () => {
+    for (let i = 0; i < 3; i++) {
+      await request(app.getHttpServer()).put(`/counter/increment/${counterId}`);
+    }
+
+    const response = await request(app.getHttpServer())
+      .get(`/counter/${counterId}`)
+      .send()
+      .expect(200);
+
+    expect(response.body.value).toBe(3);
   });
 });

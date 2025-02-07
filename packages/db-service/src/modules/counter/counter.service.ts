@@ -8,7 +8,6 @@ export class CounterService {
     const data = await this.prisma.counter.create({
       data: { value },
     });
-    console.log('COUNTER DATAJEFDSL', data);
     return data;
   }
   async incrementCounter(counterId: string) {
