@@ -1,9 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class CounterService {
   constructor(private prisma: PrismaService) {}
+  async createCounter(value: number) {
+    const data = await this.prisma.counter.create({
+      data: { value },
+    });
+    console.log('COUNTER DATAJEFDSL', data);
+    return data;
+  }
   async incrementCounter(counterId: string) {
     const data = await this.prisma.counter.update({
       where: {
@@ -42,16 +49,13 @@ export class CounterService {
     return data;
   }
   async getCounter(counterId: string) {
-    console.log(`Received getCounter request for counterId: ${counterId}`);
-    let data = await this.prisma.counter.findUnique({
+    const data = await this.prisma.counter.findUnique({
       where: {
         id: counterId,
       },
     });
     if (!data) {
-      data = await this.prisma.counter.create({
-        data: { id: counterId, value: 0 },
-      });
+      throw new NotFoundException('Counter not found');
     }
     return data;
   }

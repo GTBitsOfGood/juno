@@ -14,7 +14,7 @@ import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 
-jest.setTimeout(20000);
+jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -56,7 +56,7 @@ beforeEach(async () => {
 describe('Create Counter Route', () => {
   it('Get and create a counter', () => {
     return request(app.getHttpServer())
-      .get('/counter/counter_first')
+      .get('/counter/test-counter')
       .send()
       .expect(200)
       .then((response) => {
@@ -67,7 +67,7 @@ describe('Create Counter Route', () => {
 describe('Counter Routes', () => {
   it('Increment aforementioned counter', () => {
     return request(app.getHttpServer())
-      .post('/counter/increment/counter_first')
+      .put('/counter/increment/test-counter')
       .send()
       .expect(200)
       .then((response) => {
@@ -76,7 +76,7 @@ describe('Counter Routes', () => {
   });
   it('Increment aforementioned counter again', () => {
     return request(app.getHttpServer())
-      .post('/counter/increment/counter_first')
+      .put('/counter/increment/test-counter')
       .send()
       .expect(200)
       .then((response) => {
@@ -85,7 +85,7 @@ describe('Counter Routes', () => {
   });
   it('Decrement aforementioned counter', () => {
     return request(app.getHttpServer())
-      .post('/counter/decrement/counter_first')
+      .put('/counter/decrement/test-counter')
       .send()
       .expect(200)
       .then((response) => {
@@ -94,11 +94,9 @@ describe('Counter Routes', () => {
   });
   it('Reset counter', async () => {
     const response = await request(app.getHttpServer())
-      .post('/counter/reset/counter_first')
+      .put('/counter/reset/test-counter')
       .send()
       .expect(200);
-    console.log('HERE');
-    console.log(response);
     expect(response.body.value).toEqual(0);
   });
 });

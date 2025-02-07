@@ -9,6 +9,13 @@ export class CounterController
 {
   constructor(private readonly counterService: CounterService) {}
 
+  async createCounter(
+    request: CounterProto.CreateCounterRequest,
+  ): Promise<CounterProto.CreateCounterResponse> {
+    const data = await this.counterService.createCounter(request.value);
+    return { counterId: data.id, value: data.value };
+  }
+
   async incrementCounter(
     request: CounterProto.IncrementCounterRequest,
   ): Promise<CounterProto.IncrementCounterResponse> {
@@ -33,10 +40,6 @@ export class CounterController
   async getCounter(
     request: CounterProto.GetCounterRequest,
   ): Promise<CounterProto.GetCounterResponse> {
-    console.log(
-      `Received getCounter request for counterId: ${request.counterId}`,
-    );
-    return { value: 0 };
     const data = await this.counterService.getCounter(request.counterId);
     return { value: data.value };
   }

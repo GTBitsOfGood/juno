@@ -3,12 +3,19 @@ syntax = "proto3";
 package juno.counter;
 
 service CounterService {
+    rpc createCounter(CreateCounterRequest) returns (CreateCounterResponse);
     rpc incrementCounter(IncrementCounterRequest) returns (IncrementCounterResponse);
     rpc decrementCounter(DecrementCounterRequest) returns (DecrementCounterResponse);
     rpc resetCounter(ResetCounterRequest) returns (ResetCounterResponse);
     rpc getCounter(GetCounterRequest) returns (GetCounterResponse);
   }
-
+  message CreateCounterRequest {
+    int32 value = 1;
+  }
+  message CreateCounterResponse {
+    string counterId = 1;
+    int32 value = 2;
+  }
   message IncrementCounterRequest {
     string counterId = 1;
   }

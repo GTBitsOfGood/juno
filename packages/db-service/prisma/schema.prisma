@@ -136,6 +136,6 @@ model FileServiceFile {
 }
 
 model Counter {
-  id              String                 @id
+  id              String                 @id @default(uuid())
   value           Int
 }
