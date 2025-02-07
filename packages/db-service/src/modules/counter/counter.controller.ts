@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { CounterProto } from 'juno-proto';
 import { CounterService } from './counter.service';
 
-@Controller('counter')
+@Controller()
 @CounterProto.CounterServiceControllerMethods()
 export class CounterController
   implements CounterProto.CounterServiceController
@@ -33,6 +33,10 @@ export class CounterController
   async getCounter(
     request: CounterProto.GetCounterRequest,
   ): Promise<CounterProto.GetCounterResponse> {
+    console.log(
+      `Received getCounter request for counterId: ${request.counterId}`,
+    );
+    return { value: 0 };
     const data = await this.counterService.getCounter(request.counterId);
     return { value: data.value };
   }

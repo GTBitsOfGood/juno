@@ -42,6 +42,7 @@ export class CounterService {
     return data;
   }
   async getCounter(counterId: string) {
+    console.log(`Received getCounter request for counterId: ${counterId}`);
     let data = await this.prisma.counter.findUnique({
       where: {
         id: counterId,
