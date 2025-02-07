@@ -12,7 +12,10 @@ export class CounterController
   async createCounter(
     request: CounterProto.CreateCounterRequest,
   ): Promise<CounterProto.CreateCounterResponse> {
-    const data = await this.counterService.createCounter(request.value);
+    const data = await this.counterService.createCounter(
+      request.counterId,
+      request.value,
+    );
     return { counterId: data.id, value: data.value };
   }
 

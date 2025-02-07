@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 export const protobufPackage = 'juno.counter';
 
 export interface CreateCounterRequest {
+  counterId: string;
   value: number;
 }
 

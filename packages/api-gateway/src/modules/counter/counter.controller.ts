@@ -37,10 +37,13 @@ export class CounterController implements OnModuleInit {
     return new CounterResponse(counter);
   }
 
-  @Post(':value')
-  async createCounter(@Param('value') value: number): Promise<CounterResponse> {
+  @Post(':counterId/:value')
+  async createCounter(
+    @Param('counterId') counterId: string,
+    @Param('value') value: number,
+  ): Promise<CounterResponse> {
     const counter = await lastValueFrom(
-      this.counterService.createCounter({ value }),
+      this.counterService.createCounter({ counterId, value }),
     );
     return new CounterResponse(counter);
   }

@@ -4,9 +4,9 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class CounterService {
   constructor(private prisma: PrismaService) {}
-  async createCounter(value: number) {
+  async createCounter(counterId: string, value: number) {
     const data = await this.prisma.counter.create({
-      data: { value },
+      data: { id: counterId, value },
     });
     return data;
   }

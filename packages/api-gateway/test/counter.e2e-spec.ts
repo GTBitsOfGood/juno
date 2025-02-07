@@ -38,6 +38,8 @@ afterAll((done) => {
   done();
 });
 
+let index: number = 0;
+
 beforeEach(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -54,20 +56,20 @@ beforeEach(async () => {
 
   await app.init();
 
-  // Create a new counter for testing and store the generated ID
   const response = await request(app.getHttpServer())
-    .post('/counter/0')
+    .post(`/counter/test-counter-${index}/0`)
     .send()
     .expect(201);
 
-  counterId = response.body.counterId; // Store generated ID
+  counterId = response.body.counterId;
   expect(counterId).toBeDefined();
+  index += 1;
 });
 
 describe('Counter API Tests', () => {
   it('creates a new counter', async () => {
     const response = await request(app.getHttpServer())
-      .post('/counter/0')
+      .post('/counter/test-counter/0')
       .send()
       .expect(201);
 

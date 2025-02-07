@@ -10,7 +10,8 @@ service CounterService {
     rpc getCounter(GetCounterRequest) returns (GetCounterResponse);
   }
   message CreateCounterRequest {
-    int32 value = 1;
+    string counterId = 1;
+    int32 value = 2;
   }
   message CreateCounterResponse {
     string counterId = 1;

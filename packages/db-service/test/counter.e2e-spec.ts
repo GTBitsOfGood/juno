@@ -81,6 +81,8 @@ afterEach(async () => {
 
 describe('DB Service Counter Tests', () => {
   let counterClient: any;
+  let counterId: string;
+  let index: number = 1;
 
   beforeEach(() => {
     const counterProto = ProtoLoader.loadSync([
@@ -94,11 +96,14 @@ describe('DB Service Counter Tests', () => {
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
     );
+
+    counterId = `test-counter-${index}`;
+    index += 1;
   });
 
   it('creates and retrieves a counter with initial value 0', async () => {
     const data = (await new Promise((resolve) => {
-      counterClient.createCounter({ value: 0 }, (err, resp) => {
+      counterClient.createCounter({ counterId, value: 0 }, (err, resp) => {
         expect(err).toBeNull();
         expect(resp.value).toBe(0);
         resolve(resp);
@@ -116,7 +121,7 @@ describe('DB Service Counter Tests', () => {
 
   it('increments the counter correctly', async () => {
     const data = (await new Promise((resolve) => {
-      counterClient.createCounter({ value: 0 }, (err, resp) => {
+      counterClient.createCounter({ counterId, value: 0 }, (err, resp) => {
         expect(err).toBeNull();
         resolve(resp);
       });
@@ -136,7 +141,7 @@ describe('DB Service Counter Tests', () => {
 
   it('decrements the counter correctly', async () => {
     const data = (await new Promise((resolve) => {
-      counterClient.createCounter({ value: 0 }, (err, resp) => {
+      counterClient.createCounter({ counterId, value: 0 }, (err, resp) => {
         expect(err).toBeNull();
         resolve(resp);
       });
@@ -163,7 +168,7 @@ describe('DB Service Counter Tests', () => {
 
   it('handles multiple increments correctly and resets', async () => {
     const data = (await new Promise((resolve) => {
-      counterClient.createCounter({ value: 0 }, (err, resp) => {
+      counterClient.createCounter({ counterId, value: 0 }, (err, resp) => {
         expect(err).toBeNull();
         resolve(resp);
       });
@@ -211,7 +216,7 @@ describe('DB Service Counter Tests', () => {
 
   it('retrieves updated value after incrementing', async () => {
     const data = (await new Promise((resolve) => {
-      counterClient.createCounter({ value: 0 }, (err, resp) => {
+      counterClient.createCounter({ counterId, value: 0 }, (err, resp) => {
         expect(err).toBeNull();
         resolve(resp);
       });
