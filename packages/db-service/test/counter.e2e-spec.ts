@@ -66,6 +66,7 @@ describe('Counter Service Tests', () => {
       counterClient.getCounter({ counterId }, (err, resp) => {
         expect(err).toBeNull();
         expect(resp).toHaveProperty('value');
+        expect(resp.value).toBe(0);
         resolve(resp);
       });
     });
@@ -80,6 +81,7 @@ describe('Counter Service Tests', () => {
       counterClient.incrementCounter({ counterId }, (err, resp) => {
         expect(err).toBeNull();
         expect(resp).toHaveProperty('value');
+        expect(resp.value).toBe(1);
         resolve(resp);
       });
     });
@@ -94,6 +96,7 @@ describe('Counter Service Tests', () => {
       counterClient.decrementCounter({ counterId }, (err, resp) => {
         expect(err).toBeNull();
         expect(resp).toHaveProperty('value');
+        expect(resp.value).toBe(0);
         resolve(resp);
       });
     });
@@ -107,7 +110,6 @@ describe('Counter Service Tests', () => {
     const promise = new Promise((resolve) => {
       counterClient.resetCounter({ counterId }, (err, resp) => {
         expect(err).toBeNull();
-        console.log(resp);
         expect(resp.value).toBe(0);
         resolve(resp);
       });
@@ -123,6 +125,7 @@ describe('Counter Service Tests', () => {
       counterClient.getCounter({ counterId }, (err, resp) => {
         expect(err).toBeNull();
         expect(resp).toHaveProperty('value');
+        expect(resp.value).toBe(0);
         resolve(resp);
       });
     });
