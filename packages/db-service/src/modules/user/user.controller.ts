@@ -4,11 +4,13 @@ import { Role } from '@prisma/client';
 import * as validate from 'src/utility/validate';
 import { IdentifierProto, UserProto } from 'juno-proto';
 import * as bcrypt from 'bcrypt';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 @Controller()
 @UserProto.UserServiceControllerMethods()
 export class UserController implements UserProto.UserServiceController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   private mapPrismaRoleToRPC(role: Role): UserProto.UserType {
     switch (role) {
@@ -40,6 +42,14 @@ export class UserController implements UserProto.UserServiceController {
   ): Promise<UserProto.User> {
     const userFind = validate.validateUserIdentifier(identifier);
     const user = await this.userService.user(userFind);
+
+    if (!user) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
     return {
       ...user,
       type: this.mapPrismaRoleToRPC(user.type),
