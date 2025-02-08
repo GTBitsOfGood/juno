@@ -1,8 +1,8 @@
 import {
   Controller,
-  Get,
   Inject,
   OnModuleInit,
+  Get,
   Post,
   Put,
 } from '@nestjs/common';
@@ -29,31 +29,31 @@ export class CounterController implements OnModuleInit {
   }
 
   @Post(':id')
-  async createCounter(id: string) {
+  async createCounter(id: string): Promise<CounterResponse> {
     const counter = this.counterService.createCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
-  @Post(':id/increment')
-  async incrementCounter(id: string) {
+  @Put(':id/increment')
+  async incrementCounter(id: string): Promise<CounterResponse> {
     const counter = this.counterService.incrementCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
-  @Post(':id/decrement')
-  async decrementCounter(id: string) {
+  @Put(':id/decrement')
+  async decrementCounter(id: string): Promise<CounterResponse> {
     const counter = this.counterService.decrementCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
   
   @Put(':id/reset')
-  async resetCounter(id: string) {
+  async resetCounter(id: string): Promise<CounterResponse> {
     const counter = this.counterService.resetCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
   @Get(':id')
-  async getCounter(id: string) {
+  async getCounter(id: string): Promise<CounterResponse> {
     const counter = this.counterService.getCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }

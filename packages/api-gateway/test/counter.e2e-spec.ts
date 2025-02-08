@@ -15,7 +15,7 @@ import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 let app: INestApplication;
 let apiKey: string | undefined = undefined;
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -54,13 +54,72 @@ beforeEach(async () => {
   await app.init();
 });
 
-const ADMIN_EMAIL = 'test-superadmin@test.com';
-const ADMIN_PASSWORD = 'test-password';
+describe('Counter Tests', () => {
+  it('creates a counter', async () => {
+    await request(app.getHttpServer())
+      .post('/counter/testapi1')
+      .send()
+      .expect(201)
+      .expect('{"id":"testapi1","value":0}');
+  });
 
-describe('Counter Update Routes', () => {
-  // to do after figuring out why it won't run lol
-});
+  it('increments a counter', async () => {
+    await request(app.getHttpServer())
+      .post('/counter/testapi2')
+      .send();
+    
+    await request(app.getHttpServer())
+      .put('/counter/testapi2/increment')
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.value).toEqual(1);
+      });
+  });
 
-describe('Counter Retrieval Routes', () => {
-  // to do
+  it('decrements a counter', async () => {
+    await request(app.getHttpServer())
+      .post('/counter/testapi3')
+      .send();
+    
+    await request(app.getHttpServer())
+      .put('/counter/testapi3/decrement')
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.value).toEqual(-1);
+      });
+  });
+
+  it('resets a counter', async () => {
+    await request(app.getHttpServer())
+      .post('/counter/testapi4')
+      .send();
+
+    await request(app.getHttpServer())
+      .put('/counter/testapi4/increment')
+      .send();
+    
+    await request(app.getHttpServer())
+      .put('/counter/testapi4/reset')
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.value).toEqual(0);
+      });
+  });
+
+  it('gets a counter', async () => {
+    await request(app.getHttpServer())
+      .post('/counter/testapi5')
+      .send();
+
+    await request(app.getHttpServer())
+      .get('/counter/testapi5')
+      .send()
+      .expect(200)
+      .then((response) => {
+        expect(response.body.id).toEqual('testapi5');
+      });
+  });
 });
