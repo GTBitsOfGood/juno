@@ -5,6 +5,7 @@ import {
   Get,
   Post,
   Put,
+  Param,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -29,31 +30,31 @@ export class CounterController implements OnModuleInit {
   }
 
   @Post(':id')
-  async createCounter(id: string): Promise<CounterResponse> {
+  async createCounter(@Param('id') id: string): Promise<CounterResponse> {
     const counter = this.counterService.createCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
   @Put(':id/increment')
-  async incrementCounter(id: string): Promise<CounterResponse> {
+  async incrementCounter(@Param('id') id: string): Promise<CounterResponse> {
     const counter = this.counterService.incrementCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
   @Put(':id/decrement')
-  async decrementCounter(id: string): Promise<CounterResponse> {
+  async decrementCounter(@Param('id') id: string): Promise<CounterResponse> {
     const counter = this.counterService.decrementCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
   @Put(':id/reset')
-  async resetCounter(id: string): Promise<CounterResponse> {
+  async resetCounter(@Param('id') id: string): Promise<CounterResponse> {
     const counter = this.counterService.resetCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
   @Get(':id')
-  async getCounter(id: string): Promise<CounterResponse> {
+  async getCounter(@Param('id') id: string): Promise<CounterResponse> {
     const counter = this.counterService.getCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
