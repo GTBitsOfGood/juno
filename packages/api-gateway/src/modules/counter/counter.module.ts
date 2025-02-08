@@ -11,7 +11,6 @@ import {
   CounterProto,
   CounterProtoFile
 } from 'juno-proto';
-import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
 
 const { COUNTER_SERVICE_NAME, JUNO_COUNTER_PACKAGE_NAME } = CounterProto;
 
@@ -35,8 +34,3 @@ const { COUNTER_SERVICE_NAME, JUNO_COUNTER_PACKAGE_NAME } = CounterProto;
   controllers: [CounterController],
 })
 export class CounterModule {}
-// export class CounterModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(ApiKeyMiddleware).forRoutes('counter/*');
-//   }
-// } don't think its necessary?

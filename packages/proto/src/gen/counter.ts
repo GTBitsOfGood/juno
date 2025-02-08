@@ -10,6 +10,10 @@ import { Observable } from 'rxjs';
 
 export const protobufPackage = 'juno.counter';
 
+export interface CreateCounterRequest {
+  id: string;
+}
+
 export interface IncrementCounterRequest {
   id: string;
 }
@@ -34,6 +38,8 @@ export interface Counter {
 export const JUNO_COUNTER_PACKAGE_NAME = 'juno.counter';
 
 export interface CounterServiceClient {
+  createCounter(request: CreateCounterRequest): Observable<Counter>;
+
   incrementCounter(request: IncrementCounterRequest): Observable<Counter>;
 
   decrementCounter(request: DecrementCounterRequest): Observable<Counter>;
@@ -44,6 +50,10 @@ export interface CounterServiceClient {
 }
 
 export interface CounterServiceController {
+  createCounter(
+    request: CreateCounterRequest,
+  ): Promise<Counter> | Observable<Counter> | Counter;
+
   incrementCounter(
     request: IncrementCounterRequest,
   ): Promise<Counter> | Observable<Counter> | Counter;
@@ -64,6 +74,7 @@ export interface CounterServiceController {
 export function CounterServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
+      'createCounter',
       'incrementCounter',
       'decrementCounter',
       'resetCounter',

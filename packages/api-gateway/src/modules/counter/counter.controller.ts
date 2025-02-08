@@ -8,9 +8,8 @@ import {
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { CounterResponse } from 'src/models/counter.dto';t
+import { CounterResponse } from 'src/models/counter.dto';
 import { CounterProto } from 'juno-proto';
-import { ApiTags } from '@nestjs/swagger';
 
 const { COUNTER_SERVICE_NAME } = CounterProto;
 
@@ -27,6 +26,12 @@ export class CounterController implements OnModuleInit {
       this.counterClient.getService<CounterProto.CounterServiceClient>(
         COUNTER_SERVICE_NAME,
       );
+  }
+
+  @Post(':id')
+  async createCounter(id: string) {
+    const counter = this.counterService.createCounter({ id });
+    return new CounterResponse(await lastValueFrom(counter));
   }
 
   @Post(':id/increment')
