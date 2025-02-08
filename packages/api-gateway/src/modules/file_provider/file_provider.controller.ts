@@ -54,16 +54,12 @@ export class FileProviderController implements OnModuleInit {
   async registerFileProvider(
     @Body('') params: RegisterFileProviderModel,
   ): Promise<FileProviderResponse> {
-    console.log(`params: ${JSON.stringify(params)}`);
-
     const fileProvider = this.fileProviderService.registerProvider({
       baseUrl: params.baseUrl,
       providerName: params.providerName,
       privateAccessKey: params.accessKey.privateAccessKey,
       publicAccessKey: params.accessKey.publicAccessKey,
     });
-
-    console.log(`provider: ${JSON.stringify(fileProvider)}`);
 
     return new FileProviderResponse(await lastValueFrom(fileProvider));
   }

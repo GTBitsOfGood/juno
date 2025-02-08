@@ -54,10 +54,6 @@ export class FileBucketController implements OnModuleInit {
   async registerFileBucket(
     @Body() params: RegisterFileBucketModel,
   ): Promise<FileBucketResponse> {
-    console.log(
-      `Received params for registering file bucket: ${JSON.stringify(params)}`,
-    );
-
     const grpcResponse = this.fileBucketService.registerBucket({
       name: params.name,
       configId: params.configId,
@@ -66,10 +62,6 @@ export class FileBucketController implements OnModuleInit {
     });
 
     const bucketData = await lastValueFrom(grpcResponse);
-
-    console.log(
-      `Received response from gRPC service: ${JSON.stringify(bucketData)}`,
-    );
 
     return new FileBucketResponse(bucketData);
   }
