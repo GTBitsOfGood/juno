@@ -9,7 +9,7 @@ export class CounterService {
   async createCounter(id: string): Promise<Counter> {
     return this.prisma.counter.create({
       data: { id: id, value: 0 },
-    })
+    });
   }
 
   async incrementCounter(id: string): Promise<Counter> {

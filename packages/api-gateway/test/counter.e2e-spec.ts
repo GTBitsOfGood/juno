@@ -13,7 +13,6 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
-let apiKey: string | undefined = undefined;
 
 jest.setTimeout(30000);
 
@@ -64,10 +63,8 @@ describe('Counter Tests', () => {
   });
 
   it('increments a counter', async () => {
-    await request(app.getHttpServer())
-      .post('/counter/testapi2')
-      .send();
-    
+    await request(app.getHttpServer()).post('/counter/testapi2').send();
+
     await request(app.getHttpServer())
       .put('/counter/testapi2/increment')
       .send()
@@ -78,10 +75,8 @@ describe('Counter Tests', () => {
   });
 
   it('decrements a counter', async () => {
-    await request(app.getHttpServer())
-      .post('/counter/testapi3')
-      .send();
-    
+    await request(app.getHttpServer()).post('/counter/testapi3').send();
+
     await request(app.getHttpServer())
       .put('/counter/testapi3/decrement')
       .send()
@@ -92,14 +87,12 @@ describe('Counter Tests', () => {
   });
 
   it('resets a counter', async () => {
-    await request(app.getHttpServer())
-      .post('/counter/testapi4')
-      .send();
+    await request(app.getHttpServer()).post('/counter/testapi4').send();
 
     await request(app.getHttpServer())
       .put('/counter/testapi4/increment')
       .send();
-    
+
     await request(app.getHttpServer())
       .put('/counter/testapi4/reset')
       .send()
@@ -110,9 +103,7 @@ describe('Counter Tests', () => {
   });
 
   it('gets a counter', async () => {
-    await request(app.getHttpServer())
-      .post('/counter/testapi5')
-      .send();
+    await request(app.getHttpServer()).post('/counter/testapi5').send();
 
     await request(app.getHttpServer())
       .get('/counter/testapi5')

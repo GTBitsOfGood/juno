@@ -45,7 +45,7 @@ export class CounterController implements OnModuleInit {
     const counter = this.counterService.decrementCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
-  
+
   @Put(':id/reset')
   async resetCounter(id: string): Promise<CounterResponse> {
     const counter = this.counterService.resetCounter({ id });

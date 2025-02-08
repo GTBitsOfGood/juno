@@ -1,16 +1,9 @@
-import {
-  Module,
-  NestModule,
-  MiddlewareConsumer,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { CounterController } from './counter.controller';
-import {
-  CounterProto,
-  CounterProtoFile
-} from 'juno-proto';
+import { CounterProto, CounterProtoFile } from 'juno-proto';
 
 const { COUNTER_SERVICE_NAME, JUNO_COUNTER_PACKAGE_NAME } = CounterProto;
 

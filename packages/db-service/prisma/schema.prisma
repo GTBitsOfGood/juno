@@ -51,8 +51,8 @@ enum Role {
 
 model EmailServiceConfig {
   id             Int
-  environment    String @default("")
-  sendgridApiKey String @default("")
+  environment    String                        @default("")
+  sendgridApiKey String                        @default("")
   emails         EmailServiceConfigAndSender[]
   domains        EmailServiceConfigAndDomain[]
   Project        Project                       @relation(fields: [id], references: [id])
@@ -136,6 +136,6 @@ model FileServiceFile {
 }
 
 model Counter {
-  id      String    @id
-  value   Int
+  id    String @id
+  value Int
 }

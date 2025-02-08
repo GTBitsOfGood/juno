@@ -94,36 +94,36 @@ describe('DB Service Counter Tests', () => {
     counterClient = new counterProtoGRPC.juno.counter.CounterService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
-    )
-  })
+    );
+  });
 
   it('creates a new counter', async () => {
     await new Promise((resolve) => {
       counterClient.createCounter(
-        { 
-          id: 'test1'
+        {
+          id: 'test1',
         },
         (err, resp) => {
           expect(err).toBeNull();
           expect(resp['value']).toBe(0);
           resolve({});
         },
-      );    
+      );
     });
   });
 
   it('increments a counter', async () => {
-    const counter = await new Promise((resolve) => {
+    const counter = (await new Promise((resolve) => {
       counterClient.createCounter(
-        { 
+        {
           id: 'test2',
         },
         (err, resp) => {
           expect(err).toBeNull();
           resolve(resp);
         },
-      );    
-    }) as { id: string, value: number };
+      );
+    })) as { id: string; value: number };
 
     await new Promise((resolve) => {
       counterClient.incrementCounter(
@@ -140,17 +140,17 @@ describe('DB Service Counter Tests', () => {
   });
 
   it('decrements a counter', async () => {
-    const counter = await new Promise((resolve) => {
+    const counter = (await new Promise((resolve) => {
       counterClient.createCounter(
-        { 
+        {
           id: 'test3',
         },
         (err, resp) => {
           expect(err).toBeNull();
           resolve(resp);
         },
-      );    
-    }) as { id: string, value: number };
+      );
+    })) as { id: string; value: number };
 
     await new Promise((resolve) => {
       counterClient.decrementCounter(
@@ -167,17 +167,17 @@ describe('DB Service Counter Tests', () => {
   });
 
   it('resets a counter', async () => {
-    const counter = await new Promise((resolve) => {
+    const counter = (await new Promise((resolve) => {
       counterClient.createCounter(
-        { 
+        {
           id: 'test4',
         },
         (err, resp) => {
           expect(err).toBeNull();
           resolve(resp);
         },
-      );    
-    }) as { id: string, value: number };
+      );
+    })) as { id: string; value: number };
 
     await new Promise((resolve) => {
       counterClient.incrementCounter(
@@ -206,17 +206,17 @@ describe('DB Service Counter Tests', () => {
   });
 
   it('gets a counter', async () => {
-    const originalCounter = await new Promise((resolve) => {
+    const originalCounter = (await new Promise((resolve) => {
       counterClient.createCounter(
-        { 
+        {
           id: 'test5',
         },
         (err, resp) => {
           expect(err).toBeNull();
           resolve(resp);
         },
-      );    
-    }) as { id: string, value: number };
+      );
+    })) as { id: string; value: number };
 
     const retrievedCounter = await new Promise((resolve) => {
       counterClient.getCounter(
@@ -232,5 +232,4 @@ describe('DB Service Counter Tests', () => {
 
     expect(retrievedCounter == originalCounter);
   });
-
 });
