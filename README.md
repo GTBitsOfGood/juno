@@ -49,7 +49,7 @@ When running Juno locally, the documentation can be found under `localhost:<api-
 - [protoc](https://github.com/protocolbuffers/protobuf) v28.2
 - WSL2 if running on a Windows OS
 
-> [!warning] Homebrew's Outdated Protoc Version
+> [!WARNING]
 > Homebrew is likely to contain an older `protoc` version incompatible with Juno. To avoid any potential incompatibilities, it is recommended to install the binaries from protoc's [releases page](https://github.com/protocolbuffers/protobuf/releases).
 
 ### Using Docker
