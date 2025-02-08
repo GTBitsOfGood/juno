@@ -1,6 +1,5 @@
 <div align="center">
   
-  <a href="">![E2E Tests](https://img.shields.io/github/actions/workflow/status/GTBitsOfGood/juno/e2e-tests.yml?style=for-the-badge)</a> 
   <a href="">![GitHub Releases](https://img.shields.io/github/v/release/GTBitsOfGood/juno?include_prereleases&style=for-the-badge)</a>
   <a href="">![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)</a>
   
@@ -20,12 +19,14 @@
 
 Juno is a monorepo using a combination of NestJS, [gRPC](https://grpc.io/), Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
 
+![Juno Diagram](image-1.png)
+
 Packages are managed through [PNPM Workspaces](https://pnpm.io/workspaces). The current packages are as follows:
 
-- [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) based on the API route and given information
-- [auth-service](./packages/auth-service/): An internal service used to handle all API authentication necessities. Provides RPC endpoints for API key generation/validation/revocation and JWT generation/validation. Used in some endpoints but primarily as middleware within the gateway to ensure authorized access to other services
+- [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via [Remote Procedure Calls](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) based on the API route and given information.
+- [auth-service](./packages/auth-service/): An internal service used to handle all API authentication necessities. Provides RPC endpoints for API key generation/validation/revocation and JWT generation/validation. Used in some endpoints but primarily as middleware within the gateway to ensure authorized access to other services.
 
-- [db-service](./packages/db-service/): An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals
+- [db-service](./packages/db-service/): An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.) via [Prisma](https://www.prisma.io/). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals
 - [email-service](./packages/email-service/): A SendGrid-based central service for managing per-project mailing functionality with support for all major mailing providers.
 - [logging-service](./packages/logging-service/): A dedicated logging service for error and audit logs, including traces, metrics information, and sentry.io integration.
 
@@ -43,8 +44,11 @@ When running Juno locally, the documentation can be found under `localhost:<api-
 ### Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) v4.24+
-- [protoc](https://github.com/protocolbuffers/protobuf)
+- [protoc](https://github.com/protocolbuffers/protobuf) v28.2
 - WSL2 if running on a Windows OS
+
+> [!warning] Homebrew's Outdated Protoc Version
+> Homebrew is likely to contain an older `protoc` version incompatible with Juno. To avoid any potential incompatibilities, it is recommended to install the binaries from protoc's [releases page](https://github.com/protocolbuffers/protobuf/releases).
 
 ### Using Docker
 
@@ -70,7 +74,7 @@ pnpm start:dev:live-all
 
 ### Making requests
 
-Requests can be made at the endpoint `localhost:3000/some/request/path`.
+The `api-gateway` service contains interactive documentation at the endpoint `localhost:<exposed docker port>/docs` for easily sending requests. Direct requests to the gateway can be made via `localhost:3000/some/request/path`.
 
 ### Testing
 
@@ -87,6 +91,30 @@ To continuously run tests for a service as file changes are made:
 - api-gateway: `pnpm test:e2e:api-gateway-live`
 - auth-service: `pnpm test:e2e:auth-service-live`
 - db-service: `pnpm test:e2e:db-service-live`
+
+### Modifying/creating Proto Files
+
+After creating or modifying a `.proto` definition, the types must be built and synced to all Juno services. You can achieve this with the following commands:
+
+```sh
+pnpm gen-proto
+pnpm sync-protos
+```
+
+### Modifying database schemas
+
+We use [Prisma](https://www.prisma.io/) in `db-service` as an ORM to define all database schemas/relationships. After a change has been made to the Prisma schema, a migration must be made. There are two options:
+
+1. While Juno is running, run `DATABASE_URL=postgresql://user:password@localhost:<port> pnpm prisma migrate` to generate the migration
+2. Verify a new migration has been created under the `migrations` folder
+
+### Force rebuilding docker containers
+
+In some situations it might be beneficial to override Docker Compose's cache and completely rebuild all docker containers. This is possible by appending `--build` to end of your `pnpm` command:
+
+```sh
+pnpm test:e2e:api-gateway-live --build
+```
 
 ## Troubleshooting
 
