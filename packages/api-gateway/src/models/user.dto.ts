@@ -30,31 +30,43 @@ export class SetUserTypeModel {
   type: UserProto.UserType;
 }
 
+export class LinkProjectModel {
+  @ApiProperty({ description: 'ID of project to be linked' })
+  id?: number;
+  @ApiProperty({ description: 'Name of project to be linked' })
+  name?: string;
+}
+
 export class UserResponse {
   @Transform(({ value }) => Number(value))
   @ApiProperty({ description: 'User id' })
   id: number;
+
   @ApiProperty({ description: 'User email', example: 'user@email.com' })
   email: string;
+
   @ApiProperty({ description: 'User name', example: 'John' })
   name: string;
+
   @Transform(fromEnum)
   @ApiProperty({ description: 'User type', example: UserProto.UserType.ADMIN })
   type: UserProto.UserType;
+
+  // Protobuf's Long requires extra transformation
+  @Transform(({ value }) => value?.map((v: any) => v.low))
+  @ApiProperty({
+    description: 'Project IDs associated with user',
+    type: [Number],
+  })
+  projectIds: number[];
 
   constructor(user: UserProto.User) {
     this.id = user.id;
     this.email = user.email;
     this.name = user.name;
     this.type = user.type;
+    this.projectIds = user.projectIds;
   }
-}
-
-export class LinkProjectModel {
-  @ApiProperty({ description: 'ID of project to be linked' })
-  id?: number;
-  @ApiProperty({ description: 'Name of project to be linked' })
-  name?: string;
 }
 
 function toEnum(params: { value: string }): UserProto.UserType | undefined {
