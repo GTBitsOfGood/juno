@@ -184,7 +184,7 @@ describe('DB Service Counter Tests', () => {
         {
           id: counter.id,
         },
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },
