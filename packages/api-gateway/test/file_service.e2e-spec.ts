@@ -203,69 +203,69 @@ describe('File Upload Verification Routes', () => {
     });
   });
 
-  // it('Fail to register config', async () => {
-  //   // Register file config failed because projectId is -1 does not exist
-  //   let configId;
-  //   try {
-  //     configId = await registerConfig(-1);
-  //   } catch (err) {
-  //     expect(err).toBeDefined;
-  //     expect(configId).not.toBeDefined;
-  //   }
+  it('Fail to register config', async () => {
+    // Register file config failed because projectId is -1 does not exist
+    let configId;
+    try {
+      configId = await registerConfig(-1);
+    } catch (err) {
+      expect(err).toBeDefined;
+      expect(configId).not.toBeDefined;
+    }
 
-  //   // Register file provider successfully because it does not involve config
-  //   assertAPIRequest({
-  //     url: '/file/provider',
-  //     apiKey: apiKey,
-  //     data: {
-  //       providerName: providerName,
-  //       accessKey: {
-  //         publicAccessKey: accessKeyId,
-  //         privateAccessKey: secretAccessKey,
-  //       },
-  //       baseUrl: baseURL,
-  //     },
-  //     expectStatus: 201,
-  //   });
+    // Register file provider successfully because it does not involve config
+    assertAPIRequest({
+      url: '/file/provider',
+      apiKey: apiKey,
+      data: {
+        providerName: providerName,
+        accessKey: {
+          publicAccessKey: accessKeyId,
+          privateAccessKey: secretAccessKey,
+        },
+        baseUrl: baseURL,
+      },
+      expectStatus: 201,
+    });
 
-  //   // Create bucket failed because config is undefined
-  //   assertAPIRequest({
-  //     url: '/file/bucket',
-  //     apiKey: apiKey,
-  //     data: {
-  //       name: bucketName,
-  //       configId: configId,
-  //       fileProviderName: providerName,
-  //       FileServiceFile: [],
-  //     },
-  //     expectStatus: 500,
-  //   });
+    // Create bucket failed because config is undefined
+    assertAPIRequest({
+      url: '/file/bucket',
+      apiKey: apiKey,
+      data: {
+        name: bucketName,
+        configId: configId,
+        fileProviderName: providerName,
+        FileServiceFile: [],
+      },
+      expectStatus: 500,
+    });
 
-  //   // Upload file failed because config is undefine
-  //   assertAPIRequest({
-  //     url: '/file/upload',
-  //     apiKey: apiKey,
-  //     data: {
-  //       fileName: fileName,
-  //       bucketName: bucketName,
-  //       providerName: providerName,
-  //       configId: configId,
-  //       region: region,
-  //     },
-  //     expectStatus: 500,
-  //   });
+    // Upload file failed because config is undefine
+    assertAPIRequest({
+      url: '/file/upload',
+      apiKey: apiKey,
+      data: {
+        fileName: fileName,
+        bucketName: bucketName,
+        providerName: providerName,
+        configId: configId,
+        region: region,
+      },
+      expectStatus: 500,
+    });
 
-  //   // Download file failed because config is undefine
-  //   assertAPIRequest({
-  //     url: '/file/download',
-  //     apiKey: apiKey,
-  //     data: {
-  //       bucketName: bucketName,
-  //       configId: configId,
-  //       fileName: fileName,
-  //       providerName: providerName,
-  //     },
-  //     expectStatus: 500,
-  //   });
-  // });
+    // Download file failed because config is undefine
+    assertAPIRequest({
+      url: '/file/download',
+      apiKey: apiKey,
+      data: {
+        bucketName: bucketName,
+        configId: configId,
+        fileName: fileName,
+        providerName: providerName,
+      },
+      expectStatus: 500,
+    });
+  });
 });
