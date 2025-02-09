@@ -101,7 +101,7 @@ export class RegisterEmailResponse {
 export class SetupEmailResponse {
   @ApiProperty({
     type: 'boolean',
-    description: 'Whether an email was successfully sent',
+    description: 'Whether an email was successfully setup',
   })
   success: boolean;
 
