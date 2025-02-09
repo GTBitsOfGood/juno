@@ -14,6 +14,7 @@ import {
 } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -22,12 +23,23 @@ const projectName = 'file-service-api-gateway-test';
 let projectId: number;
 let apiKey: string;
 let uniqueBucketName: string;
+let providerName: string;
+let fileName: string;
 
 interface AssertAPIRequestInput {
   url: string;
   apiKey: string;
   data: any;
   expectStatus: number;
+}
+
+interface S3ClientMetadata {
+  endpoint: string;
+  region: string;
+  credentials: {
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
 }
 
 // Will use api-gateway endpoint testing once available
@@ -90,6 +102,30 @@ async function createProject(projectName: string): Promise<number> {
   return project.body.id;
 }
 
+async function deleteS3BucketPostTest(
+  bucketName: string,
+  s3ClientMetadata: S3ClientMetadata,
+) {
+  const client = new S3Client(s3ClientMetadata);
+  const command = new DeleteBucketCommand({ Bucket: bucketName });
+  await client.send(command);
+}
+
+async function resetDB() {
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
+  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => {
+      resolve(0);
+    });
+  });
+}
+
 beforeAll(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -104,34 +140,11 @@ beforeAll(async () => {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   await app.init();
-
-  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
-  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
-    process.env.DB_SERVICE_ADDR,
-    GRPC.credentials.createInsecure(),
-  );
-  await new Promise((resolve) => {
-    resetClient.resetDb({}, () => {
-      resolve(0);
-    });
-  });
 });
 
 afterAll((done) => {
   app.close();
   done();
-});
-
-beforeEach(async () => {
-  if (!projectId && projectId != 0) {
-    projectId = await createProject(projectName);
-  }
-  if (!apiKey) {
-    apiKey = await createAPIKeyForProjectName(projectName);
-  }
-  uniqueBucketName = `Bucket-${Date.now()}`;
 });
 
 const region = 'us-east-005';
@@ -140,10 +153,32 @@ const secretAccessKey = process.env.secretAccessKey;
 const baseURL = process.env.baseURL;
 
 describe('File Upload Verification Routes', () => {
-  it('Successful upload/download file', async () => {
-    const providerName = 'backblazeb2-upload';
-    const fileName = 'TestFileServiceE2E';
+  beforeEach(async () => {
+    await resetDB();
+    projectId = await createProject(projectName);
+    apiKey = await createAPIKeyForProjectName(projectName);
 
+    uniqueBucketName = `Bucket-${Date.now()}`;
+    providerName = `Provider-${Date.now()}`;
+    fileName = `File-${Date.now()}`;
+  });
+
+  afterEach(async () => {
+    try {
+      await deleteS3BucketPostTest(uniqueBucketName, {
+        endpoint: baseURL,
+        region: region,
+        credentials: {
+          accessKeyId: accessKeyId as string,
+          secretAccessKey: secretAccessKey as string,
+        },
+      });
+    } catch (err) {
+      console.log(err.message);
+    }
+  });
+
+  it('Successful upload/download file', async () => {
     // Register file config
     const configIdLong = await registerConfig(projectId);
     expect(configIdLong).toBeDefined;
@@ -206,9 +241,6 @@ describe('File Upload Verification Routes', () => {
   });
 
   it('Fail to register config', async () => {
-    const providerName = 'backblazeb2-upload-fail-1';
-    const fileName = 'TestFileServiceE2E-fail-1';
-
     // Register file config failed because projectId is -1 does not exist
     const configId = await registerConfig(-1);
     expect(configId).not.toBeDefined;
@@ -264,6 +296,70 @@ describe('File Upload Verification Routes', () => {
         configId: configId,
         fileName: fileName,
         providerName: providerName,
+      },
+      expectStatus: 400,
+    });
+  });
+
+  it('Fail to register provider', async () => {
+    // Register file config successfully
+    const configIdLong = await registerConfig(projectId);
+    expect(configIdLong).toBeDefined;
+    const configId = configIdLong.low;
+
+    const invalidProviderName = '';
+
+    // Fail to register file provider
+    await assertAPIRequest({
+      url: '/file/provider',
+      apiKey: apiKey,
+      data: {
+        providerName: invalidProviderName,
+        accessKey: {
+          publicAccessKey: accessKeyId,
+          privateAccessKey: secretAccessKey,
+        },
+        baseUrl: baseURL,
+      },
+      expectStatus: 400,
+    });
+
+    // Create bucket failed
+    await assertAPIRequest({
+      url: '/file/bucket',
+      apiKey: apiKey,
+      data: {
+        name: uniqueBucketName,
+        configId: configId,
+        fileProviderName: invalidProviderName,
+        FileServiceFile: [],
+      },
+      expectStatus: 400,
+    });
+
+    // Upload file failed
+    await assertAPIRequest({
+      url: '/file/upload',
+      apiKey: apiKey,
+      data: {
+        fileName: fileName,
+        bucketName: uniqueBucketName,
+        providerName: invalidProviderName,
+        configId: configId,
+        region: region,
+      },
+      expectStatus: 400,
+    });
+
+    // Download file failed
+    await assertAPIRequest({
+      url: '/file/download',
+      apiKey: apiKey,
+      data: {
+        bucketName: uniqueBucketName,
+        configId: configId,
+        fileName: fileName,
+        providerName: invalidProviderName,
       },
       expectStatus: 400,
     });
