@@ -45,8 +45,8 @@ export class FileProviderController
     try {
       const fileProviderRequest = this.fileProviderDbService.createProvider({
         accessKey: JSON.stringify({
-          publicAccessKey: request.publicAccessKey,
-          privateAccessKey: request.privateAccessKey,
+          accessKeyId: request.publicAccessKey,
+          secretAccessKey: request.privateAccessKey,
         }),
         providerName: request.providerName,
         metadata: JSON.stringify({ endpoint: request.baseUrl }),
