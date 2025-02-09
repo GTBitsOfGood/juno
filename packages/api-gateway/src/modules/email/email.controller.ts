@@ -42,7 +42,7 @@ const { EMAIL_SERVICE_NAME } = EmailProto;
 export class EmailController implements OnModuleInit {
   private emailService: EmailProto.EmailServiceClient;
 
-  constructor(@Inject(EMAIL_SERVICE_NAME) private emailClient: ClientGrpc) { }
+  constructor(@Inject(EMAIL_SERVICE_NAME) private emailClient: ClientGrpc) {}
 
   onModuleInit() {
     this.emailService =
@@ -56,7 +56,7 @@ export class EmailController implements OnModuleInit {
   })
   @ApiCreatedResponse({
     description: 'Email Service setup successfully',
-    type: SetupEmailResponse
+    type: SetupEmailResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
