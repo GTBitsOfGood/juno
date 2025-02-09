@@ -98,6 +98,18 @@ export class RegisterEmailResponse {
   }
 }
 
+export class SetupEmailResponse {
+  @ApiProperty({
+    type: 'boolean',
+    description: 'Whether an email was successfully sent',
+  })
+  success: boolean;
+
+  constructor(res: EmailProto.SetupResponse) {
+    this.success = res.success;
+  }
+}
+
 export class SetupEmailServiceModel {
   @ApiProperty({
     type: 'string',

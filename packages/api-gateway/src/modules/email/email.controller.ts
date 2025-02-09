@@ -16,6 +16,7 @@ import {
   RegisterEmailResponse,
   SendEmailModel,
   SendEmailResponse,
+  SetupEmailResponse,
   SetupEmailServiceModel,
   VerifyDomainModel,
 } from 'src/models/email.dto';
@@ -62,15 +63,16 @@ export class EmailController implements OnModuleInit {
   async setup(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body('') params: SetupEmailServiceModel,
-  ) {
-    await lastValueFrom(
+  ): Promise<SetupEmailResponse> {
+    const setupResponse = await lastValueFrom(
       this.emailService.setup({
         sendgridKey: params.sendgridKey,
         projectId: apiKey.project.id,
         environment: apiKey.environment,
       }),
     );
-    return {};
+
+    return new SetupEmailResponse(setupResponse);
   }
 
   @ApiOperation({
