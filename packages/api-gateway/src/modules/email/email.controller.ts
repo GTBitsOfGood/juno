@@ -56,6 +56,7 @@ export class EmailController implements OnModuleInit {
   })
   @ApiCreatedResponse({
     description: 'Email Service setup successfully',
+    type: SetupEmailResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
