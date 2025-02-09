@@ -63,7 +63,7 @@ export class EmailController implements OnModuleInit {
   async setup(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body('') params: SetupEmailServiceModel,
-  ) {
+  ): Promise<SetupEmailResponse> {
     const setupResponse = await lastValueFrom(
       this.emailService.setup({
         sendgridKey: params.sendgridKey,
