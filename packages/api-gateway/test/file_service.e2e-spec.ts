@@ -21,6 +21,7 @@ const ADMIN_PASSWORD = 'test-password';
 const projectName = 'file-service-api-gateway-test';
 let projectId: number;
 let apiKey: string;
+let uniqueBucketName: string;
 
 interface AssertAPIRequestInput {
   url: string;
@@ -30,7 +31,7 @@ interface AssertAPIRequestInput {
 }
 
 // Will use api-gateway endpoint testing once available
-async function registerConfig(projectId: number): Promise<number> {
+async function registerConfig(projectId: number): Promise<any> {
   const configProto = ProtoLoader.loadSync([FileConfigProtoFile]) as any;
   const configProtoGRPC = GRPC.loadPackageDefinition(configProto) as any;
   const configClient =
@@ -40,17 +41,17 @@ async function registerConfig(projectId: number): Promise<number> {
     );
 
   const config: FileConfigProto.FileServiceConfig = await new Promise(
-    (resolve, reject) => {
+    (resolve) => {
       configClient.createConfig(
         { projectId: projectId, buckets: [], files: [] },
         (err, res) => {
-          if (err) reject(new Error('ConfigRegistrationError'));
+          if (err) resolve(null);
           else resolve(res);
         },
       );
     },
   );
-  return config.id;
+  return config && config.id;
 }
 
 async function assertAPIRequest(input: AssertAPIRequestInput) {
@@ -90,6 +91,20 @@ async function createProject(projectName: string): Promise<number> {
 }
 
 beforeAll(async () => {
+  const moduleFixture: TestingModule = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile();
+
+  app = moduleFixture.createNestApplication();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  await app.init();
+
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
 
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
@@ -110,45 +125,32 @@ afterAll((done) => {
 });
 
 beforeEach(async () => {
-  const moduleFixture: TestingModule = await Test.createTestingModule({
-    imports: [AppModule],
-  }).compile();
-
-  app = moduleFixture.createNestApplication();
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  );
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
-  await app.init();
-
-  if (!apiKey) {
-    apiKey = await createAPIKeyForProjectName('test-seed-project');
-  }
   if (!projectId && projectId != 0) {
     projectId = await createProject(projectName);
   }
+  if (!apiKey) {
+    apiKey = await createAPIKeyForProjectName(projectName);
+  }
+  uniqueBucketName = `Bucket-${Date.now()}`;
 });
 
 const region = 'us-east-005';
-const bucketName = 'test-uploads-bog-juno';
-const providerName = 'backblazeb2-upload';
-const fileName = 'TestFileServiceE2E';
-
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
 const baseURL = process.env.baseURL;
 
 describe('File Upload Verification Routes', () => {
   it('Successful upload/download file', async () => {
+    const providerName = 'backblazeb2-upload';
+    const fileName = 'TestFileServiceE2E';
+
     // Register file config
-    const configId = await registerConfig(projectId);
-    expect(configId).toBeDefined;
+    const configIdLong = await registerConfig(projectId);
+    expect(configIdLong).toBeDefined;
+    const configId = configIdLong.low;
 
     // Register file provider
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/provider',
       apiKey: apiKey,
       data: {
@@ -163,11 +165,11 @@ describe('File Upload Verification Routes', () => {
     });
 
     // Create bucket
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/bucket',
       apiKey: apiKey,
       data: {
-        name: bucketName,
+        name: uniqueBucketName,
         configId: configId,
         fileProviderName: providerName,
         FileServiceFile: [],
@@ -176,12 +178,12 @@ describe('File Upload Verification Routes', () => {
     });
 
     // Upload file
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/upload',
       apiKey: apiKey,
       data: {
         fileName: fileName,
-        bucketName: bucketName,
+        bucketName: uniqueBucketName,
         providerName: providerName,
         configId: configId,
         region: region,
@@ -190,11 +192,11 @@ describe('File Upload Verification Routes', () => {
     });
 
     // Download file
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/download',
       apiKey: apiKey,
       data: {
-        bucketName: bucketName,
+        bucketName: uniqueBucketName,
         configId: configId,
         fileName: fileName,
         providerName: providerName,
@@ -204,17 +206,15 @@ describe('File Upload Verification Routes', () => {
   });
 
   it('Fail to register config', async () => {
+    const providerName = 'backblazeb2-upload-fail-1';
+    const fileName = 'TestFileServiceE2E-fail-1';
+
     // Register file config failed because projectId is -1 does not exist
-    let configId;
-    try {
-      configId = await registerConfig(-1);
-    } catch (err) {
-      expect(err).toBeDefined;
-      expect(configId).not.toBeDefined;
-    }
+    const configId = await registerConfig(-1);
+    expect(configId).not.toBeDefined;
 
     // Register file provider successfully because it does not involve config
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/provider',
       apiKey: apiKey,
       data: {
@@ -229,43 +229,43 @@ describe('File Upload Verification Routes', () => {
     });
 
     // Create bucket failed because config is undefined
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/bucket',
       apiKey: apiKey,
       data: {
-        name: bucketName,
+        name: uniqueBucketName,
         configId: configId,
         fileProviderName: providerName,
         FileServiceFile: [],
       },
-      expectStatus: 500,
+      expectStatus: 400,
     });
 
     // Upload file failed because config is undefine
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/upload',
       apiKey: apiKey,
       data: {
         fileName: fileName,
-        bucketName: bucketName,
+        bucketName: uniqueBucketName,
         providerName: providerName,
         configId: configId,
         region: region,
       },
-      expectStatus: 500,
+      expectStatus: 400,
     });
 
     // Download file failed because config is undefine
-    assertAPIRequest({
+    await assertAPIRequest({
       url: '/file/download',
       apiKey: apiKey,
       data: {
-        bucketName: bucketName,
+        bucketName: uniqueBucketName,
         configId: configId,
         fileName: fileName,
         providerName: providerName,
       },
-      expectStatus: 500,
+      expectStatus: 400,
     });
   });
 });
