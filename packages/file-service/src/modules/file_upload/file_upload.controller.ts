@@ -60,6 +60,7 @@ export class FileUploadController implements FileServiceController {
     const fileName = request.fileName;
     const providerName = request.providerName;
     const region = request.region ? request.region : 'us-east-1';
+    const configEnv = request.configEnv;
 
     //Try connecting to s3 client
 
@@ -69,6 +70,7 @@ export class FileUploadController implements FileServiceController {
         bucketName: bucketName,
         configId: configId,
         path: fileName,
+        configEnv: configEnv,
       };
       const fileRequest = { fileId };
       const file = await firstValueFrom(
@@ -81,7 +83,6 @@ export class FileUploadController implements FileServiceController {
         });
       }
     } catch (e) {
-      console.log(e);
       throw new RpcException({
         code: status.NOT_FOUND,
         message: `File not found: ${e}`,
@@ -111,7 +112,6 @@ export class FileUploadController implements FileServiceController {
 
       return { url };
     } catch (err) {
-      console.log(err);
       throw new RpcException({
         code: status.NOT_FOUND,
         message: `Signed URL Not Found: ${err}`,
@@ -177,6 +177,7 @@ export class FileUploadController implements FileServiceController {
             bucketName: request.bucketName,
             configId: request.configId,
             path: request.fileName,
+            configEnv: request.configEnv,
           },
           metadata: '',
         }),

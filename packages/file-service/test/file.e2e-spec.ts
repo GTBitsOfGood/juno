@@ -10,6 +10,7 @@ import {
   ResetProtoFile,
   FileBucketProtoFile,
   FileProviderProtoFile,
+  FileProviderProto,
 } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
@@ -86,6 +87,7 @@ beforeAll(async () => {
         }),
         metadata: JSON.stringify({ endpoint: baseURL }),
         bucket: [],
+        type: FileProviderProto.ProviderType.S3,
       },
       () => {
         resolve(0);
@@ -106,6 +108,7 @@ beforeAll(async () => {
       {
         name: bucketName,
         configId: configId,
+        configEnv: configEnv,
         fileProviderName: providerName,
         files: [],
       },
@@ -125,6 +128,7 @@ beforeAll(async () => {
         fileId: {
           bucketName: bucketName,
           configId: configId,
+          configEnv: configEnv,
           path: 'ValidFile',
         },
         metadata: '',
@@ -145,6 +149,7 @@ afterAll(async () => {
 let fileClient: any;
 const bucketName = 'test-downloads-bog-juno';
 const configId = 0;
+const configEnv = 'prod';
 const providerName = 'backblazeb2-download';
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
@@ -159,6 +164,7 @@ describe('Download File Tests', () => {
           bucketName: bucketName,
           providerName: providerName,
           configId: configId,
+          configEnv: configEnv,
         },
 
         (err: any) => {
@@ -179,10 +185,10 @@ describe('Download File Tests', () => {
           bucketName: bucketName,
           providerName: providerName,
           configId: configId,
+          configEnv: configEnv,
         },
 
         (err: any) => {
-          console.log(JSON.stringify(err));
           expect(err).toBeNull();
           resolve({});
         },

@@ -54,6 +54,7 @@ export interface RegisterProviderRequest {
   publicAccessKey: string;
   privateAccessKey: string;
   baseUrl: string;
+  type: ProviderType;
 }
 
 export interface RemoveProviderRequest {

@@ -56,6 +56,7 @@ message RegisterProviderRequest {
   string public_access_key = 2;
   string private_access_key = 3;
   string baseUrl = 4;
+  ProviderType type = 5;
 }
 
 message RemoveProviderRequest { string provider_name = 1; }

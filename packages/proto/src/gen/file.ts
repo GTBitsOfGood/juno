@@ -39,6 +39,7 @@ export interface UploadFileRequest {
   bucketName: string;
   providerName: string;
   configId: number;
+  configEnv: string;
   region?: string | undefined;
 }
 
@@ -51,6 +52,7 @@ export interface DownloadFileRequest {
   bucketName: string;
   providerName: string;
   configId: number;
+  configEnv: string;
   region?: string | undefined;
 }
 

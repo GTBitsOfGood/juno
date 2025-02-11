@@ -8,6 +8,7 @@ import {
   ResetProtoFile,
   FileProviderProtoFile,
   FileBucketProto,
+  FileProviderProto,
 } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 import { JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME } from 'juno-proto/dist/gen/file_provider';
@@ -72,6 +73,7 @@ beforeAll(async () => {
         accessKey: JSON.stringify({ accessKeyId, secretAccessKey }),
         metadata: JSON.stringify({ endpoint: baseURL }),
         bucket: [],
+        type: FileProviderProto.ProviderType.S3,
       },
       () => resolve(0),
     );
@@ -94,6 +96,7 @@ beforeAll(async () => {
       {
         name: bucketName,
         configId,
+        configEnv,
         fileProviderName: providerName,
         files: [],
       },
@@ -121,6 +124,7 @@ let bucketClientDB: any;
 let bucketClient: any;
 const bucketName = 'test-bucket-juno-buckets';
 const configId = 0;
+const configEnv = 'prod';
 const providerName = 'backblazeb2-buckets';
 
 const accessKeyId = process.env.accessKeyId;
@@ -135,6 +139,7 @@ describe('File Bucket Creation Tests', () => {
         {
           name: 'successful-bucket',
           configId,
+          configEnv,
           fileProviderName: providerName,
         },
         (err: any) => {
@@ -167,6 +172,7 @@ describe('File Bucket Creation Tests', () => {
         {
           name: bucketName,
           configId,
+          configEnv,
           fileProviderName: 'invalidProvider',
         },
         (err: any) => {
@@ -184,6 +190,7 @@ describe('File Bucket Creation Tests', () => {
         {
           name: bucketName,
           configId,
+          configEnv,
           fileProviderName: providerName,
         },
         (err: any) => {

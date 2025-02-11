@@ -10,6 +10,7 @@ import {
   ResetProtoFile,
   FileBucketProtoFile,
   FileProviderProtoFile,
+  FileProviderProto,
 } from 'juno-proto';
 import { AppModule } from './../src/app.module';
 
@@ -88,6 +89,7 @@ beforeAll(async () => {
         }),
         metadata: JSON.stringify({ endpoint: baseURL }),
         bucket: [],
+        type: FileProviderProto.ProviderType.S3,
       },
       () => {
         resolve(0);
@@ -109,6 +111,7 @@ beforeAll(async () => {
       {
         name: bucketName,
         configId: configId,
+        configEnv: configEnv,
         fileProviderName: providerName,
         files: [],
       },
@@ -128,6 +131,7 @@ let fileClient: any;
 const region = 'us-east-005';
 const bucketName = 'test-uploads-bog-juno';
 const configId = 0;
+const configEnv = 'prod';
 const providerName = 'backblazeb2-upload';
 
 const accessKeyId = process.env.accessKeyId;
@@ -143,6 +147,7 @@ describe('File Service File Upload Tests', () => {
           fileName: 'TestFileName',
           providerName: providerName,
           configId: configId,
+          configEnv: configEnv,
           region: region,
         },
 
@@ -164,6 +169,7 @@ describe('File Service File Upload Tests', () => {
           fileName: 'TestFileDuplicate',
           providerName: providerName,
           configId: configId,
+          configEnv: configEnv,
           region: region,
         },
 
@@ -183,6 +189,7 @@ describe('File Service File Upload Tests', () => {
           fileName: 'TestFileDuplicate',
           providerName: providerName,
           configId: configId,
+          configEnv: configEnv,
           region: region,
         },
 
