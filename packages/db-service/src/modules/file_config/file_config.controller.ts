@@ -17,11 +17,14 @@ export class FileConfigController
   async createConfig(
     request: FileConfigProto.CreateFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-    const configId = request.projectId;
+    const projectId = request.projectId;
+    const environment = request.environment;
 
     try {
-      const existingConfig =
-        await this.fileServiceConfigService.getConfig(configId);
+      const existingConfig = await this.fileServiceConfigService.getConfig({
+        id: projectId,
+        environment,
+      });
       if (existingConfig) {
         throw new RpcException({
           code: status.ALREADY_EXISTS,
@@ -48,7 +51,10 @@ export class FileConfigController
   async getConfig(
     request: FileConfigProto.GetFileServiceConfigRequest,
   ): Promise<FileConfigProto.FileServiceConfig> {
-    const config = await this.fileServiceConfigService.getConfig(request.id);
+    const config = await this.fileServiceConfigService.getConfig({
+      id: request.id,
+      environment: request.environment,
+    });
     if (!config) {
       throw new RpcException({
         code: status.NOT_FOUND,

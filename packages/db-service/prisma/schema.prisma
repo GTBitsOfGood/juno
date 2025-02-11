@@ -51,7 +51,7 @@ enum Role {
 
 model EmailServiceConfig {
   id             Int
-  environment    String @default("")
+  environment    String @default("test")
   sendgridApiKey String @default("")
   emails         EmailServiceConfigAndSender[]
   domains        EmailServiceConfigAndDomain[]
@@ -106,7 +106,7 @@ enum FileProviderType {
 
 model FileServiceConfig {
   id              Int                 
-  environment    String @default("")
+  environment    String @default("test")
   buckets         FileServiceBucket[]
   Project         Project             @relation(fields: [id], references: [id])
   FileServiceFile FileServiceFile[]

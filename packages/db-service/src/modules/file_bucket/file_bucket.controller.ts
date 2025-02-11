@@ -39,7 +39,7 @@ export class FileBucketController implements BucketDbServiceController {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message:
-          'Name, configId, file provider name, files, and metadata must be provided',
+          'Name, configId, environment, file provider name, files, and metadata must be provided',
       });
     }
     type ResType = {

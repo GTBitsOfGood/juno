@@ -103,6 +103,7 @@ describe('File Provider Tests', () => {
       }),
       metadata: 'Test metadata',
       bucket: [],
+      type: FileProviderProto.ProviderType.S3,
     };
 
     const promise = new Promise((resolve) => {
@@ -124,6 +125,7 @@ describe('File Provider Tests', () => {
       }),
       metadata: 'Test metadata',
       bucket: [],
+      type: FileProviderProto.ProviderType.S3,
     };
 
     const promise1 = new Promise((resolve) => {
@@ -154,6 +156,7 @@ describe('File Provider Tests', () => {
       }),
       metadata: 'Test metadata',
       bucket: [],
+      type: FileProviderProto.ProviderType.S3,
     };
 
     const promise1 = new Promise((resolve) => {
@@ -203,6 +206,7 @@ describe('File Provider Tests', () => {
       }),
       metadata: 'Test metadata',
       bucket: [],
+      type: FileProviderProto.ProviderType.S3,
     };
 
     const promise1 = new Promise((resolve) => {
@@ -242,6 +246,7 @@ describe('File Provider Tests', () => {
       }),
       metadata: 'Test metadata',
       bucket: [],
+      type: FileProviderProto.ProviderType.S3,
     };
 
     const promise1 = new Promise((resolve) => {
@@ -293,6 +298,7 @@ describe('File Provider Tests', () => {
       }),
       metadata: 'Test metadata',
       bucket: [],
+      type: FileProviderProto.ProviderType.S3,
     };
 
     const promise1 = new Promise((resolve) => {

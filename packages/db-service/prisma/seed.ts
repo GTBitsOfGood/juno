@@ -75,6 +75,7 @@ async function main() {
     update: {},
     create: {
       id: 0,
+      environment: 'prod',
     },
   });
 

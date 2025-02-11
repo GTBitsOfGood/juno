@@ -91,6 +91,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'test',
           configId: 0,
+          configEnv: 'prod',
           fileProviderName: 'test-provider',
           files: [],
         },
@@ -111,6 +112,7 @@ describe('DB Service File Bucket Tests', () => {
           configId: 0,
           fileProviderName: 'test-provider',
           files: [],
+          configEnv: 'prod',
         },
         (err) => {
           expect(err).not.toBeNull();
@@ -128,6 +130,7 @@ describe('DB Service File Bucket Tests', () => {
           configId: 0,
           fileProviderName: 'test-provider',
           files: [],
+          configEnv: 'prod',
         },
         (err) => {
           expect(err).toBeNull();
@@ -140,6 +143,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'deleter',
           configId: 0,
+          configEnv: 'prod',
         },
         (err) => {
           expect(err).toBeNull();
@@ -155,6 +159,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'test',
           configId: 1000,
+          configEnv: 'prod',
         },
         (err) => {
           expect(err).not.toBeNull();
@@ -170,6 +175,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'updater',
           configId: 0,
+          configEnv: 'prod',
           fileProviderName: 'test-provider',
           files: [],
         },
@@ -184,6 +190,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'updater',
           configId: 0,
+          configEnv: 'prod',
           fileProviderName: 'test-provider',
         },
         (err, resp) => {
@@ -200,6 +207,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'notupdatable',
           configId: 5,
+          configEnv: 'prod',
           fileProviderName: 'test-provider',
         },
         (err) => {
@@ -215,6 +223,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'notupdatable',
           configId: 5,
+          configEnv: 'prod',
         },
         (err) => {
           expect(err).not.toBeNull();
@@ -229,6 +238,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'reader',
           configId: 0,
+          configEnv: 'prod',
           fileProviderName: 'test-provider',
         },
         (err, resp) => {
@@ -243,6 +253,7 @@ describe('DB Service File Bucket Tests', () => {
         {
           name: 'reader',
           configId: 0,
+          configEnv: 'prod',
         },
         (err) => {
           expect(err).toBeNull();

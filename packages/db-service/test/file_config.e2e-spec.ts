@@ -71,6 +71,7 @@ function tryCreateConfig(configClient: any) {
     configClient.createConfig(
       {
         projectId: 0,
+        environment: 'test-env',
         buckets: [],
         files: [],
       },
@@ -114,6 +115,7 @@ describe('File Service Config Tests', () => {
         configClient.createConfig(
           {
             projectId: 0,
+            environment: 'test-env',
             buckets: [],
             files: [],
           },
@@ -138,6 +140,7 @@ describe('File Service Config Tests', () => {
         configClient.createConfig(
           {
             projectId: 0,
+            environment: 'prod',
             buckets: [],
             files: [],
           },
@@ -158,13 +161,16 @@ describe('File Service Config Tests', () => {
   it('deletes a config', async () => {
     await tryCreateConfig(configClient);
     const deleteResponse = await new Promise((resolve, reject) => {
-      configClient.deleteConfig({ id: createdConfigId }, (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(res);
-        }
-      });
+      configClient.deleteConfig(
+        { id: createdConfigId, environment: 'test-env' },
+        (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        },
+      );
     });
 
     expect(deleteResponse).toHaveProperty('id', createdConfigId);
@@ -174,7 +180,7 @@ describe('File Service Config Tests', () => {
     try {
       await new Promise((resolve, reject) => {
         configClient.deleteConfig(
-          { id: createdConfigId + 1000000 },
+          { id: createdConfigId + 1000000, environemnt: 'prod' },
           (err, res) => {
             if (err) {
               reject(err);
@@ -195,6 +201,7 @@ describe('File Service Config Tests', () => {
       configClient.updateConfig(
         {
           id: createdConfigId,
+          environment: 'test-env',
           buckets: [],
           files: [],
         },
@@ -214,13 +221,16 @@ describe('File Service Config Tests', () => {
   it('reading a nonexistent config', async () => {
     try {
       await new Promise((resolve, reject) => {
-        configClient.getConfig({ id: createdConfigId + 10000 }, (err, res) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(res);
-          }
-        });
+        configClient.getConfig(
+          { id: createdConfigId + 10000, environment: 'prod' },
+          (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          },
+        );
       });
     } catch (err) {
       expect(err).toBeDefined();
@@ -231,13 +241,16 @@ describe('File Service Config Tests', () => {
     await tryCreateConfig(configClient);
     const readResponse: FileConfigProto.FileServiceConfig = await new Promise(
       (resolve, reject) => {
-        configClient.getConfig({ id: createdConfigId }, (err, res) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(res);
-          }
-        });
+        configClient.getConfig(
+          { id: createdConfigId, environment: 'test-env' },
+          (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          },
+        );
       },
     );
 
