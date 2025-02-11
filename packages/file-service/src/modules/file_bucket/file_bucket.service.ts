@@ -63,7 +63,7 @@ export class FileBucketService implements OnModuleInit {
     try {
       const s3Client = await this.getS3ClientForProvider(
         request.fileProviderName,
-        'us-east-1',
+        'us-east-005',
       );
       const createBucketCommand = new CreateBucketCommand({
         Bucket: request.name,
@@ -100,7 +100,7 @@ export class FileBucketService implements OnModuleInit {
       );
       const s3Client = await this.getS3ClientForProvider(
         bucket.fileProviderName,
-        'us-east-1',
+        'us-east-005',
       );
       const deleteBucketCommand = new DeleteBucketCommand({
         Bucket: request.name,
