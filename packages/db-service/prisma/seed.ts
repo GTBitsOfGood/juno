@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { FileProviderType, PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -86,7 +86,7 @@ async function main() {
     create: {
       name: 'test-provider',
       accessKey: 'test-key',
-      type: S3,
+      type: FileProviderType.S3,
       metadata: '',
     },
   });
