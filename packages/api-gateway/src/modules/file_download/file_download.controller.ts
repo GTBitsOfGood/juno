@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { FileProto } from 'juno-proto';
+import { AuthCommonProto, FileProto } from 'juno-proto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -19,6 +19,7 @@ import {
   DownloadFileModel,
   DownloadFileResponse,
 } from 'src/models/file_download.dto';
+import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { FILE_SERVICE_NAME } = FileProto;
 
@@ -56,9 +57,15 @@ export class FileDownloadController implements OnModuleInit {
     type: DownloadFileResponse,
   })
   async downloadFile(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body('') params: DownloadFileModel,
   ): Promise<DownloadFileResponse> {
-    const res = await lastValueFrom(this.fileService.downloadFile(params));
+    const res = await lastValueFrom(
+      this.fileService.downloadFile({
+        configEnv: apiKey.environment,
+        ...params,
+      }),
+    );
 
     return new DownloadFileResponse(res);
   }

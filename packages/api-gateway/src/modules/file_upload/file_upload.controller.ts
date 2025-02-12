@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { FileProto } from 'juno-proto';
+import { AuthCommonProto, FileProto } from 'juno-proto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -19,6 +19,7 @@ import {
   UploadFileResponse,
   UploadFileModel,
 } from 'src/models/file_upload.dto';
+import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { FILE_SERVICE_NAME } = FileProto;
 
@@ -54,6 +55,7 @@ export class FileUploadController implements OnModuleInit {
     type: UploadFileResponse,
   })
   async uploadFile(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body('') params: UploadFileModel,
   ): Promise<UploadFileResponse> {
     const uploadFile = this.fileService.uploadFile({
@@ -62,6 +64,7 @@ export class FileUploadController implements OnModuleInit {
       providerName: params.providerName,
       configId: params.configId,
       region: params.region,
+      configEnv: apiKey.environment,
     });
 
     return new UploadFileResponse(await lastValueFrom(uploadFile));
