@@ -59,6 +59,7 @@ export class FileProviderController implements OnModuleInit {
       providerName: params.providerName,
       privateAccessKey: params.accessKey.privateAccessKey,
       publicAccessKey: params.accessKey.publicAccessKey,
+      type: params.type,
     });
 
     return new FileProviderResponse(await lastValueFrom(fileProvider));

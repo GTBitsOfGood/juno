@@ -26,7 +26,7 @@ model Project {
   apiKeys      ApiKey[]
   users        User[]
   emailService EmailServiceConfig[]
-  fileService  FileServiceConfig?
+  fileService  FileServiceConfig[]
 }
 
 model ApiKey {
@@ -51,7 +51,7 @@ enum Role {
 
 model EmailServiceConfig {
   id             Int
-  environment    String @default("")
+  environment    String @default("test")
   sendgridApiKey String @default("")
   emails         EmailServiceConfigAndSender[]
   domains        EmailServiceConfigAndDomain[]
@@ -99,17 +99,25 @@ model EmailDomain {
   EmailSender     EmailSender[]
 }
 
+enum FileProviderType {
+  S3 
+  AZURE 
+}
+
 model FileServiceConfig {
-  id              Int                 @id
+  id              Int                 
+  environment    String @default("test")
   buckets         FileServiceBucket[]
   Project         Project             @relation(fields: [id], references: [id])
   FileServiceFile FileServiceFile[]
+  @@id([id, environment])
 }
 
 model FileProvider {
   name              String              @id
   accessKey         String
   metadata          String
+  type              FileProviderType
   FileServiceBucket FileServiceBucket[]
 }
 
@@ -117,20 +125,22 @@ model FileServiceBucket {
   name             String
   provider         FileProvider      @relation(fields: [fileProviderName], references: [name])
   configId         Int
-  config           FileServiceConfig @relation(fields: [configId], references: [id])
+  configEnv        String
+  config           FileServiceConfig @relation(fields: [configId, configEnv], references: [id, environment])
   fileProviderName String
   FileServiceFile  FileServiceFile[]
 
-  @@id([name, configId])
+  @@id([name, configId, configEnv])
 }
 
 model FileServiceFile {
   path       String
-  bucket     FileServiceBucket @relation(fields: [bucketName, configId], references: [name, configId])
-  config     FileServiceConfig @relation(fields: [configId], references: [id])
+  bucket     FileServiceBucket @relation(fields: [bucketName, configId, configEnv], references: [name, configId, configEnv])
+  config     FileServiceConfig @relation(fields: [configId, configEnv], references: [id, environment])
   configId   Int
+  configEnv  String
   bucketName String
   metadata   String
 
-  @@id([path, bucketName, configId])
+  @@id([path, bucketName, configId, configEnv])
 }

@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { FileProviderType, PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -67,11 +67,15 @@ async function main() {
 
   await prisma.fileServiceConfig.upsert({
     where: {
-      id: 0,
+      id_environment: {
+        environment: 'prod',
+        id: 0,
+      },
     },
     update: {},
     create: {
       id: 0,
+      environment: 'prod',
     },
   });
 
@@ -83,6 +87,7 @@ async function main() {
     create: {
       name: 'test-provider',
       accessKey: 'test-key',
+      type: FileProviderType.S3,
       metadata: '',
     },
   });

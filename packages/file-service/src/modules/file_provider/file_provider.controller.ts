@@ -50,6 +50,7 @@ export class FileProviderController
         }),
         providerName: request.providerName,
         metadata: JSON.stringify({ endpoint: request.baseUrl }),
+        type: request.type,
         bucket: [],
       });
 

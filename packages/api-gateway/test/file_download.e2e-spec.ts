@@ -12,6 +12,7 @@ import {
   FileProviderProtoFile,
   FileBucketProtoFile,
   ResetProtoFile,
+  FileProviderProto,
 } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
@@ -84,6 +85,7 @@ beforeAll(async () => {
         }),
         metadata: JSON.stringify({ endpoint: baseURL }),
         bucket: [],
+        type: FileProviderProto.ProviderType.S3,
       },
       () => {
         resolve(0);
@@ -105,6 +107,7 @@ beforeAll(async () => {
         name: bucketName,
         configId: configId,
         fileProviderName: providerName,
+        configEnv: 'prod',
         files: [],
       },
       () => {
@@ -124,6 +127,7 @@ beforeAll(async () => {
         fileId: {
           bucketName: bucketName,
           configId: configId,
+          configEnv: 'prod',
           path: validFile,
         },
         metadata: '',

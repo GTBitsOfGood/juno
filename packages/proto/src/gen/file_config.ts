@@ -15,27 +15,32 @@ export const protobufPackage = 'juno.file_service.config';
 export interface FileServiceConfig {
   id: number;
   buckets: Bucket[];
+  environment: string;
   files: File[];
 }
 
 export interface GetFileServiceConfigRequest {
   id: number;
+  environment: string;
 }
 
 export interface CreateFileServiceConfigRequest {
   projectId: number;
   buckets: Bucket[];
   files: File[];
+  environment: string;
 }
 
 export interface UpdateFileServiceConfigRequest {
   id: number;
   buckets: Bucket[];
   files: File[];
+  environment: string;
 }
 
 export interface DeleteFileServiceConfigRequest {
   id: number;
+  environment: string;
 }
 
 export const JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME = 'juno.file_service.config';

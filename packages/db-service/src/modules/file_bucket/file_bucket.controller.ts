@@ -33,18 +33,20 @@ export class FileBucketController implements BucketDbServiceController {
     if (
       !request.name ||
       request.configId == undefined ||
-      !request.fileProviderName
+      !request.fileProviderName ||
+      request.configEnv == undefined
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message:
-          'Name, configId, file provider name, files, and metadata must be provided',
+          'Name, configId, configEnv, file provider name, files, and metadata must be provided',
       });
     }
     type ResType = {
       name: string;
       configId: number;
       fileProviderName: string;
+      configEnv: string;
       FileServiceFile?: Array<IdentifierProto.FileIdentifier>; // Include FileServiceFile as optional
     };
     //attach foreign keys to config, file provider, and fileservice file when we have access to foreign keys
@@ -56,6 +58,7 @@ export class FileBucketController implements BucketDbServiceController {
     return {
       name: res.name,
       configId: res.configId,
+      configEnv: res.configEnv,
       fileProviderName: res.fileProviderName,
       FileServiceFile: res.FileServiceFile,
     } as FileBucketProto.Bucket;
@@ -63,10 +66,10 @@ export class FileBucketController implements BucketDbServiceController {
   async deleteBucket(
     request: FileBucketProto.DeleteBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
-    if (!request.name || request.configId == undefined) {
+    if (!request.name || request.configId == undefined || !request.configEnv) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
-        message: 'Both name and configId must be provided',
+        message: 'Both name, configId, and configEnv must be provided',
       });
     }
     return this.fileBucketService.deleteBucket(request);
@@ -77,11 +80,13 @@ export class FileBucketController implements BucketDbServiceController {
     if (
       !request.name ||
       request.configId == undefined ||
-      !request.fileProviderName
+      !request.fileProviderName ||
+      !request.configEnv
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
-        message: 'Name, configId, and updated metadata must be provided',
+        message:
+          'Name, configId, configEnv, and updated metadata must be provided',
       });
     }
     return this.fileBucketService.updateBucket(request);

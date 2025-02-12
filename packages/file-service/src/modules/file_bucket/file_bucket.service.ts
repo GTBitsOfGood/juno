@@ -96,6 +96,7 @@ export class FileBucketService implements OnModuleInit {
         this.fileDBService.deleteBucket({
           name: request.name,
           configId: request.configId,
+          configEnv: request.configEnv,
         }),
       );
       const s3Client = await this.getS3ClientForProvider(

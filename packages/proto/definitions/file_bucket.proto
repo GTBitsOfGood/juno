@@ -20,6 +20,7 @@ service BucketFileService {
 message Bucket {
   string name = 1;
   int32 configId = 2;
+  string configEnv = 5;
   string fileProviderName = 3;
   repeated identifiers.FileIdentifier FileServiceFile = 4;
 }
@@ -27,11 +28,13 @@ message Bucket {
 message GetBucketRequest {
   string name = 1;
   int32 configId = 2;
+  string configEnv = 3;
 }
 
 message CreateBucketRequest {
   string name = 1;
   int32 configId = 2;
+  string configEnv = 5;
   string fileProviderName = 3;
   repeated identifiers.FileIdentifier FileServiceFile = 4;
 }
@@ -39,22 +42,26 @@ message CreateBucketRequest {
 message UpdateBucketRequest {
   string name = 1;
   int32 configId = 2;
+  string configEnv = 4;
   string fileProviderName = 3;
 }
 
 message DeleteBucketRequest {
   string name = 1;
   int32 configId = 2;
+  string configEnv = 3;
 }
 
 message RegisterBucketRequest {
   string name = 1;
   int32 configId = 2;
   string fileProviderName = 3;
+  string configEnv = 5;
   repeated identifiers.FileIdentifier FileServiceFile = 4;
 }
 
 message RemoveBucketRequest {
   string name = 1;
   int32 configId = 2;
+  string configEnv = 3;
 }

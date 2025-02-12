@@ -14,6 +14,7 @@ export const protobufPackage = 'juno.file_service.bucket';
 export interface Bucket {
   name: string;
   configId: number;
+  configEnv: string;
   fileProviderName: string;
   FileServiceFile: FileIdentifier[];
 }
@@ -21,11 +22,13 @@ export interface Bucket {
 export interface GetBucketRequest {
   name: string;
   configId: number;
+  configEnv: string;
 }
 
 export interface CreateBucketRequest {
   name: string;
   configId: number;
+  configEnv: string;
   fileProviderName: string;
   FileServiceFile: FileIdentifier[];
 }
@@ -33,24 +36,28 @@ export interface CreateBucketRequest {
 export interface UpdateBucketRequest {
   name: string;
   configId: number;
+  configEnv: string;
   fileProviderName: string;
 }
 
 export interface DeleteBucketRequest {
   name: string;
   configId: number;
+  configEnv: string;
 }
 
 export interface RegisterBucketRequest {
   name: string;
   configId: number;
   fileProviderName: string;
+  configEnv: string;
   FileServiceFile: FileIdentifier[];
 }
 
 export interface RemoveBucketRequest {
   name: string;
   configId: number;
+  configEnv: string;
 }
 
 export const JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME = 'juno.file_service.bucket';

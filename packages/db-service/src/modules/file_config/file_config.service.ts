@@ -17,6 +17,7 @@ export class FileServiceConfigService {
             id: Number(configData.projectId),
           },
         },
+        environment: configData.environment,
       },
       include: {
         Project: true,
@@ -26,10 +27,15 @@ export class FileServiceConfigService {
     });
   }
 
-  async getConfig(configId: number): Promise<FileServiceConfig | null> {
+  async getConfig(
+    req: FileConfigProto.GetFileServiceConfigRequest,
+  ): Promise<FileServiceConfig | null> {
     return this.prisma.fileServiceConfig.findUnique({
       where: {
-        id: Number(configId),
+        id_environment: {
+          id: Number(req.id),
+          environment: req.environment,
+        },
       },
       include: {
         Project: true,
@@ -40,12 +46,14 @@ export class FileServiceConfigService {
   }
 
   async updateConfig(
-    configId: number,
-    configData: FileConfigProto.UpdateFileServiceConfigRequest,
+    req: FileConfigProto.UpdateFileServiceConfigRequest,
   ): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.update({
       where: {
-        id: Number(configId),
+        id_environment: {
+          id: Number(req.id),
+          environment: req.environment,
+        },
       },
       data: {
         buckets: {
@@ -56,7 +64,7 @@ export class FileServiceConfigService {
         },
         Project: {
           connect: {
-            id: Number(configData.id),
+            id: Number(req.id),
           },
         },
         FileServiceFile: {
@@ -80,10 +88,15 @@ export class FileServiceConfigService {
     });
   }
 
-  async deleteConfig(configId: number): Promise<FileServiceConfig> {
+  async deleteConfig(
+    request: FileConfigProto.DeleteFileServiceConfigRequest,
+  ): Promise<FileServiceConfig> {
     return this.prisma.fileServiceConfig.delete({
       where: {
-        id: Number(configId),
+        id_environment: {
+          id: Number(request.id),
+          environment: request.environment,
+        },
       },
       include: {
         Project: true,

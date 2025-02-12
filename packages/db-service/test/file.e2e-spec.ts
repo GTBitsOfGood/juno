@@ -79,6 +79,7 @@ describe('DB Service File Tests', () => {
   let fileClient: any;
   const bucketName = 'Test Bucket';
   const configId = 0;
+  const configEnv = 'prod';
 
   beforeEach(async () => {
     const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
@@ -118,6 +119,7 @@ describe('DB Service File Tests', () => {
         {
           name: bucketName,
           configId: configId,
+          configEnv: configEnv,
           fileProviderName: 'test-provider',
           files: [],
         },
@@ -136,6 +138,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/create',
           },
           metadata: 'Test metadata',
@@ -158,6 +161,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/create',
           },
           metadata: 'Test metadata',
@@ -178,6 +182,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/create',
           },
           metadata: 'Test metadata',
@@ -200,6 +205,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/delete',
           },
           metadata: 'Test metadata',
@@ -220,6 +226,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/delete',
           },
         },
@@ -240,6 +247,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: 'File does not exist',
             configId: 2,
+            configEnv: configEnv,
             path: 'Test/file/path/not-exist',
           },
         },
@@ -260,6 +268,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/update',
           },
           metadata: 'Test metadata',
@@ -280,6 +289,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/update',
           },
           metadata: 'New metadata',
@@ -301,6 +311,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: 'File does not exist',
             configId: 3,
+            configEnv: configEnv,
             path: 'Test/file/path/not-exist',
           },
           metadata: 'New metadata',
@@ -322,6 +333,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/get',
           },
           metadata: 'Test metadata',
@@ -342,6 +354,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: bucketName,
             configId: configId,
+            configEnv: configEnv,
             path: 'Test/file/path/get',
           },
         },
@@ -362,6 +375,7 @@ describe('DB Service File Tests', () => {
           fileId: {
             bucketName: 'File does not exist',
             configId: 4,
+            configEnv: configEnv,
             path: 'Test/file/path/not-exist',
           },
         },

@@ -84,6 +84,7 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider_success',
+        type: FileProviderProto.ProviderType.S3,
       };
       const response = await new Promise((resolve) => {
         fileProviderClient.registerProvider(
@@ -107,6 +108,7 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider',
+        type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
         fileProviderClient.registerProvider(
@@ -130,6 +132,7 @@ describe('File Provider Tests', () => {
         privateAccessKey: '',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider',
+        type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
         fileProviderClient.registerProvider(
@@ -153,6 +156,7 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: '',
         providerName: 'test_provider',
+        type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
         fileProviderClient.registerProvider(
@@ -175,6 +179,7 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: '',
+        type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
         fileProviderClient.registerProvider(

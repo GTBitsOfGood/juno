@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {} from '@prisma/client';
+import { FileProviderType } from '@prisma/client';
 import { FileProviderProto } from 'juno-proto';
 // import { Bucket } from 'juno-proto/dist/gen/file_bucket';
 import { PrismaService } from 'src/prisma.service';
@@ -7,6 +7,24 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class FileProviderService {
   constructor(private prisma: PrismaService) {}
+
+  rpcToPrismaProvider(req: FileProviderProto.ProviderType): FileProviderType {
+    switch (req) {
+      case FileProviderProto.ProviderType.S3:
+        return 'S3';
+      case FileProviderProto.ProviderType.AZURE:
+        return 'AZURE';
+    }
+  }
+
+  prismaToRpcProvider(req: FileProviderType): FileProviderProto.ProviderType {
+    switch (req) {
+      case 'S3':
+        return FileProviderProto.ProviderType.S3;
+      case 'AZURE':
+        return FileProviderProto.ProviderType.AZURE;
+    }
+  }
 
   async createProvider(
     req: FileProviderProto.CreateFileProviderRequest,
@@ -22,6 +40,7 @@ export class FileProviderService {
           accessKey: req.accessKey,
           name: req.providerName,
           metadata: req.metadata,
+          type: this.rpcToPrismaProvider(req.type),
           // FileServiceBucket: {
           //   create: buckets,
           // },
@@ -32,6 +51,7 @@ export class FileProviderService {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         accessKey: fileProvider.accessKey,
+        providerType: req.type,
         //   will have to fix once buckets are properly updated in proto
         // bucket: buckets as Bucket[],
         bucket: [],
@@ -53,6 +73,7 @@ export class FileProviderService {
       return {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
+        providerType: this.prismaToRpcProvider(fileProvider.type),
         bucket: [],
         accessKey: fileProvider.accessKey,
       };
@@ -95,6 +116,9 @@ export class FileProviderService {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         accessKey: fileProvider.accessKey,
+        providerType: fileProvider.type
+          ? this.prismaToRpcProvider(fileProvider.type)
+          : undefined,
         // bucket: buckets,
         bucket: [],
       };
@@ -116,6 +140,7 @@ export class FileProviderService {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
         accessKey: fileProvider.accessKey,
+        providerType: this.prismaToRpcProvider(fileProvider.type),
         bucket: [],
       };
     } catch (error) {

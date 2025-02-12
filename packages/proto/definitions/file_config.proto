@@ -17,21 +17,30 @@ service FileServiceConfigDbService {
 message FileServiceConfig {
   int64 id = 1;
   repeated bucket.Bucket buckets = 2;
+  string environment = 3;
   repeated file.File files = 4;
 }
 
-message GetFileServiceConfigRequest { int64 id = 1; }
+message GetFileServiceConfigRequest {
+  int64 id = 1;
+  string environment = 2;
+}
 
 message CreateFileServiceConfigRequest {
   int64 project_id = 1;
   repeated bucket.Bucket buckets = 2;
   repeated file.File files = 3;
+  string environment = 4;
 }
 
 message UpdateFileServiceConfigRequest {
   int64 id = 1;
   repeated bucket.Bucket buckets = 2;
   repeated file.File files = 3;
+  string environment = 4;
 }
 
-message DeleteFileServiceConfigRequest { int64 id = 1; }
+message DeleteFileServiceConfigRequest {
+  int64 id = 1;
+  string environment = 2;
+}

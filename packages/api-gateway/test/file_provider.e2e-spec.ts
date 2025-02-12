@@ -7,7 +7,7 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import { FileProviderProto, ResetProtoFile } from 'juno-proto';
+import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 
@@ -73,11 +73,14 @@ beforeEach(async () => {
 
 describe('File Provider Verification Routes', () => {
   it('Missing provider name file provider without auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: '',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -87,11 +90,14 @@ describe('File Provider Verification Routes', () => {
   });
 
   it('Missing public access key file provider without auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: '',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: '',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -101,11 +107,14 @@ describe('File Provider Verification Routes', () => {
   });
 
   it('Missing private access key file provider without auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: '',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: '',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -115,11 +124,14 @@ describe('File Provider Verification Routes', () => {
   });
 
   it('Missing base url file provider without auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: '',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -136,6 +148,7 @@ describe('File Provider Verification Routes', () => {
         privateAccessKey: 'Test Private Access Key',
       },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -145,11 +158,14 @@ describe('File Provider Verification Routes', () => {
   });
 
   it('Missing provider name file provider with auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: '',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -160,11 +176,14 @@ describe('File Provider Verification Routes', () => {
   });
 
   it('Missing public access key file provider with auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: '',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: '',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -175,11 +194,14 @@ describe('File Provider Verification Routes', () => {
   });
 
   it('Missing private access key file provider with auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: '',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: '',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -190,11 +212,14 @@ describe('File Provider Verification Routes', () => {
   });
 
   it('Missing base url file provider with auth key', () => {
-    const fileProviderBody: FileProviderProto.RegisterProviderRequest = {
+    const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: '',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())
@@ -212,6 +237,7 @@ describe('File Provider Verification Routes', () => {
         privateAccessKey: 'Test Private Access Key',
       },
       baseUrl: 'https://aws.amazon.com/s3',
+      type: 'S3',
     };
 
     return request(app.getHttpServer())

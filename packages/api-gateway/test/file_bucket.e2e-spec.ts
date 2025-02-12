@@ -8,9 +8,9 @@ import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
 import {
-  FileBucketProto,
   ResetProtoFile,
   FileProviderProtoFile,
+  FileProviderProto,
 } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
@@ -27,6 +27,8 @@ const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
 const baseURL = process.env.baseURL;
 const providerName = 'backblazeb2-upload';
+
+jest.setTimeout(10000);
 
 async function APIKeyForProjectName(projectName: string): Promise<string> {
   const key = await request(app.getHttpServer())
@@ -90,6 +92,7 @@ beforeAll(async () => {
         }),
         metadata: JSON.stringify({ endpoint: baseURL }),
         bucket: [],
+        type: FileProviderProto.ProviderType.S3,
       },
       (err: any) => {
         if (err) return reject(err);
@@ -118,7 +121,7 @@ describe('File Bucket Routes', () => {
   });
 
   it('Creating a bucket successfully', async () => {
-    const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
+    const fileBucketBody = {
       name: uniqueBucketName,
       configId: 0,
       fileProviderName: providerName,
@@ -146,7 +149,7 @@ describe('File Bucket Routes', () => {
   });
 
   it('Unsuccessful creation due to missing bucket name', async () => {
-    const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
+    const fileBucketBody = {
       name: '',
       configId: 1,
       fileProviderName: 'Test Provider',
@@ -161,7 +164,7 @@ describe('File Bucket Routes', () => {
   });
 
   it('Unsuccessful creation due to missing config ID', async () => {
-    const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
+    const fileBucketBody = {
       name: uniqueBucketName,
       configId: undefined,
       fileProviderName: 'Test Provider',
@@ -176,7 +179,7 @@ describe('File Bucket Routes', () => {
   });
 
   it('Unsuccessful creation due to missing file provider name', async () => {
-    const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
+    const fileBucketBody = {
       name: uniqueBucketName,
       configId: 1,
       fileProviderName: '',
@@ -191,7 +194,7 @@ describe('File Bucket Routes', () => {
   });
 
   it('Creating an existing bucket (should fail)', async () => {
-    const fileBucketBody: FileBucketProto.RegisterBucketRequest = {
+    const fileBucketBody = {
       name: uniqueBucketName + '-duplicate',
       configId: 0,
       fileProviderName: providerName,

@@ -11,11 +11,18 @@ import { Bucket } from './file_bucket';
 
 export const protobufPackage = 'juno.file_service.provider';
 
+export enum ProviderType {
+  S3 = 0,
+  AZURE = 1,
+  UNRECOGNIZED = -1,
+}
+
 export interface FileProvider {
   providerName: string;
   accessKey: string;
   metadata: string;
   bucket: Bucket[];
+  providerType: ProviderType;
 }
 
 export interface GetFileProviderRequest {
@@ -27,6 +34,7 @@ export interface CreateFileProviderRequest {
   accessKey: string;
   metadata: string;
   bucket: Bucket[];
+  type: ProviderType;
 }
 
 export interface UpdateFileProviderRequest {
@@ -34,6 +42,7 @@ export interface UpdateFileProviderRequest {
   accessKey?: string | undefined;
   metadata?: string | undefined;
   bucket: Bucket[];
+  type?: ProviderType | undefined;
 }
 
 export interface DeleteFileProviderRequest {
@@ -45,6 +54,7 @@ export interface RegisterProviderRequest {
   publicAccessKey: string;
   privateAccessKey: string;
   baseUrl: string;
+  type: ProviderType;
 }
 
 export interface RemoveProviderRequest {

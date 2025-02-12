@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { FileBucketProto } from 'juno-proto';
+import { AuthCommonProto, FileBucketProto } from 'juno-proto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -19,6 +19,7 @@ import {
   RegisterFileBucketModel,
   FileBucketResponse,
 } from 'src/models/file_bucket.dto';
+import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { BUCKET_FILE_SERVICE_NAME } = FileBucketProto;
 
@@ -52,6 +53,7 @@ export class FileBucketController implements OnModuleInit {
     type: FileBucketResponse,
   })
   async registerFileBucket(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body() params: RegisterFileBucketModel,
   ): Promise<FileBucketResponse> {
     const grpcResponse = this.fileBucketService.registerBucket({
@@ -59,6 +61,7 @@ export class FileBucketController implements OnModuleInit {
       configId: params.configId,
       fileProviderName: params.fileProviderName,
       FileServiceFile: params.FileServiceFile,
+      configEnv: apiKey.environment,
     });
 
     const bucketData = await lastValueFrom(grpcResponse);

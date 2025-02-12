@@ -42,7 +42,7 @@ interface S3ClientMetadata {
   };
 }
 
-// Will use api-gateway endpoint testing once available
+// TODO: use api-gateway endpoint testing once available
 async function registerConfig(projectId: number): Promise<any> {
   const configProto = ProtoLoader.loadSync([FileConfigProtoFile]) as any;
   const configProtoGRPC = GRPC.loadPackageDefinition(configProto) as any;
@@ -55,7 +55,7 @@ async function registerConfig(projectId: number): Promise<any> {
   const config: FileConfigProto.FileServiceConfig = await new Promise(
     (resolve) => {
       configClient.createConfig(
-        { projectId: projectId, buckets: [], files: [] },
+        { projectId: projectId, environment: 'prod', buckets: [], files: [] },
         (err, res) => {
           if (err) resolve(null);
           else resolve(res);
@@ -182,7 +182,7 @@ describe('File Upload Verification Routes', () => {
     // Register file config
     const configIdLong = await registerConfig(projectId);
     expect(configIdLong).toBeDefined;
-    const configId = configIdLong.low;
+    const configId = Number(configIdLong);
 
     // Register file provider
     await assertAPIRequest({
@@ -195,6 +195,7 @@ describe('File Upload Verification Routes', () => {
           privateAccessKey: secretAccessKey,
         },
         baseUrl: baseURL,
+        type: 'S3',
       },
       expectStatus: 201,
     });
@@ -256,6 +257,7 @@ describe('File Upload Verification Routes', () => {
           privateAccessKey: secretAccessKey,
         },
         baseUrl: baseURL,
+        type: 'S3',
       },
       expectStatus: 201,
     });
@@ -320,6 +322,7 @@ describe('File Upload Verification Routes', () => {
           privateAccessKey: secretAccessKey,
         },
         baseUrl: baseURL,
+        type: 'S3',
       },
       expectStatus: 400,
     });
