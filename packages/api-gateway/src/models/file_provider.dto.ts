@@ -1,8 +1,8 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, ValidateNested } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { FileProviderProto } from 'juno-proto';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 class AccessKey {
   @ApiProperty({
@@ -22,11 +22,12 @@ class AccessKey {
 
 export class RegisterFileProviderModel {
   @ApiProperty({
-    type: [AccessKey],
-    format: 'email',
+    type: AccessKey,
     description: 'The access key to register with',
   })
   @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => AccessKey)
   accessKey: AccessKey;
 
   @ApiProperty({
