@@ -47,7 +47,11 @@ export class RegisterFileProviderModel {
 
   @IsNotEmpty()
   @Transform(toEnum)
-  @ApiProperty({ description: 'File provider type' })
+  @ApiProperty({
+    type: 'string',
+    description: 'File provider type (one of S3 or AZURE)',
+    example: 'S3',
+  })
   type: FileProviderProto.ProviderType;
 }
 

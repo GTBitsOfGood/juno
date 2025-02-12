@@ -180,7 +180,7 @@ describe('File Service Config Tests', () => {
     try {
       await new Promise((resolve, reject) => {
         configClient.deleteConfig(
-          { id: createdConfigId + 1000000, environemnt: 'prod' },
+          { id: createdConfigId + 1000000, environment: 'prod' },
           (err, res) => {
             if (err) {
               reject(err);

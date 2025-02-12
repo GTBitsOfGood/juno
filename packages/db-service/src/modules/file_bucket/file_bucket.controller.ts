@@ -39,7 +39,7 @@ export class FileBucketController implements BucketDbServiceController {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message:
-          'Name, configId, environment, file provider name, files, and metadata must be provided',
+          'Name, configId, configEnv, file provider name, files, and metadata must be provided',
       });
     }
     type ResType = {
@@ -69,7 +69,7 @@ export class FileBucketController implements BucketDbServiceController {
     if (!request.name || request.configId == undefined || !request.configEnv) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
-        message: 'Both name and configId must be provided',
+        message: 'Both name, configId, and configEnv must be provided',
       });
     }
     return this.fileBucketService.deleteBucket(request);
@@ -85,7 +85,8 @@ export class FileBucketController implements BucketDbServiceController {
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
-        message: 'Name, configId, and updated metadata must be provided',
+        message:
+          'Name, configId, configEnv, and updated metadata must be provided',
       });
     }
     return this.fileBucketService.updateBucket(request);

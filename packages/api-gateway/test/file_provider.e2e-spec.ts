@@ -75,8 +75,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing provider name file provider without auth key', () => {
     const fileProviderBody = {
       providerName: '',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
       type: 'S3',
     };
@@ -90,8 +92,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing public access key file provider without auth key', () => {
     const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: '',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: '',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
       type: 'S3',
     };
@@ -105,8 +109,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing private access key file provider without auth key', () => {
     const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: '',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: '',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
       type: 'S3',
     };
@@ -120,8 +126,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing base url file provider without auth key', () => {
     const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: '',
       type: 'S3',
     };
@@ -152,8 +160,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing provider name file provider with auth key', () => {
     const fileProviderBody = {
       providerName: '',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
       type: 'S3',
     };
@@ -168,8 +178,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing public access key file provider with auth key', () => {
     const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: '',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: '',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
       type: 'S3',
     };
@@ -184,8 +196,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing private access key file provider with auth key', () => {
     const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: '',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: '',
+      },
       baseUrl: 'https://aws.amazon.com/s3',
       type: 'S3',
     };
@@ -200,8 +214,10 @@ describe('File Provider Verification Routes', () => {
   it('Missing base url file provider with auth key', () => {
     const fileProviderBody = {
       providerName: 'Test Provider',
-      publicAccessKey: 'Test Public Access Key',
-      privateAccessKey: 'Test Private Access Key',
+      accessKey: {
+        publicAccessKey: 'Test Public Access Key',
+        privateAccessKey: 'Test Private Access Key',
+      },
       baseUrl: '',
       type: 'S3',
     };
