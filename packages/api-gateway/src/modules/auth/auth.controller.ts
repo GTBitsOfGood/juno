@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -94,8 +93,7 @@ export class AuthController implements OnModuleInit {
 
   @Post('/user/jwt')
   @ApiOperation({
-    summary:
-      'Generates a temporary JWT for the project tied to a specified user.',
+    summary: 'Generates a temporary JWT tied to a specified user.',
     description:
       'JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given valid user credentials.',
   })
@@ -110,10 +108,6 @@ export class AuthController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Bad request',
-  })
-  @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Internal server error.',
   })
   @ApiHeader({
     name: 'X-User-Email',

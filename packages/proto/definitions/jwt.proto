@@ -16,7 +16,7 @@ service JwtService {
 
 message CreateApiKeyJwtRequest { string api_key = 1; }
 
-message ValidateJwtRequest { string jwt = 2; }
+message ValidateJwtRequest { string jwt = 1; }
 
 message CreateUserJwtRequest { common.User user = 1; }
 

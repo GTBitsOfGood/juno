@@ -88,7 +88,7 @@ export class JWTController implements JwtProto.JwtServiceController {
     );
 
     if (!user) {
-      throw new Error('Invalid API Key');
+      throw new Error('Invalid User');
     }
 
     const token = jwt.sign(

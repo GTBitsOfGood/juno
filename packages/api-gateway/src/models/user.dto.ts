@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { CommonProto } from 'juno-proto';

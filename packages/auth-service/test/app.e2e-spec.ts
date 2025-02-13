@@ -441,7 +441,7 @@ describe('Auth Service User JWT Tests', () => {
           return resolve(resp);
         });
       }),
-    ).rejects.toBeDefined(); // Expecting an error because apiKey does not exist in DB
+    ).rejects.toBeDefined(); // Expecting an error because user does not exist in DB
   });
 
   it('successfully validates a valid JWT whose user exists', async () => {
@@ -500,7 +500,7 @@ describe('Auth Service User JWT Tests', () => {
           return resolve(resp);
         });
       }),
-    ).rejects.toBeDefined(); // Expecting an error because apiKey is not in DB
+    ).rejects.toBeDefined(); // Expecting an error because user is not in DB
   });
 
   it('rejects an expired JWT whose user exists', async () => {

@@ -11,6 +11,7 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { sign } from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -187,7 +188,7 @@ describe('API Key JWT Verification Routes', () => {
 });
 
 describe('User JWT Verification Routes', () => {
-  it('Missing credenials ', () => {
+  it('Missing credentials', () => {
     return request(app.getHttpServer())
       .post('/auth/user/jwt')
       .send()
@@ -220,6 +221,12 @@ describe('User JWT Verification Routes', () => {
       .send()
       .expect(201);
 
-    return expect(key.body['token']).toBeDefined();
+    expect(key.body['token']).toBeDefined();
+
+    const result = jwt.verify(
+      key.body['token'],
+      process.env.JWT_SECRET ?? 'secret',
+    );
+    return expect(result['user']['email']).toEqual(ADMIN_EMAIL);
   });
 });
