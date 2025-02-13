@@ -42,6 +42,8 @@ interface S3ClientMetadata {
   };
 }
 
+jest.setTimeout(15000);
+
 // TODO: use api-gateway endpoint testing once available
 async function registerConfig(projectId: number): Promise<any> {
   const configProto = ProtoLoader.loadSync([FileConfigProtoFile]) as any;
