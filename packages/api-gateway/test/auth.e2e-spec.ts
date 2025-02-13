@@ -11,6 +11,7 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { sign } from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -110,14 +111,17 @@ describe('Auth Key Verification Routes', () => {
   });
 });
 
-describe('JWT Verification Routes', () => {
+describe('API Key JWT Verification Routes', () => {
   it('Missing authorization header', () => {
-    return request(app.getHttpServer()).post('/auth/jwt').send().expect(401);
+    return request(app.getHttpServer())
+      .post('/auth/api_key/jwt')
+      .send()
+      .expect(401);
   });
 
   it('Empty bearer authorization header', () => {
     return request(app.getHttpServer())
-      .post('/auth/jwt')
+      .post('/auth/api_key/jwt')
       .set('Authorization', `Bearer `)
       .send()
       .expect(500);
@@ -125,7 +129,7 @@ describe('JWT Verification Routes', () => {
 
   it('Malformed api key request', async () => {
     return request(app.getHttpServer())
-      .post('/auth/jwt')
+      .post('/auth/api_key/jwt')
       .set('Authorization', `Bearer invalid.jwt.token`)
       .send()
       .expect(500);
@@ -153,7 +157,7 @@ describe('JWT Verification Routes', () => {
     );
 
     return request(app.getHttpServer())
-      .post('/auth/jwt')
+      .post('/auth/api_key/jwt')
       .set('Authorization', `Bearer ${apiKey}`)
       .send()
       .expect(500);
@@ -176,9 +180,53 @@ describe('JWT Verification Routes', () => {
     const apiKey = key.body['apiKey'];
 
     return request(app.getHttpServer())
-      .post('/auth/jwt')
+      .post('/auth/api_key/jwt')
       .set('Authorization', `Bearer ${apiKey}`)
       .send()
       .expect(201);
+  });
+});
+
+describe('User JWT Verification Routes', () => {
+  it('Missing credentials', () => {
+    return request(app.getHttpServer())
+      .post('/auth/user/jwt')
+      .send()
+      .expect(401);
+  });
+
+  it('Empty email/pass header', () => {
+    return request(app.getHttpServer())
+      .post('/auth/user/jwt')
+      .set('X-User-Email', ``)
+      .set('X-User-Password', 'password')
+      .send()
+      .expect(401);
+  });
+
+  it('Invalid password', () => {
+    return request(app.getHttpServer())
+      .post('/auth/user/jwt')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', 'invalid-password')
+      .send()
+      .expect(401);
+  });
+
+  it('generates a valid JWT', async () => {
+    const key = await request(app.getHttpServer())
+      .post('/auth/user/jwt')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(201);
+
+    expect(key.body['token']).toBeDefined();
+
+    const result = jwt.verify(
+      key.body['token'],
+      process.env.JWT_SECRET ?? 'secret',
+    );
+    return expect(result['user']['email']).toEqual(ADMIN_EMAIL);
   });
 });

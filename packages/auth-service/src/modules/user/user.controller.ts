@@ -1,5 +1,5 @@
 import { Controller, Inject } from '@nestjs/common';
-import { UserProto } from 'juno-proto';
+import { CommonProto, UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import * as bcrypt from 'bcrypt';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
@@ -21,7 +21,7 @@ export class UserController implements UserProto.UserAuthServiceController {
   }
   async authenticate(
     request: UserProto.AuthenticateUserRequest,
-  ): Promise<UserProto.User> {
+  ): Promise<CommonProto.User> {
     let passwordHash: UserProto.UserPasswordHash;
     try {
       passwordHash = await lastValueFrom(

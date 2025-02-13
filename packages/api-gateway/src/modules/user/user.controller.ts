@@ -20,7 +20,7 @@ import {
   ApiHeader,
 } from '@nestjs/swagger';
 import { ClientGrpc } from '@nestjs/microservices';
-import { ProjectProto, UserProto } from 'juno-proto';
+import { CommonProto, ProjectProto, UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import {
   CreateUserModel,
@@ -122,15 +122,15 @@ export class UserController implements OnModuleInit {
     description: 'Internal server error.',
   })
   async createUser(
-    @User() user: UserProto.User,
+    @User() user: CommonProto.User,
     @Body() params: CreateUserModel,
   ) {
-    if (user.type == UserProto.UserType.USER) {
+    if (user.type == CommonProto.UserType.USER) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
     const createdUser = this.userService.createUser({
       ...params,
-      type: UserProto.UserType.USER,
+      type: CommonProto.UserType.USER,
     });
 
     return new UserResponse(await lastValueFrom(createdUser));
@@ -176,10 +176,10 @@ export class UserController implements OnModuleInit {
     description: 'Internal server error.',
   })
   async setUserType(
-    @User() user: UserProto.User,
+    @User() user: CommonProto.User,
     @Body() setUserTypeParams: SetUserTypeModel,
   ) {
-    if (user.type !== UserProto.UserType.SUPERADMIN) {
+    if (user.type !== CommonProto.UserType.SUPERADMIN) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
     await lastValueFrom(
@@ -238,7 +238,7 @@ export class UserController implements OnModuleInit {
     description: 'Internal server error.',
   })
   async linkUserWithProjectId(
-    @User() user: UserProto.User,
+    @User() user: CommonProto.User,
     @Param('id') idStr: string,
     @Body() linkProjectBody: LinkProjectModel,
   ) {
@@ -253,7 +253,7 @@ export class UserController implements OnModuleInit {
       user,
       projectClient: this.projectService,
     });
-    if (!linked || user.type == UserProto.UserType.USER) {
+    if (!linked || user.type == CommonProto.UserType.USER) {
       throw new UnauthorizedException(
         'Only Superadmins & Linked Admins can link Users to Projects',
       );

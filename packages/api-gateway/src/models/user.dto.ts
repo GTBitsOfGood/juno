@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { UserProto } from 'juno-proto';
+import { CommonProto } from 'juno-proto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserModel {
@@ -27,7 +27,7 @@ export class SetUserTypeModel {
   @IsNotEmpty()
   @Transform(toEnum)
   @ApiProperty({ description: 'New user type' })
-  type: UserProto.UserType;
+  type: CommonProto.UserType;
 }
 
 export class LinkProjectModel {
@@ -49,8 +49,11 @@ export class UserResponse {
   name: string;
 
   @Transform(fromEnum)
-  @ApiProperty({ description: 'User type', example: UserProto.UserType.ADMIN })
-  type: UserProto.UserType;
+  @ApiProperty({
+    description: 'User type',
+    example: CommonProto.UserType.ADMIN,
+  })
+  type: CommonProto.UserType;
 
   // Protobuf's Long requires extra transformation
   @Transform(({ value }) => value?.map((v: any) => v.low))
@@ -60,7 +63,7 @@ export class UserResponse {
   })
   projectIds: number[];
 
-  constructor(user: UserProto.User) {
+  constructor(user: CommonProto.User) {
     this.id = user.id;
     this.email = user.email;
     this.name = user.name;
@@ -69,26 +72,26 @@ export class UserResponse {
   }
 }
 
-function toEnum(params: { value: string }): UserProto.UserType | undefined {
+function toEnum(params: { value: string }): CommonProto.UserType | undefined {
   switch (params.value) {
     case 'SUPERADMIN':
-      return UserProto.UserType.SUPERADMIN;
+      return CommonProto.UserType.SUPERADMIN;
     case 'ADMIN':
-      return UserProto.UserType.ADMIN;
+      return CommonProto.UserType.ADMIN;
     case 'USER':
-      return UserProto.UserType.USER;
+      return CommonProto.UserType.USER;
     default:
       return undefined;
   }
 }
 
 function fromEnum(params: {
-  value: UserProto.UserType;
+  value: CommonProto.UserType;
 }): 'SUPERADMIN' | 'ADMIN' | 'USER' {
   switch (params.value) {
-    case UserProto.UserType.SUPERADMIN:
+    case CommonProto.UserType.SUPERADMIN:
       return 'SUPERADMIN';
-    case UserProto.UserType.ADMIN:
+    case CommonProto.UserType.ADMIN:
       return 'ADMIN';
     default:
       return 'USER';

@@ -4,50 +4,39 @@ package juno.user;
 
 import "identifiers.proto";
 
+import "common.proto";
+
 service UserService {
-  rpc getUser(identifiers.UserIdentifier) returns (User);
-  rpc createUser(CreateUserRequest) returns (User);
-  rpc updateUser(UpdateUserRequest) returns (User);
-  rpc deleteUser(identifiers.UserIdentifier) returns (User);
-  rpc linkProject(LinkProjectToUserRequest) returns (User);
+  rpc getUser(identifiers.UserIdentifier) returns (common.User);
+  rpc createUser(CreateUserRequest) returns (common.User);
+  rpc updateUser(UpdateUserRequest) returns (common.User);
+  rpc deleteUser(identifiers.UserIdentifier) returns (common.User);
+  rpc linkProject(LinkProjectToUserRequest) returns (common.User);
   rpc getUserPasswordHash(identifiers.UserIdentifier)
       returns (UserPasswordHash);
 }
 
 service UserAuthService {
-  rpc authenticate(AuthenticateUserRequest) returns (User);
-}
-
-message User {
-  int64 id = 1;
-  string email = 2;
-  string name = 3;
-  UserType type = 4;
-  repeated int64 projectIds = 5;
+  rpc authenticate(AuthenticateUserRequest) returns (common.User);
 }
 
 message UserPasswordHash { string hash = 1; }
 
 message UserPassword { string password = 1; }
 
-enum UserType {
-  SUPERADMIN = 0;
-  ADMIN = 1;
-  USER = 2;
-}
 
 message CreateUserRequest {
   string email = 1;
   string name = 2;
   string password = 3;
-  UserType type = 4;
+  common.UserType type = 4;
 }
 
 message UserUpdateParams {
   optional string email = 1;
   optional string name = 2;
   optional string password = 3;
-  optional UserType type = 4;
+  optional common.UserType type = 4;
 }
 
 message UpdateUserRequest {

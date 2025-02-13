@@ -4,17 +4,30 @@ package juno.jwt;
 
 import "identifiers.proto";
 import "auth_common.proto";
+import "common.proto";
 
 service JwtService {
-  rpc createJwt(CreateJwtRequest) returns (CreateJwtResponse);
-  rpc validateJwt(ValidateJwtRequest) returns (ValidateJwtResponse);
+  rpc createApiKeyJwt(CreateApiKeyJwtRequest) returns (CreateJwtResponse);
+  rpc validateApiKeyJwt(ValidateJwtRequest) returns (ValidateApiKeyJwtResponse);
+
+  rpc createUserJwt(CreateUserJwtRequest) returns (CreateJwtResponse);
+  rpc validateUserJwt(ValidateJwtRequest) returns (ValidateUserJwtResponse);
 }
 
-message CreateJwtRequest { string api_key = 1; }
+message CreateApiKeyJwtRequest { string api_key = 1; }
+
+message ValidateJwtRequest { string jwt = 1; }
+
+message CreateUserJwtRequest { common.User user = 1; }
+
 message CreateJwtResponse { string jwt = 1; }
 
-message ValidateJwtRequest { string jwt = 2; }
-message ValidateJwtResponse { 
+message ValidateApiKeyJwtResponse {
   bool valid = 1;
   optional auth_common.ApiKey apiKey = 2;
+}
+
+message ValidateUserJwtResponse {
+  bool valid = 1;
+  optional common.User user = 2;
 }

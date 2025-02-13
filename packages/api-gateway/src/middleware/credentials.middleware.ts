@@ -9,7 +9,7 @@ import {
 import { NextFunction, Request, Response } from 'express';
 import { lastValueFrom } from 'rxjs';
 import { ClientGrpc } from '@nestjs/microservices';
-import { UserProto } from 'juno-proto';
+import { CommonProto, UserProto } from 'juno-proto';
 
 const { USER_AUTH_SERVICE_NAME } = UserProto;
 
@@ -59,4 +59,4 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
   }
 }
 
-type UserReq = Request & { user?: UserProto.User };
+type UserReq = Request & { user?: CommonProto.User };

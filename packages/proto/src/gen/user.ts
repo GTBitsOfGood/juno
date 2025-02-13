@@ -7,24 +7,10 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { User, UserType } from './common';
 import { ProjectIdentifier, UserIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.user';
-
-export enum UserType {
-  SUPERADMIN = 0,
-  ADMIN = 1,
-  USER = 2,
-  UNRECOGNIZED = -1,
-}
-
-export interface User {
-  id: number;
-  email: string;
-  name: string;
-  type: UserType;
-  projectIds: number[];
-}
 
 export interface UserPasswordHash {
   hash: string;

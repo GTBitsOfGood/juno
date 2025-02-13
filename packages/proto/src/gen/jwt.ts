@@ -8,53 +8,92 @@
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { ApiKey } from './auth_common';
+import { User } from './common';
 
 export const protobufPackage = 'juno.jwt';
 
-export interface CreateJwtRequest {
+export interface CreateApiKeyJwtRequest {
   apiKey: string;
-}
-
-export interface CreateJwtResponse {
-  jwt: string;
 }
 
 export interface ValidateJwtRequest {
   jwt: string;
 }
 
-export interface ValidateJwtResponse {
+export interface CreateUserJwtRequest {
+  user: User | undefined;
+}
+
+export interface CreateJwtResponse {
+  jwt: string;
+}
+
+export interface ValidateApiKeyJwtResponse {
   valid: boolean;
   apiKey?: ApiKey | undefined;
+}
+
+export interface ValidateUserJwtResponse {
+  valid: boolean;
+  user?: User | undefined;
 }
 
 export const JUNO_JWT_PACKAGE_NAME = 'juno.jwt';
 
 export interface JwtServiceClient {
-  createJwt(request: CreateJwtRequest): Observable<CreateJwtResponse>;
+  createApiKeyJwt(
+    request: CreateApiKeyJwtRequest,
+  ): Observable<CreateJwtResponse>;
 
-  validateJwt(request: ValidateJwtRequest): Observable<ValidateJwtResponse>;
+  validateApiKeyJwt(
+    request: ValidateJwtRequest,
+  ): Observable<ValidateApiKeyJwtResponse>;
+
+  createUserJwt(request: CreateUserJwtRequest): Observable<CreateJwtResponse>;
+
+  validateUserJwt(
+    request: ValidateJwtRequest,
+  ): Observable<ValidateUserJwtResponse>;
 }
 
 export interface JwtServiceController {
-  createJwt(
-    request: CreateJwtRequest,
+  createApiKeyJwt(
+    request: CreateApiKeyJwtRequest,
   ):
     | Promise<CreateJwtResponse>
     | Observable<CreateJwtResponse>
     | CreateJwtResponse;
 
-  validateJwt(
+  validateApiKeyJwt(
     request: ValidateJwtRequest,
   ):
-    | Promise<ValidateJwtResponse>
-    | Observable<ValidateJwtResponse>
-    | ValidateJwtResponse;
+    | Promise<ValidateApiKeyJwtResponse>
+    | Observable<ValidateApiKeyJwtResponse>
+    | ValidateApiKeyJwtResponse;
+
+  createUserJwt(
+    request: CreateUserJwtRequest,
+  ):
+    | Promise<CreateJwtResponse>
+    | Observable<CreateJwtResponse>
+    | CreateJwtResponse;
+
+  validateUserJwt(
+    request: ValidateJwtRequest,
+  ):
+    | Promise<ValidateUserJwtResponse>
+    | Observable<ValidateUserJwtResponse>
+    | ValidateUserJwtResponse;
 }
 
 export function JwtServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['createJwt', 'validateJwt'];
+    const grpcMethods: string[] = [
+      'createApiKeyJwt',
+      'validateApiKeyJwt',
+      'createUserJwt',
+      'validateUserJwt',
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

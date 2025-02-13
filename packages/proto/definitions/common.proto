@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package juno.common;
+
+enum UserType {
+  SUPERADMIN = 0;
+  ADMIN = 1;
+  USER = 2;
+}
+
+message User {
+  int64 id = 1;
+  string email = 2;
+  string name = 3;
+  UserType type = 4;
+  repeated int64 projectIds = 5;
+}
