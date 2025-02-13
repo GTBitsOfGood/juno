@@ -1,5 +1,5 @@
 import { Controller, Inject } from '@nestjs/common';
-import { JwtProto, ApiKeyProto } from 'juno-proto';
+import { JwtProto, ApiKeyProto, UserProto } from 'juno-proto';
 import * as jwt from 'jsonwebtoken';
 import { ClientGrpc } from '@nestjs/microservices';
 import { createHash } from 'crypto';
@@ -9,10 +9,13 @@ import { lastValueFrom } from 'rxjs';
 @JwtProto.JwtServiceControllerMethods()
 export class JWTController implements JwtProto.JwtServiceController {
   private apiKeyDbService: ApiKeyProto.ApiKeyDbServiceClient;
+  private userDbService: UserProto.UserServiceClient;
 
   constructor(
     @Inject(ApiKeyProto.API_KEY_DB_SERVICE_NAME)
     private apiKeyClient: ClientGrpc,
+    @Inject(UserProto.USER_SERVICE_NAME)
+    private userClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
@@ -20,9 +23,14 @@ export class JWTController implements JwtProto.JwtServiceController {
       this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
         ApiKeyProto.API_KEY_DB_SERVICE_NAME,
       );
+
+    this.userDbService =
+      this.userClient.getService<UserProto.UserServiceClient>(
+        UserProto.USER_SERVICE_NAME,
+      );
   }
-  async createJwt(
-    request: JwtProto.CreateJwtRequest,
+  async createApiKeyJwt(
+    request: JwtProto.CreateApiKeyJwtRequest,
   ): Promise<JwtProto.CreateJwtResponse> {
     const apiKeyHash = createHash('sha256')
       .update(request.apiKey)
@@ -46,10 +54,9 @@ export class JWTController implements JwtProto.JwtServiceController {
 
     return { jwt: token };
   }
-  async validateJwt(
+  async validateApiKeyJwt(
     request: JwtProto.ValidateJwtRequest,
-  ): Promise<JwtProto.ValidateJwtResponse> {
-    // rough implementation for middleware testing, please delete if unused
+  ): Promise<JwtProto.ValidateApiKeyJwtResponse> {
     try {
       const { apiKeyHash } = <jwt.ApiKeyHashJWTPayload>(
         jwt.verify(request.jwt, process.env.JWT_SECRET ?? 'secret')
@@ -64,6 +71,52 @@ export class JWTController implements JwtProto.JwtServiceController {
         return {
           valid: true,
           apiKey,
+        };
+      }
+      return { valid: false };
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+  async createUserJwt(
+    request: JwtProto.CreateUserJwtRequest,
+  ): Promise<JwtProto.CreateJwtResponse> {
+    const user = await lastValueFrom(
+      this.userDbService.getUser({
+        id: request.user.id,
+      }),
+    );
+
+    if (!user) {
+      throw new Error('Invalid API Key');
+    }
+
+    const token = jwt.sign(
+      {
+        user: user,
+      },
+      process.env.JWT_SECRET ?? 'secret',
+    );
+
+    return { jwt: token };
+  }
+  async validateUserJwt(
+    request: JwtProto.ValidateJwtRequest,
+  ): Promise<JwtProto.ValidateUserJwtResponse> {
+    try {
+      const { user } = <jwt.UserJWTPayload>(
+        jwt.verify(request.jwt, process.env.JWT_SECRET ?? 'secret')
+      );
+      const userVerify = await lastValueFrom(
+        this.userDbService.getUser({
+          id: user.id,
+        }),
+      );
+
+      if (userVerify) {
+        return {
+          valid: true,
+          user,
         };
       }
       return { valid: false };
