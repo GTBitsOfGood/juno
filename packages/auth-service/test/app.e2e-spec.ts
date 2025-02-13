@@ -436,7 +436,7 @@ describe('Auth Service User JWT Tests', () => {
 
     await expect(
       new Promise((resolve, reject) => {
-        jwtClient.createUserJwt({ user: invalidUser}, (err, resp) => {
+        jwtClient.createUserJwt({ user: invalidUser }, (err, resp) => {
           if (err) return reject(err);
           return resolve(resp);
         });
@@ -445,7 +445,6 @@ describe('Auth Service User JWT Tests', () => {
   });
 
   it('successfully validates a valid JWT whose user exists', async () => {
-
     const jwtResponse = await new Promise((resolve, reject) => {
       jwtClient.createUserJwt({ user }, (err, resp) => {
         if (err) return reject(err);
@@ -505,7 +504,6 @@ describe('Auth Service User JWT Tests', () => {
   });
 
   it('rejects an expired JWT whose user exists', async () => {
-
     const jwt = sign(
       {
         user,

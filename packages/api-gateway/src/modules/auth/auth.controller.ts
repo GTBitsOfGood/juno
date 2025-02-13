@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -20,7 +21,7 @@ import {
   ApiResponse,
   ApiBody,
 } from '@nestjs/swagger';
-import { ApiKeyProto, JwtProto, ProjectProto, UserProto } from 'juno-proto';
+import { ApiKeyProto, CommonProto, JwtProto, ProjectProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { User } from 'src/decorators/user.decorator';
 import {
@@ -60,7 +61,7 @@ export class AuthController implements OnModuleInit {
       );
   }
 
-  @Post('/jwt')
+  @Post('/api_key/jwt')
   @ApiOperation({
     summary:
       'Generates a temporary JWT for the project tied to a specified API key.',
@@ -80,12 +81,59 @@ export class AuthController implements OnModuleInit {
     },
   })
   @ApiBearerAuth('API_Key')
-  async getJWT(@Headers('Authorization') apiKey?: string) {
+  async getApiKeyJWT(@Headers('Authorization') apiKey?: string) {
     const key = apiKey?.replace('Bearer ', '');
     if (key === undefined) {
       throw new UnauthorizedException('API Key is required');
     }
-    const jwt = await lastValueFrom(this.jwtService.createJwt({ apiKey: key }));
+    const jwt = await lastValueFrom(
+      this.jwtService.createApiKeyJwt({ apiKey: key }),
+    );
+    return new IssueJWTResponse(jwt);
+  }
+
+  @Post('/user/jwt')
+  @ApiOperation({
+    summary:
+      'Generates a temporary JWT for the project tied to a specified user.',
+    description:
+      'JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given valid user credentials.',
+  })
+  @ApiCreatedResponse({
+    description: 'Successfully created a JWT.',
+    type: IssueJWTResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Invalid User Credentials',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad request',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Internal server error.',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of a user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiBearerAuth('API_Key')
+  async getUserJWT(@User() user: CommonProto.User) {
+    const jwt = await lastValueFrom(this.jwtService.createUserJwt({ user }));
     return new IssueJWTResponse(jwt);
   }
 
@@ -116,7 +164,7 @@ export class AuthController implements OnModuleInit {
   @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
   async createApiKey(
-    @User() user: UserProto.User,
+    @User() user: CommonProto.User,
     @Body() issueApiKeyRequest: IssueApiKeyRequest,
   ) {
     const linked = await userLinkedToProject({
@@ -124,7 +172,7 @@ export class AuthController implements OnModuleInit {
       user,
       projectClient: this.projectService,
     });
-    if (!linked || user.type == UserProto.UserType.USER) {
+    if (!linked || user.type == CommonProto.UserType.USER) {
       throw new UnauthorizedException(
         'Only Superadmins & Linked Admins can create API Keys',
       );

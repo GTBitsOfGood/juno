@@ -34,7 +34,7 @@ export class ProjectLinkingMiddleware implements NestMiddleware, OnModuleInit {
       if (!token) {
         throw new Error('Jwt not found');
       }
-      const jwtValidation = this.jwtService.validateJwt({ jwt: token });
+      const jwtValidation = this.jwtService.validateApiKeyJwt({ jwt: token });
       await lastValueFrom(jwtValidation);
       next();
     } catch {
