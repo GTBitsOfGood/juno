@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Role } from '@prisma/client';
 import * as validate from 'src/utility/validate';
-import { IdentifierProto, UserProto } from 'juno-proto';
+import { CommonProto, IdentifierProto, UserProto } from 'juno-proto';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -12,26 +12,26 @@ import { status } from '@grpc/grpc-js';
 export class UserController implements UserProto.UserServiceController {
   constructor(private readonly userService: UserService) {}
 
-  private mapPrismaRoleToRPC(role: Role): UserProto.UserType {
+  private mapPrismaRoleToRPC(role: Role): CommonProto.UserType {
     switch (role) {
       case Role.USER:
-        return UserProto.UserType.USER;
+        return CommonProto.UserType.USER;
       case Role.ADMIN:
-        return UserProto.UserType.ADMIN;
+        return CommonProto.UserType.ADMIN;
       case Role.SUPERADMIN:
-        return UserProto.UserType.SUPERADMIN;
+        return CommonProto.UserType.SUPERADMIN;
       default:
-        return UserProto.UserType.UNRECOGNIZED;
+        return CommonProto.UserType.UNRECOGNIZED;
     }
   }
 
-  private mapRPCRoleToPrisma(role: UserProto.UserType): Role {
+  private mapRPCRoleToPrisma(role: CommonProto.UserType): Role {
     switch (role) {
-      case UserProto.UserType.ADMIN:
+      case CommonProto.UserType.ADMIN:
         return Role.ADMIN;
-      case UserProto.UserType.SUPERADMIN:
+      case CommonProto.UserType.SUPERADMIN:
         return Role.SUPERADMIN;
-      case UserProto.UserType.USER:
+      case CommonProto.UserType.USER:
       default:
         return Role.USER;
     }
@@ -39,7 +39,7 @@ export class UserController implements UserProto.UserServiceController {
 
   async getUser(
     identifier: IdentifierProto.UserIdentifier,
-  ): Promise<UserProto.User> {
+  ): Promise<CommonProto.User> {
     const userFind = validate.validateUserIdentifier(identifier);
     const user = await this.userService.user(userFind);
 
@@ -69,7 +69,7 @@ export class UserController implements UserProto.UserServiceController {
 
   async createUser(
     request: UserProto.CreateUserRequest,
-  ): Promise<UserProto.User> {
+  ): Promise<CommonProto.User> {
     const user = await this.userService.createUser({
       name: request.name,
       email: request.email,
@@ -85,7 +85,7 @@ export class UserController implements UserProto.UserServiceController {
 
   async updateUser(
     request: UserProto.UpdateUserRequest,
-  ): Promise<UserProto.User> {
+  ): Promise<CommonProto.User> {
     const identifier = validate.validateUserIdentifier(request.userIdentifier);
     const user = await this.userService.updateUser(identifier, {
       name: request.updateParams.name,
@@ -102,7 +102,7 @@ export class UserController implements UserProto.UserServiceController {
 
   async deleteUser(
     request: IdentifierProto.UserIdentifier,
-  ): Promise<UserProto.User> {
+  ): Promise<CommonProto.User> {
     const identifier = validate.validateUserIdentifier(request);
 
     const user = await this.userService.deleteUser(identifier);
@@ -116,7 +116,7 @@ export class UserController implements UserProto.UserServiceController {
 
   async linkProject(
     request: UserProto.LinkProjectToUserRequest,
-  ): Promise<UserProto.User> {
+  ): Promise<CommonProto.User> {
     const user = validate.validateUserIdentifier(request.user);
     const updated = await this.userService.updateUser(user, {
       allowedProjects: {

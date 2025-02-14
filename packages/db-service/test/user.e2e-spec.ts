@@ -5,6 +5,7 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
+  CommonProto,
   IdentifiersProtoFile,
   ProjectProto,
   ProjectProtoFile,
@@ -13,7 +14,6 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-import { UserType } from 'juno-proto/dist/gen/user';
 
 const { JUNO_USER_PACKAGE_NAME } = UserProto;
 const { JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
@@ -133,14 +133,14 @@ describe('DB Service User Tests', () => {
           updateParams: {
             email: 'new@test.com',
             name: 'new',
-            type: UserType.USER,
+            type: CommonProto.UserType.USER,
           },
         },
         (err, resp) => {
           expect(err).toBeNull();
           expect(resp['email']).toBe('new@test.com');
           expect(resp['name']).toBe('new');
-          expect(resp['type']).toBe(UserType.USER);
+          expect(resp['type']).toBe(CommonProto.UserType.USER);
           resolve({});
         },
       );
@@ -213,7 +213,7 @@ describe('DB Service User Tests', () => {
           expect(err).toBeNull();
           expect(resp['email']).toBe('test@test.com');
           expect(resp['name']).toBe('some-name');
-          expect(resp['type']).toBe(UserType.SUPERADMIN);
+          expect(resp['type']).toBe(CommonProto.UserType.SUPERADMIN);
           expect(resp['projectIds'].map((id) => Number(id))).toStrictEqual([1]);
           resolve({});
         },

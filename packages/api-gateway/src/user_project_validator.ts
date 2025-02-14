@@ -1,14 +1,14 @@
-import { IdentifierProto, UserProto } from 'juno-proto';
+import { CommonProto, IdentifierProto } from 'juno-proto';
 import { ProjectServiceClient } from 'juno-proto/dist/gen/project';
 import { lastValueFrom } from 'rxjs';
 
 export async function userLinkedToProject(options: {
   project: IdentifierProto.ProjectIdentifier;
-  user: UserProto.User;
+  user: CommonProto.User;
   projectClient: ProjectServiceClient;
 }) {
   const { project, user, projectClient } = options;
-  if (user.type == UserProto.UserType.SUPERADMIN) {
+  if (user.type == CommonProto.UserType.SUPERADMIN) {
     return true;
   }
 

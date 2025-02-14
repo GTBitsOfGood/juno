@@ -18,7 +18,7 @@ import {
   LinkUserModel,
   ProjectResponse,
 } from 'src/models/project.dto';
-import { AuthCommonProto, ProjectProto, UserProto } from 'juno-proto';
+import { AuthCommonProto, CommonProto, ProjectProto } from 'juno-proto';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
@@ -118,10 +118,10 @@ export class ProjectController implements OnModuleInit {
     type: ProjectResponse,
   })
   async createProject(
-    @User() user: UserProto.User,
+    @User() user: CommonProto.User,
     @Body() params: CreateProjectModel,
   ) {
-    if (user.type !== UserProto.UserType.SUPERADMIN) {
+    if (user.type !== CommonProto.UserType.SUPERADMIN) {
       throw new HttpException(
         'Only Superadmins can create projects',
         HttpStatus.UNAUTHORIZED,

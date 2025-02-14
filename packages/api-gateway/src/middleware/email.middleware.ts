@@ -38,7 +38,7 @@ export class EmailLinkingMiddleware implements NestMiddleware, OnModuleInit {
         throw new Error('Jwt not found');
       }
 
-      const jwtValidation = this.jwtService.validateJwt({ jwt: token });
+      const jwtValidation = this.jwtService.validateApiKeyJwt({ jwt: token });
       const res = await lastValueFrom(jwtValidation);
 
       if (!res.valid) {
