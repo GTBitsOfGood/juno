@@ -40,9 +40,9 @@ export class ProjectLinkingMiddleware implements NestMiddleware, OnModuleInit {
         throw new Error('Invalid jwt');
       }
       next();
-    } catch {
+    } catch (error) {
       throw new HttpException(
-        'Invalid user credentials',
+        `Invalid user credentials ${error}`,
         HttpStatus.UNAUTHORIZED,
       );
     }

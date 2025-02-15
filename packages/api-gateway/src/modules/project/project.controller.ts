@@ -19,12 +19,13 @@ import {
   ProjectResponse,
 } from 'src/models/project.dto';
 import { AuthCommonProto, CommonProto, ProjectProto } from 'juno-proto';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
+@ApiBearerAuth('API_Key')
 @ApiTags('project')
 @Controller('project')
 export class ProjectController implements OnModuleInit {
