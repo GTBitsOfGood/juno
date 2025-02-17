@@ -51,11 +51,8 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
       req.apiKey = res.key;
 
       next();
-    } catch {
-      throw new HttpException(
-        'Invalid user credentials',
-        HttpStatus.UNAUTHORIZED,
-      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
   }
 

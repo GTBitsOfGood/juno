@@ -59,7 +59,7 @@ export class FileProviderController
       return fileProvider;
     } catch (error) {
       throw new RpcException({
-        code: status.INTERNAL,
+        code: status.FAILED_PRECONDITION,
         message: error.message,
       });
     }

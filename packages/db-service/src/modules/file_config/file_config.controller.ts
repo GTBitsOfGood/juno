@@ -93,8 +93,8 @@ export class FileConfigController
         });
       }
       throw new RpcException({
-        code: status.UNKNOWN,
-        message: 'An unknown error occurred during update',
+        code: status.FAILED_PRECONDITION,
+        message: 'Failed to update config',
       });
     }
   }
@@ -121,8 +121,8 @@ export class FileConfigController
         });
       }
       throw new RpcException({
-        code: status.UNKNOWN,
-        message: 'An unknown error occurred during deletion',
+        code: status.FAILED_PRECONDITION,
+        message: 'Failed to delete config',
       });
     }
   }

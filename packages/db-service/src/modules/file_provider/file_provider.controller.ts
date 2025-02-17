@@ -3,6 +3,7 @@ import { FileProviderProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { FileProviderDbServiceController } from 'juno-proto/dist/gen/file_provider';
 import { FileProviderService } from './file_provider.service';
+import { status } from '@grpc/grpc-js';
 
 @Controller()
 @FileProviderProto.FileProviderDbServiceControllerMethods()
@@ -12,7 +13,10 @@ export class FileProviderController implements FileProviderDbServiceController {
     request: FileProviderProto.GetFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (!request.providerName || request.providerName === '') {
-      throw new RpcException('Provider ID is invalid');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Provider name is invalid',
+      });
     }
     const fileProvider = await this.fileProviderService.getProvider(request);
     return fileProvider;
@@ -21,7 +25,10 @@ export class FileProviderController implements FileProviderDbServiceController {
     request: FileProviderProto.CreateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (!request.providerName || !request.accessKey || !request.metadata) {
-      throw new RpcException('The given parameters are invalid!');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Provider name, access key, or metadata are invalid',
+      });
     }
     const fileProvider = await this.fileProviderService.createProvider(request);
     return fileProvider;
@@ -30,7 +37,10 @@ export class FileProviderController implements FileProviderDbServiceController {
     request: FileProviderProto.DeleteFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (!request.providerName || request.providerName === '') {
-      throw new RpcException('Provider ID is invalid');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Provider name is invalid',
+      });
     }
     const fileProvider = await this.fileProviderService.deleteProvider(request);
     return fileProvider;
@@ -39,7 +49,10 @@ export class FileProviderController implements FileProviderDbServiceController {
     request: FileProviderProto.UpdateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     if (!request.providerName && !request.accessKey && !request.metadata) {
-      throw new RpcException('You must update one of the attributes.');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Provider name, access key, or metadata are not provided',
+      });
     }
     const fileProvider = await this.fileProviderService.updateProvider(request);
     return fileProvider;

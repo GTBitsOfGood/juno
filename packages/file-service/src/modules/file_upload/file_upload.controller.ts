@@ -163,7 +163,6 @@ export class FileUploadController implements FileServiceController {
       });
       url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     } catch (err) {
-      console.log(err);
       throw new RpcException({
         code: status.NOT_FOUND,
         message: `Could not create signed url: ${err}`,
@@ -184,7 +183,7 @@ export class FileUploadController implements FileServiceController {
       );
     } catch (e) {
       throw new RpcException({
-        code: status.INTERNAL,
+        code: e.code ?? status.FAILED_PRECONDITION,
         message: `Could not save file to database: ${e}`,
       });
     }

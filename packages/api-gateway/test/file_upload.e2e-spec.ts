@@ -15,6 +15,7 @@ import {
 } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -59,7 +60,6 @@ beforeAll(async () => {
       GRPC.credentials.createInsecure(),
     );
 
-  console.log(configId);
   await new Promise((resolve) => {
     providerClient.createProvider(
       {
@@ -120,6 +120,7 @@ beforeEach(async () => {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
 
@@ -263,6 +264,6 @@ describe('File Upload Verification Routes', () => {
       .post('/file/upload')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileUploadBody)
-      .expect(500);
+      .expect(409);
   });
 });

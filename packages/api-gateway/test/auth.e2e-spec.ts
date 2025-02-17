@@ -12,6 +12,7 @@ import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { sign } from 'jsonwebtoken';
 import * as jwt from 'jsonwebtoken';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -49,6 +50,7 @@ beforeEach(async () => {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
 });
@@ -107,7 +109,7 @@ describe('Auth Key Verification Routes', () => {
           name: 'invalid-project-name',
         },
       })
-      .expect(500);
+      .expect(400);
   });
 });
 
@@ -124,7 +126,7 @@ describe('API Key JWT Verification Routes', () => {
       .post('/auth/api_key/jwt')
       .set('Authorization', `Bearer `)
       .send()
-      .expect(500);
+      .expect(401);
   });
 
   it('Malformed api key request', async () => {
@@ -132,7 +134,7 @@ describe('API Key JWT Verification Routes', () => {
       .post('/auth/api_key/jwt')
       .set('Authorization', `Bearer invalid.jwt.token`)
       .send()
-      .expect(500);
+      .expect(401);
   });
 
   it('Expired JWT api key', async () => {
@@ -160,7 +162,7 @@ describe('API Key JWT Verification Routes', () => {
       .post('/auth/api_key/jwt')
       .set('Authorization', `Bearer ${apiKey}`)
       .send()
-      .expect(500);
+      .expect(401);
   });
 
   it('Expected valid request for auth key and jwt generation', async () => {

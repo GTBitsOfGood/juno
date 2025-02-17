@@ -51,7 +51,7 @@ export class FileBucketService implements OnModuleInit {
       return new S3Client(metadata);
     } catch (error) {
       throw new RpcException({
-        code: status.INTERNAL,
+        code: status.NOT_FOUND,
         message: `Failed to initialize S3 client: ${error.message} `,
       });
     }
@@ -82,7 +82,7 @@ export class FileBucketService implements OnModuleInit {
         });
       }
       throw new RpcException({
-        code: status.INTERNAL,
+        code: status.FAILED_PRECONDITION,
         message: `Failed to create bucket: ${error.message} `,
       });
     }
@@ -116,7 +116,7 @@ export class FileBucketService implements OnModuleInit {
         });
       }
       throw new RpcException({
-        code: status.INTERNAL,
+        code: status.FAILED_PRECONDITION,
         message: `Failed to delete bucket: ${error.message} `,
       });
     }

@@ -44,7 +44,10 @@ export class AuthService {
       include: { project: true },
     });
     if (!key) {
-      return undefined;
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Api key not found',
+      });
     }
     return convertDbApiKeyToTs(key);
   }
@@ -93,8 +96,10 @@ export class AuthService {
       });
       return convertDbApiKeyToTs(prismaApiKey);
     } catch (error) {
-      console.error('Error creating API key:', error);
-      throw error;
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Error creating API key',
+      });
     }
   }
 
@@ -113,7 +118,10 @@ const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
       case 'FULL':
         return AuthCommonProto.ApiScope.FULL;
       default:
-        throw new Error(`Unknown scope: ${scope}`);
+        throw new RpcException({
+          code: status.FAILED_PRECONDITION,
+          message: `Unknown Api scope: ${scope}`,
+        });
     }
   });
 

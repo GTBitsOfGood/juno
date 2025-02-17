@@ -46,11 +46,8 @@ export class EmailLinkingMiddleware implements NestMiddleware, OnModuleInit {
       }
 
       next();
-    } catch {
-      throw new HttpException(
-        'Invalid user credentials',
-        HttpStatus.UNAUTHORIZED,
-      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
   }
 

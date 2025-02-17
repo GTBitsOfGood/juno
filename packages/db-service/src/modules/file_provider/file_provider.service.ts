@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { FileProviderType } from '@prisma/client';
 import { FileProviderProto } from 'juno-proto';
+import { status } from '@grpc/grpc-js';
+
 // import { Bucket } from 'juno-proto/dist/gen/file_bucket';
 import { PrismaService } from 'src/prisma.service';
 
@@ -57,8 +60,10 @@ export class FileProviderService {
         bucket: [],
       };
     } catch (error) {
-      console.error('Error creating file provider:', error);
-      throw error;
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Failed to create file provider',
+      });
     }
   }
 
@@ -78,8 +83,10 @@ export class FileProviderService {
         accessKey: fileProvider.accessKey,
       };
     } catch (error) {
-      console.error('Error getting file provider:', error);
-      throw error;
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'File provider not found',
+      });
     }
   }
 
@@ -123,8 +130,10 @@ export class FileProviderService {
         bucket: [],
       };
     } catch (error) {
-      console.error('Error updating file provider:', error);
-      throw error;
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Failed to update file provider',
+      });
     }
   }
 
@@ -144,8 +153,10 @@ export class FileProviderService {
         bucket: [],
       };
     } catch (error) {
-      console.error('Error deleting file provider:', error);
-      throw error;
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Failed to delete file provider',
+      });
     }
   }
 }
