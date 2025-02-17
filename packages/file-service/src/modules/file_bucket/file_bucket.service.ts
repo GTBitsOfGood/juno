@@ -51,7 +51,7 @@ export class FileBucketService implements OnModuleInit {
       return new S3Client(metadata);
     } catch (error) {
       throw new RpcException({
-        code: status.NOT_FOUND,
+        code: status.FAILED_PRECONDITION,
         message: `Failed to initialize S3 client: ${error.message} `,
       });
     }

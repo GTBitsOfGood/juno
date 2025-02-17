@@ -12,7 +12,7 @@ export class FileProviderController implements FileProviderDbServiceController {
   async getProvider(
     request: FileProviderProto.GetFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    if (!request.providerName || request.providerName === '') {
+    if (!request.providerName || request.providerName.trim() === '') {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: 'Provider name is invalid',

@@ -164,7 +164,7 @@ export class FileUploadController implements FileServiceController {
       url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     } catch (err) {
       throw new RpcException({
-        code: status.NOT_FOUND,
+        code: status.FAILED_PRECONDITION,
         message: `Could not create signed url: ${err}`,
       });
     }

@@ -46,7 +46,7 @@ export class JWTController implements JwtProto.JwtServiceController {
     } catch (error) {
       if (error.code === status.NOT_FOUND)
         throw new RpcException({
-          code: status.PERMISSION_DENIED,
+          code: status.UNAUTHENTICATED,
           message: 'Invalid Api key',
         });
       else
@@ -87,7 +87,7 @@ export class JWTController implements JwtProto.JwtServiceController {
       return { valid: false };
     } catch (e) {
       throw new RpcException({
-        code: status.NOT_FOUND,
+        code: status.INVALID_ARGUMENT,
         message: 'Invalid JWT',
       });
     }
