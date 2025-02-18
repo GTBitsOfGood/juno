@@ -68,7 +68,7 @@ export class AuthService {
         });
         if (!project) {
           throw new RpcException({
-            code: status.NOT_FOUND,
+            code: status.INVALID_ARGUMENT,
             message: 'Project not found',
           });
         }
@@ -77,7 +77,7 @@ export class AuthService {
 
       if (projectId == undefined) {
         throw new RpcException({
-          code: status.NOT_FOUND,
+          code: status.INVALID_ARGUMENT,
           message: 'Project not found',
         });
       }
@@ -96,6 +96,7 @@ export class AuthService {
       });
       return convertDbApiKeyToTs(prismaApiKey);
     } catch (error) {
+      if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
         message: 'Error creating API key',
