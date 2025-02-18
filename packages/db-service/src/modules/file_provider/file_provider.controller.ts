@@ -48,10 +48,10 @@ export class FileProviderController implements FileProviderDbServiceController {
   async updateProvider(
     request: FileProviderProto.UpdateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    if (!request.providerName || !request.accessKey || !request.metadata) {
+    if (!request.providerName && !request.accessKey && !request.metadata) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
-        message: 'Provider name, access key, or metadata are not provided',
+        message: 'You must update one of the attributes',
       });
     }
     const fileProvider = await this.fileProviderService.updateProvider(request);
