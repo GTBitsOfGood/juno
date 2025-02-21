@@ -5,6 +5,7 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { isSubset } from 'src/utility/checksubset';
+import { isEqual } from 'lodash';
 import {
   CommonProto,
   IdentifiersProtoFile,
@@ -243,7 +244,7 @@ describe('DB Service User Tests', () => {
       );
     });
 
-    await userPromise;
+    const user1 = await userPromise;
 
     const getUserPromise = new Promise((resolve) => {
       userClient.getUser(
@@ -261,7 +262,9 @@ describe('DB Service User Tests', () => {
       );
     });
 
-    await getUserPromise;
+    const user2 = await getUserPromise;
+
+    expect(isEqual(user1, user2)).toBe(true);
   });
 
   it('gets all users', async () => {

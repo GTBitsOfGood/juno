@@ -5,6 +5,7 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { isSubset } from 'src/utility/checksubset';
+import { isEqual } from 'lodash';
 import {
   IdentifiersProtoFile,
   ProjectProto,
@@ -162,19 +163,21 @@ describe('DB Service Project Tests', () => {
         },
       );
     });
-    expect(retrievedProject == originalProject).toBe(true); //Expect? Expect what? This test is broken bro
+    expect(isEqual(retrievedProject, originalProject)).toBe(true); //Expect? Expect what? This test is broken bro
   });
 
   it('gets all projects', async () => {
     const proj1: CommonProto.Project = await new Promise((resolve) => {
       projectClient.createProject({ name: 'test1' }, (err, resp) => {
         expect(err).toBeNull();
+        createdProjectIds.push(resp.id);
         resolve(resp);
       });
     });
     const proj2: CommonProto.Project = await new Promise((resolve) => {
       projectClient.createProject({ name: 'test2' }, (err, resp) => {
         expect(err).toBeNull();
+        createdProjectIds.push(resp.id);
         resolve(resp);
       });
     });
@@ -193,6 +196,93 @@ describe('DB Service Project Tests', () => {
     expect(isSubset(expected_projects.projects, projects.projects)).toEqual(
       true,
     );
+  });
+
+  it('gets all users within a project', async () => {
+    //Do createdProjects have to be deleted at the end?
+    //Create project
+    const project: CommonProto.Project = await new Promise((resolve) => {
+      projectClient.createProject({ name: 'test_project_acd' }, (err, resp) => {
+        expect(err).toBeNull();
+        createdProjectIds.push(resp.id);
+        resolve(resp);
+      });
+    });
+    //Create and link users
+    await new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'random1@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+    const req1: ProjectProto.LinkUserToProjectRequest = {
+      project: { id: project.id },
+      user: { email: 'random1@test.com' },
+    };
+    await new Promise((resolve) => {
+      projectClient.linkUser(req1, (err, resp) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
+    });
+    await new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'random2@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+    const req2: ProjectProto.LinkUserToProjectRequest = {
+      project: { id: project.id },
+      user: { email: 'random2@test.com' },
+    };
+    await new Promise((resolve) => {
+      projectClient.linkUser(req2, (err, resp) => {
+        expect(err).toBeNull();
+        resolve({});
+      });
+    });
+
+    //Get users (Can't get users when creating them since no project is specified then)
+    const user1: CommonProto.User = await new Promise((resolve) => {
+      userClient.getUser({ email: 'random1@test.com' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    const user2: CommonProto.User = await new Promise((resolve) => {
+      userClient.getUser({ email: 'random2@test.com' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    const expected_users: CommonProto.Users = {
+      users: [user1, user2],
+    };
+    const actual_users: CommonProto.Users = await new Promise((resolve) => {
+      projectClient.getUsersFromProject({ id: project.id }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    console.log('Expected', expected_users);
+    console.log('Actual', actual_users);
+    expect(isSubset(expected_users.users, actual_users.users)).toBe(true);
   });
 
   it('validates identifier', async () => {

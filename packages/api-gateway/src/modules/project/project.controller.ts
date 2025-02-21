@@ -24,7 +24,6 @@ import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 import { UserResponses } from 'src/models/user.dto';
-
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
 @ApiTags('project')
