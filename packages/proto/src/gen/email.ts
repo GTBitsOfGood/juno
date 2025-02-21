@@ -124,7 +124,7 @@ export interface SendGridRecord {
 
 export interface EmailDomain {
   domain: string;
-  subdomain: string;
+  subdomain?: string | undefined;
   sendgridId: number;
   projects: ProjectIdentifier[];
 }
@@ -135,7 +135,7 @@ export interface EmailDomainRequest {
 
 export interface CreateEmailDomainRequest {
   domain: string;
-  subdomain: string;
+  subdomain?: string | undefined;
   sendgridId: number;
   configId: number;
   configEnvironment: string;

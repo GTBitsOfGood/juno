@@ -133,7 +133,7 @@ message SendGridRecord {
 
 message EmailDomain {
   string domain = 1;
-  string subdomain = 2;
+  optional string subdomain = 2;
   int64 sendgridId = 3;
   repeated identifiers.ProjectIdentifier projects = 4;
 }
@@ -142,7 +142,7 @@ message EmailDomainRequest { string domain = 1; }
 
 message CreateEmailDomainRequest {
   string domain = 1;
-  string subdomain = 2;
+  optional string subdomain = 2;
   int64 sendgridId = 3;
   int64 configId = 4;
   string configEnvironment = 5;

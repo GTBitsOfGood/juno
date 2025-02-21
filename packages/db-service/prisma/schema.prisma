@@ -93,7 +93,7 @@ model EmailSender {
 
 model EmailDomain {
   domain          String                        @id()
-  subdomain       String
+  subdomain       String?
   sendgridId      Int
   attachedConfigs EmailServiceConfigAndDomain[]
   EmailSender     EmailSender[]
