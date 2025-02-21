@@ -8,6 +8,7 @@ import "common.proto";
 
 service UserService {
   rpc getUser(identifiers.UserIdentifier) returns (common.User);
+  rpc getAllUsers(GetAllUsersRequest) returns (common.Users);
   rpc createUser(CreateUserRequest) returns (common.User);
   rpc updateUser(UpdateUserRequest) returns (common.User);
   rpc deleteUser(identifiers.UserIdentifier) returns (common.User);
@@ -23,6 +24,9 @@ service UserAuthService {
 message UserPasswordHash { string hash = 1; }
 
 message UserPassword { string password = 1; }
+
+
+message GetAllUsersRequest {}
 
 
 message CreateUserRequest {

@@ -1,41 +1,16 @@
 import { Controller } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Role } from '@prisma/client';
 import * as validate from 'src/utility/validate';
 import { CommonProto, IdentifierProto, UserProto } from 'juno-proto';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-
+import { GetAllUsersRequest } from 'juno-proto/dist/gen/user';
+import { mapPrismaRoleToRPC, mapRPCRoleToPrisma } from 'src/utility/convert';
 @Controller()
 @UserProto.UserServiceControllerMethods()
 export class UserController implements UserProto.UserServiceController {
   constructor(private readonly userService: UserService) {}
-
-  private mapPrismaRoleToRPC(role: Role): CommonProto.UserType {
-    switch (role) {
-      case Role.USER:
-        return CommonProto.UserType.USER;
-      case Role.ADMIN:
-        return CommonProto.UserType.ADMIN;
-      case Role.SUPERADMIN:
-        return CommonProto.UserType.SUPERADMIN;
-      default:
-        return CommonProto.UserType.UNRECOGNIZED;
-    }
-  }
-
-  private mapRPCRoleToPrisma(role: CommonProto.UserType): Role {
-    switch (role) {
-      case CommonProto.UserType.ADMIN:
-        return Role.ADMIN;
-      case CommonProto.UserType.SUPERADMIN:
-        return Role.SUPERADMIN;
-      case CommonProto.UserType.USER:
-      default:
-        return Role.USER;
-    }
-  }
 
   async getUser(
     identifier: IdentifierProto.UserIdentifier,
@@ -52,8 +27,25 @@ export class UserController implements UserProto.UserServiceController {
 
     return {
       ...user,
-      type: this.mapPrismaRoleToRPC(user.type),
+      type: mapPrismaRoleToRPC(user.type),
       projectIds: user.allowedProjects.map((project) => project.id),
+    };
+  }
+
+  async getAllUsers(_: GetAllUsersRequest): Promise<CommonProto.Users> {
+    void _; //Indicates to linter input not used
+    const users = await this.userService.getUsers();
+    return {
+      users: users.map((user) => {
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          password: user.password, //Should this field be present?
+          type: mapPrismaRoleToRPC(user.type),
+          projectIds: user.allowedProjects.map((project) => project.id),
+        };
+      }),
     };
   }
 
@@ -74,12 +66,12 @@ export class UserController implements UserProto.UserServiceController {
       name: request.name,
       email: request.email,
       password: await bcrypt.hash(request.password, 10),
-      type: this.mapRPCRoleToPrisma(request.type),
+      type: mapRPCRoleToPrisma(request.type),
     });
     return {
       ...user,
-      type: this.mapPrismaRoleToRPC(user.type),
-      projectIds: [1],
+      type: mapPrismaRoleToRPC(user.type),
+      projectIds: null, //Why is this added? It's not actually added to the real user. I'm gonna remove it for now.
     };
   }
 
@@ -91,11 +83,11 @@ export class UserController implements UserProto.UserServiceController {
       name: request.updateParams.name,
       email: request.updateParams.email,
       password: request.updateParams.password,
-      type: this.mapRPCRoleToPrisma(request.updateParams.type),
+      type: mapRPCRoleToPrisma(request.updateParams.type),
     });
     return {
       ...user,
-      type: this.mapPrismaRoleToRPC(user.type),
+      type: mapPrismaRoleToRPC(user.type),
       projectIds: user.allowedProjects.map((project) => project.id),
     };
   }
@@ -109,7 +101,7 @@ export class UserController implements UserProto.UserServiceController {
 
     return {
       ...user,
-      type: this.mapPrismaRoleToRPC(user.type),
+      type: mapPrismaRoleToRPC(user.type),
       projectIds: user.allowedProjects.map((project) => project.id),
     };
   }
@@ -125,7 +117,7 @@ export class UserController implements UserProto.UserServiceController {
     });
     return {
       ...updated,
-      type: this.mapPrismaRoleToRPC(updated.type),
+      type: mapPrismaRoleToRPC(updated.type),
       projectIds: updated.allowedProjects.map((project) => project.id),
     };
   }

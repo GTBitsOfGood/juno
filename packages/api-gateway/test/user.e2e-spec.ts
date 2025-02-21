@@ -181,4 +181,17 @@ describe('User Creation Routes', () => {
       })
       .expect(400);
   });
+  // it('should fail with unauthorized user', async () => {
+  //   await request(app.getHttpServer())
+  //     .post('/user')
+  //     .set('X-User-Email', ADMIN_EMAIL)
+  //     .set('X-User-Password', ADMIN_PASSWORD)
+  //     .send({
+  //       id: '2', //Regular user
+  //       password: 'pwd123',
+  //       name: 'John Doe',
+  //       email: 'john@example.com',
+  //     })
+  //     .expect(201);
+  // });
 });

@@ -12,7 +12,9 @@ const userWithProjectIds = {
   },
 };
 
-type UserWithProjectIds = Prisma.UserGetPayload<typeof userWithProjectIds>;
+export type UserWithProjectIds = Prisma.UserGetPayload<
+  typeof userWithProjectIds
+>;
 
 @Injectable()
 export class UserService {
@@ -39,6 +41,10 @@ export class UserService {
       where: lookup,
       ...userWithProjectIds,
     });
+  }
+
+  async getUsers(): Promise<UserWithProjectIds[]> {
+    return this.prisma.user.findMany({ include: { allowedProjects: true } });
   }
 
   async createUser(input: Prisma.UserCreateInput): Promise<User> {

@@ -72,6 +72,13 @@ export class UserResponse {
   }
 }
 
+export class UserResponses {
+  users: UserResponse[];
+  constructor(usersResponse: CommonProto.Users) {
+    this.users = usersResponse.users.map((user) => new UserResponse(user));
+  }
+}
+
 function toEnum(params: { value: string }): CommonProto.UserType | undefined {
   switch (params.value) {
     case 'SUPERADMIN':

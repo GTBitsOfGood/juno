@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Project } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-
+import { UserWithProjectIds } from '../user/user.service';
 @Injectable()
 export class ProjectService {
   constructor(private prisma: PrismaService) {}
@@ -19,6 +19,13 @@ export class ProjectService {
       cursor,
       where,
       orderBy,
+    });
+  }
+
+  async getUsersWithProject(desiredId: number): Promise<UserWithProjectIds[]> {
+    return this.prisma.user.findMany({
+      where: { allowedProjects: { some: { id: desiredId } } },
+      include: { allowedProjects: true },
     });
   }
 

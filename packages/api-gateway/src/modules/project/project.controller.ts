@@ -17,11 +17,13 @@ import {
   CreateProjectModel,
   LinkUserModel,
   ProjectResponse,
+  ProjectResponses,
 } from 'src/models/project.dto';
 import { AuthCommonProto, CommonProto, ProjectProto } from 'juno-proto';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import { UserResponses } from 'src/models/user.dto';
 
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
@@ -29,7 +31,6 @@ const { PROJECT_SERVICE_NAME } = ProjectProto;
 @Controller('project')
 export class ProjectController implements OnModuleInit {
   private projectService: ProjectProto.ProjectServiceClient;
-
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
   ) {}
@@ -66,6 +67,88 @@ export class ProjectController implements OnModuleInit {
     });
 
     return new ProjectResponse(await lastValueFrom(project));
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Retrieves all projects.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returned all projects',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  async getAllProjects(
+    @User() user: CommonProto.User,
+  ): Promise<ProjectResponses> {
+    if (user.type != CommonProto.UserType.SUPERADMIN) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    const projects = this.projectService.getAllProjects({});
+    return new ProjectResponses(await lastValueFrom(projects));
+  }
+
+  //Get all users assosciated with a project
+  @Get(':id/users')
+  @ApiOperation({ summary: 'Retrieve all users assosciated with a project. ' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returned all users asossciated with given project.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No project found with this id.',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  async getUsersByProject(
+    @Param('id') id: number,
+    @User() user: CommonProto.User,
+  ): Promise<UserResponses> {
+    let authenticated = false;
+    if (user.type == CommonProto.UserType.SUPERADMIN) {
+      authenticated = true;
+    }
+    if (
+      user.type == CommonProto.UserType.ADMIN &&
+      user.projectIds.includes(id)
+    ) {
+      authenticated = true;
+    }
+    if (!authenticated) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    const users = this.projectService.getUsersFromProject({ projectId: id });
+
+    return new UserResponses(await lastValueFrom(users));
   }
 
   @Get('name/:name')
