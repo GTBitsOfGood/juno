@@ -30,7 +30,7 @@ export class ProjectLinkingMiddleware implements NestMiddleware, OnModuleInit {
     }
     const token = this.extractTokenFromHeader(req);
     if (!token) {
-      throw new UnauthorizedException('Jwt not found');
+      throw new UnauthorizedException('JWT not found');
     }
     try {
       const jwtValidation = this.jwtService.validateApiKeyJwt({
@@ -39,7 +39,7 @@ export class ProjectLinkingMiddleware implements NestMiddleware, OnModuleInit {
       await lastValueFrom(jwtValidation);
       next();
     } catch (error) {
-      throw new UnauthorizedException('Invalid jwt');
+      throw new UnauthorizedException('Invalid JWT');
     }
   }
 

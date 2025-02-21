@@ -33,7 +33,7 @@ export class EmailLinkingMiddleware implements NestMiddleware, OnModuleInit {
     }
     const token = this.extractTokenFromHeader(req);
     if (!token) {
-      throw new UnauthorizedException('Jwt not found');
+      throw new UnauthorizedException('JWT not found');
     }
     try {
       const jwtValidation = this.jwtService.validateApiKeyJwt({ jwt: token });
