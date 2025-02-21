@@ -53,7 +53,7 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
       next();
     } catch {
       throw new HttpException(
-        'Invalid user credentials',
+        `Invalid user credentials`,
         HttpStatus.UNAUTHORIZED,
       );
     }
