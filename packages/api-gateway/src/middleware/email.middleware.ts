@@ -3,8 +3,7 @@ import {
   NestMiddleware,
   Inject,
   OnModuleInit,
-  HttpException,
-  HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -26,31 +25,22 @@ export class EmailLinkingMiddleware implements NestMiddleware, OnModuleInit {
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
+    if (
+      req.headers.authorization === undefined ||
+      req.headers.authorization.length === 0
+    ) {
+      throw new UnauthorizedException('No authorization headers');
+    }
+    const token = this.extractTokenFromHeader(req);
+    if (!token) {
+      throw new UnauthorizedException('JWT not found');
+    }
     try {
-      if (
-        req.headers.authorization === undefined ||
-        req.headers.authorization.length === 0
-      ) {
-        throw new Error('No authorization headers');
-      }
-      const token = this.extractTokenFromHeader(req);
-      if (!token) {
-        throw new Error('Jwt not found');
-      }
-
       const jwtValidation = this.jwtService.validateApiKeyJwt({ jwt: token });
-      const res = await lastValueFrom(jwtValidation);
-
-      if (!res.valid) {
-        throw new Error('Invalid JWT');
-      }
-
+      await lastValueFrom(jwtValidation);
       next();
-    } catch {
-      throw new HttpException(
-        'Invalid user credentials',
-        HttpStatus.UNAUTHORIZED,
-      );
+    } catch (error) {
+      throw new UnauthorizedException('Invalid JWT');
     }
   }
 

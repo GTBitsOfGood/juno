@@ -45,7 +45,10 @@ export class FileController implements FileDbServiceController {
           });
         }
       } else {
-        throw err;
+        throw new RpcException({
+          code: status.FAILED_PRECONDITION,
+          message: 'Failed to create file',
+        });
       }
     }
   }
@@ -102,7 +105,10 @@ export class FileController implements FileDbServiceController {
           message: 'File not found',
         });
       } else {
-        throw err;
+        throw new RpcException({
+          code: status.FAILED_PRECONDITION,
+          message: 'Failed to update file',
+        });
       }
     }
   }
@@ -133,7 +139,10 @@ export class FileController implements FileDbServiceController {
           message: 'File not found',
         });
       } else {
-        throw err;
+        throw new RpcException({
+          code: status.FAILED_PRECONDITION,
+          message: 'Failed to delete file',
+        });
       }
     }
   }

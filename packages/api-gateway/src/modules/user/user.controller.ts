@@ -118,8 +118,8 @@ export class UserController implements OnModuleInit {
     description: 'Bad request',
   })
   @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Internal server error.',
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized operation',
   })
   async createUser(
     @User() user: CommonProto.User,
@@ -172,8 +172,8 @@ export class UserController implements OnModuleInit {
     description: 'Bad request',
   })
   @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Internal server error.',
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized operation',
   })
   async setUserType(
     @User() user: CommonProto.User,
@@ -234,8 +234,8 @@ export class UserController implements OnModuleInit {
     description: 'User linked to project successfully.',
   })
   @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: 'Internal server error.',
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized operation',
   })
   async linkUserWithProjectId(
     @User() user: CommonProto.User,

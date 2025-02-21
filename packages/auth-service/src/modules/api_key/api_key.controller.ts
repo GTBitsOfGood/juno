@@ -30,7 +30,10 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     );
 
     if (!apiKey) {
-      throw new Error('Invalid API Key');
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Api key not found',
+      });
     }
 
     return {
@@ -66,7 +69,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     });
     if (!key) {
       throw new RpcException({
-        code: status.INTERNAL,
+        code: status.FAILED_PRECONDITION,
         message: 'Failed to create API Key',
       });
     }

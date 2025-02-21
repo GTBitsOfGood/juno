@@ -1,8 +1,9 @@
 import { Controller, Inject } from '@nestjs/common';
 import { JwtProto, ApiKeyProto, UserProto } from 'juno-proto';
 import * as jwt from 'jsonwebtoken';
-import { ClientGrpc } from '@nestjs/microservices';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { createHash } from 'crypto';
+import { status } from '@grpc/grpc-js';
 import { lastValueFrom } from 'rxjs';
 
 @Controller('jwt')
@@ -35,14 +36,24 @@ export class JWTController implements JwtProto.JwtServiceController {
     const apiKeyHash = createHash('sha256')
       .update(request.apiKey)
       .digest('hex');
-    const apiKey = await lastValueFrom(
-      this.apiKeyDbService.getApiKey({
-        hash: apiKeyHash,
-      }),
-    );
 
-    if (!apiKey) {
-      throw new Error('Invalid API Key');
+    try {
+      await lastValueFrom(
+        this.apiKeyDbService.getApiKey({
+          hash: apiKeyHash,
+        }),
+      );
+    } catch (error) {
+      if (error.code === status.NOT_FOUND)
+        throw new RpcException({
+          code: status.UNAUTHENTICATED,
+          message: 'Invalid Api key',
+        });
+      else
+        throw new RpcException({
+          code: status.FAILED_PRECONDITION,
+          message: 'Failed to get api key',
+        });
     }
 
     const token = jwt.sign(
@@ -75,7 +86,10 @@ export class JWTController implements JwtProto.JwtServiceController {
       }
       return { valid: false };
     } catch (e) {
-      throw new Error(e.message);
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid JWT',
+      });
     }
   }
   async createUserJwt(
@@ -88,7 +102,10 @@ export class JWTController implements JwtProto.JwtServiceController {
     );
 
     if (!user) {
-      throw new Error('Invalid User');
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'User not found',
+      });
     }
 
     const token = jwt.sign(
@@ -121,7 +138,10 @@ export class JWTController implements JwtProto.JwtServiceController {
       }
       return { valid: false };
     } catch (e) {
-      throw new Error(e.message);
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Invalid JWT',
+      });
     }
   }
 }
