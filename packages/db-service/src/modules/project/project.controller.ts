@@ -8,8 +8,8 @@ import {
 import { IdentifierProto, ProjectProto, CommonProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { GetUsersFromProject } from 'juno-proto/dist/gen/user';
 import { mapPrismaRoleToRPC } from 'src/utility/convert';
+
 @Controller()
 @ProjectProto.ProjectServiceControllerMethods()
 export class ProjectController
@@ -40,17 +40,18 @@ export class ProjectController
   }
 
   async getUsersFromProject(
-    input: GetUsersFromProject,
+    input: ProjectProto.GetUsersFromProject,
   ): Promise<CommonProto.Users> {
-    const users = await this.projectService.getUsersWithProject(
-      input.projectId,
-    );
+    const projectIdentifier: IdentifierProto.ProjectIdentifier = {
+      id: input.projectId,
+    };
+    const params = validateProjectIdentifier(projectIdentifier);
+    await this.getProject(projectIdentifier); //Throws error if project doesn't exist.
+    const users = await this.projectService.getUsersWithProject(params.id);
     return {
       users: users.map((user) => {
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
+          ...user,
           type: mapPrismaRoleToRPC(user.type),
           projectIds: user.allowedProjects.map((project) => project.id),
         };

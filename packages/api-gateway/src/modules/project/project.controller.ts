@@ -24,6 +24,7 @@ import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 import { UserResponses } from 'src/models/user.dto';
+
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
 @ApiTags('project')
@@ -93,7 +94,7 @@ export class ProjectController implements OnModuleInit {
   async getAllProjects(
     @User() user: CommonProto.User,
   ): Promise<ProjectResponses> {
-    if (user.type != CommonProto.UserType.SUPERADMIN) {
+    if (user == undefined || user.type != CommonProto.UserType.SUPERADMIN) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
     const projects = this.projectService.getAllProjects({});
@@ -128,16 +129,22 @@ export class ProjectController implements OnModuleInit {
     },
   })
   async getUsersByProject(
-    @Param('id') id: number,
+    @Param('id') idStr: string,
     @User() user: CommonProto.User,
   ): Promise<UserResponses> {
+    const id = parseInt(idStr);
+    if (Number.isNaN(id)) {
+      throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);
+    }
     let authenticated = false;
-    if (user.type == CommonProto.UserType.SUPERADMIN) {
+    if (user != undefined && user.type == CommonProto.UserType.SUPERADMIN) {
       authenticated = true;
     }
+
     if (
+      user != undefined &&
       user.type == CommonProto.UserType.ADMIN &&
-      user.projectIds.includes(id)
+      user.projectIds.some((projectId) => projectId == id)
     ) {
       authenticated = true;
     }
@@ -146,7 +153,6 @@ export class ProjectController implements OnModuleInit {
     }
 
     const users = this.projectService.getUsersFromProject({ projectId: id });
-
     return new UserResponses(await lastValueFrom(users));
   }
 

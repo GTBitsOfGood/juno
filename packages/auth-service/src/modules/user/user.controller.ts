@@ -47,6 +47,7 @@ export class UserController implements UserProto.UserAuthServiceController {
         message: 'Incorrect password',
       });
     }
+    console.log('EMAIL_FROM_AUTH: ', request.email);
     return lastValueFrom(
       this.userService.getUser({
         email: request.email,

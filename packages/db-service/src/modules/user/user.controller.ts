@@ -38,10 +38,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       users: users.map((user) => {
         return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          password: user.password, //Should this field be present?
+          ...user, //Should this field be present?
           type: mapPrismaRoleToRPC(user.type),
           projectIds: user.allowedProjects.map((project) => project.id),
         };

@@ -22,10 +22,6 @@ export interface UserPassword {
 
 export interface GetAllUsersRequest {}
 
-export interface GetUsersFromProject {
-  projectId: number;
-}
-
 export interface CreateUserRequest {
   email: string;
   name: string;

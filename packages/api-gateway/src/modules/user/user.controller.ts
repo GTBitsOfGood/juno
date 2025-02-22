@@ -79,8 +79,8 @@ export class UserController implements OnModuleInit {
       type: 'string',
     },
   })
-  async getAllProjects(@User() user: CommonProto.User): Promise<UserResponses> {
-    if (user.type != CommonProto.UserType.SUPERADMIN) {
+  async getAllUsers(@User() user: CommonProto.User): Promise<UserResponses> {
+    if (user == undefined || user.type != CommonProto.UserType.SUPERADMIN) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
     const users = this.userService.getAllUsers({});
@@ -120,8 +120,6 @@ export class UserController implements OnModuleInit {
     return new UserResponse(await lastValueFrom(user));
   }
 
-  @Get()
-  @ApiOperation({ summary: 'get all users.' })
   @Post()
   @ApiOperation({ summary: 'Create a new user.' })
   @ApiHeader({

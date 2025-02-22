@@ -230,7 +230,7 @@ describe('DB Service Project Tests', () => {
     await new Promise((resolve) => {
       projectClient.linkUser(req1, (err, resp) => {
         expect(err).toBeNull();
-        resolve({});
+        resolve(resp);
       });
     });
     await new Promise((resolve) => {
@@ -254,7 +254,7 @@ describe('DB Service Project Tests', () => {
     await new Promise((resolve) => {
       projectClient.linkUser(req2, (err, resp) => {
         expect(err).toBeNull();
-        resolve({});
+        resolve(resp);
       });
     });
 
@@ -275,13 +275,14 @@ describe('DB Service Project Tests', () => {
       users: [user1, user2],
     };
     const actual_users: CommonProto.Users = await new Promise((resolve) => {
-      projectClient.getUsersFromProject({ id: project.id }, (err, resp) => {
-        expect(err).toBeNull();
-        resolve(resp);
-      });
+      projectClient.getUsersFromProject(
+        { projectId: project.id },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
     });
-    console.log('Expected', expected_users);
-    console.log('Actual', actual_users);
     expect(isSubset(expected_users.users, actual_users.users)).toBe(true);
   });
 
