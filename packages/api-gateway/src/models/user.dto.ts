@@ -73,6 +73,10 @@ export class UserResponse {
 }
 
 export class UserResponses {
+  @ApiProperty({
+    description: 'Users',
+    type: [UserResponse],
+  })
   users: UserResponse[];
   constructor(usersResponse: CommonProto.Users) {
     this.users = usersResponse.users.map((user) => new UserResponse(user));

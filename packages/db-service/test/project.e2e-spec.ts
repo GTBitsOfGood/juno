@@ -163,7 +163,7 @@ describe('DB Service Project Tests', () => {
         },
       );
     });
-    expect(isEqual(retrievedProject, originalProject)).toBe(true); //Expect? Expect what? This test is broken bro
+    expect(isEqual(retrievedProject, originalProject)).toBe(true);
   });
 
   it('gets all projects', async () => {
