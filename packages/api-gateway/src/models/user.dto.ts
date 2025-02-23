@@ -74,7 +74,7 @@ export class UserResponse {
 
 export class UserResponses {
   @ApiProperty({
-    description: 'Users',
+    description: 'List of Users',
     type: [UserResponse],
   })
   users: UserResponse[];

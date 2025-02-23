@@ -46,7 +46,7 @@ export class ProjectController
       id: input.projectId,
     };
     const params = validateProjectIdentifier(projectIdentifier);
-    await this.getProject(projectIdentifier); //Throws error if project doesn't exist.
+    await this.getProject(projectIdentifier); //Throws Not found RPC exception if project doesn't exist.
     const users = await this.projectService.getUsersWithProject(params.id);
     return {
       users: users.map((user) => {

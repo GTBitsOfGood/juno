@@ -22,9 +22,9 @@ export class ProjectService {
     });
   }
 
-  async getUsersWithProject(desiredId: number): Promise<UserWithProjectIds[]> {
+  async getUsersWithProject(projectId: number): Promise<UserWithProjectIds[]> {
     return this.prisma.user.findMany({
-      where: { allowedProjects: { some: { id: desiredId } } },
+      where: { allowedProjects: { some: { id: projectId } } },
       include: { allowedProjects: true },
     });
   }

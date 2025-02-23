@@ -68,7 +68,7 @@ export class UserController implements UserProto.UserServiceController {
     return {
       ...user,
       type: mapPrismaRoleToRPC(user.type),
-      projectIds: null, //Why is this added? It's not actually added to the real user. I'm gonna remove it for now.
+      projectIds: null,
     };
   }
 

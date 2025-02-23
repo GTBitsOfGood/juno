@@ -29,6 +29,7 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
   async use(req: UserReq, res: Response, next: NextFunction) {
     const emailHeader = req.header('X-User-Email');
     const passwordHeader = req.header('X-User-Password');
+
     // If invalid headers, return 401
     if (emailHeader === undefined || passwordHeader === undefined) {
       throw new HttpException(
