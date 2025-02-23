@@ -3,8 +3,7 @@ import {
   NestMiddleware,
   Inject,
   OnModuleInit,
-  HttpException,
-  HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -27,35 +26,26 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
   }
 
   async use(req: ApiKeyReq, res: Response, next: NextFunction) {
-    try {
-      if (
-        req.headers.authorization === undefined ||
-        req.headers.authorization.length === 0
-      ) {
-        throw new Error('No authorization headers');
-      }
-      const token = this.extractTokenFromHeader(req);
-      if (!token) {
-        throw new Error('API Key not found');
-      }
+    if (
+      req.headers.authorization === undefined ||
+      req.headers.authorization.length === 0
+    ) {
+      throw new UnauthorizedException('No authorization headers');
+    }
+    const token = this.extractTokenFromHeader(req);
+    if (!token) {
+      throw new UnauthorizedException('API Key not found');
+    }
 
+    try {
       const apiKeyValidation = this.apiKeyService.validateApiKey({
         apiKey: token,
       });
       const res = await lastValueFrom(apiKeyValidation);
-
-      if (!res.valid) {
-        throw new Error('Invalid API Key');
-      }
-
       req.apiKey = res.key;
-
       next();
-    } catch {
-      throw new HttpException(
-        'Invalid user credentials',
-        HttpStatus.UNAUTHORIZED,
-      );
+    } catch (error) {
+      throw new UnauthorizedException('Invalid API Key');
     }
   }
 

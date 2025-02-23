@@ -81,8 +81,8 @@ export class AuthController implements OnModuleInit {
   })
   @ApiBearerAuth('API_Key')
   async getApiKeyJWT(@Headers('Authorization') apiKey?: string) {
-    const key = apiKey?.replace('Bearer ', '');
-    if (key === undefined) {
+    const key = apiKey?.split(' ').at(1);
+    if (!key) {
       throw new UnauthorizedException('API Key is required');
     }
     const jwt = await lastValueFrom(

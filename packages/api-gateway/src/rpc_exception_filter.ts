@@ -51,8 +51,10 @@ function rpcStatusToHttp(rpc: status): number {
   switch (rpc) {
     case status.OK:
       return 200;
+    case status.UNAUTHENTICATED:
     case status.PERMISSION_DENIED:
       return 401;
+    case status.INVALID_ARGUMENT:
     case status.FAILED_PRECONDITION:
       return 400;
     case status.NOT_FOUND:

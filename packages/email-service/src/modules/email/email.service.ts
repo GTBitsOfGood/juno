@@ -43,7 +43,10 @@ export class EmailService implements OnModuleInit {
     req: EmailProto.AuthenticateDomainRequest,
   ): Promise<EmailProto.AuthenticateDomainResponse> {
     if (!req.domain || req.domain.length == 0) {
-      throw new RpcException('Cannot register domain (no domain supplied)');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Cannot register domain (no domain supplied)',
+      });
     }
 
     const config = await lastValueFrom(
@@ -56,9 +59,10 @@ export class EmailService implements OnModuleInit {
     const sendGridApiKey = config.sendgridKey;
 
     if (!sendGridApiKey) {
-      throw new RpcException(
-        'Cannot register domain (SendGrid API key not in .env)',
-      );
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Cannot register domain (SendGrid API key not in .env)',
+      });
     }
 
     const sendGridUrl = 'https://api.sendgrid.com/v3/whitelabel/domains';
@@ -168,13 +172,22 @@ export class EmailService implements OnModuleInit {
     req: EmailProto.RegisterSenderRequest,
   ): Promise<EmailProto.RegisterSenderResponse> {
     if (!req.fromEmail) {
-      throw new RpcException('Cannot register sender (no email supplied)');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Cannot register sender (no email supplied)',
+      });
     }
     if (!req.fromName) {
-      throw new RpcException('Cannot register sender (no name supplied)');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Cannot register sender (no name supplied)',
+      });
     }
     if (!req.replyTo) {
-      throw new RpcException('Cannot register sender (no reply to specified)');
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Cannot register sender (no reply to specified)',
+      });
     }
     const config = await lastValueFrom(
       this.emailService.getEmailServiceConfig({
@@ -188,9 +201,10 @@ export class EmailService implements OnModuleInit {
     const sendgridUrl = 'https://api.sendgrid.com/v3/verified_senders';
 
     if (!sendgridApiKey) {
-      throw new RpcException(
-        'Cannot register sender (sendgrid API key is missing)',
-      );
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Cannot register sender (sendgrid API key is missing)',
+      });
     }
 
     if (process.env['NODE_ENV'] == 'test') {
@@ -256,9 +270,10 @@ export class EmailService implements OnModuleInit {
     const sendgridUrl = `https://api.sendgrid.com/v3/whitelabel/domains/${id}/val`;
 
     if (!sendgridApiKey) {
-      throw new RpcException(
-        'Cannot verify domain (sendgrid API key is missing)',
-      );
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Cannot verify domain (sendgrid API key is missing)',
+      });
     }
 
     if (process.env['NODE_ENV'] == 'test') {
@@ -288,7 +303,10 @@ export class EmailService implements OnModuleInit {
         records,
       };
     } catch (error) {
-      throw new RpcException('Failed to register domain');
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Failed to register domain',
+      });
     }
   }
 }
