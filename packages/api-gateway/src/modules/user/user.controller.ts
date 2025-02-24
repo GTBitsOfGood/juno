@@ -62,7 +62,7 @@ export class UserController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned all users',
-    type: UserResponses
+    type: UserResponses,
   })
   @ApiHeader({
     name: 'X-User-Email',
