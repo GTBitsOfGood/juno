@@ -7,7 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
-import { User, UserType } from './common';
+import { User, Users, UserType } from './common';
 import { ProjectIdentifier, UserIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.user';
@@ -19,6 +19,8 @@ export interface UserPasswordHash {
 export interface UserPassword {
   password: string;
 }
+
+export interface GetAllUsersRequest {}
 
 export interface CreateUserRequest {
   email: string;
@@ -54,6 +56,8 @@ export const JUNO_USER_PACKAGE_NAME = 'juno.user';
 export interface UserServiceClient {
   getUser(request: UserIdentifier): Observable<User>;
 
+  getAllUsers(request: GetAllUsersRequest): Observable<Users>;
+
   createUser(request: CreateUserRequest): Observable<User>;
 
   updateUser(request: UpdateUserRequest): Observable<User>;
@@ -67,6 +71,10 @@ export interface UserServiceClient {
 
 export interface UserServiceController {
   getUser(request: UserIdentifier): Promise<User> | Observable<User> | User;
+
+  getAllUsers(
+    request: GetAllUsersRequest,
+  ): Promise<Users> | Observable<Users> | Users;
 
   createUser(
     request: CreateUserRequest,
@@ -94,6 +102,7 @@ export function UserServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       'getUser',
+      'getAllUsers',
       'createUser',
       'updateUser',
       'deleteUser',

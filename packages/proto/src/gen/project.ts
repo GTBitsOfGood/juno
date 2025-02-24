@@ -7,14 +7,16 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { Project, Projects, Users } from './common';
 import { ProjectIdentifier, UserIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.project';
 
-export interface Project {
-  id: number;
-  name: string;
+export interface GetUsersFromProject {
+  projectId: number;
 }
+
+export interface GetAllProjectsRequest {}
 
 export interface CreateProjectRequest {
   name: string;
@@ -39,6 +41,10 @@ export const JUNO_PROJECT_PACKAGE_NAME = 'juno.project';
 export interface ProjectServiceClient {
   getProject(request: ProjectIdentifier): Observable<Project>;
 
+  getAllProjects(request: GetAllProjectsRequest): Observable<Projects>;
+
+  getUsersFromProject(request: GetUsersFromProject): Observable<Users>;
+
   createProject(request: CreateProjectRequest): Observable<Project>;
 
   updateProject(request: UpdateProjectRequest): Observable<Project>;
@@ -52,6 +58,14 @@ export interface ProjectServiceController {
   getProject(
     request: ProjectIdentifier,
   ): Promise<Project> | Observable<Project> | Project;
+
+  getAllProjects(
+    request: GetAllProjectsRequest,
+  ): Promise<Projects> | Observable<Projects> | Projects;
+
+  getUsersFromProject(
+    request: GetUsersFromProject,
+  ): Promise<Users> | Observable<Users> | Users;
 
   createProject(
     request: CreateProjectRequest,
@@ -74,6 +88,8 @@ export function ProjectServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       'getProject',
+      'getAllProjects',
+      'getUsersFromProject',
       'createProject',
       'updateProject',
       'deleteProject',

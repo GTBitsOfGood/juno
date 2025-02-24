@@ -3,20 +3,23 @@ syntax = "proto3";
 package juno.project;
 
 import "identifiers.proto";
+import "common.proto";
 
 service ProjectService {
-  rpc getProject(identifiers.ProjectIdentifier) returns (Project);
-  rpc createProject(CreateProjectRequest) returns (Project);
-  rpc updateProject(UpdateProjectRequest) returns (Project);
-  rpc deleteProject(identifiers.ProjectIdentifier) returns (Project);
-  rpc linkUser(LinkUserToProjectRequest) returns (Project);
+  rpc getProject(identifiers.ProjectIdentifier) returns (common.Project);
+  rpc getAllProjects(GetAllProjectsRequest) returns (common.Projects);
+  rpc getUsersFromProject(GetUsersFromProject) returns (common.Users);
+  rpc createProject(CreateProjectRequest) returns (common.Project);
+  rpc updateProject(UpdateProjectRequest) returns (common.Project);
+  rpc deleteProject(identifiers.ProjectIdentifier) returns (common.Project);
+  rpc linkUser(LinkUserToProjectRequest) returns (common.Project);
 }
 
-message Project {
-  int64 id = 1;
-  string name = 2;
+message GetUsersFromProject {
+  int64 projectId = 1;
 }
 
+message GetAllProjectsRequest {}
 message CreateProjectRequest { string name = 1; }
 
 message ProjectUpdateParams { optional string name = 2; }

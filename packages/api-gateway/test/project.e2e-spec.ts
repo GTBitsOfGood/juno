@@ -524,4 +524,141 @@ describe('Project Linking Middleware', () => {
       })
       .expect(200);
   });
+  it('get projects should fail with unauthorized user', async () => {
+    //Create unauthorized user
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: '2', //Regular user
+        password: 'pwd123',
+        name: 'John Doe',
+        email: 'john1@example.com',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/project')
+      .set('X-User-Email', 'john1@example.com')
+      .set('X-User-Password', 'pwd123')
+      .send()
+      .expect(401);
+  });
+  it('get projects should succeed with authorized user', async () => {
+    await request(app.getHttpServer())
+      .get('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200);
+  });
+  it('get users from a project should fail with unauthorized user', async () => {
+    //Create unauthorized user
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: '2', //Regular user
+        password: 'pwd123',
+        name: 'John Doe',
+        email: 'john2@example.com',
+      })
+      .expect(201);
+    //Create project
+    const project = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'testProject1',
+      })
+      .expect(201);
+    const projectId = project.body['id'];
+
+    await request(app.getHttpServer())
+      .get(`/project/${projectId}/users`)
+      .set('X-User-Email', 'john2@example.com')
+      .set('X-User-Password', 'pwd123')
+      .send()
+      .expect(401);
+  });
+  it('get users from a project should fail with admin not linked to the project', async () => {
+    //Create unauthorized user
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: '1', //Admin user
+        password: 'pwd123',
+        name: 'John Doe',
+        email: 'john3@example.com',
+      })
+      .expect(201);
+    //Create project
+    const project = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'testProject2',
+      })
+      .expect(201);
+    const projectId = project.body['id'];
+
+    await request(app.getHttpServer())
+      .get(`/project/${projectId}/users`)
+      .set('X-User-Email', 'john3@example.com')
+      .set('X-User-Password', 'pwd123')
+      .send()
+      .expect(401);
+  });
+  it('get users from a project should succeed with admin linked to the project', async () => {
+    //Create unauthorized user
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'pwd123',
+        name: 'John Doe',
+        email: 'john4@example.com',
+      })
+      .expect(201);
+    //Authorize user by converting to admin
+    await request(app.getHttpServer())
+      .post('/user/type')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        email: 'john4@example.com',
+        type: 'ADMIN',
+      })
+      .expect(201);
+    //Link project
+    await request(app.getHttpServer())
+      .put('/project/name/test-seed-project/user')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        email: 'john4@example.com',
+      })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .get(`/project/0/users`)
+      .set('X-User-Email', 'john4@example.com')
+      .set('X-User-Password', 'pwd123')
+      .send()
+      .expect(200);
+  });
+  it("get users from a project that doesn't exist", async () => {
+    await request(app.getHttpServer())
+      .get(`/project/123/users`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(404);
+  });
 });

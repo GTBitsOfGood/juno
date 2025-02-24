@@ -4,6 +4,8 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { isSubset } from 'src/utility/checksubset';
+import { isEqual } from 'lodash';
 import {
   CommonProto,
   IdentifiersProtoFile,
@@ -242,7 +244,7 @@ describe('DB Service User Tests', () => {
       );
     });
 
-    await userPromise;
+    const user1 = await userPromise;
 
     const getUserPromise = new Promise((resolve) => {
       userClient.getUser(
@@ -260,7 +262,53 @@ describe('DB Service User Tests', () => {
       );
     });
 
-    await getUserPromise;
+    const user2 = await getUserPromise;
+
+    expect(isEqual(user1, user2)).toBe(true);
+  });
+
+  it('gets all users', async () => {
+    //Users don't seem to be getting reset at thend of this test
+    const user1: CommonProto.User = await new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'randomemail1@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+    const user2: CommonProto.User = await new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'randomemail3@test.com',
+          password: 'some-password1',
+          name: 'some-name-1',
+          type: 'ADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+
+    const expected_users: CommonProto.Users = {
+      users: [user1, user2],
+    };
+
+    const users: CommonProto.Users = await new Promise((resolve) => {
+      userClient.getAllUsers({}, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    expect(isSubset(expected_users.users, users.users)).toEqual(true);
   });
 
   it('can get a valid user password hash', async () => {

@@ -181,4 +181,32 @@ describe('User Creation Routes', () => {
       })
       .expect(400);
   });
+  it('get users should fail with unauthorized user', async () => {
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: '1', //Unauthorized admin user
+        password: 'pwd123',
+        name: 'John Doe',
+        email: 'john5@example.com',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('/user')
+      .set('X-User-Email', 'john5@example.com')
+      .set('X-User-Password', 'pwd123')
+      .send()
+      .expect(401);
+  });
+  it('get users should succeed with authorized user', async () => {
+    await request(app.getHttpServer())
+      .get('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200);
+  });
 });

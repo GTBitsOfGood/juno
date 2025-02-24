@@ -4,6 +4,8 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { isSubset } from 'src/utility/checksubset';
+import { isEqual } from 'lodash';
 import {
   IdentifiersProtoFile,
   ProjectProto,
@@ -12,6 +14,8 @@ import {
   ResetProtoFile,
   UserProto,
   UserProtoFile,
+  CommonProto,
+  CommonProtoFile,
 } from 'juno-proto';
 
 const { JUNO_USER_PACKAGE_NAME } = UserProto;
@@ -37,6 +41,7 @@ async function initApp() {
       protoPath: [
         UserProtoFile,
         ProjectProtoFile,
+        CommonProtoFile,
         IdentifiersProtoFile,
         ResetProtoFile,
       ],
@@ -83,6 +88,7 @@ describe('DB Service Project Tests', () => {
   beforeEach(() => {
     const proto = ProtoLoader.loadSync([
       ProjectProtoFile,
+      CommonProtoFile,
       IdentifiersProtoFile,
       UserProtoFile,
     ]) as any;
@@ -132,7 +138,7 @@ describe('DB Service Project Tests', () => {
   });
 
   it('gets a project', async () => {
-    const originalProject: ProjectProto.Project = await new Promise(
+    const originalProject: CommonProto.Project = await new Promise(
       (resolve) => {
         projectClient.createProject(
           {
@@ -157,7 +163,127 @@ describe('DB Service Project Tests', () => {
         },
       );
     });
-    expect(retrievedProject == originalProject);
+    expect(isEqual(retrievedProject, originalProject)).toBe(true);
+  });
+
+  it('gets all projects', async () => {
+    const proj1: CommonProto.Project = await new Promise((resolve) => {
+      projectClient.createProject({ name: 'test1' }, (err, resp) => {
+        expect(err).toBeNull();
+        createdProjectIds.push(resp.id);
+        resolve(resp);
+      });
+    });
+    const proj2: CommonProto.Project = await new Promise((resolve) => {
+      projectClient.createProject({ name: 'test2' }, (err, resp) => {
+        expect(err).toBeNull();
+        createdProjectIds.push(resp.id);
+        resolve(resp);
+      });
+    });
+
+    const expected_projects: CommonProto.Projects = {
+      projects: [proj1, proj2],
+    };
+
+    const projects: CommonProto.Projects = await new Promise((resolve) => {
+      projectClient.getAllProjects({}, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+
+    expect(isSubset(expected_projects.projects, projects.projects)).toEqual(
+      true,
+    );
+  });
+
+  it('gets all users within a project', async () => {
+    //Do createdProjects have to be deleted at the end?
+    //Create project
+    const project: CommonProto.Project = await new Promise((resolve) => {
+      projectClient.createProject({ name: 'test_project_acd' }, (err, resp) => {
+        expect(err).toBeNull();
+        createdProjectIds.push(resp.id);
+        resolve(resp);
+      });
+    });
+    //Create and link users
+    await new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'random1@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+    const req1: ProjectProto.LinkUserToProjectRequest = {
+      project: { id: project.id },
+      user: { email: 'random1@test.com' },
+    };
+    await new Promise((resolve) => {
+      projectClient.linkUser(req1, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    await new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'random2@test.com',
+          password: 'some-password',
+          name: 'some-name',
+          type: 'SUPERADMIN',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+    const req2: ProjectProto.LinkUserToProjectRequest = {
+      project: { id: project.id },
+      user: { email: 'random2@test.com' },
+    };
+    await new Promise((resolve) => {
+      projectClient.linkUser(req2, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+
+    //Get users (Can't get users when creating them since no project is specified then)
+    const user1: CommonProto.User = await new Promise((resolve) => {
+      userClient.getUser({ email: 'random1@test.com' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    const user2: CommonProto.User = await new Promise((resolve) => {
+      userClient.getUser({ email: 'random2@test.com' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    const expected_users: CommonProto.Users = {
+      users: [user1, user2],
+    };
+    const actual_users: CommonProto.Users = await new Promise((resolve) => {
+      projectClient.getUsersFromProject(
+        { projectId: project.id },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
+    });
+    expect(isSubset(expected_users.users, actual_users.users)).toBe(true);
   });
 
   it('validates identifier', async () => {
@@ -187,7 +313,7 @@ describe('DB Service Project Tests', () => {
   });
 
   it('updates a project', async () => {
-    const project: ProjectProto.Project = await new Promise((resolve) => {
+    const project: CommonProto.Project = await new Promise((resolve) => {
       projectClient.createProject(
         {
           name: 'test',
@@ -215,7 +341,7 @@ describe('DB Service Project Tests', () => {
   });
 
   it('deletes a project', async () => {
-    const project: ProjectProto.Project = await new Promise((resolve) => {
+    const project: CommonProto.Project = await new Promise((resolve) => {
       projectClient.createProject(
         {
           name: 'test',
@@ -252,7 +378,7 @@ describe('DB Service Project Tests', () => {
         },
       );
     });
-    const project: ProjectProto.Project = await new Promise((resolve) => {
+    const project: CommonProto.Project = await new Promise((resolve) => {
       projectClient.createProject(
         {
           name: 'test',

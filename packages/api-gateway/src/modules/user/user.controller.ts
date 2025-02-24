@@ -27,6 +27,7 @@ import {
   LinkProjectModel,
   SetUserTypeModel,
   UserResponse,
+  UserResponses,
 } from 'src/models/user.dto';
 import { User } from 'src/decorators/user.decorator';
 import { userLinkedToProject } from 'src/user_project_validator';
@@ -54,6 +55,36 @@ export class UserController implements OnModuleInit {
       this.projectClient.getService<ProjectProto.ProjectServiceClient>(
         PROJECT_SERVICE_NAME,
       );
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Retrieves all users.' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returned all users',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  async getAllUsers(@User() user: CommonProto.User): Promise<UserResponses> {
+    if (user == undefined || user.type != CommonProto.UserType.SUPERADMIN) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    const users = this.userService.getAllUsers({});
+    return new UserResponses(await lastValueFrom(users));
   }
 
   @Get('id/:id')

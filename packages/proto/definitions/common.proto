@@ -15,3 +15,16 @@ message User {
   UserType type = 4;
   repeated int64 projectIds = 5;
 }
+
+message Users {
+  repeated User users = 1;
+}
+
+message Project {
+  int64 id = 1;
+  string name = 2;
+}
+
+message Projects {
+  repeated Project projects = 1;
+}

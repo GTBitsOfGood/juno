@@ -5,9 +5,11 @@ import {
   validateProjectIdentifier,
   validateUserIdentifier,
 } from 'src/utility/validate';
-import { IdentifierProto, ProjectProto } from 'juno-proto';
+import { IdentifierProto, ProjectProto, CommonProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { mapPrismaRoleToRPC } from 'src/utility/convert';
+
 @Controller()
 @ProjectProto.ProjectServiceControllerMethods()
 export class ProjectController
@@ -27,6 +29,34 @@ export class ProjectController
       });
     }
     return project;
+  }
+
+  async getAllProjects(
+    _: ProjectProto.GetAllProjectsRequest,
+  ): Promise<CommonProto.Projects> {
+    void _; //Indicates to linter input not used
+    const projects = await this.projectService.projects();
+    return { projects: projects };
+  }
+
+  async getUsersFromProject(
+    input: ProjectProto.GetUsersFromProject,
+  ): Promise<CommonProto.Users> {
+    const projectIdentifier: IdentifierProto.ProjectIdentifier = {
+      id: input.projectId,
+    };
+    const params = validateProjectIdentifier(projectIdentifier);
+    await this.getProject(projectIdentifier); //Throws Not found RPC exception if project doesn't exist.
+    const users = await this.projectService.getUsersWithProject(params.id);
+    return {
+      users: users.map((user) => {
+        return {
+          ...user,
+          type: mapPrismaRoleToRPC(user.type),
+          projectIds: user.allowedProjects.map((project) => project.id),
+        };
+      }),
+    };
   }
 
   async createProject(

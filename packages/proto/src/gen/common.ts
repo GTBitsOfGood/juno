@@ -23,4 +23,17 @@ export interface User {
   projectIds: number[];
 }
 
+export interface Users {
+  users: User[];
+}
+
+export interface Project {
+  id: number;
+  name: string;
+}
+
+export interface Projects {
+  projects: Project[];
+}
+
 export const JUNO_COMMON_PACKAGE_NAME = 'juno.common';

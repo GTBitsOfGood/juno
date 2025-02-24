@@ -76,6 +76,7 @@ export class UserModule implements NestModule {
       .apply(CredentialsMiddleware)
       .forRoutes(
         { path: 'user', method: RequestMethod.POST },
+        { path: 'user', method: RequestMethod.GET },
         { path: 'user/type', method: RequestMethod.POST },
         { path: 'user/id/:id/project', method: RequestMethod.PUT },
       );

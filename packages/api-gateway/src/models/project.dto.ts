@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
-import { ProjectProto } from 'juno-proto';
+import { CommonProto } from 'juno-proto';
 
 export class CreateProjectModel {
   @IsNotEmpty()
@@ -17,9 +17,20 @@ export class ProjectResponse {
   @ApiProperty({ description: 'The name of the project' })
   name: string;
 
-  constructor(project: ProjectProto.Project) {
+  constructor(project: CommonProto.Project) {
     this.id = project.id;
     this.name = project.name;
+  }
+}
+
+export class ProjectResponses {
+  @ApiProperty({ description: 'List of projects' })
+  projects: ProjectResponse[];
+
+  constructor(projectsResponse: CommonProto.Projects) {
+    this.projects = projectsResponse.projects.map(
+      (project) => new ProjectResponse(project),
+    );
   }
 }
 

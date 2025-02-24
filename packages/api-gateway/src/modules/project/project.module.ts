@@ -83,6 +83,10 @@ export class ProjectModule implements NestModule {
       );
     consumer
       .apply(CredentialsMiddleware)
-      .forRoutes({ path: 'project', method: RequestMethod.POST });
+      .forRoutes(
+        { path: 'project', method: RequestMethod.POST },
+        { path: 'project', method: RequestMethod.GET },
+        { path: 'project/:id/users', method: RequestMethod.GET },
+      );
   }
 }
