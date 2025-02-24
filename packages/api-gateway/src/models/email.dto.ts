@@ -187,8 +187,7 @@ export class RegisterDomainModel {
     example: 'subdomain',
     description: 'Subdomain to be registered',
   })
-  @IsNotEmpty()
-  subdomain: string;
+  subdomain?: string | undefined;
 }
 
 export class VerifyDomainModel {

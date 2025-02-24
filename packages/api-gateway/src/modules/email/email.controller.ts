@@ -110,7 +110,7 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Registers a sender domain.',
+    summary: 'Registers a sender domain with SendGrid.',
   })
   @ApiCreatedResponse({
     description: 'Domain registered successfully',
