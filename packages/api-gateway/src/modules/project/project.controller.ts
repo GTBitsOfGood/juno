@@ -114,6 +114,7 @@ export class ProjectController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned all users asossciated with given project.',
+    type: UserResponses
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
