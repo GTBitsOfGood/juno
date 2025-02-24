@@ -12,6 +12,8 @@ RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 # TODO: Switch over to minimal node installation
 FROM node:18 as deps
 
+ARG TARGETARCH
+
 # pnpm needs to be added to the global path
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -19,12 +21,15 @@ RUN corepack enable
 
 RUN corepack prepare pnpm@10.0.0 --activate
 
+COPY ./docker/get_protoc.sh /get_protoc.sh
+RUN chmod +x /get_protoc.sh
+RUN TARGETARCH=$TARGETARCH /get_protoc.sh
+
+RUN cp /protoc/bin/protoc /usr/local/bin/protoc
 
 WORKDIR /app
 
 COPY . .
-
-RUN --mount=type=cache,sharing=locked,target=/var/cache/apt apt update && apt install -y python3 make g++ protobuf-compiler
 
 RUN chmod +x /app/packages/proto/gen_protos.sh
 
