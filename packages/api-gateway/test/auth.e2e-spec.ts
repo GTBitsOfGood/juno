@@ -189,6 +189,70 @@ describe('API Key JWT Verification Routes', () => {
   });
 });
 
+describe('Auth Middleware Tests using test-auth endpoint', () => {
+  it('validates with API key only', async () => {
+    const key = await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        environment: 'prod',
+        project: {
+          name: 'test-seed-project',
+        },
+      });
+
+    // use the API key with our test endpoint
+    const response = await request(app.getHttpServer())
+      .get('/auth/test-auth')
+      .set('Authorization', `Bearer ${key.body['apiKey']}`)
+      .send();
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('ok');
+  });
+
+  it('validates with JWT only', async () => {
+    // get a valid API key
+    const key = await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        environment: 'prod',
+        project: {
+          name: 'test-seed-project',
+        },
+      });
+
+    // get a JWT using the API key
+    const jwtResponse = await request(app.getHttpServer())
+      .post('/auth/api_key/jwt')
+      .set('Authorization', `Bearer ${key.body['apiKey']}`)
+      .send();
+
+    expect(jwtResponse.status).toBe(201);
+    expect(jwtResponse.body.token).toBeDefined();
+
+    // use that JWT with our test endpoint
+    const response = await request(app.getHttpServer())
+      .get('/auth/test-auth')
+      .set('Authorization', `Bearer ${jwtResponse.body.token}`)
+      .send();
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('ok');
+  });
+
+  it('fail when both API key and JWT are invalid', async () => {
+    return request(app.getHttpServer())
+      .get('/auth/test-auth')
+      .set('Authorization', 'Bearer not.a.valid.api.key.or.jwt')
+      .send()
+      .expect(401);
+  });
+});
+
 describe('User JWT Verification Routes', () => {
   it('Missing credentials', () => {
     return request(app.getHttpServer())

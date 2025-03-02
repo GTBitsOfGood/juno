@@ -10,12 +10,21 @@ import { FileUploadController } from './file_upload.controller';
 import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
 
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ApiKeyProtoFile, FileProto, FileProtoFile } from 'juno-proto';
+import {
+  ApiKeyProtoFile,
+  FileProto,
+  FileProtoFile,
+  JwtProtoFile,
+} from 'juno-proto';
 import { FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file';
 import {
   API_KEY_SERVICE_NAME,
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
+import {
+  JWT_SERVICE_NAME,
+  JUNO_JWT_PACKAGE_NAME,
+} from 'juno-proto/dist/gen/jwt';
 
 @Module({
   imports: [
@@ -30,6 +39,15 @@ import {
           url: process.env.AUTH_SERVICE_ADDR,
           package: JUNO_API_KEY_PACKAGE_NAME,
           protoPath: ApiKeyProtoFile,
+        },
+      },
+      {
+        name: JWT_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: JUNO_JWT_PACKAGE_NAME,
+          protoPath: JwtProtoFile,
         },
       },
       {
