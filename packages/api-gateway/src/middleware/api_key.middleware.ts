@@ -9,14 +9,9 @@ import { Request, Response, NextFunction } from 'express';
 import { ClientGrpc } from '@nestjs/microservices';
 import { ApiKeyProto, JwtProto, AuthCommonProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
-// import { ApiKey } from 'juno-proto/dist/gen/auth_common';
 
 const { API_KEY_SERVICE_NAME } = ApiKeyProto;
 const { JWT_SERVICE_NAME } = JwtProto;
-
-// interface ApiKeyReq extends Request {
-//   apiKey?: ApiKey;
-// }
 
 @Injectable()
 export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
