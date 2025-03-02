@@ -228,7 +228,6 @@ describe('User Creation Routes', () => {
 });
 
 describe('Credentials Middleware Tests (jwt authentication)', () => {
-
   it('gets users with authorized jwt', async () => {
     await request(app.getHttpServer())
       .get('/user')
@@ -250,7 +249,7 @@ describe('Credentials Middleware Tests (jwt authentication)', () => {
       })
       .expect(201);
 
-    userJwt = await JWTforUser('test-unauthorized-jwt@example.com', 'password')
+    userJwt = await JWTforUser('test-unauthorized-jwt@example.com', 'password');
 
     await request(app.getHttpServer())
       .get('/user')
