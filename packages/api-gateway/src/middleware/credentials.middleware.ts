@@ -39,10 +39,15 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
     const passwordHeader = req.header('X-User-Password');
     const authHeader = req.header('Authorization');
 
-    if (emailHeader === undefined && passwordHeader === undefined) {
+    if (
+      (emailHeader === undefined || emailHeader.length === 0) &&
+      (passwordHeader === undefined || passwordHeader.length === 0)
+    ) {
       // attempt to check authorization header for jwt when no email or password is provided
-      if (!authHeader) {
-        throw new UnauthorizedException('No email, password, or authorization headers');
+      if (authHeader === undefined || authHeader.length === 0) {
+        throw new UnauthorizedException(
+          'No email, password, or authorization headers',
+        );
       }
 
       const token = this.extractTokenFromHeader(req);
@@ -61,13 +66,18 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
       }
     } else {
       // attempt to use email and password
-      if (emailHeader === undefined || passwordHeader === undefined) {
+      if (
+        emailHeader === undefined ||
+        emailHeader.length === 0 ||
+        passwordHeader === undefined ||
+        passwordHeader.length === 0
+      ) {
         throw new HttpException(
           'Invalid credentials provided',
           HttpStatus.UNAUTHORIZED,
         );
       }
-  
+
       try {
         // Wait for RPC result from authentication request
         const user = await lastValueFrom(
@@ -76,7 +86,7 @@ export class CredentialsMiddleware implements NestMiddleware, OnModuleInit {
             password: passwordHeader,
           }),
         );
-  
+
         req.user = user;
       } catch {
         throw new HttpException(

@@ -14,7 +14,19 @@ import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 
+let userJwt: string | undefined = undefined;
+
 jest.setTimeout(15000);
+
+async function JWTforUser(userEmail: string, userPassword: string) {
+  const jwt = await request(app.getHttpServer())
+    .post('/auth/user/jwt')
+    .set('X-User-Email', userEmail)
+    .set('X-User-Password', userPassword)
+    .send();
+
+  return jwt.body['token'];
+}
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -51,6 +63,10 @@ beforeEach(async () => {
   app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
+
+  if (!userJwt) {
+    userJwt = await JWTforUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+  }
 });
 
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -208,5 +224,55 @@ describe('User Creation Routes', () => {
       .set('X-User-Password', ADMIN_PASSWORD)
       .send()
       .expect(200);
+  });
+});
+
+describe('Credentials Middleware Tests (jwt authentication)', () => {
+
+  it('gets users with authorized jwt', async () => {
+    await request(app.getHttpServer())
+      .get('/user')
+      .set('Authorization', 'Bearer ' + userJwt)
+      .send()
+      .expect(200);
+  });
+
+  it('fails to get users with unauthorized user jwt', async () => {
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: '2',
+        password: 'password',
+        name: 'test-unauthorized-jwt',
+        email: 'test-unauthorized-jwt@example.com',
+      })
+      .expect(201);
+
+    userJwt = await JWTforUser('test-unauthorized-jwt@example.com', 'password')
+
+    await request(app.getHttpServer())
+      .get('/user')
+      .set('Authorization', 'Bearer ' + userJwt)
+      .send()
+      .expect(401);
+  });
+
+  it('fails to get users with jwt when email is nonempty', async () => {
+    await request(app.getHttpServer())
+      .get('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('Authorization', 'Bearer ' + userJwt)
+      .send()
+      .expect(401);
+  });
+
+  it('fails to get users with invalid jwt', async () => {
+    await request(app.getHttpServer())
+      .get('/user')
+      .set('Authorization', 'Bearer invalid-jwt')
+      .send()
+      .expect(401);
   });
 });
