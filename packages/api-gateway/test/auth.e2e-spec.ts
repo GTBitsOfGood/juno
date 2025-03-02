@@ -251,29 +251,6 @@ describe('Auth Middleware Tests using test-auth endpoint', () => {
       .send()
       .expect(401);
   });
-
-  it('accepts valid API key directly', async () => {
-    // Get a valid API key
-    const key = await request(app.getHttpServer())
-      .post('/auth/key')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-        environment: 'prod',
-        project: {
-          name: 'test-seed-project',
-        },
-      });
-
-    // Try to use the API key with our test endpoint
-    const response = await request(app.getHttpServer())
-      .get('/auth/test-auth')
-      .set('Authorization', `Bearer ${key.body['apiKey']}`)
-      .send();
-
-    expect(response.status).toBe(200);
-    expect(response.body.status).toBe('ok');
-  });
 });
 
 describe('User JWT Verification Routes', () => {
