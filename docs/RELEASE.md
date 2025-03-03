@@ -4,7 +4,7 @@ Creating a new Juno release requires 3 steps:
 
 - Create the release on GitHub
 - Update juno-sdk to use the new auto-generated SDK
-- Change container images on azure
+- Change container images on Azure
 
 ## Creating a new release on GitHub
 
