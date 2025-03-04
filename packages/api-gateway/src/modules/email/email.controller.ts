@@ -1,15 +1,21 @@
 import {
   Body,
   Controller,
-  Post,
-  OnModuleInit,
-  Inject,
+  Get,
   HttpException,
+  BadRequestException,
   HttpStatus,
+  Inject,
+  OnModuleInit,
+  Param,
+  Post,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
+import { validateOrReject } from 'class-validator';
+import { AuthCommonProto, EmailProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import {
+  EmailConfigResponse,
   RegisterDomainModel,
   RegisterDomainResponse,
   RegisterEmailModel,
@@ -20,35 +26,74 @@ import {
   SetupEmailServiceModel,
   VerifyDomainModel,
 } from 'src/models/email.dto';
-import { AuthCommonProto, EmailProto } from 'juno-proto';
-import { validateOrReject } from 'class-validator';
 
 import {
-  ApiBearerAuth,
-  ApiUnauthorizedResponse,
   ApiBadRequestResponse,
-  ApiTags,
+  ApiBearerAuth,
   ApiCreatedResponse,
-  ApiOperation,
   ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 
-const { EMAIL_SERVICE_NAME } = EmailProto;
+const { EMAIL_SERVICE_NAME, EMAIL_DB_SERVICE_NAME } = EmailProto;
 
 @ApiBearerAuth('API_Key')
 @ApiTags('email')
 @Controller('email')
 export class EmailController implements OnModuleInit {
   private emailService: EmailProto.EmailServiceClient;
+  private emailDBService: EmailProto.EmailDbServiceClient;
 
-  constructor(@Inject(EMAIL_SERVICE_NAME) private emailClient: ClientGrpc) {}
+  constructor(
+    @Inject(EMAIL_SERVICE_NAME) private emailClient: ClientGrpc,
+    @Inject(EMAIL_DB_SERVICE_NAME) private emailDBClient: ClientGrpc,
+  ) {}
 
   onModuleInit() {
     this.emailService =
       this.emailClient.getService<EmailProto.EmailServiceClient>(
         EMAIL_SERVICE_NAME,
       );
+    this.emailDBService =
+      this.emailDBClient.getService<EmailProto.EmailDbServiceClient>(
+        EMAIL_DB_SERVICE_NAME,
+      );
+  }
+
+  @Get('config/:id')
+  @ApiOperation({ summary: 'Get email configuration by ID' })
+  @ApiBadRequestResponse({
+    description: 'Parameters are invalid',
+  })
+  @ApiNotFoundResponse({
+    description: 'No email config with specified ID was found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid API key provided',
+  })
+  @ApiOkResponse({
+    description: 'Returned the email config associated with the specified ID',
+    type: EmailConfigResponse,
+  })
+  async getEmailConfigById(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Param('id') id: string,
+  ): Promise<EmailConfigResponse> {
+    const idNumber = parseInt(id);
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('Id must be a number');
+    }
+
+    const config = this.emailDBService.getEmailServiceConfig({
+      id: idNumber,
+      environment: apiKey.environment,
+    });
+
+    return new EmailConfigResponse(await lastValueFrom(config));
   }
 
   @ApiOperation({

@@ -4,11 +4,62 @@ import {
   ArrayNotEmpty,
   ValidateNested,
   IsOptional,
+  IsInt,
+  IsString,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { EmailProto } from 'juno-proto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { SendGridDnsRecords, SendGridRecord } from 'juno-proto/dist/gen/email';
+
+export class EmailConfigResponse {
+  @ApiProperty({
+    type: 'number',
+    description: 'Email Configuration ID',
+  })
+  @IsNotEmpty()
+  @IsInt()
+  id: number;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'The configured environment',
+  })
+  @IsNotEmpty()
+  @IsString()
+  environment: string;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'The configured sendGrid key',
+  })
+  @IsNotEmpty()
+  @IsString()
+  sendgridKey: string;
+
+  @ApiProperty({
+    type: [Object],
+    description: 'The list of domains associated with the email config',
+  })
+  @IsArray()
+  domains: EmailProto.EmailDomain[];
+
+  @ApiProperty({
+    type: [Object],
+    description: 'The list of senders associated with the email config',
+  })
+  @IsArray()
+  senders: EmailProto.EmailSender[];
+
+  constructor(emailConfig: EmailProto.EmailServiceConfig) {
+    this.id = emailConfig.id;
+    this.environment = emailConfig.environment;
+    this.sendgridKey = emailConfig.sendgridKey;
+    this.domains = emailConfig.domains;
+    this.senders = emailConfig.senders;
+  }
+}
 
 export class RegisterEmailModel {
   @ApiProperty({
