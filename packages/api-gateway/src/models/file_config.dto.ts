@@ -31,6 +31,8 @@ export class FileConfigResponse {
     description: 'The list of buckets associated with the config',
   })
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => FileBucketProto.Bucket)
   buckets: FileBucketProto.Bucket[];
 
   constructor(fileConfig: FileConfigProto.FileServiceConfig) {
