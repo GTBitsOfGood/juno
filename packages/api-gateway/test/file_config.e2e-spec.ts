@@ -66,9 +66,8 @@ beforeAll(async () => {
   });
 });
 
-afterAll((done) => {
-  app.close();
-  done();
+afterAll(async () => {
+  await app.close();
 });
 
 beforeEach(async () => {
