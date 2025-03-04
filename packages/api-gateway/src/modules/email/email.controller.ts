@@ -84,7 +84,7 @@ export class EmailController implements OnModuleInit {
     @Param('id') id: string,
   ): Promise<EmailConfigResponse> {
     const idNumber = parseInt(id);
-    if (Number.isNaN(id)) {
+    if (Number.isNaN(idNumber)) {
       throw new BadRequestException('Id must be a number');
     }
 
