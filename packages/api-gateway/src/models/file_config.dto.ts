@@ -24,6 +24,8 @@ export class FileConfigResponse {
     description: 'The list of files associated with the config',
   })
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => FileProto.File)
   files: FileProto.File[];
 
   @ApiProperty({
