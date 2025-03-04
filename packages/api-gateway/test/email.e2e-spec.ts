@@ -91,12 +91,14 @@ describe('Email Service Config Routes', () => {
   });
 
   it('Failed to get email config due to missing api key', async () => {
-    return await request(app.getHttpServer()).get('/email/config/0').expect(401);
+    return await request(app.getHttpServer())
+      .get('/email/config/0')
+      .expect(401);
   });
 
   it('Failed to get email config due to not found id', async () => {
     return await request(app.getHttpServer())
-      .get('/file/config/1')
+      .get('/email/config/1')
       .set('Authorization', 'Bearer ' + apiKey)
       .expect(404);
   });
