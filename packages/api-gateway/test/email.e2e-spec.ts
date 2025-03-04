@@ -85,7 +85,7 @@ describe('Email Service Config Routes', () => {
 
   it('Failed to get email config due to invalid id', async () => {
     return await request(app.getHttpServer())
-      .get('/file/config/invalid-id')
+      .get('/email/config/invalid-id')
       .set('Authorization', 'Bearer ' + apiKey)
       .expect(400);
   });
