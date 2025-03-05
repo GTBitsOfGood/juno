@@ -51,21 +51,24 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
       const apiKeyValidation = this.apiKeyService.validateApiKey({
         apiKey: token,
       });
+
       const res = await lastValueFrom(apiKeyValidation);
       req.apiKey = res.key;
+
       next();
-      return;
     } catch (error) {
       // API key validation failed, try JWT validation
       try {
         const jwtValidation = this.jwtService.validateApiKeyJwt({ jwt: token });
         const jwtRes = await lastValueFrom(jwtValidation);
-        if (jwtRes.valid && jwtRes.apiKey) {
-          req.apiKey = jwtRes.apiKey;
-          next();
-          return;
+
+        if (!jwtRes.valid || !jwtRes.apiKey) {
+          throw new UnauthorizedException("Invalid JWT token");
         }
-        throw new UnauthorizedException('Invalid JWT token');
+
+        req.apiKey = jwtRes.apiKey;
+
+        next();
       } catch (error) {
         throw new UnauthorizedException('Invalid authentication token');
       }
