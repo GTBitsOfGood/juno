@@ -8,6 +8,7 @@ import {
   Inject,
   OnModuleInit,
   Post,
+  Get,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -217,5 +218,25 @@ export class AuthController implements OnModuleInit {
     }
 
     return;
+  }
+
+  @Get('/test-auth')
+  @ApiOperation({
+    summary: 'Test endpoint for validating middleware authentication',
+    description:
+      'This endpoint is used to test if authentication is working correctly.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Authentication successful',
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token (API Key or JWT)',
+    required: true,
+  })
+  @ApiBearerAuth()
+  async testAuth() {
+    return { status: 'ok' };
   }
 }

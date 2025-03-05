@@ -14,12 +14,17 @@ import {
   ApiKeyProtoFile,
   FileProviderProto,
   FileProviderProtoFile,
+  JwtProtoFile,
 } from 'juno-proto';
 import { FILE_PROVIDER_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_provider';
 import {
   API_KEY_SERVICE_NAME,
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
+import {
+  JWT_SERVICE_NAME,
+  JUNO_JWT_PACKAGE_NAME,
+} from 'juno-proto/dist/gen/jwt';
 
 // TODO: Make this module Auth protected
 @Module({
@@ -35,6 +40,15 @@ import {
           url: process.env.AUTH_SERVICE_ADDR,
           package: JUNO_API_KEY_PACKAGE_NAME,
           protoPath: ApiKeyProtoFile,
+        },
+      },
+      {
+        name: JWT_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: JUNO_JWT_PACKAGE_NAME,
+          protoPath: JwtProtoFile,
         },
       },
       {

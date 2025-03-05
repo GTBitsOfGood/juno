@@ -9,12 +9,17 @@ import {
   ApiKeyProtoFile,
   FileConfigProto,
   FileConfigProtoFile,
+  JwtProtoFile,
 } from 'juno-proto';
 import {
   API_KEY_SERVICE_NAME,
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
 import { FILE_SERVICE_CONFIG_DB_SERVICE_NAME } from 'juno-proto/dist/gen/file_config';
+import {
+  JWT_SERVICE_NAME,
+  JUNO_JWT_PACKAGE_NAME,
+} from 'juno-proto/dist/gen/jwt';
 
 @Module({
   imports: [
@@ -38,6 +43,15 @@ import { FILE_SERVICE_CONFIG_DB_SERVICE_NAME } from 'juno-proto/dist/gen/file_co
           url: process.env.DB_SERVICE_ADDR,
           package: FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
           protoPath: FileConfigProtoFile,
+        },
+      },
+      {
+        name: JWT_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.AUTH_SERVICE_ADDR,
+          package: JUNO_JWT_PACKAGE_NAME,
+          protoPath: JwtProtoFile,
         },
       },
     ]),
