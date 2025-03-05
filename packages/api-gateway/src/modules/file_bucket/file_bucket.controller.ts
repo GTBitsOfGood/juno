@@ -17,7 +17,7 @@ import {
 } from '@nestjs/swagger';
 import {
   RegisterFileBucketModel,
-  FileBucketResponse,
+  FileBucket,
 } from 'src/models/file_bucket.dto';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 
@@ -50,12 +50,12 @@ export class FileBucketController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned the file bucket associated with the given data',
-    type: FileBucketResponse,
+    type: FileBucket,
   })
   async registerFileBucket(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body() params: RegisterFileBucketModel,
-  ): Promise<FileBucketResponse> {
+  ): Promise<FileBucket> {
     const grpcResponse = this.fileBucketService.registerBucket({
       name: params.name,
       configId: params.configId,
@@ -66,6 +66,6 @@ export class FileBucketController implements OnModuleInit {
 
     const bucketData = await lastValueFrom(grpcResponse);
 
-    return new FileBucketResponse(bucketData);
+    return new FileBucket(bucketData);
   }
 }

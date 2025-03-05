@@ -14,7 +14,8 @@ import {
 import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
 
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
-const { EMAIL_SERVICE_NAME, JUNO_EMAIL_PACKAGE_NAME } = EmailProto;
+const { EMAIL_SERVICE_NAME, JUNO_EMAIL_PACKAGE_NAME, EMAIL_DB_SERVICE_NAME } =
+  EmailProto;
 const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
 @Module({
@@ -46,6 +47,15 @@ const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
         transport: Transport.GRPC,
         options: {
           url: process.env.EMAIL_SERVICE_ADDR,
+          package: JUNO_EMAIL_PACKAGE_NAME,
+          protoPath: EmailProtoFile,
+        },
+      },
+      {
+        name: EMAIL_DB_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.DB_SERVICE_ADDR,
           package: JUNO_EMAIL_PACKAGE_NAME,
           protoPath: EmailProtoFile,
         },

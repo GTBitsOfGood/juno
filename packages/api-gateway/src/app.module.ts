@@ -8,6 +8,7 @@ import { FileProviderModule } from './modules/file_provider/file_provider.module
 import { FileDownloadModule } from './modules/file_download/file_download.module';
 import { FileUploadModule } from './modules/file_upload/file_upload.module';
 import { FileBucketModule } from './modules/file_bucket/file_bucket.module';
+import { FileConfigModule } from './modules/file_config/file_config.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { FileBucketModule } from './modules/file_bucket/file_bucket.module';
     FileDownloadModule,
     FileUploadModule,
     FileBucketModule,
+    FileConfigModule,
   ],
 })
 export class AppModule {}
