@@ -62,8 +62,8 @@ export class FileConfigController implements OnModuleInit {
     @Param('projectId') projectId: string,
   ): Promise<FileConfigResponse> {
     const id = parseInt(projectId);
-    if (Number.isNaN(id)) {
-      throw new BadRequestException('Id must be a number');
+    if (Number.isNaN(id) || id < 0) {
+      throw new BadRequestException('Id must be an int greater than 0');
     }
 
     const config = this.fileConfigDBService.getConfig({
