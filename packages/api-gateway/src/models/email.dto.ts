@@ -9,9 +9,23 @@ import {
   IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { EmailProto } from 'juno-proto';
+import { EmailProto, IdentifierProto } from 'juno-proto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { SendGridDnsRecords, SendGridRecord } from 'juno-proto/dist/gen/email';
+
+export class EmailDomain implements EmailProto.EmailDomain {
+  domain: string;
+  subdomain?: string | undefined;
+  sendgridId: number;
+  projects: IdentifierProto.ProjectIdentifier[];
+}
+
+export class EmailSender implements EmailProto.EmailSender {
+  username: string;
+  description?: string | undefined;
+  domain: string;
+  projects: IdentifierProto.ProjectIdentifier[];
+}
 
 export class EmailConfigResponse {
   @ApiProperty({
@@ -39,18 +53,22 @@ export class EmailConfigResponse {
   sendgridKey: string;
 
   @ApiProperty({
-    type: [Object],
+    type: [EmailDomain],
     description: 'The list of domains associated with the email config',
   })
   @IsArray()
-  domains: EmailProto.EmailDomain[];
+  @ValidateNested({ each: true })
+  @Type(() => EmailDomain)
+  domains: EmailDomain[];
 
   @ApiProperty({
-    type: [Object],
+    type: [EmailSender],
     description: 'The list of senders associated with the email config',
   })
   @IsArray()
-  senders: EmailProto.EmailSender[];
+  @ValidateNested({ each: true })
+  @Type(() => EmailSender)
+  senders: EmailSender[];
 
   constructor(emailConfig: EmailProto.EmailServiceConfig) {
     this.id = emailConfig.id;
@@ -188,7 +206,7 @@ class EmailRecipient {
   name?: string | undefined;
 }
 
-class EmailSender {
+class EmailSenderSendEmailModel {
   @ApiProperty({
     type: 'string',
     format: 'email',
@@ -288,10 +306,13 @@ export class SendEmailModel {
   @Type(() => EmailRecipient)
   replyToList: EmailRecipient[] = [];
 
-  @ApiProperty({ type: EmailSender, description: 'The sender of the email' })
+  @ApiProperty({
+    type: EmailSenderSendEmailModel,
+    description: 'The sender of the email',
+  })
   @ValidateNested({ each: true })
-  @Type(() => EmailSender)
-  sender: EmailSender | undefined;
+  @Type(() => EmailSenderSendEmailModel)
+  sender: EmailSenderSendEmailModel | undefined;
 
   @ApiProperty({
     type: 'string',
