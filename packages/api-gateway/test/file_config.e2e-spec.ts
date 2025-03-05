@@ -77,25 +77,25 @@ beforeEach(async () => {
 });
 
 describe('File Config Routes', () => {
-  it('Successfully get a file config ', async () => {
+  it('Should successfully get a file config given a valid project ID and credentials', async () => {
     await request(app.getHttpServer())
       .get('/file/config/0')
       .set('Authorization', 'Bearer ' + apiKey)
       .expect(200);
   });
 
-  it('Failed to get config due to invalid id', async () => {
+  it('Should throw a 400 status error when fetching a config via invalid ID', async () => {
     return await request(app.getHttpServer())
       .get('/file/config/invalid-id')
       .set('Authorization', 'Bearer ' + apiKey)
       .expect(400);
   });
 
-  it('Failed to get config due to missing api key', async () => {
+  it('Should throw a 401 status error when fetching a config without valid credentials', async () => {
     return await request(app.getHttpServer()).get('/file/config/0').expect(401);
   });
 
-  it('Failed to get config due to not found project id', async () => {
+  it('Should throw a 404 status error when fetching a config with a non-existent project ID', async () => {
     return await request(app.getHttpServer())
       .get('/file/config/1')
       .set('Authorization', 'Bearer ' + apiKey)
