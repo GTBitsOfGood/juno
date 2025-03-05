@@ -1,5 +1,5 @@
 import { status } from '@grpc/grpc-js';
-import { Controller, NotFoundException } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { EmailProto, IdentifierProto } from 'juno-proto';
 import {
