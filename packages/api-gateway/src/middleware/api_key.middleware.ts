@@ -64,10 +64,6 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
           throw new UnauthorizedException('Invalid JWT token');
         }
 
-        if (!jwtRes.valid || !jwtRes.apiKey) {
-          throw new UnauthorizedException('Invalid JWT token');
-        }
-
         req.apiKey = jwtRes.apiKey;
         next();
       } catch (error) {
