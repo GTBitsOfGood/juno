@@ -75,6 +75,35 @@ beforeEach(async () => {
   }
 });
 
+describe('Email Service Config Routes', () => {
+  it('Successfully get an email config ', async () => {
+    await request(app.getHttpServer())
+      .get('/email/config/0')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+  });
+
+  it('Failed to get email config due to invalid id', async () => {
+    return await request(app.getHttpServer())
+      .get('/email/config/invalid-id')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(400);
+  });
+
+  it('Failed to get email config due to missing api key', async () => {
+    return await request(app.getHttpServer())
+      .get('/email/config/0')
+      .expect(401);
+  });
+
+  it('Failed to get email config due to not found id', async () => {
+    return await request(app.getHttpServer())
+      .get('/email/config/1')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(404);
+  });
+});
+
 describe('Email Service Setup Routes', () => {
   it('Creates a new service for a different env', async () => {
     const apiKey = await createApiKey('test-seed-project', 'dev');
