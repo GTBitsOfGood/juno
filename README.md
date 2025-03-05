@@ -21,7 +21,7 @@
 
 Juno is a monorepo using a combination of NestJS, [gRPC](https://grpc.io/), Protobuf, Prisma, and Postgres for API endpoints, interservice communication, and object storage/modeling.
 
-![Juno Diagram](image-1.png)
+![Juno Diagram](figures/junodiagram.png)
 
 Packages are managed through [PNPM Workspaces](https://pnpm.io/workspaces). The current packages are as follows:
 
