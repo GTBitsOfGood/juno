@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsInt, IsNotEmpty, IsString } from 'class-validator';
-import { FileBucketProto, FileConfigProto, FileProto } from 'juno-proto';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { FileConfigProto } from 'juno-proto';
+import { File } from './file.dto';
+import { FileBucket } from './file_bucket.dto';
+import { Type } from 'class-transformer';
 
 export class FileConfigResponse {
   @ApiProperty({
@@ -20,18 +29,22 @@ export class FileConfigResponse {
   environment: string;
 
   @ApiProperty({
-    type: [Object],
+    type: [File],
     description: 'The list of files associated with the config',
   })
   @IsArray()
-  files: FileProto.File[];
+  @ValidateNested({ each: true })
+  @Type(() => File)
+  files: File[];
 
   @ApiProperty({
-    type: [Object],
+    type: [FileBucket],
     description: 'The list of buckets associated with the config',
   })
   @IsArray()
-  buckets: FileBucketProto.Bucket[];
+  @ValidateNested({ each: true })
+  @Type(() => FileBucket)
+  buckets: FileBucket[];
 
   constructor(fileConfig: FileConfigProto.FileServiceConfig) {
     this.id = fileConfig.id;
