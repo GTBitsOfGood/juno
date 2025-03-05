@@ -35,7 +35,7 @@ export class RegisterFileBucketModel {
   FileServiceFile: IdentifierProto.FileIdentifier[];
 }
 
-export class FileBucketResponse {
+export class FileBucket implements FileBucketProto.Bucket {
   @ApiProperty({
     type: 'string',
     description: 'The unique name of the registered bucket',
@@ -51,6 +51,14 @@ export class FileBucketResponse {
   @IsNotEmpty()
   @IsInt()
   configId: number;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'The config environment associated with the bucket',
+  })
+  @IsNotEmpty()
+  @IsString()
+  configEnv: string;
 
   @ApiProperty({
     type: 'string',
@@ -70,6 +78,7 @@ export class FileBucketResponse {
   constructor(fileBucket: FileBucketProto.Bucket) {
     this.name = fileBucket.name;
     this.configId = fileBucket.configId;
+    this.configEnv = fileBucket.configEnv;
     this.fileProviderName = fileBucket.fileProviderName;
     this.FileServiceFile = fileBucket.FileServiceFile;
   }

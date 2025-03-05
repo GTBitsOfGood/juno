@@ -1,32 +1,26 @@
-import {
-  Module,
-  NestModule,
-  RequestMethod,
-  MiddlewareConsumer,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
-import { FileProviderController } from './file_provider.controller';
 import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
+import { FileConfigController } from './file_config.controller';
 
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
   ApiKeyProtoFile,
-  FileProviderProto,
-  FileProviderProtoFile,
+  FileConfigProto,
+  FileConfigProtoFile,
   JwtProtoFile,
 } from 'juno-proto';
-import { FILE_PROVIDER_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_provider';
 import {
   API_KEY_SERVICE_NAME,
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
+import { FILE_SERVICE_CONFIG_DB_SERVICE_NAME } from 'juno-proto/dist/gen/file_config';
 import {
   JWT_SERVICE_NAME,
   JUNO_JWT_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/jwt';
 
-// TODO: Make this module Auth protected
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -43,6 +37,15 @@ import {
         },
       },
       {
+        name: FILE_SERVICE_CONFIG_DB_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.DB_SERVICE_ADDR,
+          package: FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
+          protoPath: FileConfigProtoFile,
+        },
+      },
+      {
         name: JWT_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
@@ -51,23 +54,12 @@ import {
           protoPath: JwtProtoFile,
         },
       },
-      {
-        name: FILE_PROVIDER_FILE_SERVICE_NAME,
-        transport: Transport.GRPC,
-        options: {
-          url: process.env.FILE_SERVICE_ADDR,
-          package: FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
-          protoPath: FileProviderProtoFile,
-        },
-      },
     ]),
   ],
-  controllers: [FileProviderController],
+  controllers: [FileConfigController],
 })
-export class FileProviderModule implements NestModule {
+export class FileConfigModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(ApiKeyMiddleware)
-      .forRoutes({ path: '/file/provider', method: RequestMethod.POST });
+    consumer.apply(ApiKeyMiddleware).forRoutes('/file/config/*');
   }
 }

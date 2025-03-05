@@ -1,13 +1,13 @@
-import { Controller } from '@nestjs/common';
-import { IdentifierProto, EmailProto } from 'juno-proto';
-import { EmailService } from './email.service';
-import { validateEmailSenderIdentifier } from 'src/utility/validate';
-import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { Controller } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { EmailProto, IdentifierProto } from 'juno-proto';
 import {
-  EmailSender,
   EmailDbServiceController,
+  EmailSender,
 } from 'juno-proto/dist/gen/email';
+import { validateEmailSenderIdentifier } from 'src/utility/validate';
+import { EmailService } from './email.service';
 
 @Controller()
 @EmailProto.EmailDbServiceControllerMethods()
@@ -43,6 +43,13 @@ export class EmailController implements EmailDbServiceController {
         environment: request.environment,
       },
     });
+
+    if (!config) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Email config not found',
+      });
+    }
 
     return {
       id: config.id,
