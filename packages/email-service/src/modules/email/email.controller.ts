@@ -82,6 +82,11 @@ export class EmailController implements EmailProto.EmailServiceController {
           code: status.INVALID_ARGUMENT,
           message: errorObj.response.body.errors[0].message,
         });
+      } else {
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: 'SendGrid returned a malformed error as its response.',
+        });
       }
     }
   }
