@@ -7,7 +7,7 @@ import { status } from '@grpc/grpc-js';
 @Controller()
 @EmailProto.EmailServiceControllerMethods()
 export class EmailController implements EmailProto.EmailServiceController {
-  constructor(private readonly emailService: EmailService) {}
+  constructor(private readonly emailService: EmailService) { }
   async setup(
     request: EmailProto.SetupRequest,
   ): Promise<EmailProto.SetupResponse> {
@@ -65,7 +65,24 @@ export class EmailController implements EmailProto.EmailServiceController {
       await this.emailService.sendEmail(request);
       return { statusCode: 200 };
     } catch (error) {
-      throw new RpcException(error.message);
+      let errorObj: any;
+
+      try {
+        // attempt to parse sendgrid error
+        errorObj = JSON.parse(error.message) as any;
+      } catch (parseError) {
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: 'SendGrid returned a malformed error as its response.',
+        });
+      }
+
+      if (errorObj?.response?.body?.errors?.length > 0) {
+        throw new RpcException({
+          code: status.INVALID_ARGUMENT,
+          message: errorObj.response.body.errors[0].message,
+        });
+      }
     }
   }
 
