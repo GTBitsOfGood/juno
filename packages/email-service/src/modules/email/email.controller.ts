@@ -73,7 +73,7 @@ export class EmailController implements EmailProto.EmailServiceController {
       } catch (parseError) {
         throw new RpcException({
           code: status.INTERNAL,
-          message: 'SendGrid returned a malformed error as its response.',
+          message: error.message ?? 'An unknown SendGrid error occurred',
         });
       }
 
@@ -85,7 +85,7 @@ export class EmailController implements EmailProto.EmailServiceController {
       } else {
         throw new RpcException({
           code: status.INTERNAL,
-          message: 'SendGrid returned a malformed error as its response.',
+          message: error.message ?? 'An unknown SendGrid error occurred',
         });
       }
     }
