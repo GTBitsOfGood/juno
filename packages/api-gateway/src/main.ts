@@ -6,12 +6,17 @@ import { join } from 'path';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { RpcExceptionFilter } from './rpc_exception_filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   ConfigModule.forRoot({
     envFilePath: join(__dirname, '../../../.env.local'),
   });
   const app = await NestFactory.create(AppModule);
+
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ limit: '50mb' }));
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
