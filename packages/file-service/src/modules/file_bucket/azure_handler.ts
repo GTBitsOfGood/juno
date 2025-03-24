@@ -2,7 +2,10 @@ import { FileBucketProto, FileProviderProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { lastValueFrom } from 'rxjs';
-import { BlobServiceClient } from '@azure/storage-blob';
+import {
+  BlobServiceClient,
+  StorageSharedKeyCredential,
+} from '@azure/storage-blob';
 
 export class AzureBucketHandler {
   constructor(
@@ -12,7 +15,24 @@ export class AzureBucketHandler {
 
   async getBlobServiceClient(): Promise<BlobServiceClient> {
     try {
-      return BlobServiceClient.fromConnectionString(this.provider.accessKey);
+      const accessKeyPayload = JSON.parse(this.provider.accessKey);
+      if (!accessKeyPayload.account || !accessKeyPayload.accountKey) {
+        throw new RpcException({
+          code: status.FAILED_PRECONDITION,
+          message: 'Invalid access key payload',
+        });
+      }
+      const account = accessKeyPayload.account;
+      const accountKey = accessKeyPayload.accountKey;
+
+      const sharedKeyCredential = new StorageSharedKeyCredential(
+        account,
+        accountKey,
+      );
+      return new BlobServiceClient(
+        `https://${account}.blob.core.windows.net`,
+        sharedKeyCredential,
+      );
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
