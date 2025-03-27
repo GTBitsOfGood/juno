@@ -23,6 +23,28 @@ export class FileProviderController
       );
   }
 
+  async getAccessKey(
+    request: FileProviderProto.RegisterProviderRequest,
+  ): Promise<string> {
+    switch (request.type) {
+      case FileProviderProto.ProviderType.S3:
+        return JSON.stringify({
+          accessKeyId: request.publicAccessKey,
+          secretAccessKey: request.privateAccessKey,
+        });
+      case FileProviderProto.ProviderType.AZURE:
+        return JSON.stringify({
+          accountName: request.publicAccessKey,
+          accountKey: request.privateAccessKey,
+        });
+      default:
+        throw new RpcException({
+          code: status.INVALID_ARGUMENT,
+          message: 'Invalid argument',
+        });
+    }
+  }
+
   async registerProvider(
     request: FileProviderProto.RegisterProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
@@ -44,10 +66,7 @@ export class FileProviderController
 
     try {
       const fileProviderRequest = this.fileProviderDbService.createProvider({
-        accessKey: JSON.stringify({
-          accessKeyId: request.publicAccessKey,
-          secretAccessKey: request.privateAccessKey,
-        }),
+        accessKey: await this.getAccessKey(request),
         providerName: request.providerName,
         metadata: JSON.stringify({ endpoint: request.baseUrl }),
         type: request.type,
