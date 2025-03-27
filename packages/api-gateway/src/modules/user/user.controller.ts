@@ -18,6 +18,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiHeader,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { ClientGrpc } from '@nestjs/microservices';
 import { CommonProto, ProjectProto, UserProto } from 'juno-proto';
@@ -35,6 +36,7 @@ import { userLinkedToProject } from 'src/user_project_validator';
 const { USER_SERVICE_NAME } = UserProto;
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
+@ApiBearerAuth('API_Key')
 @ApiTags('user')
 @Controller('user')
 export class UserController implements OnModuleInit {
@@ -67,7 +69,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -75,7 +77,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -92,7 +94,7 @@ export class UserController implements OnModuleInit {
   @ApiOperation({ summary: 'Retrieve an existing user.' })
   @ApiParam({
     name: 'id',
-    required: true,
+    required: false,
     description: 'The unique identifier of the user',
     type: String,
   })
@@ -126,7 +128,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -134,7 +136,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -177,7 +179,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -185,7 +187,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -240,7 +242,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -248,7 +250,7 @@ export class UserController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },

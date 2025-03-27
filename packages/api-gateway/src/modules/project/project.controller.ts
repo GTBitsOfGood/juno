@@ -85,7 +85,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -93,7 +93,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -123,7 +123,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -131,7 +131,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -191,7 +191,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -199,7 +199,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
