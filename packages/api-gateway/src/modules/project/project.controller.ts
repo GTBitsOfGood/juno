@@ -108,12 +108,12 @@ export class ProjectController implements OnModuleInit {
     return new ProjectResponses(await lastValueFrom(projects));
   }
 
-  //Get all users assosciated with a project
+  //Get all users associated with a project
   @Get(':id/users')
-  @ApiOperation({ summary: 'Retrieve all users assosciated with a project. ' })
+  @ApiOperation({ summary: 'Retrieve all users associated with a project. ' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Returned all users asossciated with given project.',
+    description: 'Returned all users associated with given project.',
     type: UserResponses,
   })
   @ApiResponse({
