@@ -94,7 +94,7 @@ export class UserController implements OnModuleInit {
   @ApiOperation({ summary: 'Retrieve an existing user.' })
   @ApiParam({
     name: 'id',
-    required: false,
+    required: true,
     description: 'The unique identifier of the user',
     type: String,
   })
