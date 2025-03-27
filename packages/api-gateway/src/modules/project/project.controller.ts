@@ -85,7 +85,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -93,7 +93,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -108,12 +108,12 @@ export class ProjectController implements OnModuleInit {
     return new ProjectResponses(await lastValueFrom(projects));
   }
 
-  //Get all users assosciated with a project
+  //Get all users associated with a project
   @Get(':id/users')
-  @ApiOperation({ summary: 'Retrieve all users assosciated with a project. ' })
+  @ApiOperation({ summary: 'Retrieve all users associated with a project. ' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Returned all users asossciated with given project.',
+    description: 'Returned all users associated with given project.',
     type: UserResponses,
   })
   @ApiResponse({
@@ -123,7 +123,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -131,7 +131,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -191,7 +191,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -199,7 +199,7 @@ export class ProjectController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
