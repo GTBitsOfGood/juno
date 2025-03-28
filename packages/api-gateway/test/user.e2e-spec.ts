@@ -227,6 +227,39 @@ describe('User Creation Routes', () => {
   });
 });
 
+describe('User Deletion Routes', () => {
+  it('deletes an existing user', async () => {
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: '1',
+        password: 'pwd123',
+        name: 'John Doe',
+        email: 'john@example.com',
+      });
+
+    return request(app.getHttpServer())
+      .delete('/user/id/1')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+      })
+      .expect(200);
+  });
+
+  it('fails to delete a nonexistent user', () => {
+    return request(app.getHttpServer())
+      .delete('/user/id/-1')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+      })
+      .expect(404);
+  });  
+});
+
 describe('Credentials Middleware Tests (jwt authentication)', () => {
   it('gets users with authorized jwt', async () => {
     await request(app.getHttpServer())

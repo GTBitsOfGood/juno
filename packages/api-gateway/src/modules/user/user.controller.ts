@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Delete,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -303,5 +304,62 @@ export class UserController implements OnModuleInit {
     });
 
     await lastValueFrom(project);
+  }
+
+  @Delete('id/:id')
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'The unique identifier of the user',
+    type: String,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The deleted user',
+    type: UserResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad request',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No user with id found',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized operation',
+  })
+  @ApiOperation({ summary: 'Delete an existing user.' })
+  async deleteUserById(@User() user: CommonProto.User, @Param('id') idStr: string): Promise<UserResponse> {
+    if (user.type == CommonProto.UserType.USER) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    
+    const id = parseInt(idStr);
+    if (Number.isNaN(id)) {
+      throw new HttpException('ID must be a number', HttpStatus.BAD_REQUEST);
+    }
+    const deletedUser = this.userService.deleteUser({
+      id,
+    });
+
+    return new UserResponse(await lastValueFrom(deletedUser));
   }
 }
