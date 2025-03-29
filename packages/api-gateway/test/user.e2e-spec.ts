@@ -240,22 +240,18 @@ describe('User Deletion Routes', () => {
         email: 'john@example.com',
       });
 
-    return request(app.getHttpServer())
+    await request(app.getHttpServer())
       .delete('/user/id/1')
       .set('X-User-Email', ADMIN_EMAIL)
       .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-      })
       .expect(200);
   });
 
-  it('fails to delete a nonexistent user', () => {
-    return request(app.getHttpServer())
-      .delete('/user/id/-1')
+  it('fails to delete a nonexistent user', async () => {
+    await request(app.getHttpServer())
+      .delete('/user/id/100')
       .set('X-User-Email', ADMIN_EMAIL)
       .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-      })
       .expect(404);
   });  
 });

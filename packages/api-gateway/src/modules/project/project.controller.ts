@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -24,6 +25,7 @@ import {
   ApiBearerAuth,
   ApiHeader,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -327,5 +329,57 @@ export class ProjectController implements OnModuleInit {
     });
 
     await lastValueFrom(project);
+  }
+
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Delete an existing project.' })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the project to be deleted',
+    type: String,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The deleted project',
+    type: ProjectResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No project with this ID was found',
+  })
+  async deleteProjectById(
+    @User() user: CommonProto.User,
+    @Param('id') idStr: string,
+  ) {
+    if (user.type == CommonProto.UserType.USER) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    const id = parseInt(idStr);
+    if (Number.isNaN(id)) {
+      throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);
+    }
+    const deletedProject = this.projectService.deleteProject({
+      id,
+    });
+
+    return new ProjectResponse(await lastValueFrom(deletedProject));
   }
 }

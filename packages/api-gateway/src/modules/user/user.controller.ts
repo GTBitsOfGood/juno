@@ -307,6 +307,7 @@ export class UserController implements OnModuleInit {
   }
 
   @Delete('id/:id')
+  @ApiOperation({ summary: 'Delete an existing user.' })
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
@@ -326,7 +327,7 @@ export class UserController implements OnModuleInit {
   @ApiParam({
     name: 'id',
     required: true,
-    description: 'The unique identifier of the user',
+    description: 'ID of the user to be deleted',
     type: String,
   })
   @ApiResponse({
@@ -335,23 +336,17 @@ export class UserController implements OnModuleInit {
     type: UserResponse,
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Bad request',
-  })
-  @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'No user with id found',
+    description: 'No user with this ID was found',
   })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Unauthorized operation',
-  })
-  @ApiOperation({ summary: 'Delete an existing user.' })
-  async deleteUserById(@User() user: CommonProto.User, @Param('id') idStr: string): Promise<UserResponse> {
+  async deleteUserById(
+    @User() user: CommonProto.User,
+    @Param('id') idStr: string,
+  ): Promise<UserResponse> {
     if (user.type == CommonProto.UserType.USER) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
-    
+
     const id = parseInt(idStr);
     if (Number.isNaN(id)) {
       throw new HttpException('ID must be a number', HttpStatus.BAD_REQUEST);

@@ -383,6 +383,76 @@ describe('Project Update Routes', () => {
   // });
 });
 
+describe('Project Deletion Routes', () => {
+  it('deletes an existing project', async () => {
+    const project = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'testproject1',
+      });
+    const id = project.body['id'];
+    await request(app.getHttpServer())
+      .delete(`/project/id/${id}`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+  });
+
+  it('fails to delete a nonexistent project', async () => {
+    await request(app.getHttpServer())
+      .delete(`/project/id/100`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(404);
+  });
+
+  it('deletes an existing project and unlinks users from project', async () => {
+    const project = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'testproject2',
+      });
+    const projId = project.body['id'];
+
+    const user = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'test-password2',
+        name: 'testuser2',
+        email: 'testuser2@test.com',
+      });
+    const userId = user.body['id'];
+
+    // link project to user
+    await request(app.getHttpServer())
+      .put(`/user/id/${userId}/project`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'testproject2',
+      });
+    
+    // delete project
+    await request(app.getHttpServer())
+      .delete(`/project/id/${projId}`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD);
+
+    // check that user has no linked projects
+    await request(app.getHttpServer())
+      .get(`/user/id/${userId}`)
+      .then((response) => {
+        expect(response.body.projectIds.length).toEqual(0);
+      });
+  });
+});
+
 describe('Project API Key Routes', () => {
   it('Create an API key for a project with valid inputs', async () => {
     const resp = await request(app.getHttpServer())
