@@ -437,7 +437,7 @@ describe('Project Deletion Routes', () => {
       .send({
         name: 'testproject2',
       });
-    
+
     // delete project
     await request(app.getHttpServer())
       .delete(`/project/id/${projId}`)

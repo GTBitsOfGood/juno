@@ -126,6 +126,31 @@ describe('Email Service Setup Routes', () => {
       .expect(201);
   });
 
+  it('Replaces original sendgrid key when attempting to set up a service that already exists', async () => {
+    const apiKey = await createApiKey('test-seed-project', 'dev');
+    await request(app.getHttpServer())
+      .post('/email/setup')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        sendgridKey: 'test-key1',
+      });
+
+    await request(app.getHttpServer())
+      .post('/email/setup')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        sendgridKey: 'test-key2',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .get('email/config/0')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .then((response) => {
+        expect(response.body.sendgridKey).toEqual('test-key2');
+      });
+  });
+
   it('Fails without a sendgridKey', async () => {
     const apiKey = await createApiKey('test-seed-project', 'dev2');
     return request(app.getHttpServer())
