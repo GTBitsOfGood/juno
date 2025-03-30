@@ -253,7 +253,7 @@ describe('User Deletion Routes', () => {
       .set('X-User-Email', ADMIN_EMAIL)
       .set('X-User-Password', ADMIN_PASSWORD)
       .expect(404);
-  });  
+  });
 });
 
 describe('Credentials Middleware Tests (jwt authentication)', () => {

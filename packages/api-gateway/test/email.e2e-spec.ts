@@ -144,7 +144,7 @@ describe('Email Service Setup Routes', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get('email/config/0')
+      .get('/email/config/0')
       .set('Authorization', 'Bearer ' + apiKey)
       .then((response) => {
         expect(response.body.sendgridKey).toEqual('test-key2');
