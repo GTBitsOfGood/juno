@@ -438,6 +438,13 @@ describe('Project Deletion Routes', () => {
         name: 'testproject2',
       });
 
+    // check that user has one linked project
+    await request(app.getHttpServer())
+      .get(`/user/id/${userId}`)
+      .then((response) => {
+        expect(response.body.projectIds.length).toEqual(1);
+      });
+
     // delete project
     await request(app.getHttpServer())
       .delete(`/project/id/${projId}`)
@@ -448,7 +455,7 @@ describe('Project Deletion Routes', () => {
     await request(app.getHttpServer())
       .get(`/user/id/${userId}`)
       .then((response) => {
-        expect(response.body.projectIds.length).toEqual(0);
+        expect(response.body.projectIds).toBe(undefined);
       });
   });
 });
