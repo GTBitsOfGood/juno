@@ -195,4 +195,44 @@ describe('File Provider Tests', () => {
       expect(err).not.toBeNull();
     }
   });
+  it('Stores azure provider key info correctly', async () => {
+    try {
+      const registerRequest: FileProviderProto.RegisterProviderRequest = {
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+        baseUrl: 'https://azure.com',
+        providerName: 'azure-test',
+        type: FileProviderProto.ProviderType.AZURE,
+      };
+      await new Promise((resolve) => {
+        fileProviderClient.registerProvider(
+          registerRequest,
+          (err: any, resp: any) => {
+            expect(err).toBeNull();
+            resolve(resp);
+          },
+        );
+      });
+
+      const provider: FileProviderProto.FileProvider = await new Promise(
+        (resolve) => {
+          fileProviderClient.getProvider(
+            { providerName: 'azure-test' },
+            (err: any, resp: any) => {
+              expect(err).toBeNull();
+              resolve(resp);
+            },
+          );
+        },
+      );
+      expect(provider.providerName).toBe('azure-test');
+      expect(provider.providerType).toBe(FileProviderProto.ProviderType.AZURE);
+      expect(JSON.parse(provider.accessKey)).toBe({
+        accountName: 'accessKey',
+        accountKey: 'privateKey',
+      });
+    } catch (err) {
+      expect(err).not.toBeNull();
+    }
+  });
 });

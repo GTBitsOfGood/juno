@@ -36,7 +36,7 @@ export class AzureBucketHandler {
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
-        message: `Failed to initialize S3 client: ${error.message} `,
+        message: `Failed to initialize Azure client: ${error.message} `,
       });
     }
   }
@@ -53,12 +53,6 @@ export class AzureBucketHandler {
       );
       return dbBucket;
     } catch (error) {
-      if (error.message.toLowerCase().includes('you already own it')) {
-        throw new RpcException({
-          code: status.ALREADY_EXISTS,
-          message: 'Bucket already exists',
-        });
-      }
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
         message: `Failed to create bucket: ${error.message} `,
@@ -81,12 +75,6 @@ export class AzureBucketHandler {
       await blobClient.getContainerClient(request.name).delete();
       return bucket;
     } catch (error) {
-      if (error.message.includes('NoSuchBucket')) {
-        throw new RpcException({
-          code: status.NOT_FOUND,
-          message: 'Bucket not found',
-        });
-      }
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
         message: `Failed to delete bucket: ${error.message} `,

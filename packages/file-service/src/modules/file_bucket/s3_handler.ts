@@ -62,6 +62,11 @@ export class S3BucketHandler {
     request: FileBucketProto.RemoveBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
     try {
+      const s3Client = await this.getS3Client('us-east-005');
+      const deleteBucketCommand = new DeleteBucketCommand({
+        Bucket: request.name,
+      });
+      await s3Client.send(deleteBucketCommand);
       const bucket = await lastValueFrom(
         this.fileDBService.deleteBucket({
           name: request.name,
@@ -69,11 +74,6 @@ export class S3BucketHandler {
           configEnv: request.configEnv,
         }),
       );
-      const s3Client = await this.getS3Client('us-east-005');
-      const deleteBucketCommand = new DeleteBucketCommand({
-        Bucket: request.name,
-      });
-      await s3Client.send(deleteBucketCommand);
       return bucket;
     } catch (error) {
       if (error.message.includes('NoSuchBucket')) {

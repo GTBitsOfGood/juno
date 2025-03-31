@@ -90,7 +90,7 @@ export class AzureFileHandler {
           containerName: request.bucketName, // Required
           blobName: request.fileName, // Required
           permissions: BlobSASPermissions.from({
-            read: true,
+            write: true,
           }), // Required
           startsOn: new Date(), // Required
           expiresOn: new Date(new Date().valueOf() + 86400), // Optional. Date type
