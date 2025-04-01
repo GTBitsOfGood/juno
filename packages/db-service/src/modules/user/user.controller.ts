@@ -118,4 +118,20 @@ export class UserController implements UserProto.UserServiceController {
       projectIds: updated.allowedProjects.map((project) => project.id),
     };
   }
+
+  async unlinkProject(
+    request: UserProto.UnlinkProjectFromUserRequest,
+  ): Promise<CommonProto.User> {
+    const user = validate.validateUserIdentifier(request.user);
+    const updated = await this.userService.updateUser(user, {
+      allowedProjects: {
+        disconnect: validate.validateProjectIdentifier(request.project),
+      },
+    });
+    return {
+      ...updated,
+      type: mapPrismaRoleToRPC(updated.type),
+      projectIds: updated.allowedProjects.map((project) => project.id),
+    };
+  }
 }

@@ -79,6 +79,7 @@ export class UserModule implements NestModule {
         { path: 'user', method: RequestMethod.GET },
         { path: 'user/type', method: RequestMethod.POST },
         { path: 'user/id/:id/project', method: RequestMethod.PUT },
+        { path: 'user/id/:id/project', method: RequestMethod.DELETE },
       );
   }
 }

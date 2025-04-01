@@ -168,7 +168,8 @@ describe('DB Service User Tests', () => {
     await promise;
   });
 
-  it('can link a valid user to a project', async () => {
+  it('can link and unlink a valid user to/from multiple projects', async () => {
+    // Create two projects
     const projectPromise = new Promise((resolve) => {
       projectClient.createProject(
         {
@@ -184,6 +185,22 @@ describe('DB Service User Tests', () => {
 
     await projectPromise;
 
+    const project2Promise = new Promise((resolve) => {
+      projectClient.createProject(
+        {
+          name: 'testproject2',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['name']).toBe('testproject2');
+          resolve({});
+        },
+      );
+    });
+
+    await project2Promise;
+
+    // Create a user
     const promise = new Promise((resolve) => {
       userClient.createUser(
         {
@@ -205,6 +222,7 @@ describe('DB Service User Tests', () => {
 
     await promise;
 
+    // Link the user to the first project
     const promise1 = new Promise((resolve) => {
       userClient.linkProject(
         {
@@ -223,6 +241,68 @@ describe('DB Service User Tests', () => {
     });
 
     await promise1;
+
+    // Link the user to the second project
+    const promise2 = new Promise((resolve) => {
+      userClient.linkProject(
+        {
+          project: { name: 'testproject2' },
+          user: { id: 2 },
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['email']).toBe('test@test.com');
+          expect(resp['name']).toBe('some-name');
+          expect(resp['type']).toBe(CommonProto.UserType.SUPERADMIN);
+          expect(resp['projectIds'].map((id) => Number(id))).toStrictEqual([
+            1, 2,
+          ]);
+          resolve({});
+        },
+      );
+    });
+
+    await promise2;
+
+    // Unlink the user from the first project
+    const unlinkPromise1 = new Promise((resolve) => {
+      userClient.unlinkProject(
+        {
+          project: { name: 'testproject' },
+          user: { id: 2 },
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['email']).toBe('test@test.com');
+          expect(resp['name']).toBe('some-name');
+          expect(resp['type']).toBe(CommonProto.UserType.SUPERADMIN);
+          expect(resp['projectIds'].map((id) => Number(id))).toStrictEqual([2]);
+          resolve({});
+        },
+      );
+    });
+
+    await unlinkPromise1;
+
+    // Unlink the user from the second project
+    const unlinkPromise2 = new Promise((resolve) => {
+      userClient.unlinkProject(
+        {
+          project: { name: 'testproject2' },
+          user: { id: 2 },
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp['email']).toBe('test@test.com');
+          expect(resp['name']).toBe('some-name');
+          expect(resp['type']).toBe(CommonProto.UserType.SUPERADMIN);
+          expect(resp['projectIds']).toBeUndefined();
+          resolve({});
+        },
+      );
+    });
+
+    await unlinkPromise2;
   });
 
   it('can get a valid user', async () => {

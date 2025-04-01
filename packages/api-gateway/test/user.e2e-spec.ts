@@ -158,45 +158,6 @@ describe('User Creation Routes', () => {
     return request(app.getHttpServer()).get('/user/id/abc').expect(400);
   });
 
-  it('should link a user to a project', async () => {
-    await request(app.getHttpServer())
-      .post('/project')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-        name: 'projectName',
-      });
-    const resp = await request(app.getHttpServer())
-      .post('/user')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-        password: 'password',
-        name: 'John Doe',
-        email: 'john@linktoproject.com',
-      });
-    const id = resp.body['id'];
-
-    await request(app.getHttpServer())
-      .put(`/user/id/${id}/project`)
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-        name: 'projectName',
-      })
-      .expect(200);
-  });
-
-  it('should test an invalid user id', async () => {
-    await request(app.getHttpServer())
-      .put('/user/id/a/project')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-        name: 'projectName',
-      })
-      .expect(400);
-  });
   it('get users should fail with unauthorized user', async () => {
     await request(app.getHttpServer())
       .post('/user')
@@ -217,6 +178,7 @@ describe('User Creation Routes', () => {
       .send()
       .expect(401);
   });
+
   it('get users should succeed with authorized user', async () => {
     await request(app.getHttpServer())
       .get('/user')
@@ -273,5 +235,101 @@ describe('Credentials Middleware Tests (jwt authentication)', () => {
       .set('Authorization', 'Bearer invalid-jwt')
       .send()
       .expect(401);
+  });
+});
+
+describe('User Project Linkage Routes', () => {
+  it('should link a user to a project', async () => {
+    await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'projectName',
+      });
+    const resp = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'password',
+        name: 'John Doe',
+        email: 'john@linktoproject.com',
+      });
+    const id = resp.body['id'];
+
+    await request(app.getHttpServer())
+      .put(`/user/id/${id}/project`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'projectName',
+      })
+      .expect(200);
+  });
+
+  it('should test an invalid user id', async () => {
+    await request(app.getHttpServer())
+      .put('/user/id/a/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'projectName',
+      })
+      .expect(400);
+  });
+
+  it('should successfully unlink a user from a project', async () => {
+    // create a project
+    await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'unlinkTestProject',
+      });
+
+    // create a user
+    const resp = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'password',
+        name: 'Unlink Test User',
+        email: 'unlink@test.com',
+      });
+    const id = resp.body['id'];
+
+    // link the user to the project
+    await request(app.getHttpServer())
+      .put(`/user/id/${id}/project`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'unlinkTestProject',
+      })
+      .expect(200);
+
+    // unlink the user from the project
+    await request(app.getHttpServer())
+      .delete(`/user/id/${id}/project`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'unlinkTestProject',
+      })
+      .expect(200);
+  });
+
+  it('should fail to unlink with invalid user id', async () => {
+    await request(app.getHttpServer())
+      .delete('/user/id/invalid/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'unlinkTestProject',
+      })
+      .expect(400);
   });
 });

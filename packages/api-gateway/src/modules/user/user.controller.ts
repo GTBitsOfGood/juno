@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Delete,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -29,6 +30,7 @@ import {
   SetUserTypeModel,
   UserResponse,
   UserResponses,
+  UnlinkProjectModel,
 } from 'src/models/user.dto';
 import { User } from 'src/decorators/user.decorator';
 import { userLinkedToProject } from 'src/user_project_validator';
@@ -299,6 +301,82 @@ export class UserController implements OnModuleInit {
       project: {
         id: linkProjectBody.id,
         name: linkProjectBody.name,
+      },
+    });
+
+    await lastValueFrom(project);
+  }
+
+  @Delete('id/:id/project')
+  @ApiOperation({
+    summary: 'Unlink user from project.',
+    description: 'Removes a user from a project.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID being unlinked from a project',
+    type: String,
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiBody({
+    type: UnlinkProjectModel,
+    description: 'Project details to unlink from the user',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad request',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User unlinked from project successfully.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized operation',
+  })
+  async unlinkUserFromProject(
+    @User() user: CommonProto.User,
+    @Param('id') idStr: string,
+    @Body() unlinkProjectBody: UnlinkProjectModel,
+  ) {
+    const id = parseInt(idStr);
+    if (Number.isNaN(id)) {
+      throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);
+    }
+    const linked = await userLinkedToProject({
+      project: {
+        id,
+      },
+      user,
+      projectClient: this.projectService,
+    });
+    if (!linked || user.type == CommonProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can unlink Users from Projects',
+      );
+    }
+    const project = this.userService.unlinkProject({
+      user: {
+        id,
+      },
+      project: {
+        id: unlinkProjectBody.id,
+        name: unlinkProjectBody.name,
       },
     });
 
