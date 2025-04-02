@@ -32,7 +32,8 @@
     "test:e2e:email-service": "EMAIL_COMMAND=test:e2e RUN_MODE=test pnpm start:dev --exit-code-from email-service email-service",
     "test:e2e:file-service": "FILE_COMMAND=test:e2e RUN_MODE=test pnpm start:dev --exit-code-from file-service file-service",
     "test:e2e:db-service": "DB_COMMAND=test:e2e RUN_MODE=test pnpm start:dev --exit-code-from db-service db-service",
-    "test:e2e:logging-service": "LOGGING_COMMAND=test:e2e RUN_MODE=test pnpm start:dev --exit-code-from logging-service logging-service"
+    "test:e2e:logging-service": "LOGGING_COMMAND=test:e2e RUN_MODE=test pnpm start:dev --exit-code-from logging-service logging-service",
+    "studio": "scripts/launch-prisma-studio.sh"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.13.5",
