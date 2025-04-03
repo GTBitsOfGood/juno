@@ -142,8 +142,17 @@ export class EmailService {
   async createEmailServiceConfig(
     input: Prisma.EmailServiceConfigCreateInput,
   ): Promise<EmailServiceConfig> {
-    return this.prisma.emailServiceConfig.create({
-      data: input,
+    return this.prisma.emailServiceConfig.upsert({
+      where: {
+        id_environment: {
+          id: input.Project.connect.id,
+          environment: input.environment,
+        },
+      },
+      create: input,
+      update: {
+        sendgridApiKey: input.sendgridApiKey,
+      },
     });
   }
 
