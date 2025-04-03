@@ -312,7 +312,6 @@ export class UserController implements OnModuleInit {
     summary: 'Unlink user from project.',
     description: 'Removes a user from a project.',
   })
-
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
