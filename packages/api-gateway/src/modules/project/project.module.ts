@@ -87,6 +87,7 @@ export class ProjectModule implements NestModule {
         { path: 'project', method: RequestMethod.POST },
         { path: 'project', method: RequestMethod.GET },
         { path: 'project/:id/users', method: RequestMethod.GET },
+        { path: 'project/id/:id', method: RequestMethod.DELETE },
       );
   }
 }

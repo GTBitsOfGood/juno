@@ -312,11 +312,7 @@ export class UserController implements OnModuleInit {
     summary: 'Unlink user from project.',
     description: 'Removes a user from a project.',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'User ID being unlinked from a project',
-    type: String,
-  })
+
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
@@ -332,6 +328,11 @@ export class UserController implements OnModuleInit {
     schema: {
       type: 'string',
     },
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID being unlinked from a project',
+    type: String,
   })
   @ApiBody({
     type: UnlinkProjectModel,
@@ -381,5 +382,57 @@ export class UserController implements OnModuleInit {
     });
 
     await lastValueFrom(project);
+  }
+
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Delete an existing user.' })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the user to be deleted',
+    type: String,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'The deleted user',
+    type: UserResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'No user with this ID was found',
+  })
+  async deleteUserById(
+    @User() user: CommonProto.User,
+    @Param('id') idStr: string,
+  ): Promise<UserResponse> {
+    if (user.type == CommonProto.UserType.USER) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    const id = parseInt(idStr);
+    if (Number.isNaN(id)) {
+      throw new HttpException('ID must be a number', HttpStatus.BAD_REQUEST);
+    }
+    const deletedUser = this.userService.deleteUser({
+      id,
+    });
+
+    return new UserResponse(await lastValueFrom(deletedUser));
   }
 }
