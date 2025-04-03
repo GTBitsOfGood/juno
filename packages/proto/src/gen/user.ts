@@ -46,6 +46,11 @@ export interface LinkProjectToUserRequest {
   user: UserIdentifier | undefined;
 }
 
+export interface UnlinkProjectFromUserRequest {
+  project: ProjectIdentifier | undefined;
+  user: UserIdentifier | undefined;
+}
+
 export interface AuthenticateUserRequest {
   email: string;
   password: string;
@@ -65,6 +70,8 @@ export interface UserServiceClient {
   deleteUser(request: UserIdentifier): Observable<User>;
 
   linkProject(request: LinkProjectToUserRequest): Observable<User>;
+
+  unlinkProject(request: UnlinkProjectFromUserRequest): Observable<User>;
 
   getUserPasswordHash(request: UserIdentifier): Observable<UserPasswordHash>;
 }
@@ -90,6 +97,10 @@ export interface UserServiceController {
     request: LinkProjectToUserRequest,
   ): Promise<User> | Observable<User> | User;
 
+  unlinkProject(
+    request: UnlinkProjectFromUserRequest,
+  ): Promise<User> | Observable<User> | User;
+
   getUserPasswordHash(
     request: UserIdentifier,
   ):
@@ -107,6 +118,7 @@ export function UserServiceControllerMethods() {
       'updateUser',
       'deleteUser',
       'linkProject',
+      'unlinkProject',
       'getUserPasswordHash',
     ];
     for (const method of grpcMethods) {

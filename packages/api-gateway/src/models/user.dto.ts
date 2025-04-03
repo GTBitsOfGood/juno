@@ -37,6 +37,13 @@ export class LinkProjectModel {
   name?: string;
 }
 
+export class UnlinkProjectModel {
+  @ApiProperty({ description: 'ID of project to be unlinked' })
+  id?: number;
+  @ApiProperty({ description: 'Name of project to be unlinked' })
+  name?: string;
+}
+
 export class UserResponse {
   @Transform(({ value }) => Number(value))
   @ApiProperty({ description: 'User id' })
