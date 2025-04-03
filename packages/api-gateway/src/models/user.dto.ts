@@ -86,7 +86,8 @@ export class UserResponses {
   })
   users: UserResponse[];
   constructor(usersResponse: CommonProto.Users) {
-    this.users = usersResponse.users.map((user) => new UserResponse(user));
+    this.users =
+      usersResponse?.users?.map((user) => new UserResponse(user)) || [];
   }
 }
 

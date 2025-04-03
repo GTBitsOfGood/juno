@@ -49,13 +49,14 @@ export class ProjectController
     await this.getProject(projectIdentifier); //Throws Not found RPC exception if project doesn't exist.
     const users = await this.projectService.getUsersWithProject(params.id);
     return {
-      users: users.map((user) => {
-        return {
-          ...user,
-          type: mapPrismaRoleToRPC(user.type),
-          projectIds: user.allowedProjects.map((project) => project.id),
-        };
-      }),
+      users:
+        users?.map((user) => {
+          return {
+            ...user,
+            type: mapPrismaRoleToRPC(user.type),
+            projectIds: user.allowedProjects.map((project) => project.id),
+          };
+        }) || [],
     };
   }
 
