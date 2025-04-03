@@ -199,6 +199,27 @@ describe('Project Retrieval Routes', () => {
       .expect(404);
     expect(resp.text).toContain('Project not found');
   });
+
+  it('should not throw an internal error when fetching users from a project with 0 users', async () => {
+    const createdProject = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        name: 'emptyUserProject',
+      })
+      .expect(201);
+
+    const users = await request(app.getHttpServer())
+      .get(`/project/${createdProject.body['id']}/users`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send()
+      .expect(200);
+
+    expect(users.body['users']).toBeDefined();
+    expect(users.body['users'].length === 0);
+  });
 });
 
 describe('Project Update Routes', () => {
