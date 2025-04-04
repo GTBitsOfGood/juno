@@ -79,6 +79,19 @@ beforeAll(async () => {
     );
   });
 
+  await new Promise((resolve) => {
+    providerClient.createProvider(
+      {
+        providerName: providerNameAzure,
+        accessKey: JSON.stringify({ accessKeyId, secretAccessKey }),
+        metadata: JSON.stringify({ endpoint: '' }), // doesn't matter for azure
+        bucket: [],
+        type: FileProviderProto.ProviderType.AZURE,
+      },
+      () => resolve(0),
+    );
+  });
+
   const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]);
   const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
   bucketClientDB = new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
@@ -126,6 +139,7 @@ const bucketName = 'test-bucket-juno-buckets';
 const configId = 0;
 const configEnv = 'prod';
 const providerName = 'backblazeb2-buckets';
+const providerNameAzure = 'azure-buckets';
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
