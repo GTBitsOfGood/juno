@@ -107,13 +107,13 @@ pnpm sync-protos
 
 ### Updating the JunoSDK from OpenAPI
 
-With [OpenAPI](https://docs.nestjs.com/openapi/introduction), much of the internal implementation of [juno-sdk](https://github.com/GTBitsOfGood/juno-sdk) is generated automatically. This is happen via two methods:
+With [OpenAPI](https://docs.nestjs.com/openapi/introduction), much of the internal implementation of [juno-sdk](https://github.com/GTBitsOfGood/juno-sdk) is generated automatically. There are two options for triggering the SDK generation:
 
 **Automatic** - Upon a new tagged release of Juno, a GitHub action will automatically create a PR in the JunoSDK repository with the new changes.
 
 **Manual** - If the SDK needs to be updated locally for testing Juno before release, you can follow these steps:
 
-- With Juno currently running, execute the scripts/doc-extract.sh . This downloads the contents of localhost:/API_GATEWAY_URL/docs-yaml where the OpenAPI yaml specification is located, runs the OpenAPI SDK generator, and places the output into juno-client-sdk.
+- With Juno currently running, execute the scripts/doc-extract.sh. This downloads the contents of localhost:/API_GATEWAY_URL/docs-yaml where the OpenAPI yaml specification is located, runs the OpenAPI SDK generator, and places the output into juno-client-sdk.
 - Copy the `api.ts` file and `api`, `model` folders into the SDK repository
 - Ensure the changes still build (`bun run build` in the SDK repository) and fix any errors that might've been caused with the update
 - Add any additional needed methods to the SDK to use new routes (e.g. your unlink user)
