@@ -47,7 +47,7 @@ export class EmailController implements EmailDbServiceController {
     if (!config) {
       throw new RpcException({
         code: status.NOT_FOUND,
-        message: 'Email config not found',
+        message: `Email config not found for environment "${request.environment}." Are your config matches this environment?`,
       });
     }
 
