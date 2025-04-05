@@ -57,6 +57,8 @@ jobs:
           echo "accessKeyId=$ACCESS_KEY_ID" >> .env.gh-actions.local
           echo "secretAccessKey=$SECRET_ACCESS_KEY" >> .env.gh-actions.local
           echo "baseURL=$BASE_URL" >> .env.gh-actions.local
+          echo "azureStorageAccountName=$AZURE_ACCOUNT_NAME" >> .env.gh-actions.local
+          echo "azureStorageAccountKey=$AZURE_ACCOUNT_KEY" >> .env.gh-actions.local
       - name: Test
         run: pnpm test:e2e:file-service
 
