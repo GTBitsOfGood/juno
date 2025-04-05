@@ -22,8 +22,12 @@ export class AzureBucketHandler {
           message: 'Invalid access key payload',
         });
       }
-      const account = accessKeyPayload.account;
+      const account = accessKeyPayload.accountName;
       const accountKey = accessKeyPayload.accountKey;
+
+      console.log(`full payload: ${JSON.stringify(accessKeyPayload)}`);
+      console.log(`account: ${account}`);
+      console.log(`accountKey: ${accountKey}`);
 
       const sharedKeyCredential = new StorageSharedKeyCredential(
         account,

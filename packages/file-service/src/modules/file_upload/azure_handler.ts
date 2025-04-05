@@ -22,7 +22,7 @@ export class AzureFileHandler {
         message: 'Invalid access key payload',
       });
     }
-    const account = accessKeyPayload.account;
+    const account = accessKeyPayload.accountName;
     const accountKey = accessKeyPayload.accountKey;
 
     return new StorageSharedKeyCredential(account, accountKey);
