@@ -3,6 +3,7 @@ import { EmailService } from './email.service';
 import { EmailProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { Observable } from 'rxjs';
 
 @Controller()
 @EmailProto.EmailServiceControllerMethods()
@@ -101,5 +102,11 @@ export class EmailController implements EmailProto.EmailServiceController {
     request: EmailProto.VerifyDomainRequest,
   ): Promise<EmailProto.VerifyDomainResponse> {
     return this.emailService.verifyDomain(request);
+  }
+
+  async getStatistics(
+    request: EmailProto.GetStatisticsRequest,
+  ): Promise<EmailProto.StatisticResponses> {
+    return await this.emailService.getStatistics(request);
   }
 }

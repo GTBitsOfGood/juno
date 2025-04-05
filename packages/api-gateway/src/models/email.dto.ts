@@ -344,6 +344,169 @@ export class SendEmailResponse {
   }
 }
 
+export enum AggregationInterval {
+  DAY = 'day',
+  WEEK = 'week',
+  MONTH = 'month',
+}
+
+export class SendEmailStatistics {
+  @ApiProperty({
+    description: 'The number of results to return.',
+  })
+  limit?: number;
+  @ApiProperty({
+    description: 'The point in the list to begin retrieving results.',
+  })
+  offset?: number;
+  @ApiProperty({
+    description:
+      "How to group the statistics. Must be either 'day', 'week', or 'month'.",
+    enum: AggregationInterval,
+    enumName: 'AggregationInterval',
+  })
+  aggregated_by?: AggregationInterval; //This needs to be an enum
+  @ApiProperty({
+    description:
+      'The starting date of the statistics to retrieve. Must follow format YYYY-MM-DD.',
+    example: '2025-01-01',
+  })
+  start_date: string;
+  @ApiProperty({
+    description:
+      'he end date of the statistics to retrieve. Defaults to today. Must follow format YYYY-MM-DD.',
+  })
+  end_date?: string;
+}
+
+export class SendEmailStatisticsResponse {
+  @ApiProperty({ description: 'Date', example: '2023-12-24' })
+  date: string;
+
+  @ApiProperty({
+    description: 'The number of links that were clicked in your emails.',
+  })
+  clicks: number;
+
+  @ApiProperty({
+    description:
+      'The number of unique recipients who clicked links in your emails.',
+  })
+  unique_clicks: number;
+
+  @ApiProperty({
+    description:
+      'The total number of times your emails were opened by recipients.',
+  })
+  opens: number;
+
+  @ApiProperty({
+    description: 'The number of unique recipients who opened your emails.',
+  })
+  unique_opens: number;
+
+  @ApiProperty({
+    description:
+      'The number of emails that were not allowed to be delivered by ISPs.',
+  })
+  blocks: number;
+
+  @ApiProperty({
+    description: 'The number of emails that were dropped because of a bounce.',
+  })
+  bounce_drops: number;
+
+  @ApiProperty({
+    description:
+      'The number of emails that bounced instead of being delivered.',
+  })
+  bounces: number;
+
+  @ApiProperty({
+    description:
+      'The number of emails that temporarily could not be delivered.',
+  })
+  deferred: number;
+
+  @ApiProperty({
+    description: 'The number of emails confirmed to have been delivered.',
+  })
+  delivered: number;
+
+  @ApiProperty({
+    description:
+      'The number of recipients with malformed or invalid email addresses.',
+  })
+  invalid_emails: number;
+
+  @ApiProperty({
+    description:
+      'Requests from your website, application, or mail client via SMTP Relay or API.',
+  })
+  processed: number;
+
+  @ApiProperty({
+    description: 'The number of emails that were requested to be delivered.',
+  })
+  requests: number;
+
+  @ApiProperty({
+    description:
+      'The number of emails dropped due to a recipient marking your email as spam.',
+  })
+  spam_report_drops: number;
+
+  @ApiProperty({
+    description: 'The number of recipients who marked your email as spam.',
+  })
+  spam_reports: number;
+
+  @ApiProperty({
+    description:
+      'The number of emails dropped due to a recipient unsubscribing.',
+  })
+  unsubscribe_drops: number;
+
+  @ApiProperty({
+    description: 'The number of recipients who unsubscribed from your emails.',
+  })
+  unsubscribes: number;
+
+  constructor(statisticResponse: EmailProto.StatisticResponse) {
+    this.date = statisticResponse.date;
+    this.clicks = statisticResponse.clicks;
+    this.unique_clicks = statisticResponse.uniqueClicks;
+    this.opens = statisticResponse.opens;
+    this.unique_opens = statisticResponse.uniqueOpens;
+    this.blocks = statisticResponse.blocks;
+    this.bounce_drops = statisticResponse.bounceDrops;
+    this.bounces = statisticResponse.bounces;
+    this.deferred = statisticResponse.deferred;
+    this.delivered = statisticResponse.delivered;
+    this.invalid_emails = statisticResponse.invalidEmails;
+    this.processed = statisticResponse.processed;
+    this.requests = statisticResponse.requests;
+    this.spam_report_drops = statisticResponse.spamReportDrops;
+    this.spam_reports = statisticResponse.spamReports;
+    this.unsubscribe_drops = statisticResponse.unsubscribeDrops;
+    this.unsubscribes = statisticResponse.unsubscribes;
+  }
+}
+
+export class SendEmailStatisticsResponses {
+  @ApiProperty({
+    description: 'List of email analytics.',
+    type: [SendEmailStatisticsResponse],
+  })
+  responses: SendEmailStatisticsResponse[];
+  constructor(statisticsResponses: EmailProto.StatisticResponses) {
+    this.responses =
+      statisticsResponses?.responses?.map(
+        (response) => new SendEmailStatisticsResponse(response),
+      ) || [];
+  }
+}
+
 export class SendGridDNSRecord {
   valid: boolean;
   type: string;

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Query,
   HttpException,
   BadRequestException,
   HttpStatus,
@@ -25,6 +26,8 @@ import {
   SetupEmailResponse,
   SetupEmailServiceModel,
   VerifyDomainModel,
+  AggregationInterval,
+  SendEmailStatisticsResponses,
 } from 'src/models/email.dto';
 
 import {
@@ -34,6 +37,8 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -261,6 +266,80 @@ export class EmailController implements OnModuleInit {
           replyToList: req.replyToList,
           subject: req.subject,
           content: req.content,
+          configId: apiKey.project.id,
+          configEnvironment: apiKey.environment,
+        }),
+      ),
+    );
+  }
+
+  @ApiOperation({ summary: 'Gets overall email analytics' })
+  @ApiCreatedResponse({
+    description: 'Overall Email Analytics',
+    type: SendEmailStatisticsResponses,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'The number of results to return',
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    type: Number,
+    description: 'The point in the list to begin retrieving results',
+  })
+  @ApiQuery({
+    name: 'aggregatedBy',
+    required: false,
+    enum: AggregationInterval,
+    enumName: 'AggregateInterval',
+    description:
+      "How to group the statistics. Must be either 'day', 'week', or 'month'",
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: true,
+    type: String,
+    description:
+      'The starting date of the statistics to retrieve. Must follow format YYYY-MM-DD',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description:
+      'The end date of the statistics to retrieve. Defaults to today. Must follow format YYYY-MM-DD',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @Get('/analytics')
+  async getStatistics(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Query('startDate') startDate: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+    @Query('aggregatedBy') aggregatedBy?: AggregationInterval,
+    @Query('endDate') endDate?: string,
+  ) {
+    const intervalMap: Record<
+      AggregationInterval,
+      EmailProto.AggregateInterval
+    > = {
+      [AggregationInterval.DAY]: EmailProto.AggregateInterval.DAY,
+      [AggregationInterval.WEEK]: EmailProto.AggregateInterval.WEEK,
+      [AggregationInterval.MONTH]: EmailProto.AggregateInterval.MONTH,
+    };
+
+    return new SendEmailStatisticsResponses(
+      await lastValueFrom(
+        this.emailService.getStatistics({
+          limit: limit,
+          offset: offset,
+          startDate: startDate,
+          endDate: endDate,
+          aggregatedBy: intervalMap[aggregatedBy], //TODO: Validate that this works
           configId: apiKey.project.id,
           configEnvironment: apiKey.environment,
         }),

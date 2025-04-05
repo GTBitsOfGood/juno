@@ -11,6 +11,13 @@ import { EmailSenderIdentifier, ProjectIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.email';
 
+export enum AggregateInterval {
+  DAY = 0,
+  WEEK = 1,
+  MONTH = 2,
+  UNRECOGNIZED = -1,
+}
+
 export interface EmailSender {
   username: string;
   description?: string | undefined;
@@ -70,6 +77,40 @@ export interface DeleteEmailSenderRequest {
   emailSenderIdentifier: EmailSenderIdentifier | undefined;
   configId: number;
   configEnvironment: string;
+}
+
+export interface GetStatisticsRequest {
+  limit?: number | undefined;
+  offset?: number | undefined;
+  aggregatedBy?: AggregateInterval | undefined;
+  startDate: string;
+  endDate?: string | undefined;
+  configId: number;
+  configEnvironment: string;
+}
+
+export interface StatisticResponses {
+  responses: StatisticResponse[];
+}
+
+export interface StatisticResponse {
+  date: string;
+  clicks: number;
+  uniqueClicks: number;
+  opens: number;
+  uniqueOpens: number;
+  blocks: number;
+  bounceDrops: number;
+  bounces: number;
+  deferred: number;
+  delivered: number;
+  invalidEmails: number;
+  processed: number;
+  requests: number;
+  spamReportDrops: number;
+  spamReports: number;
+  unsubscribeDrops: number;
+  unsubscribes: number;
 }
 
 export interface SendEmailSenderRequestResponse {
@@ -200,6 +241,8 @@ export interface EmailServiceClient {
   ): Observable<AuthenticateDomainResponse>;
 
   verifyDomain(request: VerifyDomainRequest): Observable<VerifyDomainResponse>;
+
+  getStatistics(request: GetStatisticsRequest): Observable<StatisticResponses>;
 }
 
 export interface EmailServiceController {
@@ -234,6 +277,13 @@ export interface EmailServiceController {
     | Promise<VerifyDomainResponse>
     | Observable<VerifyDomainResponse>
     | VerifyDomainResponse;
+
+  getStatistics(
+    request: GetStatisticsRequest,
+  ):
+    | Promise<StatisticResponses>
+    | Observable<StatisticResponses>
+    | StatisticResponses;
 }
 
 export function EmailServiceControllerMethods() {
@@ -244,6 +294,7 @@ export function EmailServiceControllerMethods() {
       'registerSender',
       'authenticateDomain',
       'verifyDomain',
+      'getStatistics',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
