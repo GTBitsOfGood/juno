@@ -59,7 +59,7 @@ export class AzureFileHandler {
     try {
       const blobSAS = generateBlobSASQueryParameters(
         {
-          containerName: request.bucketName, // Required
+          containerName: `${request.bucketName}-${request.configId}-${request.configEnv}`, // Required
           blobName: request.fileName, // Required
           permissions: BlobSASPermissions.from({
             read: true,
@@ -87,7 +87,7 @@ export class AzureFileHandler {
     try {
       const blobSAS = generateBlobSASQueryParameters(
         {
-          containerName: request.bucketName, // Required
+          containerName: `${request.bucketName}-${request.configId}-${request.configEnv}`, // Required
           blobName: request.fileName, // Required
           permissions: BlobSASPermissions.from({
             write: true,

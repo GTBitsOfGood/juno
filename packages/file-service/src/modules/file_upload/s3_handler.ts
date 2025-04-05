@@ -61,7 +61,7 @@ export class S3FileHandler {
     try {
       const client = await this.getS3Client('us-east-005');
       const getcommand = new GetObjectCommand({
-        Bucket: request.bucketName,
+        Bucket: `${request.bucketName}-${request.configId}-${request.configEnv}`,
         Key: request.fileName,
       });
 
@@ -83,7 +83,7 @@ export class S3FileHandler {
     try {
       const s3Client = await this.getS3Client('us-east-005');
       const command = new PutObjectCommand({
-        Bucket: request.bucketName,
+        Bucket: `${request.bucketName}-${request.configId}-${request.configEnv}`,
         Key: request.fileName,
       });
       url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
