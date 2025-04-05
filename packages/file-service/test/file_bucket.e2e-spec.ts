@@ -207,13 +207,6 @@ describe('File Bucket Creation Tests', () => {
       sharedKeyCredential,
     );
 
-    // Try deleting if its alreayd made
-    try {
-      await client
-        .getContainerClient(`successful-bucket-azure-${configId}-${configEnv}`)
-        .delete();
-    } catch {}
-
     const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
