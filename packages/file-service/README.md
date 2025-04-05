@@ -14,13 +14,13 @@
   
 [Bits of Good](https://bitsofgood.org/)'s central infrastructure API, integrating several in-house services to simplify and streamline project development. This package is the file handling microservice. It is responsible for managing file uploads & downloads, bucket creation & deletion, and file provider setup.
 
-<a href="https://github.com/GTBitsOfGood/juno/blob/ryder/documentation-overhaul/README.md"><strong>« Back to main README</strong></a>
+<a href="https://github.com/GTBitsOfGood/juno"><strong>« Back to main README</strong></a>
 
 </div>
 
 ## File Service
 
-An Azure- & S3-compatible service for managing per-project file upload/download functionality.
+A seamless Azure & S3-compatible service for managing per-project file upload/download functionality.
 
 ## Package Structure
 
