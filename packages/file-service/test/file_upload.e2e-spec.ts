@@ -138,7 +138,7 @@ beforeAll(async () => {
   await new Promise((resolve) => {
     bucketClient.createBucket(
       {
-        name: bucketName,
+        name: bucketName + '-azure',
         configId: configId,
         configEnv: configEnv,
         fileProviderName: providerNameAzure,
