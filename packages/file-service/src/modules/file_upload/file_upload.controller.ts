@@ -6,6 +6,7 @@ import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { lastValueFrom } from 'rxjs';
 import { S3FileHandler } from './s3_handler';
+import { AzureFileHandler } from './azure_handler';
 
 const { FILE_DB_SERVICE_NAME } = FileProto;
 const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
@@ -62,6 +63,10 @@ export class FileUploadController implements FileServiceController {
           const handler = new S3FileHandler(this.fileDBService, provider);
           return handler.downloadFile(request);
         }
+        case FileProviderProto.ProviderType.AZURE: {
+          const handler = new AzureFileHandler(this.fileDBService, provider);
+          return handler.downloadFile(request);
+        }
         default: {
           throw new RpcException({
             code: status.FAILED_PRECONDITION,
@@ -111,6 +116,10 @@ export class FileUploadController implements FileServiceController {
       switch (provider.providerType) {
         case FileProviderProto.ProviderType.S3: {
           const handler = new S3FileHandler(this.fileDBService, provider);
+          return handler.uploadFile(request);
+        }
+        case FileProviderProto.ProviderType.AZURE: {
+          const handler = new AzureFileHandler(this.fileDBService, provider);
           return handler.uploadFile(request);
         }
         default: {

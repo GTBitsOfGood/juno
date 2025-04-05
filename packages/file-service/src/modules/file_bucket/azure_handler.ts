@@ -16,7 +16,7 @@ export class AzureBucketHandler {
   async getBlobServiceClient(): Promise<BlobServiceClient> {
     try {
       const accessKeyPayload = JSON.parse(this.provider.accessKey);
-      if (!accessKeyPayload.account || !accessKeyPayload.accountKey) {
+      if (!accessKeyPayload.accountName || !accessKeyPayload.accountKey) {
         throw new RpcException({
           code: status.FAILED_PRECONDITION,
           message: 'Invalid access key payload',
@@ -24,10 +24,6 @@ export class AzureBucketHandler {
       }
       const account = accessKeyPayload.accountName;
       const accountKey = accessKeyPayload.accountKey;
-
-      console.log(`full payload: ${JSON.stringify(accessKeyPayload)}`);
-      console.log(`account: ${account}`);
-      console.log(`accountKey: ${accountKey}`);
 
       const sharedKeyCredential = new StorageSharedKeyCredential(
         account,

@@ -197,7 +197,7 @@ describe('File Service File Upload Tests', () => {
     const promise = new Promise((resolve) => {
       fileClient.uploadFile(
         {
-          bucketName: bucketName,
+          bucketName: bucketName + '-azure',
           fileName: 'TestFileName',
           providerName: providerNameAzure,
           configId: configId,

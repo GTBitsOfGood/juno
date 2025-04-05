@@ -190,7 +190,7 @@ describe('File Bucket Creation Tests', () => {
     const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
-          name: 'successful-bucket',
+          name: 'successful-bucket-azure',
           configId,
           configEnv,
           fileProviderName: providerNameAzure,
@@ -214,7 +214,7 @@ describe('File Bucket Creation Tests', () => {
       sharedKeyCredential,
     );
 
-    await client.getContainerClient('successful-bucket').delete();
+    await client.getContainerClient('successful-bucket-azure').delete();
   });
 
   it('Fails to create a bucket with invalid provider', async () => {

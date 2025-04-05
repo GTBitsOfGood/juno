@@ -16,7 +16,7 @@ export class AzureFileHandler {
 
   async getSharedKeyCredential(): Promise<StorageSharedKeyCredential> {
     const accessKeyPayload = JSON.parse(this.provider.accessKey);
-    if (!accessKeyPayload.account || !accessKeyPayload.accountKey) {
+    if (!accessKeyPayload.accountName || !accessKeyPayload.accountKey) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
         message: 'Invalid access key payload',
