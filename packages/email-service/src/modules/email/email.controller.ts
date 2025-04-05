@@ -3,7 +3,6 @@ import { EmailService } from './email.service';
 import { EmailProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { Observable } from 'rxjs';
 
 @Controller()
 @EmailProto.EmailServiceControllerMethods()

@@ -9,9 +9,6 @@ import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { MailDataRequired } from '@sendgrid/mail';
 import { status } from '@grpc/grpc-js';
-import { request } from 'http';
-import { config } from 'process';
-import { stat } from 'fs';
 
 const { EMAIL_DB_SERVICE_NAME } = EmailProto;
 
