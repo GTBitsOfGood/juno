@@ -14,6 +14,10 @@ import { AppModule } from './../src/app.module';
 import { JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME } from 'juno-proto/dist/gen/file_provider';
 import { JUNO_RESET_DB_PACKAGE_NAME } from 'juno-proto/dist/gen/reset_db';
 import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  BlobServiceClient,
+  StorageSharedKeyCredential,
+} from '@azure/storage-blob';
 
 const { JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME } = FileBucketProto;
 const TEST_SERVICE_ADDR = 'file-service:50005';
@@ -79,6 +83,19 @@ beforeAll(async () => {
     );
   });
 
+  await new Promise((resolve) => {
+    providerClient.createProvider(
+      {
+        providerName: providerNameAzure,
+        accessKey: JSON.stringify({ accountName, accountKey }),
+        metadata: JSON.stringify({ endpoint: '' }), // doesn't matter for azure
+        bucket: [],
+        type: FileProviderProto.ProviderType.AZURE,
+      },
+      () => resolve(0),
+    );
+  });
+
   const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]);
   const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
   bucketClientDB = new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
@@ -126,14 +143,17 @@ const bucketName = 'test-bucket-juno-buckets';
 const configId = 0;
 const configEnv = 'prod';
 const providerName = 'backblazeb2-buckets';
+const providerNameAzure = 'azure-buckets';
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
 const baseURL = process.env.baseURL;
 const region = 'us-east-005';
+const accountName = process.env.azureStorageAccountName;
+const accountKey = process.env.azureStorageAccountKey;
 
 describe('File Bucket Creation Tests', () => {
-  it('Successfully creates a bucket', async () => {
+  it('Successfully creates a bucket - S3', async () => {
     const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
@@ -164,6 +184,37 @@ describe('File Bucket Creation Tests', () => {
     const command = new DeleteBucketCommand({ Bucket: 'successful-bucket' });
 
     await client.send(command);
+  });
+
+  it('Successfully creates a bucket - Azure', async () => {
+    const createBucketPromise = new Promise((resolve, reject) => {
+      bucketClient.registerBucket(
+        {
+          name: 'successful-bucket-azure',
+          configId,
+          configEnv,
+          fileProviderName: providerNameAzure,
+        },
+        (err: any) => {
+          if (err) {
+            return reject(err);
+          }
+          expect(err).toBeNull();
+          resolve(0);
+        },
+      );
+    });
+    await createBucketPromise;
+    const sharedKeyCredential = new StorageSharedKeyCredential(
+      accountName ?? '',
+      accountKey ?? '',
+    );
+    const client = new BlobServiceClient(
+      `https://${accountName}.blob.core.windows.net`,
+      sharedKeyCredential,
+    );
+
+    await client.getContainerClient('successful-bucket-azure').delete();
   });
 
   it('Fails to create a bucket with invalid provider', async () => {
