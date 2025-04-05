@@ -53,10 +53,14 @@ jobs:
           ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
           SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
           BASE_URL: ${{ secrets.BASE_URL }}
+          AZURE_ACCOUNT_NAME: ${{ secrets.AZURE_ACCOUNT_NAME }}
+          AZURE_ACCOUNT_KEY: ${{ secrets.AZURE_ACCOUNT_KEY }}
         run: |
           echo "accessKeyId=$ACCESS_KEY_ID" >> .env.gh-actions.local
           echo "secretAccessKey=$SECRET_ACCESS_KEY" >> .env.gh-actions.local
           echo "baseURL=$BASE_URL" >> .env.gh-actions.local
+          echo "azureStorageAccountName=$AZURE_ACCOUNT_NAME" >> .env.gh-actions.local
+          echo "azureStorageAccountKey=$AZURE_ACCOUNT_KEY" >> .env.gh-actions.local
       - name: Test
         run: pnpm test:e2e:file-service
 

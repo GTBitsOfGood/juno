@@ -97,6 +97,19 @@ beforeAll(async () => {
     );
   });
 
+  await new Promise((resolve) => {
+    providerClient.createProvider(
+      {
+        providerName: providerNameAzure,
+        accessKey: JSON.stringify({ accountName, accountKey }),
+        metadata: JSON.stringify({ endpoint: '' }), // doesn't matter for azure
+        bucket: [],
+        type: FileProviderProto.ProviderType.AZURE,
+      },
+      () => resolve(0),
+    );
+  });
+
   // Create sample bucket
   const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
   const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
@@ -120,6 +133,22 @@ beforeAll(async () => {
       },
     );
   });
+
+  // Create for azure as well
+  await new Promise((resolve) => {
+    bucketClient.createBucket(
+      {
+        name: bucketName + '-azure',
+        configId: configId,
+        configEnv: configEnv,
+        fileProviderName: providerNameAzure,
+        files: [],
+      },
+      () => {
+        resolve(0);
+      },
+    );
+  });
 });
 
 afterAll(async () => {
@@ -133,19 +162,44 @@ const bucketName = 'test-uploads-bog-juno';
 const configId = 0;
 const configEnv = 'prod';
 const providerName = 'backblazeb2-upload';
+const providerNameAzure = 'azure-upload';
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
 const baseURL = process.env.baseURL;
+const accountName = process.env.azureStorageAccountName;
+const accountKey = process.env.azureStorageAccountKey;
 
 describe('File Service File Upload Tests', () => {
-  it('Uploads file correctly', async () => {
+  it('Uploads file correctly - Azure', async () => {
     const promise = new Promise((resolve) => {
       fileClient.uploadFile(
         {
           bucketName: bucketName,
           fileName: 'TestFileName',
           providerName: providerName,
+          configId: configId,
+          configEnv: configEnv,
+          region: region,
+        },
+
+        (err: any) => {
+          expect(err).toBeNull();
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
+  it('Uploads file correctly - Azure', async () => {
+    const promise = new Promise((resolve) => {
+      fileClient.uploadFile(
+        {
+          bucketName: bucketName + '-azure',
+          fileName: 'TestFileName',
+          providerName: providerNameAzure,
           configId: configId,
           configEnv: configEnv,
           region: region,
