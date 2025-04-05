@@ -26,10 +26,12 @@ export class FileConfigController
         environment,
       });
       if (existingConfig) {
-        throw new RpcException({
-          code: status.ALREADY_EXISTS,
-          message: 'Config already exists',
-        });
+        return {
+          id: existingConfig.id,
+          environment: existingConfig.environment,
+          files: [],
+          buckets: [],
+        };
       }
     } catch (error) {
       throw new RpcException({

@@ -133,7 +133,9 @@ afterAll(async () => {
     },
   };
   const client = new S3Client(metadata);
-  const command = new DeleteBucketCommand({ Bucket: bucketName });
+  const command = new DeleteBucketCommand({
+    Bucket: `${bucketName}-${configId}-${configEnv}`,
+  });
   await client.send(command);
 });
 
@@ -154,6 +156,25 @@ const accountKey = process.env.azureStorageAccountKey;
 
 describe('File Bucket Creation Tests', () => {
   it('Successfully creates a bucket - S3', async () => {
+    const metadata = {
+      endpoint: baseURL,
+      region: region,
+      credentials: {
+        accessKeyId: accessKeyId as string,
+        secretAccessKey: secretAccessKey as string,
+      },
+    };
+
+    const client = new S3Client(metadata);
+    const command = new DeleteBucketCommand({
+      Bucket: `successful-bucket-${configId}-${configEnv}`,
+    });
+    // Delete in case it already exists
+
+    try {
+      await client.send(command);
+    } catch {}
+
     const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
@@ -172,21 +193,27 @@ describe('File Bucket Creation Tests', () => {
       );
     });
     await createBucketPromise;
-    const metadata = {
-      endpoint: baseURL,
-      region: region,
-      credentials: {
-        accessKeyId: accessKeyId as string,
-        secretAccessKey: secretAccessKey as string,
-      },
-    };
-    const client = new S3Client(metadata);
-    const command = new DeleteBucketCommand({ Bucket: 'successful-bucket' });
 
     await client.send(command);
   });
 
   it('Successfully creates a bucket - Azure', async () => {
+    const sharedKeyCredential = new StorageSharedKeyCredential(
+      accountName ?? '',
+      accountKey ?? '',
+    );
+    const client = new BlobServiceClient(
+      `https://${accountName}.blob.core.windows.net`,
+      sharedKeyCredential,
+    );
+
+    // Try deleting if its alreayd made
+    try {
+      await client
+        .getContainerClient(`successful-bucket-azure-${configId}-${configEnv}`)
+        .delete();
+    } catch {}
+
     const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
@@ -205,16 +232,10 @@ describe('File Bucket Creation Tests', () => {
       );
     });
     await createBucketPromise;
-    const sharedKeyCredential = new StorageSharedKeyCredential(
-      accountName ?? '',
-      accountKey ?? '',
-    );
-    const client = new BlobServiceClient(
-      `https://${accountName}.blob.core.windows.net`,
-      sharedKeyCredential,
-    );
 
-    await client.getContainerClient('successful-bucket-azure').delete();
+    await client
+      .getContainerClient(`successful-bucket-azure-${configId}-${configEnv}`)
+      .delete();
   });
 
   it('Fails to create a bucket with invalid provider', async () => {

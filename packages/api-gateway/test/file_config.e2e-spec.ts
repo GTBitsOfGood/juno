@@ -101,4 +101,11 @@ describe('File Config Routes', () => {
       .set('Authorization', 'Bearer ' + apiKey)
       .expect(404);
   });
+
+  it('Should setup file services for a valid project + api key', async () => {
+    return await request(app.getHttpServer())
+      .post('/file/config/setup')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+  });
 });
