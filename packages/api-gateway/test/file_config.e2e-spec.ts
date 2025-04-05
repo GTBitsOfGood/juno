@@ -106,6 +106,6 @@ describe('File Config Routes', () => {
     return await request(app.getHttpServer())
       .post('/file/config/setup')
       .set('Authorization', 'Bearer ' + apiKey)
-      .expect(200);
+      .expect(201);
   });
 });
