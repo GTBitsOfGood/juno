@@ -336,7 +336,7 @@ export class EmailService implements OnModuleInit {
       aggregated_by: reverseIntervalMap[req.aggregatedBy],
       end_date: req.endDate,
     };
-    console.log('QueryParams', queryParams);
+
     const request: ClientRequest = {
       url: `/v3/stats`,
       method: 'GET',

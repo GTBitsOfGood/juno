@@ -374,7 +374,7 @@ export class SendEmailStatistics {
   start_date: string;
   @ApiProperty({
     description:
-      'he end date of the statistics to retrieve. Defaults to today. Must follow format YYYY-MM-DD.',
+      'The end date of the statistics to retrieve. Defaults to today. Must follow format YYYY-MM-DD.',
   })
   end_date?: string;
 }
