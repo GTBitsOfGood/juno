@@ -1,6 +1,9 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { EmailProto } from 'juno-proto';
 import { SendGridService } from 'src/sendgrid.service';
+import type { ClientRequest } from '@sendgrid/client/src/request';
+import type { ClientResponse } from '@sendgrid/client/src/response';
+import * as sendgridClient from '@sendgrid/client';
 import axios from 'axios';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
@@ -309,6 +312,80 @@ export class EmailService implements OnModuleInit {
       });
     }
   }
+  async getStatistics(
+    req: EmailProto.GetStatisticsRequest,
+  ): Promise<EmailProto.StatisticResponses> {
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: req.configId,
+        environment: req.configEnvironment,
+      }),
+    );
+    const sendGridApiKey = config.sendgridKey;
+    sendgridClient.setApiKey(sendGridApiKey);
+    const reverseIntervalMap: Record<EmailProto.AggregateInterval, string> = {
+      [EmailProto.AggregateInterval.DAY]: 'day',
+      [EmailProto.AggregateInterval.WEEK]: 'week',
+      [EmailProto.AggregateInterval.MONTH]: 'month',
+      [EmailProto.AggregateInterval.UNRECOGNIZED]: 'unrecognized',
+    };
+    const queryParams = {
+      limit: req.limit,
+      offset: req.offset,
+      start_date: req.startDate,
+      aggregated_by: reverseIntervalMap[req.aggregatedBy],
+      end_date: req.endDate,
+    };
+
+    const request: ClientRequest = {
+      url: `/v3/stats`,
+      method: 'GET',
+      qs: queryParams,
+    };
+    try {
+      const intermediate = await sendgridClient.request(request);
+      const response: ClientResponse = intermediate[0];
+      const data: Statistics[] = response.body as Statistics[];
+
+      return {
+        responses: data.map((statistic) => {
+          //Sendgrid response is in a weird format
+          const metrics = statistic.stats[0].metrics;
+          return {
+            date: statistic.date,
+            clicks: metrics.clicks,
+            uniqueClicks: metrics.unique_clicks,
+            opens: metrics.opens,
+            uniqueOpens: metrics.unique_opens,
+            blocks: metrics.blocks,
+            bounceDrops: metrics.bounce_drops,
+            bounces: metrics.bounces,
+            deferred: metrics.deferred,
+            delivered: metrics.delivered,
+            invalidEmails: metrics.invalid_emails,
+            processed: metrics.processed,
+            requests: metrics.requests,
+            spamReportDrops: metrics.spam_report_drops,
+            spamReports: metrics.spam_reports,
+            unsubscribeDrops: metrics.unsubscribe_drops,
+            unsubscribes: metrics.unsubscribes,
+          };
+        }),
+      };
+    } catch (err) {
+      try {
+        throw new RpcException({
+          code: status.INVALID_ARGUMENT,
+          message: JSON.stringify(err['body']['errors']),
+        });
+      } catch {
+        throw new RpcException({
+          code: status.INVALID_ARGUMENT,
+          message: JSON.stringify(err.response?.body?.errors),
+        });
+      }
+    }
+  }
 }
 
 const TEST_SENDGRID_RECORDS = {
@@ -331,3 +408,34 @@ const TEST_SENDGRID_RECORDS = {
     data: 's2.domainkey.u1234.wl.sendgrid.net',
   },
 };
+
+// Email Metrics Interface
+interface EmailMetrics {
+  blocks: number;
+  bounce_drops: number;
+  bounces: number;
+  clicks: number;
+  deferred: number;
+  delivered: number;
+  invalid_emails: number;
+  opens: number;
+  processed: number;
+  requests: number;
+  spam_report_drops: number;
+  spam_reports: number;
+  unique_clicks: number;
+  unique_opens: number;
+  unsubscribe_drops: number;
+  unsubscribes: number;
+}
+
+// Stats Interface containing metrics
+interface Stats {
+  metrics: EmailMetrics;
+}
+
+// Statistics containing a date and an array of stats
+interface Statistics {
+  date: string;
+  stats: Stats[];
+}

@@ -11,6 +11,7 @@ service EmailService {
   rpc authenticateDomain(AuthenticateDomainRequest)
       returns (AuthenticateDomainResponse);
   rpc verifyDomain(VerifyDomainRequest) returns (VerifyDomainResponse);
+  rpc getStatistics(GetStatisticsRequest) returns (StatisticResponses);
 }
 
 service EmailDbService {
@@ -81,6 +82,46 @@ message DeleteEmailSenderRequest {
   identifiers.EmailSenderIdentifier emailSenderIdentifier = 1;
   int64 configId = 2;
   string configEnvironment = 3;
+}
+
+enum AggregateInterval {
+  DAY = 0;
+  WEEK = 1;
+  MONTH = 2;
+}
+
+message GetStatisticsRequest {
+  optional int32 limit = 1;
+  optional int32 offset = 2;
+  optional AggregateInterval aggregated_by = 3;
+  string start_date = 4;
+  optional string end_date = 5;
+  int64 configId = 7;
+  string configEnvironment = 8;
+}
+
+message StatisticResponses {
+  repeated StatisticResponse responses = 1;
+}
+
+message StatisticResponse {
+  string date = 1;
+  int32 clicks = 2;
+  int32 unique_clicks = 3;
+  int32 opens = 4;
+  int32 unique_opens = 5;
+  int32 blocks = 6;
+  int32 bounce_drops = 7;
+  int32 bounces = 8;
+  int32 deferred = 9;
+  int32 delivered = 10;
+  int32 invalid_emails = 11;
+  int32 processed = 12;
+  int32 requests = 13;
+  int32 spam_report_drops = 14;
+  int32 spam_reports = 15;
+  int32 unsubscribe_drops = 16;
+  int32 unsubscribes = 17;
 }
 
 message SendEmailSenderRequestResponse { bool success = 1; }

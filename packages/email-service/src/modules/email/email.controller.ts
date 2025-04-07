@@ -102,4 +102,10 @@ export class EmailController implements EmailProto.EmailServiceController {
   ): Promise<EmailProto.VerifyDomainResponse> {
     return this.emailService.verifyDomain(request);
   }
+
+  async getStatistics(
+    request: EmailProto.GetStatisticsRequest,
+  ): Promise<EmailProto.StatisticResponses> {
+    return await this.emailService.getStatistics(request);
+  }
 }
