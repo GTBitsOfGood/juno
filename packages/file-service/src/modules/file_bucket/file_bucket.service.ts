@@ -1,13 +1,10 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
-import {
-  S3Client,
-  CreateBucketCommand,
-  DeleteBucketCommand,
-} from '@aws-sdk/client-s3';
 import { FileBucketProto, FileProviderProto } from 'juno-proto';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { lastValueFrom } from 'rxjs';
+import { S3BucketHandler } from './s3_handler';
+import { AzureBucketHandler } from './azure_handler';
 
 @Injectable()
 export class FileBucketService implements OnModuleInit {
@@ -32,23 +29,15 @@ export class FileBucketService implements OnModuleInit {
       );
   }
 
-  async getS3ClientForProvider(
+  async getProvider(
     providerName: string,
-    region: string,
-  ): Promise<S3Client> {
+  ): Promise<FileProviderProto.FileProvider> {
     try {
-      const provider = await lastValueFrom(
+      return await lastValueFrom(
         this.fileProviderDBService.getProvider({
           providerName: providerName,
         }),
       );
-
-      const metadata = {
-        ...JSON.parse(provider.metadata),
-        region: region,
-        credentials: JSON.parse(provider.accessKey),
-      };
-      return new S3Client(metadata);
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
@@ -61,19 +50,22 @@ export class FileBucketService implements OnModuleInit {
     request: FileBucketProto.RegisterBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
     try {
-      const s3Client = await this.getS3ClientForProvider(
-        request.fileProviderName,
-        'us-east-005',
-      );
-      const createBucketCommand = new CreateBucketCommand({
-        Bucket: request.name,
-      });
-      await s3Client.send(createBucketCommand);
-
-      const dbBucket = await lastValueFrom(
-        this.fileDBService.createBucket(request),
-      );
-      return dbBucket;
+      const provider = await this.getProvider(request.fileProviderName);
+      switch (provider.providerType) {
+        case FileProviderProto.ProviderType.S3: {
+          const handler = new S3BucketHandler(this.fileDBService, provider);
+          return handler.registerBucket(request);
+        }
+        case FileProviderProto.ProviderType.AZURE: {
+          const handler = new AzureBucketHandler(this.fileDBService, provider);
+          return handler.registerBucket(request);
+        }
+        default:
+          throw new RpcException({
+            code: status.FAILED_PRECONDITION,
+            message: `Unsupported provider type: ${provider.providerType} `,
+          });
+      }
     } catch (error) {
       if (error.message.toLowerCase().includes('you already own it')) {
         throw new RpcException({
@@ -99,15 +91,22 @@ export class FileBucketService implements OnModuleInit {
           configEnv: request.configEnv,
         }),
       );
-      const s3Client = await this.getS3ClientForProvider(
-        bucket.fileProviderName,
-        'us-east-005',
-      );
-      const deleteBucketCommand = new DeleteBucketCommand({
-        Bucket: request.name,
-      });
-      await s3Client.send(deleteBucketCommand);
-      return bucket;
+      const provider = await this.getProvider(bucket.fileProviderName);
+      switch (provider.providerType) {
+        case FileProviderProto.ProviderType.S3: {
+          const handler = new S3BucketHandler(this.fileDBService, provider);
+          return handler.removeBucket(request);
+        }
+        case FileProviderProto.ProviderType.AZURE: {
+          const handler = new AzureBucketHandler(this.fileDBService, provider);
+          return handler.removeBucket(request);
+        }
+        default:
+          throw new RpcException({
+            code: status.FAILED_PRECONDITION,
+            message: `Unsupported provider type: ${provider.providerType} `,
+          });
+      }
     } catch (error) {
       if (error.message.includes('NoSuchBucket')) {
         throw new RpcException({
