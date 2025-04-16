@@ -46,7 +46,11 @@ export class AzureBucketHandler {
   ): Promise<FileBucketProto.Bucket> {
     try {
       const blobClient = await this.getBlobServiceClient();
-      await blobClient.getContainerClient(request.name).create();
+      await blobClient
+        .getContainerClient(
+          `${request.name}-${request.configId}-${request.configEnv}`,
+        )
+        .create();
 
       const dbBucket = await lastValueFrom(
         this.fileDBService.createBucket(request),
@@ -72,7 +76,11 @@ export class AzureBucketHandler {
         }),
       );
       const blobClient = await this.getBlobServiceClient();
-      await blobClient.getContainerClient(request.name).delete();
+      await blobClient
+        .getContainerClient(
+          `${request.name}-${request.configId}-${request.configEnv}`,
+        )
+        .delete();
       return bucket;
     } catch (error) {
       throw new RpcException({

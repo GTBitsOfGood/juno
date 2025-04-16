@@ -36,7 +36,7 @@ export class S3BucketHandler {
     try {
       const s3Client = await this.getS3Client('us-east-005');
       const createBucketCommand = new CreateBucketCommand({
-        Bucket: request.name,
+        Bucket: `${request.name}-${request.configId}-${request.configEnv}`,
       });
       await s3Client.send(createBucketCommand);
 
@@ -64,7 +64,7 @@ export class S3BucketHandler {
     try {
       const s3Client = await this.getS3Client('us-east-005');
       const deleteBucketCommand = new DeleteBucketCommand({
-        Bucket: request.name,
+        Bucket: `${request.name}-${request.configId}-${request.configEnv}`,
       });
       await s3Client.send(deleteBucketCommand);
       const bucket = await lastValueFrom(
