@@ -51,8 +51,8 @@ enum Role {
 
 model EmailServiceConfig {
   id             Int
-  environment    String @default("test")
-  sendgridApiKey String @default("")
+  environment    String                        @default("test")
+  sendgridApiKey String                        @default("")
   emails         EmailServiceConfigAndSender[]
   domains        EmailServiceConfigAndDomain[]
   Project        Project                       @relation(fields: [id], references: [id])
@@ -100,16 +100,17 @@ model EmailDomain {
 }
 
 enum FileProviderType {
-  S3 
-  AZURE 
+  S3
+  AZURE
 }
 
 model FileServiceConfig {
-  id              Int                 
-  environment    String @default("test")
+  id              Int
+  environment     String              @default("test")
   buckets         FileServiceBucket[]
   Project         Project             @relation(fields: [id], references: [id])
   FileServiceFile FileServiceFile[]
+
   @@id([id, environment])
 }
 
@@ -143,4 +144,9 @@ model FileServiceFile {
   metadata   String
 
   @@id([path, bucketName, configId, configEnv])
+}
+
+model Counter {
+  id    String @id
+  count Int
 }
