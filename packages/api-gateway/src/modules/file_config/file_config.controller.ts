@@ -92,7 +92,7 @@ export class FileConfigController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Sets up file services for the Project/Environmenr',
+    summary: 'Sets up file services for the Project/Environment',
   })
   @ApiCreatedResponse({
     description: 'File Services setup successfully',
