@@ -11,12 +11,12 @@ service CounterService {
 
 message IncrementCounterRequest {
     string counter_id = 1;
-    int64 amount = 2;
+    int32 amount = 2;
 }
 
 message DecrementCounterRequest {
     string counter_id = 1;
-    int64 amount = 2;
+    int32 amount = 2;
 }
 
 message GetCounterRequest {
@@ -29,5 +29,5 @@ message ResetCounterRequest {
 
 message CounterResponse {
     string counter_id = 1;
-    int64 value = 2;
+    int32 value = 2;
 }

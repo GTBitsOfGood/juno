@@ -3,6 +3,7 @@ import { CounterProto } from 'juno-proto';
 import { CounterService } from './counter.service';
 
 @Controller()
+@CounterProto.CounterServiceControllerMethods()
 export class CounterController
   implements CounterProto.CounterServiceController
 {

@@ -20,13 +20,13 @@ export class CounterChangeModel {
 
 export class CounterResponse {
   @ApiProperty({ description: 'ID of the counter' })
-  id: string;
+  counterId: string;
 
   @ApiProperty({ description: 'The current value of the counter' })
   value: number;
 
   constructor(counter: CounterProto.CounterResponse) {
-    this.id = counter.counterId;
+    this.counterId = counter.counterId;
     this.value = counter.value;
   }
 }

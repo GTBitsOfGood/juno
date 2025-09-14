@@ -26,6 +26,8 @@ import {
   FileConfigProtoFile,
   FileProviderProto,
   FileProviderProtoFile,
+  CounterProto,
+  CounterProtoFile,
 } from 'juno-proto';
 import { CustomRpcExceptionFilter } from './global-exception.filter';
 
@@ -49,6 +51,7 @@ async function bootstrap() {
           FileBucketProto.JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
           FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
           FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
+          CounterProto.JUNO_COUNTER_PACKAGE_NAME,
         ],
         protoPath: [
           UserProtoFile,
@@ -62,6 +65,7 @@ async function bootstrap() {
           FileBucketProtoFile,
           FileConfigProtoFile,
           FileProviderProtoFile,
+          CounterProtoFile,
         ],
         url: process.env.DB_SERVICE_ADDR,
       },

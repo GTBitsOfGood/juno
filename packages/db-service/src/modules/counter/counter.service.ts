@@ -14,7 +14,7 @@ export class CounterService {
     const updatedCounter = await this.prisma.counter.upsert({
       where: counter,
       create: {
-        ...counter,
+        id: counter.id!,
         count: amount,
       },
       update: {
@@ -34,7 +34,7 @@ export class CounterService {
     const updatedCounter = await this.prisma.counter.upsert({
       where: counter,
       create: {
-        ...counter,
+        id: counter.id!,
         count: -amount,
       },
       update: {
@@ -57,7 +57,7 @@ export class CounterService {
     if (!foundCounter) {
       return {
         counterId: counter.id!,
-        value: 0,
+        value: Number(0),
       };
     }
     return convertDbCounterToTs(foundCounter);
@@ -69,7 +69,7 @@ export class CounterService {
     const updatedCounter = await this.prisma.counter.upsert({
       where: counter,
       create: {
-        ...counter,
+        id: counter.id!,
         count: 0,
       },
       update: {
@@ -86,6 +86,6 @@ const convertDbCounterToTs = (
 ): CounterProto.CounterResponse => {
   return {
     counterId: counter.id,
-    value: counter.count,
+    value: Number(counter.count),
   };
 };

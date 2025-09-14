@@ -23,7 +23,7 @@ const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
         name: COUNTER_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: process.env.COUNTER_SERVICE_ADDR,
+          url: process.env.DB_SERVICE_ADDR,
           package: JUNO_COUNTER_PACKAGE_NAME,
           protoPath: CounterProtoFile,
         },
