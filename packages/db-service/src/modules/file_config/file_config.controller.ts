@@ -1,9 +1,9 @@
-import { Controller } from '@nestjs/common';
-import { FileServiceConfigService } from './file_config.service';
-import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { FileConfigProto } from 'juno-proto';
+import { Controller } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { Prisma } from '@prisma/client';
+import { FileConfigProto } from 'juno-proto';
+import { FileServiceConfigService } from './file_config.service';
 
 @Controller()
 @FileConfigProto.FileServiceConfigDbServiceControllerMethods()
@@ -33,11 +33,8 @@ export class FileConfigController
           buckets: [],
         };
       }
-    } catch (error) {
-      throw new RpcException({
-        code: status.ALREADY_EXISTS,
-        message: 'Config already exists',
-      });
+    } catch {
+      // Intentionally ignoring getConfig error for now
     }
 
     const config = await this.fileServiceConfigService.createConfig(request);
