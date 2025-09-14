@@ -1,4 +1,4 @@
-FROM alpine as grpc-probe
+FROM alpine AS grpc-probe
 
 ARG TARGETARCH
 
@@ -10,7 +10,7 @@ RUN chmod +x ./get_grpc_probe.sh
 RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 
 # TODO: Switch over to minimal node installation
-FROM node:18 as deps
+FROM node:18 AS deps
 
 ARG TARGETARCH
 
@@ -43,7 +43,7 @@ WORKDIR /app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install -r --frozen-lockfile --ignore-scripts
 
 # TODO: Switch over to a minimal node installation
-FROM node:18 as base-service
+FROM node:18 AS base-service
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -54,7 +54,7 @@ COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
 
 RUN chmod a+x /bin/grpc_health_probe
 
-FROM base-service as api-gateway-dev
+FROM base-service AS api-gateway-dev
 
 WORKDIR /app
 
@@ -68,7 +68,7 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/api-gateway
 
-FROM base-service as auth-service-dev
+FROM base-service AS auth-service-dev
 
 WORKDIR /app
 
@@ -82,7 +82,7 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/auth-service
 
-FROM base-service as email-service-dev
+FROM base-service AS email-service-dev
 
 WORKDIR /app
 
@@ -96,7 +96,7 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/email-service
 
-FROM base-service as file-service-dev
+FROM base-service AS file-service-dev
 
 WORKDIR /app
 
@@ -110,7 +110,21 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/file-service
 
-FROM base-service as logging-service-dev
+FROM base-service AS analytics-service-dev
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules/
+
+COPY --from=deps /app/packages/analytics-service/node_modules ./packages/node_modules/
+
+COPY . .
+
+COPY --from=deps /app/packages/proto/ ./packages/proto/
+
+WORKDIR /app/packages/analytics-service
+
+FROM base-service AS logging-service-dev
 
 WORKDIR /app
 
@@ -124,7 +138,7 @@ COPY --from=deps /app/packages/proto/ ./packages/proto/
 
 WORKDIR /app/packages/logging-service
 
-FROM base-service as db-service-dev
+FROM base-service AS db-service-dev
 
 WORKDIR /app
 

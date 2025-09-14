@@ -63,6 +63,22 @@ services:
         - action: rebuild
           path: ./Dockerfile.dev
 
+  analytics-service:
+    extends:
+      file: docker-compose-dev.yml
+      service: analytics-service
+    volumes:
+      - ./packages/analytics-service:/app/packages/analytics-service
+      - /app/packages/analytics-service/node_modules
+    develop:
+      watch:
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./packages/analytics-service/package.json
+        - action: rebuild
+          path: ./Dockerfile.dev
+
   logging-service:
     extends:
       file: docker-compose-dev.yml
