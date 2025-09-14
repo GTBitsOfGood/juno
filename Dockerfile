@@ -1,4 +1,4 @@
-FROM alpine as grpc-probe
+FROM alpine AS grpc-probe
 
 ARG TARGETARCH
 
@@ -10,7 +10,7 @@ RUN chmod +x ./get_grpc_probe.sh
 RUN TARGETARCH=$TARGETARCH ./get_grpc_probe.sh
 
 # TODO: Switch over to minimal node installation
-FROM node:18 as deps
+FROM node:18 AS deps
 
 ARG TARGETARCH
 
@@ -49,9 +49,10 @@ RUN pnpm deploy --filter=db-service --prod /deploy/db-service
 RUN pnpm deploy --filter=email-service --prod /deploy/email-service
 RUN pnpm deploy --filter=logging-service --prod /deploy/logging-service
 RUN pnpm deploy --filter=file-service --prod /deploy/file-service
+RUN pnpm deploy --filter=analytics-service --prod /deploy/analytics-service
 
 # TODO: Switch over to a minimal node installation
-FROM node:18 as base-service
+FROM node:18 AS base-service
 
 ARG SENTRY_AUTH_TOKEN
 # TODO: Move over to a direct wget (no more npm usage)
@@ -66,7 +67,7 @@ COPY --from=grpc-probe /grpc_health_probe /bin/grpc_health_probe
 
 RUN chmod a+x /bin/grpc_health_probe
 
-FROM base-service as api-gateway
+FROM base-service AS api-gateway
 
 WORKDIR /app
 
@@ -80,7 +81,7 @@ RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]
 
-FROM base-service as auth-service
+FROM base-service AS auth-service
 
 WORKDIR /app
 
@@ -94,7 +95,7 @@ RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]
 
-FROM base-service as email-service
+FROM base-service AS email-service
 
 WORKDIR /app
 
@@ -108,7 +109,7 @@ RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]
 
-FROM base-service as file-service
+FROM base-service AS file-service
 
 WORKDIR /app
 
@@ -122,7 +123,21 @@ RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]
 
-FROM base-service as logging-service
+FROM base-service AS analytics-service
+
+WORKDIR /app
+
+COPY --from=deps /deploy/analytics-service/ ./analytics-service/
+
+WORKDIR /app/analytics-service
+
+EXPOSE 5000
+
+RUN pnpm build
+
+ENTRYPOINT ["pnpm", "start:prod"]
+
+FROM base-service AS logging-service
 
 WORKDIR /app
 
@@ -136,7 +151,7 @@ RUN pnpm build
 
 ENTRYPOINT ["pnpm", "start:prod"]
 
-FROM base-service as db-service
+FROM base-service AS db-service
 
 WORKDIR /app
 

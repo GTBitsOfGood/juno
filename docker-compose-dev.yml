@@ -11,6 +11,7 @@ services:
       DB_SERVICE_ADDR: db-service:5000
       AUTH_SERVICE_ADDR: auth-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
+      ANALYTICS_SERVICE_ADDR: analytics-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       FILE_SERVICE_ADDR: file-service:5000
       SENTRY_DSN: 'https://895c35e671ebe116967d7818f6c99efb@o4506876382609408.ingest.us.sentry.io/4507926410559488'
@@ -42,6 +43,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
+      ANALYTICS_SERVICE_ADDR: analytics-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       FILE_SERVICE_ADDR: file-service:5000
       SENTRY_DSN: 'https://f65c541f1d3217cf4752046e8ce46ec4@o4506876382609408.ingest.us.sentry.io/4507926438346752'
@@ -68,6 +70,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
+      ANALYTICS_SERVICE_ADDR: analytics-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       FILE_SERVICE_ADDR: file-service:5000
       NODE_ENV: test
@@ -84,6 +87,35 @@ services:
       timeout: 20s
       retries: 10
 
+  analytics-service:
+    build:
+      dockerfile: Dockerfile.dev
+      target: analytics-service-dev
+      context: .
+    ports:
+      - 5000
+    entrypoint: pnpm --filter analytics-service ${FILE_COMMAND-start:dev}
+    environment:
+      AUTH_SERVICE_ADDR: auth-service:5000
+      DB_SERVICE_ADDR: db-service:5000
+      EMAIL_SERVICE_ADDR: email-service:5000
+      ANALYTICS_SERVICE_ADDR: analytics-service:5000
+      LOGGING_SERVICE_ADDR: logging-service:5000
+      FILE_SERVICE_ADDR: file-service:5000
+      NODE_ENV: test
+      SENDGRID_API_KEY: test-key
+      SENTRY_DSN: 'https://01e85b2d3c5222b4a54d0796db847b55@o4506876382609408.ingest.us.sentry.io/4510019961749504'
+    networks:
+      - bog-api-net
+    depends_on:
+      db-service:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'grpc_health_probe -addr=analytics-service:5000']
+      interval: 2s
+      timeout: 20s
+      retries: 10
+
   file-service:
     build:
       dockerfile: Dockerfile.dev
@@ -96,6 +128,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
+      ANALYTICS_SERVICE_ADDR: analytics-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       FILE_SERVICE_ADDR: file-service:5000
       NODE_ENV: test
@@ -129,6 +162,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
+      ANALYTICS_SERVICE_ADDR: analytics-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       DATABASE_URL: postgresql://user:password@db
       FILE_SERVICE_ADDR: file-service:5000
@@ -153,6 +187,7 @@ services:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
+      ANALYTICS_SERVICE_ADDR: analytics-service:5000
       LOGGING_SERVICE_ADDR: logging-service:5000
       FILE_SERVICE_ADDR: file-service:5000
       DATABASE_URL: postgresql://user:password@db
