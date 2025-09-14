@@ -94,7 +94,7 @@ services:
       context: .
     ports:
       - 5000
-    entrypoint: pnpm --filter analytics-service ${FILE_COMMAND-start:dev}
+    entrypoint: pnpm --filter analytics-service ${ANALYTICS_COMMAND-start:dev}
     environment:
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
