@@ -4,7 +4,12 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
-import { EmailProtoFile, EmailProto } from 'juno-proto';
+import {
+  EmailProtoFile,
+  EmailProto,
+  HealthProto,
+  HealthProtoFile,
+} from 'juno-proto';
 import { SentryFilter } from './sentry.filter';
 
 async function bootstrap() {
@@ -16,8 +21,11 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: [EmailProto.JUNO_EMAIL_PACKAGE_NAME],
-        protoPath: [EmailProtoFile],
+        package: [
+          EmailProto.JUNO_EMAIL_PACKAGE_NAME,
+          HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
+        ],
+        protoPath: [EmailProtoFile, HealthProtoFile],
         url: process.env.EMAIL_SERVICE_ADDR,
       },
     },
