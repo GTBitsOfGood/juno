@@ -15,7 +15,10 @@ import {
   API_KEY_SERVICE_NAME,
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
-import { FILE_SERVICE_CONFIG_DB_SERVICE_NAME } from 'juno-proto/dist/gen/file_config';
+import {
+  FILE_SERVICE_CONFIG_DB_SERVICE_NAME,
+  FILE_SERVICE_CONFIG_SERVICE_NAME,
+} from 'juno-proto/dist/gen/file_config';
 import {
   JWT_SERVICE_NAME,
   JUNO_JWT_PACKAGE_NAME,
@@ -41,6 +44,15 @@ import {
         transport: Transport.GRPC,
         options: {
           url: process.env.DB_SERVICE_ADDR,
+          package: FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
+          protoPath: FileConfigProtoFile,
+        },
+      },
+      {
+        name: FILE_SERVICE_CONFIG_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.FILE_SERVICE_ADDR,
           package: FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
           protoPath: FileConfigProtoFile,
         },

@@ -53,3 +53,15 @@ export class FileConfigResponse {
     this.buckets = fileConfig.buckets;
   }
 }
+
+export class SetupFileServiceResponse {
+  @ApiProperty({
+    type: 'boolean',
+    description: 'Whether file services were successfully setup',
+  })
+  success: boolean;
+
+  constructor(res: FileConfigProto.SetupResponse) {
+    this.success = res.success;
+  }
+}

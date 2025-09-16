@@ -5,11 +5,13 @@ import {
   Inject,
   OnModuleInit,
   Param,
+  Post,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -19,25 +21,38 @@ import {
 import { AuthCommonProto, FileConfigProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
-import { FileConfigResponse } from 'src/models/file_config.dto';
+import {
+  FileConfigResponse,
+  SetupFileServiceResponse,
+} from 'src/models/file_config.dto';
 
-const { FILE_SERVICE_CONFIG_DB_SERVICE_NAME } = FileConfigProto;
+const {
+  FILE_SERVICE_CONFIG_DB_SERVICE_NAME,
+  FILE_SERVICE_CONFIG_SERVICE_NAME,
+} = FileConfigProto;
 
 @ApiBearerAuth('api_key')
 @ApiTags('file_config')
 @Controller('file')
 export class FileConfigController implements OnModuleInit {
+  private fileConfigService: FileConfigProto.FileServiceConfigServiceClient;
   private fileConfigDBService: FileConfigProto.FileServiceConfigDbServiceClient;
 
   constructor(
     @Inject(FILE_SERVICE_CONFIG_DB_SERVICE_NAME)
+    private fileConfigDbClient: ClientGrpc,
+    @Inject(FILE_SERVICE_CONFIG_SERVICE_NAME)
     private fileConfigClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.fileConfigDBService =
-      this.fileConfigClient.getService<FileConfigProto.FileServiceConfigDbServiceClient>(
+      this.fileConfigDbClient.getService<FileConfigProto.FileServiceConfigDbServiceClient>(
         FILE_SERVICE_CONFIG_DB_SERVICE_NAME,
+      );
+    this.fileConfigService =
+      this.fileConfigClient.getService<FileConfigProto.FileServiceConfigServiceClient>(
+        FILE_SERVICE_CONFIG_SERVICE_NAME,
       );
   }
 
@@ -74,5 +89,28 @@ export class FileConfigController implements OnModuleInit {
     });
 
     return new FileConfigResponse(await lastValueFrom(config));
+  }
+
+  @ApiOperation({
+    summary: 'Sets up file services for the Project/Environment',
+  })
+  @ApiCreatedResponse({
+    description: 'File Services setup successfully',
+    type: SetupFileServiceResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @Post('config/setup')
+  async setup(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+  ): Promise<SetupFileServiceResponse> {
+    const setupResponse = await lastValueFrom(
+      this.fileConfigService.setup({
+        projectId: apiKey.project.id,
+        environment: apiKey.environment,
+      }),
+    );
+
+    return new SetupFileServiceResponse(setupResponse);
   }
 }

@@ -1,15 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestMicroservice } from '@nestjs/common';
-import { AppModule } from '../src/app.module';
-import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
+import { INestMicroservice } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
   FileConfigProto,
   FileConfigProtoFile,
   ResetProto,
   ResetProtoFile,
 } from 'juno-proto';
+import { AppModule } from '../src/app.module';
 
 let app: INestMicroservice;
 let createdConfigId: number;
@@ -135,8 +135,8 @@ describe('File Service Config Tests', () => {
   });
 
   it('creates a duplicate file service config', async () => {
-    try {
-      await new Promise((resolve, reject) => {
+    const response: FileConfigProto.FileServiceConfig = await new Promise(
+      (resolve, reject) => {
         configClient.createConfig(
           {
             projectId: 0,
@@ -152,10 +152,9 @@ describe('File Service Config Tests', () => {
             }
           },
         );
-      });
-    } catch (err) {
-      expect(err).toBeDefined();
-    }
+      },
+    );
+    expect(response).toHaveProperty('id');
   });
 
   it('deletes a config', async () => {

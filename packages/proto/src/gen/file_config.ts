@@ -12,6 +12,16 @@ import { Bucket } from './file_bucket';
 
 export const protobufPackage = 'juno.file_service.config';
 
+export interface SetupRequest {
+  projectId: number;
+  environment: string;
+}
+
+export interface SetupResponse {
+  success: boolean;
+  config: FileServiceConfig | undefined;
+}
+
 export interface FileServiceConfig {
   id: number;
   buckets: Bucket[];
@@ -128,3 +138,44 @@ export function FileServiceConfigDbServiceControllerMethods() {
 }
 
 export const FILE_SERVICE_CONFIG_DB_SERVICE_NAME = 'FileServiceConfigDbService';
+
+export interface FileServiceConfigServiceClient {
+  setup(request: SetupRequest): Observable<SetupResponse>;
+}
+
+export interface FileServiceConfigServiceController {
+  setup(
+    request: SetupRequest,
+  ): Promise<SetupResponse> | Observable<SetupResponse> | SetupResponse;
+}
+
+export function FileServiceConfigServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ['setup'];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('FileServiceConfigService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('FileServiceConfigService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
+    }
+  };
+}
+
+export const FILE_SERVICE_CONFIG_SERVICE_NAME = 'FileServiceConfigService';

@@ -1,19 +1,18 @@
+import { status } from '@grpc/grpc-js';
 import { Controller, Inject } from '@nestjs/common';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { FileProto, FileProviderProto } from 'juno-proto';
 import { FileServiceController } from 'juno-proto/dist/gen/file';
-import { ClientGrpc } from '@nestjs/microservices';
-import { RpcException } from '@nestjs/microservices';
-import { status } from '@grpc/grpc-js';
 import { lastValueFrom } from 'rxjs';
-import { S3FileHandler } from './s3_handler';
 import { AzureFileHandler } from './azure_handler';
+import { S3FileHandler } from './s3_handler';
 
 const { FILE_DB_SERVICE_NAME } = FileProto;
 const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
 
 @Controller()
 @FileProto.FileServiceControllerMethods()
-export class FileUploadController implements FileServiceController {
+export class FileTransferController implements FileServiceController {
   private fileDBService: FileProto.FileDbServiceClient;
   private fileProviderDbService: FileProviderProto.FileProviderDbServiceClient;
 

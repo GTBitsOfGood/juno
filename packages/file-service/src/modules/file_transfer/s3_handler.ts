@@ -1,31 +1,34 @@
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3';
 import { FileProto, FileProviderProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { lastValueFrom } from 'rxjs';
-import {
-  BlobSASPermissions,
-  generateBlobSASQueryParameters,
-  StorageSharedKeyCredential,
-} from '@azure/storage-blob';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-export class AzureFileHandler {
+export class S3FileHandler {
   constructor(
     private fileDBService: FileProto.FileDbServiceClient,
     private provider: FileProviderProto.FileProvider,
   ) {}
 
-  async getSharedKeyCredential(): Promise<StorageSharedKeyCredential> {
-    const accessKeyPayload = JSON.parse(this.provider.accessKey);
-    if (!accessKeyPayload.accountName || !accessKeyPayload.accountKey) {
+  async getS3Client(region: string): Promise<S3Client> {
+    try {
+      const metadata = {
+        ...JSON.parse(this.provider.metadata),
+        region: region,
+        credentials: JSON.parse(this.provider.accessKey),
+      };
+      return new S3Client(metadata);
+    } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
-        message: 'Invalid access key payload',
+        message: `Failed to initialize S3 client: ${error.message} `,
       });
     }
-    const account = accessKeyPayload.accountName;
-    const accountKey = accessKeyPayload.accountKey;
-
-    return new StorageSharedKeyCredential(account, accountKey);
   }
 
   async downloadFile(
@@ -54,23 +57,17 @@ export class AzureFileHandler {
       });
     }
 
-    const sharedKeyCredential = await this.getSharedKeyCredential();
     //get url
     try {
-      const blobSAS = generateBlobSASQueryParameters(
-        {
-          containerName: request.bucketName, // Required
-          blobName: request.fileName, // Required
-          permissions: BlobSASPermissions.from({
-            read: true,
-          }), // Required
-          startsOn: new Date(), // Required
-          expiresOn: new Date(new Date().valueOf() + 86400), // Optional. Date type
-        },
-        sharedKeyCredential, // StorageSharedKeyCredential - `new StorageSharedKeyCredential(account, accountKey)`
-      ).toString();
+      const client = await this.getS3Client('us-east-005');
+      const getcommand = new GetObjectCommand({
+        Bucket: `${request.bucketName}-${request.configId}-${request.configEnv}`,
+        Key: request.fileName,
+      });
 
-      return { url: blobSAS };
+      const url = await getSignedUrl(client, getcommand, { expiresIn: 3600 });
+
+      return { url };
     } catch (err) {
       throw new RpcException({
         code: status.NOT_FOUND,
@@ -82,27 +79,18 @@ export class AzureFileHandler {
   async uploadFile(
     request: FileProto.UploadFileRequest,
   ): Promise<FileProto.UploadFileResponse> {
-    const sharedKeyCredential = await this.getSharedKeyCredential();
     let url = '';
     try {
-      const blobSAS = generateBlobSASQueryParameters(
-        {
-          containerName: request.bucketName, // Required
-          blobName: request.fileName, // Required
-          permissions: BlobSASPermissions.from({
-            write: true,
-          }), // Required
-          startsOn: new Date(), // Required
-          expiresOn: new Date(new Date().valueOf() + 86400), // Optional. Date type
-        },
-        sharedKeyCredential, // StorageSharedKeyCredential - `new StorageSharedKeyCredential(account, accountKey)`
-      ).toString();
-
-      url = blobSAS;
+      const s3Client = await this.getS3Client('us-east-005');
+      const command = new PutObjectCommand({
+        Bucket: `${request.bucketName}-${request.configId}-${request.configEnv}`,
+        Key: request.fileName,
+      });
+      url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     } catch (err) {
       throw new RpcException({
-        code: status.NOT_FOUND,
-        message: `Signed URL Not Found: ${err}`,
+        code: status.FAILED_PRECONDITION,
+        message: `Could not create signed url: ${err}`,
       });
     }
     try {
