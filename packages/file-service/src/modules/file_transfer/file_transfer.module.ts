@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { FileUploadController } from './file_upload.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
-import { join } from 'path';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
   FileProto,
   FileProtoFile,
   FileProviderProto,
   FileProviderProtoFile,
 } from 'juno-proto';
+import { join } from 'path';
+import { FileTransferController } from './file_transfer.controller';
 
 const { FILE_DB_SERVICE_NAME, JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileProto;
 const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
@@ -39,6 +39,6 @@ const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
       },
     ]),
   ],
-  controllers: [FileUploadController],
+  controllers: [FileTransferController],
 })
-export class FileUploadModule {}
+export class FileTransferModule {}
