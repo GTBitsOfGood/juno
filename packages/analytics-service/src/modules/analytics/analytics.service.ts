@@ -3,7 +3,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { EventEnvironment } from 'bog-analytics';
 import { AnalyticsProto } from 'juno-proto';
-import { BogAnalyticsService } from 'src/analytics.service';
+import { BogAnalyticsService } from 'src/bog-analytics.service';
 
 @Injectable()
 export class AnalyticsService implements OnModuleInit {
@@ -19,7 +19,7 @@ export class AnalyticsService implements OnModuleInit {
   async logClickEvent(
     event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
-    this.bogAnalytics.authenticate('mock-api-key-123');
+    this.bogAnalytics.authenticate(event.apiKey);
 
     if (
       !event ||
@@ -39,19 +39,19 @@ export class AnalyticsService implements OnModuleInit {
       id: response._id,
       category: response.category,
       subcategory: response.subcategory,
-      project_id: response.projectId,
+      projectId: response.projectId,
       environment: response.environment,
-      created_at:
+      createdAt:
         response.createdAt instanceof Date
           ? response.createdAt.toISOString()
           : response.createdAt,
-      updated_at:
+      updatedAt:
         response.updatedAt instanceof Date
           ? response.updatedAt.toISOString()
           : response.updatedAt,
-      event_properties: {
-        object_id: response.eventProperties.objectId,
-        user_id: response.eventProperties.userId,
+      eventProperties: {
+        objectId: response.eventProperties.objectId,
+        userId: response.eventProperties.userId,
       },
     };
   }
@@ -59,7 +59,7 @@ export class AnalyticsService implements OnModuleInit {
   async logInputEvent(
     event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
-    this.bogAnalytics.authenticate('mock-api-key-123');
+    this.bogAnalytics.authenticate(event.apiKey);
 
     if (
       !event ||
@@ -82,20 +82,20 @@ export class AnalyticsService implements OnModuleInit {
       id: response._id,
       category: response.category,
       subcategory: response.subcategory,
-      project_id: response.projectId,
+      projectId: response.projectId,
       environment: response.environment,
-      created_at:
+      createdAt:
         response.createdAt instanceof Date
           ? response.createdAt.toISOString()
           : response.createdAt,
-      updated_at:
+      updatedAt:
         response.updatedAt instanceof Date
           ? response.updatedAt.toISOString()
           : response.updatedAt,
-      event_properties: {
-        object_id: response.eventProperties.objectId,
-        user_id: response.eventProperties.userId,
-        text_value: response.eventProperties.textValue,
+      eventProperties: {
+        objectId: response.eventProperties.objectId,
+        userId: response.eventProperties.userId,
+        textValue: response.eventProperties.textValue,
       },
     };
   }
@@ -103,7 +103,7 @@ export class AnalyticsService implements OnModuleInit {
   async logVisitEvent(
     event: AnalyticsProto.VisitEventRequest,
   ): Promise<AnalyticsProto.VisitEventResponse> {
-    this.bogAnalytics.authenticate('mock-api-key-123');
+    this.bogAnalytics.authenticate(event.apiKey);
 
     if (
       !event ||
@@ -123,19 +123,19 @@ export class AnalyticsService implements OnModuleInit {
       id: response._id,
       category: response.category,
       subcategory: response.subcategory,
-      project_id: response.projectId,
+      projectId: response.projectId,
       environment: response.environment,
-      created_at:
+      createdAt:
         response.createdAt instanceof Date
           ? response.createdAt.toISOString()
           : response.createdAt,
-      updated_at:
+      updatedAt:
         response.updatedAt instanceof Date
           ? response.updatedAt.toISOString()
           : response.updatedAt,
-      event_properties: {
-        page_url: response.eventProperties.pageUrl,
-        user_id: response.eventProperties.userId,
+      eventProperties: {
+        pageUrl: response.eventProperties.pageUrl,
+        userId: response.eventProperties.userId,
       },
     };
   }
@@ -143,7 +143,7 @@ export class AnalyticsService implements OnModuleInit {
   async logCustomEvent(
     event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
-    this.bogAnalytics.authenticate('mock-api-key-123');
+    this.bogAnalytics.authenticate(event.apiKey);
 
     if (
       !event ||
@@ -168,14 +168,14 @@ export class AnalyticsService implements OnModuleInit {
     );
     return {
       id: response._id,
-      event_type_id: response.eventTypeId,
-      project_id: response.projectId,
+      eventTypeId: response.eventTypeId,
+      projectId: response.projectId,
       environment: response.environment,
-      created_at:
+      createdAt:
         response.createdAt instanceof Date
           ? response.createdAt.toISOString()
           : response.createdAt,
-      updated_at:
+      updatedAt:
         response.updatedAt instanceof Date
           ? response.updatedAt.toISOString()
           : response.updatedAt,

@@ -14,6 +14,8 @@ message ClickEventRequest {
     string object_id = 1;  // objectId in bog-analytics
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 3; // API key for authenticating the request
 }
 
 // Visit Event Request - matches bog-analytics VisitEventProperties  
@@ -21,6 +23,8 @@ message VisitEventRequest {
     string page_url = 1;   // pageUrl in bog-analytics
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 3; // API key for authenticating the request
 }
 
 // Input Event Request - matches bog-analytics InputEventProperties
@@ -29,6 +33,8 @@ message InputEventRequest {
     string user_id = 2;     // userId in bog-analytics
     string text_value = 3;  // textValue in bog-analytics
     // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 4; // API key for authenticating the request
 }
 
 // Custom Event Request - matches bog-analytics logCustomEvent parameters
@@ -37,6 +43,8 @@ message CustomEventRequest {
     string subcategory = 2; // subcategory parameter in bog-analytics
     map<string, string> properties = 3; // properties object in bog-analytics
     // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 4; // API key for authenticating the request
 }
 
 // Event Properties - match bog-analytics eventProperties

@@ -16,6 +16,8 @@ export interface ClickEventRequest {
   objectId: string;
   /** userId in bog-analytics */
   userId: string;
+  /** API key for authenticating the request */
+  apiKey: string;
 }
 
 /** Visit Event Request - matches bog-analytics VisitEventProperties */
@@ -24,6 +26,8 @@ export interface VisitEventRequest {
   pageUrl: string;
   /** userId in bog-analytics */
   userId: string;
+  /** API key for authenticating the request */
+  apiKey: string;
 }
 
 /** Input Event Request - matches bog-analytics InputEventProperties */
@@ -34,6 +38,8 @@ export interface InputEventRequest {
   userId: string;
   /** textValue in bog-analytics */
   textValue: string;
+  /** API key for authenticating the request */
+  apiKey: string;
 }
 
 /** Custom Event Request - matches bog-analytics logCustomEvent parameters */
@@ -44,6 +50,8 @@ export interface CustomEventRequest {
   subcategory: string;
   /** properties object in bog-analytics */
   properties: { [key: string]: string };
+  /** API key for authenticating the request */
+  apiKey: string;
 }
 
 export interface CustomEventRequest_PropertiesEntry {
