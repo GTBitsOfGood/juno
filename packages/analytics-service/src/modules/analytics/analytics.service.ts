@@ -1,25 +1,28 @@
 import { status } from '@grpc/grpc-js';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { EventEnvironment } from 'bog-analytics';
 import { AnalyticsProto } from 'juno-proto';
 import { BogAnalyticsService } from 'src/bog-analytics.service';
 
 @Injectable()
-export class AnalyticsService implements OnModuleInit {
-  private bogAnalytics: BogAnalyticsService;
+export class AnalyticsService {
+  constructor(private readonly bogAnalytics: BogAnalyticsService) {}
 
-  onModuleInit() {
-    // Initialize the bog-analytics SDK here if needed
-    this.bogAnalytics = new BogAnalyticsService({
-      environment: EventEnvironment.DEVELOPMENT,
-    });
+  authenticateAnalytics(key: string) {
+    try {
+      this.bogAnalytics.authenticate(key);
+    } catch (e) {
+      throw new RpcException({
+        code: status.UNAUTHENTICATED,
+        message: 'Invalid API key',
+      });
+    }
   }
 
   async logClickEvent(
     event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
-    this.bogAnalytics.authenticate(event.apiKey);
+    this.authenticateAnalytics(event.apiKey);
 
     if (
       !event ||
@@ -59,7 +62,7 @@ export class AnalyticsService implements OnModuleInit {
   async logInputEvent(
     event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
-    this.bogAnalytics.authenticate(event.apiKey);
+    this.authenticateAnalytics(event.apiKey);
 
     if (
       !event ||
@@ -103,7 +106,7 @@ export class AnalyticsService implements OnModuleInit {
   async logVisitEvent(
     event: AnalyticsProto.VisitEventRequest,
   ): Promise<AnalyticsProto.VisitEventResponse> {
-    this.bogAnalytics.authenticate(event.apiKey);
+    this.authenticateAnalytics(event.apiKey);
 
     if (
       !event ||
@@ -143,7 +146,7 @@ export class AnalyticsService implements OnModuleInit {
   async logCustomEvent(
     event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
-    this.bogAnalytics.authenticate(event.apiKey);
+    this.authenticateAnalytics(event.apiKey);
 
     if (
       !event ||

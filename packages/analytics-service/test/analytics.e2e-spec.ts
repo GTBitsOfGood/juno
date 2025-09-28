@@ -5,17 +5,84 @@ import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ResetProtoFile, AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
+import { BogAnalyticsService } from 'src/bog-analytics.service';
 
 const { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } = AnalyticsProto;
 
 let app: INestMicroservice;
+
+const mockBogAnalyticsService = {
+  authenticate: jest.fn(),
+  logClickEvent: jest
+    .fn()
+    .mockImplementation((event) =>
+      Promise.resolve({
+        _id: 'id',
+        category: 'category',
+        subcategory: 'subcategory',
+        projectId: 'project-id',
+        environment: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        eventProperties: { objectId: event.objectId, userId: event.userId },
+      }),
+    ),
+  logInputEvent: jest
+    .fn()
+    .mockImplementation((event) =>
+      Promise.resolve({
+        _id: 'id',
+        category: 'category',
+        subcategory: 'subcategory',
+        projectId: 'project-id',
+        environment: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        eventProperties: {
+          objectId: event.objectId,
+          userId: event.userId,
+          textValue: event.textValue,
+        },
+      }),
+    ),
+  logVisitEvent: jest
+    .fn()
+    .mockImplementation((event) =>
+      Promise.resolve({
+        _id: 'id',
+        category: 'category',
+        subcategory: 'subcategory',
+        projectId: 'project-id',
+        environment: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        eventProperties: { pageUrl: event.pageUrl, userId: event.userId },
+      }),
+    ),
+  logCustomEvent: jest
+    .fn()
+    .mockImplementation((category, subcategory, properties) =>
+      Promise.resolve({
+        _id: 'id',
+        eventTypeId: 'event-type-id',
+        projectId: 'project-id',
+        environment: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        properties: properties,
+      }),
+    ),
+};
 
 jest.setTimeout(10000);
 
 async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider(BogAnalyticsService)
+    .useValue(mockBogAnalyticsService)
+    .compile();
 
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
@@ -61,13 +128,15 @@ describe('Analytics Service Authenticate Domain Tests', () => {
   beforeEach(async () => {
     const proto = ProtoLoader.loadSync([AnalyticsProtoFile]) as any;
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-    analyticsClient = new protoGRPC.juno.analytics.AnalyticsService(
-      process.env.ANALYTICS_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
+    // TODO: rename analytics_service proto to just juno.analytics
+    analyticsClient =
+      new protoGRPC.juno.analytics_service.analytics.AnalyticsService(
+        process.env.ANALYTICS_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
   });
 
-  it('Log click event with valid api key', async (done) => {
+  it('Log click event with valid api key', async () => {
     const request = {
       apiKey: 'mock-api-key-123',
       objectId: 'button-1',
@@ -88,10 +157,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response).toBeDefined();
     expect(response.eventProperties.objectId).toBe('button-1');
     expect(response.eventProperties.userId).toBe('user-123');
-    done();
   });
 
-  it('Log click event with invalid api key', async (done) => {
+  it('Log click event with invalid api key', async () => {
     const request = {
       apiKey: 'invalid-api-key',
       objectId: 'button-1',
@@ -112,11 +180,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     } catch (err) {
       expect(err).toBeDefined();
     }
-
-    done();
   });
 
-  it('Log visit event with valid api key', async (done) => {
+  it('Log visit event with valid api key', async () => {
     const request = {
       apiKey: 'mock-api-key-123',
       pageUrl: 'https://example.com/page',
@@ -137,10 +203,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response).toBeDefined();
     expect(response.eventProperties.pageUrl).toBe('https://example.com/page');
     expect(response.eventProperties.userId).toBe('user-123');
-    done();
   });
 
-  it('Log visit event with invalid api key', async (done) => {
+  it('Log visit event with invalid api key', async () => {
     const request = {
       apiKey: 'invalid-api-key',
       pageUrl: 'https://example.com/page',
@@ -161,11 +226,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     } catch (err) {
       expect(err).toBeDefined();
     }
-
-    done();
   });
 
-  it('Log input event with valid api key', async (done) => {
+  it('Log input event with valid api key', async () => {
     const request = {
       apiKey: 'mock-api-key-123',
       objectId: 'input-field-1',
@@ -188,10 +251,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response.eventProperties.objectId).toBe('input-field-1');
     expect(response.eventProperties.userId).toBe('user-123');
     expect(response.eventProperties.textValue).toBe('user input text');
-    done();
   });
 
-  it('Log input event with invalid api key', async (done) => {
+  it('Log input event with invalid api key', async () => {
     const request = {
       apiKey: 'invalid-api-key',
       objectId: 'input-field-1',
@@ -213,11 +275,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     } catch (err) {
       expect(err).toBeDefined();
     }
-
-    done();
   });
 
-  it('Log custom event with valid api key', async (done) => {
+  it('Log custom event with valid api key', async () => {
     const request = {
       apiKey: 'mock-api-key-123',
       category: 'user-action',
@@ -242,10 +302,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response).toBeDefined();
     expect(response.properties.formType).toBe('contact');
     expect(response.properties.formId).toBe('contact-form-1');
-    done();
   });
 
-  it('Log custom event with invalid api key', async (done) => {
+  it('Log custom event with invalid api key', async () => {
     const request = {
       apiKey: 'invalid-api-key',
       category: 'user-action',
@@ -269,7 +328,5 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     } catch (err) {
       expect(err).toBeDefined();
     }
-
-    done();
   });
 });

@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
-import { BogAnalyticsService } from 'src/analytics.service';
+import { BogAnalyticsService } from 'src/bog-analytics.service';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
+import { EventEnvironment } from 'bog-analytics';
 
 const {
   ANALYTICS_SERVICE_NAME,
@@ -24,6 +25,17 @@ const {
     ]),
   ],
   controllers: [AnalyticsController],
-  providers: [AnalyticsService, BogAnalyticsService],
+  providers: [
+    AnalyticsService,
+    BogAnalyticsService,
+    {
+      provide: BogAnalyticsService,
+      useFactory: () => {
+        return new BogAnalyticsService({
+          environment: EventEnvironment.DEVELOPMENT, // TODO: we'll have to switch this later
+        });
+      },
+    },
+  ],
 })
 export class AnalyticsModule {}

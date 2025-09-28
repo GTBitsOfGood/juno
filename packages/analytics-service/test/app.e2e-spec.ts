@@ -4,8 +4,8 @@ import { AppModule } from './../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AnalyticsProtoFile, ResetProtoFile } from 'juno-proto';
-import { JUNO_EMAIL_PACKAGE_NAME } from 'juno-proto/dist/gen/email';
+import { AnalyticsProtoFile, ResetProtoFile, AnalyticsProto } from 'juno-proto';
+import { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } from 'juno-proto/dist/gen/analytics';
 
 let app: INestMicroservice;
 
@@ -19,9 +19,9 @@ async function initApp() {
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: [JUNO_EMAIL_PACKAGE_NAME],
+      package: [JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME],
       protoPath: [AnalyticsProtoFile],
-      url: process.env.EMAIL_SERVICE_ADDR,
+      url: process.env.ANALYTICS_SERVICE_ADDR,
     },
   });
 
@@ -57,14 +57,8 @@ afterAll(() => {
   app.close();
 });
 
-describe('Analytics Service Sender Registration Tests', () => {
-  //   let analyticsClient: any;
-  //   beforeEach(async () => {
-  //     const proto = ProtoLoader.loadSync([AnalyticsProtoFile]) as any;
-  //     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-  //     analyticsClient = new protoGRPC.juno.analytics.AnalyticsService(
-  //       process.env.ANALYTICS_SERVICE_ADDR,
-  //       GRPC.credentials.createInsecure(),
-  //     );
-  //   });
+describe('Analytics Service Tests', () => {
+  it('does nothing', async () => {
+    // TODO: placeholder for future tests
+  });
 });
