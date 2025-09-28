@@ -16,7 +16,9 @@ export interface GetUsersFromProject {
   projectId: number;
 }
 
-export interface GetAllProjectsRequest {}
+export interface GetAllProjectsRequest {
+  projectIds: number[];
+}
 
 export interface CreateProjectRequest {
   name: string;

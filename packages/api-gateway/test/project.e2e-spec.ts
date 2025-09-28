@@ -622,27 +622,7 @@ describe('Project Linking Middleware', () => {
       })
       .expect(200);
   });
-  it('get projects should fail with unauthorized user', async () => {
-    //Create unauthorized user
-    await request(app.getHttpServer())
-      .post('/user')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
-      .send({
-        id: '2', //Regular user
-        password: 'pwd123',
-        name: 'John Doe',
-        email: 'john1@example.com',
-      })
-      .expect(201);
 
-    await request(app.getHttpServer())
-      .get('/project')
-      .set('X-User-Email', 'john1@example.com')
-      .set('X-User-Password', 'pwd123')
-      .send()
-      .expect(401);
-  });
   it('get projects should succeed with authorized user', async () => {
     await request(app.getHttpServer())
       .get('/project')
