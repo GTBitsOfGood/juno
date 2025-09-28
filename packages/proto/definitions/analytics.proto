@@ -2,4 +2,120 @@ syntax = "proto3";
 
 package juno.analytics_service.analytics;
 
-import "identifiers.proto";
+service AnalyticsService {
+    rpc logClickEvent(ClickEventRequest) returns (ClickEventResponse);
+    rpc logVisitEvent(VisitEventRequest) returns (VisitEventResponse);
+    rpc logInputEvent(InputEventRequest) returns (InputEventResponse);
+    rpc logCustomEvent(CustomEventRequest) returns (CustomEventResponse);
+}
+
+// Click Event Request - matches bog-analytics ClickEventProperties
+message ClickEventRequest {
+    string object_id = 1;  // objectId in bog-analytics
+    string user_id = 2;    // userId in bog-analytics
+    // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 3; // API key for authenticating the request
+}
+
+// Visit Event Request - matches bog-analytics VisitEventProperties  
+message VisitEventRequest {
+    string page_url = 1;   // pageUrl in bog-analytics
+    string user_id = 2;    // userId in bog-analytics
+    // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 3; // API key for authenticating the request
+}
+
+// Input Event Request - matches bog-analytics InputEventProperties
+message InputEventRequest {
+    string object_id = 1;   // objectId in bog-analytics
+    string user_id = 2;     // userId in bog-analytics
+    string text_value = 3;  // textValue in bog-analytics
+    // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 4; // API key for authenticating the request
+}
+
+// Custom Event Request - matches bog-analytics logCustomEvent parameters
+message CustomEventRequest {
+    string category = 1;    // category parameter in bog-analytics
+    string subcategory = 2; // subcategory parameter in bog-analytics
+    map<string, string> properties = 3; // properties object in bog-analytics
+    // Note: bog-analytics handles createdAt automatically
+
+    string api_key = 4; // API key for authenticating the request
+}
+
+// Event Properties - match bog-analytics eventProperties
+
+message ClickEventProperties {
+    string object_id = 1;       // objectId in bog-analytics
+    string user_id = 2;         // userId in bog-analytics
+}
+
+message VisitEventProperties {
+    string page_url = 1;        // pageUrl in bog-analytics
+    string user_id = 2;         // userId in bog-analytics
+}
+
+message InputEventProperties {
+    string object_id = 1;       // objectId in bog-analytics
+    string user_id = 2;         // userId in bog-analytics
+    string text_value = 3;      // textValue in bog-analytics
+}
+
+// Response messages - match bog-analytics return types exactly
+
+// Click Event Response - matches bog-analytics ClickEvent interface
+message ClickEventResponse {
+    // BaseEvent fields
+    string id = 1;                              // _id field from bog-analytics
+    string category = 2;                        // category field
+    string subcategory = 3;                     // subcategory field  
+    string project_id = 4;                      // projectId field
+    string environment = 5;                     // environment field
+    string created_at = 6;                      // createdAt field
+    string updated_at = 7;                      // updatedAt field
+    // eventProperties fields
+    ClickEventProperties event_properties = 8;  // Click-specific properties
+}
+
+// Visit Event Response - matches bog-analytics VisitEvent interface
+message VisitEventResponse {
+    // BaseEvent fields
+    string id = 1;                              // _id field from bog-analytics
+    string category = 2;                        // category field
+    string subcategory = 3;                     // subcategory field  
+    string project_id = 4;                      // projectId field
+    string environment = 5;                     // environment field
+    string created_at = 6;                      // createdAt field
+    string updated_at = 7;                      // updatedAt field
+    // eventProperties fields
+    VisitEventProperties event_properties = 8;  // Visit-specific properties
+}
+
+// Input Event Response - matches bog-analytics InputEvent interface
+message InputEventResponse {
+    // BaseEvent fields
+    string id = 1;                              // _id field from bog-analytics
+    string category = 2;                        // category field
+    string subcategory = 3;                     // subcategory field  
+    string project_id = 4;                      // projectId field
+    string environment = 5;                     // environment field
+    string created_at = 6;                      // createdAt field
+    string updated_at = 7;                      // updatedAt field
+    // eventProperties fields
+    InputEventProperties event_properties = 8;  // Input-specific properties
+}
+
+// Custom Event Response - matches bog-analytics CustomEvent interface
+message CustomEventResponse {
+    string id = 1;                              // _id field from bog-analytics
+    string event_type_id = 2;                   // eventTypeId for custom events
+    string project_id = 3;                      // projectId field
+    string environment = 4;                     // environment field
+    string created_at = 5;                      // createdAt field
+    string updated_at = 6;                      // updatedAt field
+    map<string, string> properties = 7;        // Custom properties object
+}
