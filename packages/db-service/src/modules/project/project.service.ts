@@ -7,12 +7,16 @@ export class ProjectService {
   constructor(private prisma: PrismaService) {}
 
   async projects(
-    skip?: number,
-    take?: number,
-    cursor?: Prisma.ProjectWhereUniqueInput,
-    where?: Prisma.ProjectWhereInput,
-    orderBy?: Prisma.ProjectOrderByWithRelationInput,
+    params: {
+      skip?: number;
+      take?: number;
+      cursor?: Prisma.ProjectWhereUniqueInput;
+      where?: Prisma.ProjectWhereInput;
+      orderBy?: Prisma.ProjectOrderByWithRelationInput;
+    } = {},
   ): Promise<Project[]> {
+    const { skip, take, cursor, where, orderBy } = params;
+
     return this.prisma.project.findMany({
       skip,
       take,

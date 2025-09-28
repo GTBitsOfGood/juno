@@ -5,7 +5,7 @@ services:
       target: api-gateway-dev
       context: .
     ports:
-      - 3000
+      - '8888:3000'
     entrypoint: pnpm --filter api-gateway ${GATEWAY_COMMAND-start:dev}
     environment:
       DB_SERVICE_ADDR: db-service:5000

@@ -103,10 +103,26 @@ export class ProjectController implements OnModuleInit {
   async getAllProjects(
     @User() user: CommonProto.User,
   ): Promise<ProjectResponses> {
-    if (user == undefined || user.type != CommonProto.UserType.SUPERADMIN) {
+    if (user == undefined) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
-    const projects = this.projectService.getAllProjects({});
+
+    let projectIds: number[] = [];
+
+    // superadmin can see all projects; admin/user are assigned projects
+    if (user.type !== CommonProto.UserType.SUPERADMIN) {
+      // if the user hasn't been assigned any projects, we don't want them to bypass security
+      if (user.projectIds === undefined || user.projectIds.length == 0) {
+        return new ProjectResponses({ projects: [] });
+      }
+
+      projectIds = user.projectIds;
+    }
+
+    console.log(projectIds);
+
+    // const projects = this.projectService.getAllProjects({ projectIds });
+    const projects = this.projectService.getAllProjects({ projectIds });
     return new ProjectResponses(await lastValueFrom(projects));
   }
 
