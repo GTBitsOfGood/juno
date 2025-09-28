@@ -1,5 +1,5 @@
 import { status } from '@grpc/grpc-js';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { AnalyticsProto } from 'juno-proto';
 import { BogAnalyticsService } from 'src/bog-analytics.service';

@@ -27,7 +27,6 @@ const {
   controllers: [AnalyticsController],
   providers: [
     AnalyticsService,
-    BogAnalyticsService,
     {
       provide: BogAnalyticsService,
       useFactory: () => {
