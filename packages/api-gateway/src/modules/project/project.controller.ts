@@ -119,9 +119,6 @@ export class ProjectController implements OnModuleInit {
       projectIds = user.projectIds;
     }
 
-    console.log(projectIds);
-
-    // const projects = this.projectService.getAllProjects({ projectIds });
     const projects = this.projectService.getAllProjects({ projectIds });
     return new ProjectResponses(await lastValueFrom(projects));
   }

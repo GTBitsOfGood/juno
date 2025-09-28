@@ -34,12 +34,6 @@ export class ProjectController
   async getAllProjects(
     input: ProjectProto.GetAllProjectsRequest,
   ): Promise<CommonProto.Projects> {
-    console.log(
-      input.projectIds !== undefined
-        ? input.projectIds.map((id: any) => id.low)
-        : [],
-    );
-
     // [] projectIds serializes to undefined with proto
     // requiring extra check for input
     const projects = await this.projectService.projects({
@@ -47,13 +41,11 @@ export class ProjectController
         input.projectIds !== undefined
           ? {
               id: {
-                in: input.projectIds.map((id: any) => id.low),
+                in: input.projectIds.map((id: any) => Number(id)),
               },
             }
           : undefined,
     });
-
-    console.log(projects);
 
     return { projects: projects };
   }
