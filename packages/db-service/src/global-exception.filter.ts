@@ -52,7 +52,7 @@ export class CustomRpcExceptionFilter
       return throwError(() => exception.getError());
     } else {
       console.error(`Unexpected Error: ${JSON.stringify(exception)}`);
-      Sentry.captureException(exception);
+      // Sentry.captureException(exception);
       return throwError(() =>
         new RpcException({
           code: status.INTERNAL,
