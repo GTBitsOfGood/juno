@@ -13,52 +13,46 @@ let app: INestMicroservice;
 
 const mockBogAnalyticsService = {
   authenticate: jest.fn(),
-  logClickEvent: jest
-    .fn()
-    .mockImplementation((event) =>
-      Promise.resolve({
-        _id: 'id',
-        category: 'category',
-        subcategory: 'subcategory',
-        projectId: 'project-id',
-        environment: 'test',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventProperties: { objectId: event.objectId, userId: event.userId },
-      }),
-    ),
-  logInputEvent: jest
-    .fn()
-    .mockImplementation((event) =>
-      Promise.resolve({
-        _id: 'id',
-        category: 'category',
-        subcategory: 'subcategory',
-        projectId: 'project-id',
-        environment: 'test',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventProperties: {
-          objectId: event.objectId,
-          userId: event.userId,
-          textValue: event.textValue,
-        },
-      }),
-    ),
-  logVisitEvent: jest
-    .fn()
-    .mockImplementation((event) =>
-      Promise.resolve({
-        _id: 'id',
-        category: 'category',
-        subcategory: 'subcategory',
-        projectId: 'project-id',
-        environment: 'test',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventProperties: { pageUrl: event.pageUrl, userId: event.userId },
-      }),
-    ),
+  logClickEvent: jest.fn().mockImplementation((event) =>
+    Promise.resolve({
+      _id: 'id',
+      category: 'category',
+      subcategory: 'subcategory',
+      projectId: 'project-id',
+      environment: 'test',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      eventProperties: { objectId: event.objectId, userId: event.userId },
+    }),
+  ),
+  logInputEvent: jest.fn().mockImplementation((event) =>
+    Promise.resolve({
+      _id: 'id',
+      category: 'category',
+      subcategory: 'subcategory',
+      projectId: 'project-id',
+      environment: 'test',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      eventProperties: {
+        objectId: event.objectId,
+        userId: event.userId,
+        textValue: event.textValue,
+      },
+    }),
+  ),
+  logVisitEvent: jest.fn().mockImplementation((event) =>
+    Promise.resolve({
+      _id: 'id',
+      category: 'category',
+      subcategory: 'subcategory',
+      projectId: 'project-id',
+      environment: 'test',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      eventProperties: { pageUrl: event.pageUrl, userId: event.userId },
+    }),
+  ),
   logCustomEvent: jest
     .fn()
     .mockImplementation((category, subcategory, properties) =>
