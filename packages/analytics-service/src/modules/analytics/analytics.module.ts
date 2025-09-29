@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
-import { BogAnalyticsService } from 'src/analytics.service';
+import { BogAnalyticsService } from 'src/bog-analytics.service';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
 
