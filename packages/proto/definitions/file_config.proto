@@ -14,6 +14,20 @@ service FileServiceConfigDbService {
   rpc updateConfig(UpdateFileServiceConfigRequest) returns (FileServiceConfig);
 }
 
+service FileServiceConfigService {
+  rpc setup(SetupRequest) returns (SetupResponse);
+}
+
+message SetupRequest {
+  int64 projectId = 1;
+  string environment = 2;
+}
+
+message SetupResponse {
+  bool success = 1;
+  FileServiceConfig config = 2;
+}
+
 message FileServiceConfig {
   int64 id = 1;
   repeated bucket.Bucket buckets = 2;

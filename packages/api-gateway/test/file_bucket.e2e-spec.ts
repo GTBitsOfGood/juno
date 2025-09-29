@@ -143,7 +143,9 @@ describe('File Bucket Routes', () => {
       },
     };
     const client = new S3Client(metadata);
-    const command = new DeleteBucketCommand({ Bucket: uniqueBucketName });
+    const command = new DeleteBucketCommand({
+      Bucket: `${uniqueBucketName}-0-prod`,
+    });
 
     await client.send(command);
   });
@@ -223,7 +225,7 @@ describe('File Bucket Routes', () => {
     };
     const client = new S3Client(metadata);
     const command = new DeleteBucketCommand({
-      Bucket: uniqueBucketName + '-duplicate',
+      Bucket: uniqueBucketName + '-duplicate-0-prod',
     });
 
     await client.send(command);

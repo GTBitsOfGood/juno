@@ -19,7 +19,9 @@ message GetUsersFromProject {
   int64 projectId = 1;
 }
 
-message GetAllProjectsRequest {}
+message GetAllProjectsRequest {
+  repeated int64 projectIds = 1;
+}
 message CreateProjectRequest { string name = 1; }
 
 message ProjectUpdateParams { optional string name = 2; }

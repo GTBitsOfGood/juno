@@ -32,10 +32,21 @@ export class ProjectController
   }
 
   async getAllProjects(
-    _: ProjectProto.GetAllProjectsRequest,
+    input: ProjectProto.GetAllProjectsRequest,
   ): Promise<CommonProto.Projects> {
-    void _; //Indicates to linter input not used
-    const projects = await this.projectService.projects();
+    // [] projectIds serializes to undefined with proto
+    // requiring extra check for input
+    const projects = await this.projectService.projects({
+      where:
+        input.projectIds !== undefined
+          ? {
+              id: {
+                in: input.projectIds.map((id: any) => Number(id)),
+              },
+            }
+          : undefined,
+    });
+
     return { projects: projects };
   }
 

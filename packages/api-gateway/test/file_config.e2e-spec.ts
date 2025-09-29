@@ -1,16 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
 import {
   ClassSerializerInterceptor,
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
-import * as request from 'supertest';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ResetProtoFile } from 'juno-proto';
-import * as GRPC from '@grpc/grpc-js';
-import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
+import * as request from 'supertest';
+import { AppModule } from './../src/app.module';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -100,5 +100,18 @@ describe('File Config Routes', () => {
       .get('/file/config/1')
       .set('Authorization', 'Bearer ' + apiKey)
       .expect(404);
+  });
+
+  it('Should setup file services for a valid project + api key', async () => {
+    return await request(app.getHttpServer())
+      .post('/file/config/setup')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(201);
+  });
+
+  it('Should throw a 401 status error when setup file services without valid credentials', async () => {
+    return await request(app.getHttpServer())
+      .post('/file/config/setup')
+      .expect(401);
   });
 });
