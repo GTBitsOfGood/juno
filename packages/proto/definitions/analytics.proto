@@ -3,10 +3,23 @@ syntax = "proto3";
 package juno.analytics_service.analytics;
 
 service AnalyticsService {
+    // BogAnalyticsLogger methods
     rpc logClickEvent(ClickEventRequest) returns (ClickEventResponse);
     rpc logVisitEvent(VisitEventRequest) returns (VisitEventResponse);
     rpc logInputEvent(InputEventRequest) returns (InputEventResponse);
     rpc logCustomEvent(CustomEventRequest) returns (CustomEventResponse);
+
+    // AnalyticsViewer methods
+    rpc getCustomEventTypes(CustomEventTypeRequest) returns (CustomEventTypeResponse);
+    rpc getCustomGraphTypesById(CustomGraphTypeRequest) returns (CustomGraphTypeResponse);
+    rpc getClickEventsPaginated(GetClickEventsRequest) returns (GetClickEventsResponse);
+    rpc getAllClickEvents(GetAllClickEventsRequest) returns (GetAllClickEventsResponse);
+    rpc getVisitEventsPaginated(GetVisitEventsRequest) returns (GetVisitEventsResponse);
+    rpc getAllVisitEvents(GetAllVisitEventsRequest) returns (GetAllVisitEventsResponse);
+    rpc getInputEventsPaginated(GetInputEventsRequest) returns (GetInputEventsResponse);
+    rpc getAllInputEvents(GetAllInputEventsRequest) returns (GetAllInputEventsResponse);
+    rpc getCustomEventsPaginated(GetCustomEventsRequest) returns (GetCustomEventsResponse);
+    rpc getAllCustomEvents(GetAllCustomEventsRequest) returns (GetAllCustomEventsResponse);
 }
 
 // Click Event Request - matches bog-analytics ClickEventProperties
@@ -45,6 +58,89 @@ message CustomEventRequest {
     // Note: bog-analytics handles createdAt automatically
 
     string api_key = 4; // API key for authenticating the request
+}
+
+message CustomEventTypeRequest {
+    string project_name = 1;
+
+    string api_key = 2;
+}
+
+message CustomGraphTypeRequest {
+    string project_name = 1;
+    string event_type_id = 2;
+    string api_key = 3;
+}
+
+// Paginated requests - matches bog-analytics GetEventsQueryParams
+message GetClickEventsRequest {
+    string project_name = 1;
+    string after_id = 2;        // afterId in bog-analytics (optional)
+    string environment = 3;     // environment in bog-analytics
+    int32 limit = 4;           // limit in bog-analytics (optional)
+    string after_time = 5;     // afterTime in bog-analytics (optional)
+    string api_key = 6;
+}
+
+message GetVisitEventsRequest {
+    string project_name = 1;
+    string after_id = 2;
+    string environment = 3;
+    int32 limit = 4;
+    string after_time = 5;
+    string api_key = 6;
+}
+
+message GetInputEventsRequest {
+    string project_name = 1;
+    string after_id = 2;
+    string environment = 3;
+    int32 limit = 4;
+    string after_time = 5;
+    string api_key = 6;
+}
+
+// Custom events extends the base pattern with category/subcategory
+message GetCustomEventsRequest {
+    string project_name = 1;
+    string after_id = 2;
+    string environment = 3;
+    int32 limit = 4;
+    string after_time = 5;
+    string category = 6;        // category for custom events
+    string subcategory = 7;     // subcategory for custom events
+    string api_key = 8;
+}
+
+// "Get All" requests - simpler, matches bog-analytics getAllXXXEvents
+message GetAllClickEventsRequest {
+    string project_name = 1;
+    string after_time = 2;      // afterTime in bog-analytics (optional)
+    int32 limit = 3;           // limit in bog-analytics (optional)
+    string api_key = 4;
+}
+
+message GetAllVisitEventsRequest {
+    string project_name = 1;
+    string after_time = 2;
+    int32 limit = 3;
+    string api_key = 4;
+}
+
+message GetAllInputEventsRequest {
+    string project_name = 1;
+    string after_time = 2;
+    int32 limit = 3;
+    string api_key = 4;
+}
+
+message GetAllCustomEventsRequest {
+    string project_name = 1;
+    string category = 2;
+    string subcategory = 3;
+    string after_time = 4;
+    int32 limit = 5;
+    string api_key = 6;
 }
 
 // Event Properties - match bog-analytics eventProperties
@@ -118,4 +214,65 @@ message CustomEventResponse {
     string created_at = 5;                      // createdAt field
     string updated_at = 6;                      // updatedAt field
     map<string, string> properties = 7;        // Custom properties object
+}
+
+message CustomEventTypeResponse {
+    string id = 1;
+    string category = 2;
+    string subcategory = 3;
+    repeated string properties = 4;
+    string project_id = 5;
+}
+
+message CustomGraphTypeResponse {
+    repeated CustomGraphType graphs = 1;
+}
+
+message CustomGraphType {
+    string id = 1;
+    string event_type_id = 2;
+    string project_id = 3;
+    string graph_title = 4;
+    string x_property = 5;
+    string y_property = 6;
+    string graph_type = 7;
+    string caption = 8;         // optional field
+}
+
+// Paginated responses - reuse existing response types in arrays + afterId
+message GetClickEventsResponse {
+    repeated ClickEventResponse events = 1;
+    string after_id = 2;
+}
+
+message GetVisitEventsResponse {
+    repeated VisitEventResponse events = 1;
+    string after_id = 2;
+}
+
+message GetInputEventsResponse {
+    repeated InputEventResponse events = 1;
+    string after_id = 2;
+}
+
+message GetCustomEventsResponse {
+    repeated CustomEventResponse events = 1;
+    string after_id = 2;
+}
+
+// "Get All" responses - just arrays of existing response types
+message GetAllClickEventsResponse {
+    repeated ClickEventResponse events = 1;
+}
+
+message GetAllVisitEventsResponse {
+    repeated VisitEventResponse events = 1;
+}
+
+message GetAllInputEventsResponse {
+    repeated InputEventResponse events = 1;
+}
+
+message GetAllCustomEventsResponse {
+    repeated CustomEventResponse events = 1;
 }

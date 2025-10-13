@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
-import { BogAnalyticsService } from 'src/bog-analytics.service';
+import {
+  AnalyticsViewerService,
+  BogAnalyticsService,
+} from 'src/bog-analytics.service';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
 import { EventEnvironment } from 'bog-analytics';
@@ -31,6 +34,14 @@ const {
       provide: BogAnalyticsService,
       useFactory: () => {
         return new BogAnalyticsService({
+          environment: EventEnvironment.DEVELOPMENT, // TODO: we'll have to switch this later
+        });
+      },
+    },
+    {
+      provide: AnalyticsViewerService,
+      useFactory: () => {
+        return new AnalyticsViewerService({
           environment: EventEnvironment.DEVELOPMENT, // TODO: we'll have to switch this later
         });
       },

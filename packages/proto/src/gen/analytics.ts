@@ -59,6 +59,96 @@ export interface CustomEventRequest_PropertiesEntry {
   value: string;
 }
 
+export interface CustomEventTypeRequest {
+  projectName: string;
+  apiKey: string;
+}
+
+export interface CustomGraphTypeRequest {
+  projectName: string;
+  eventTypeId: string;
+  apiKey: string;
+}
+
+/** Paginated requests - matches bog-analytics GetEventsQueryParams */
+export interface GetClickEventsRequest {
+  projectName: string;
+  /** afterId in bog-analytics (optional) */
+  afterId: string;
+  /** environment in bog-analytics */
+  environment: string;
+  /** limit in bog-analytics (optional) */
+  limit: number;
+  /** afterTime in bog-analytics (optional) */
+  afterTime: string;
+  apiKey: string;
+}
+
+export interface GetVisitEventsRequest {
+  projectName: string;
+  afterId: string;
+  environment: string;
+  limit: number;
+  afterTime: string;
+  apiKey: string;
+}
+
+export interface GetInputEventsRequest {
+  projectName: string;
+  afterId: string;
+  environment: string;
+  limit: number;
+  afterTime: string;
+  apiKey: string;
+}
+
+/** Custom events extends the base pattern with category/subcategory */
+export interface GetCustomEventsRequest {
+  projectName: string;
+  afterId: string;
+  environment: string;
+  limit: number;
+  afterTime: string;
+  /** category for custom events */
+  category: string;
+  /** subcategory for custom events */
+  subcategory: string;
+  apiKey: string;
+}
+
+/** "Get All" requests - simpler, matches bog-analytics getAllXXXEvents */
+export interface GetAllClickEventsRequest {
+  projectName: string;
+  /** afterTime in bog-analytics (optional) */
+  afterTime: string;
+  /** limit in bog-analytics (optional) */
+  limit: number;
+  apiKey: string;
+}
+
+export interface GetAllVisitEventsRequest {
+  projectName: string;
+  afterTime: string;
+  limit: number;
+  apiKey: string;
+}
+
+export interface GetAllInputEventsRequest {
+  projectName: string;
+  afterTime: string;
+  limit: number;
+  apiKey: string;
+}
+
+export interface GetAllCustomEventsRequest {
+  projectName: string;
+  category: string;
+  subcategory: string;
+  afterTime: string;
+  limit: number;
+  apiKey: string;
+}
+
 export interface ClickEventProperties {
   /** objectId in bog-analytics */
   objectId: string;
@@ -165,10 +255,74 @@ export interface CustomEventResponse_PropertiesEntry {
   value: string;
 }
 
+export interface CustomEventTypeResponse {
+  id: string;
+  category: string;
+  subcategory: string;
+  properties: string[];
+  projectId: string;
+}
+
+export interface CustomGraphTypeResponse {
+  graphs: CustomGraphType[];
+}
+
+export interface CustomGraphType {
+  id: string;
+  eventTypeId: string;
+  projectId: string;
+  graphTitle: string;
+  xProperty: string;
+  yProperty: string;
+  graphType: string;
+  /** optional field */
+  caption: string;
+}
+
+/** Paginated responses - reuse existing response types in arrays + afterId */
+export interface GetClickEventsResponse {
+  events: ClickEventResponse[];
+  afterId: string;
+}
+
+export interface GetVisitEventsResponse {
+  events: VisitEventResponse[];
+  afterId: string;
+}
+
+export interface GetInputEventsResponse {
+  events: InputEventResponse[];
+  afterId: string;
+}
+
+export interface GetCustomEventsResponse {
+  events: CustomEventResponse[];
+  afterId: string;
+}
+
+/** "Get All" responses - just arrays of existing response types */
+export interface GetAllClickEventsResponse {
+  events: ClickEventResponse[];
+}
+
+export interface GetAllVisitEventsResponse {
+  events: VisitEventResponse[];
+}
+
+export interface GetAllInputEventsResponse {
+  events: InputEventResponse[];
+}
+
+export interface GetAllCustomEventsResponse {
+  events: CustomEventResponse[];
+}
+
 export const JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME =
   'juno.analytics_service.analytics';
 
 export interface AnalyticsServiceClient {
+  /** BogAnalyticsLogger methods */
+
   logClickEvent(request: ClickEventRequest): Observable<ClickEventResponse>;
 
   logVisitEvent(request: VisitEventRequest): Observable<VisitEventResponse>;
@@ -176,9 +330,53 @@ export interface AnalyticsServiceClient {
   logInputEvent(request: InputEventRequest): Observable<InputEventResponse>;
 
   logCustomEvent(request: CustomEventRequest): Observable<CustomEventResponse>;
+
+  /** AnalyticsViewer methods */
+
+  getCustomEventTypes(
+    request: CustomEventTypeRequest,
+  ): Observable<CustomEventTypeResponse>;
+
+  getCustomGraphTypesById(
+    request: CustomGraphTypeRequest,
+  ): Observable<CustomGraphTypeResponse>;
+
+  getClickEventsPaginated(
+    request: GetClickEventsRequest,
+  ): Observable<GetClickEventsResponse>;
+
+  getAllClickEvents(
+    request: GetAllClickEventsRequest,
+  ): Observable<GetAllClickEventsResponse>;
+
+  getVisitEventsPaginated(
+    request: GetVisitEventsRequest,
+  ): Observable<GetVisitEventsResponse>;
+
+  getAllVisitEvents(
+    request: GetAllVisitEventsRequest,
+  ): Observable<GetAllVisitEventsResponse>;
+
+  getInputEventsPaginated(
+    request: GetInputEventsRequest,
+  ): Observable<GetInputEventsResponse>;
+
+  getAllInputEvents(
+    request: GetAllInputEventsRequest,
+  ): Observable<GetAllInputEventsResponse>;
+
+  getCustomEventsPaginated(
+    request: GetCustomEventsRequest,
+  ): Observable<GetCustomEventsResponse>;
+
+  getAllCustomEvents(
+    request: GetAllCustomEventsRequest,
+  ): Observable<GetAllCustomEventsResponse>;
 }
 
 export interface AnalyticsServiceController {
+  /** BogAnalyticsLogger methods */
+
   logClickEvent(
     request: ClickEventRequest,
   ):
@@ -206,6 +404,78 @@ export interface AnalyticsServiceController {
     | Promise<CustomEventResponse>
     | Observable<CustomEventResponse>
     | CustomEventResponse;
+
+  /** AnalyticsViewer methods */
+
+  getCustomEventTypes(
+    request: CustomEventTypeRequest,
+  ):
+    | Promise<CustomEventTypeResponse>
+    | Observable<CustomEventTypeResponse>
+    | CustomEventTypeResponse;
+
+  getCustomGraphTypesById(
+    request: CustomGraphTypeRequest,
+  ):
+    | Promise<CustomGraphTypeResponse>
+    | Observable<CustomGraphTypeResponse>
+    | CustomGraphTypeResponse;
+
+  getClickEventsPaginated(
+    request: GetClickEventsRequest,
+  ):
+    | Promise<GetClickEventsResponse>
+    | Observable<GetClickEventsResponse>
+    | GetClickEventsResponse;
+
+  getAllClickEvents(
+    request: GetAllClickEventsRequest,
+  ):
+    | Promise<GetAllClickEventsResponse>
+    | Observable<GetAllClickEventsResponse>
+    | GetAllClickEventsResponse;
+
+  getVisitEventsPaginated(
+    request: GetVisitEventsRequest,
+  ):
+    | Promise<GetVisitEventsResponse>
+    | Observable<GetVisitEventsResponse>
+    | GetVisitEventsResponse;
+
+  getAllVisitEvents(
+    request: GetAllVisitEventsRequest,
+  ):
+    | Promise<GetAllVisitEventsResponse>
+    | Observable<GetAllVisitEventsResponse>
+    | GetAllVisitEventsResponse;
+
+  getInputEventsPaginated(
+    request: GetInputEventsRequest,
+  ):
+    | Promise<GetInputEventsResponse>
+    | Observable<GetInputEventsResponse>
+    | GetInputEventsResponse;
+
+  getAllInputEvents(
+    request: GetAllInputEventsRequest,
+  ):
+    | Promise<GetAllInputEventsResponse>
+    | Observable<GetAllInputEventsResponse>
+    | GetAllInputEventsResponse;
+
+  getCustomEventsPaginated(
+    request: GetCustomEventsRequest,
+  ):
+    | Promise<GetCustomEventsResponse>
+    | Observable<GetCustomEventsResponse>
+    | GetCustomEventsResponse;
+
+  getAllCustomEvents(
+    request: GetAllCustomEventsRequest,
+  ):
+    | Promise<GetAllCustomEventsResponse>
+    | Observable<GetAllCustomEventsResponse>
+    | GetAllCustomEventsResponse;
 }
 
 export function AnalyticsServiceControllerMethods() {
@@ -215,6 +485,16 @@ export function AnalyticsServiceControllerMethods() {
       'logVisitEvent',
       'logInputEvent',
       'logCustomEvent',
+      'getCustomEventTypes',
+      'getCustomGraphTypesById',
+      'getClickEventsPaginated',
+      'getAllClickEvents',
+      'getVisitEventsPaginated',
+      'getAllVisitEvents',
+      'getInputEventsPaginated',
+      'getAllInputEvents',
+      'getCustomEventsPaginated',
+      'getAllCustomEvents',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
