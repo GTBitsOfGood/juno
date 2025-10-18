@@ -5,9 +5,9 @@ import { join } from 'path';
 import { AnalyticsController } from './analytics.controller';
 import {
   AnalyticsProto,
+  AnalyticsProtoFile,
   ApiKeyProto,
   ApiKeyProtoFile,
-  EmailProtoFile,
   JwtProto,
   JwtProtoFile,
 } from 'juno-proto';
@@ -50,7 +50,7 @@ const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
         options: {
           url: process.env.ANALYTICS_SERVICE_ADDR,
           package: JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME,
-          protoPath: EmailProtoFile,
+          protoPath: AnalyticsProtoFile,
         },
       },
     ]),

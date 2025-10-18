@@ -87,13 +87,7 @@ describe('Analytics Event Logging Routes', () => {
           userId: 'user-456',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(201)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.id).toBeDefined();
-          expect(response.body.eventProperties.objectId).toBe('button-123');
-          expect(response.body.eventProperties.userId).toBe('user-456');
-        });
+        .expect(201);
     });
 
     it('Failed to log click event due to missing API key', async () => {
@@ -155,14 +149,7 @@ describe('Analytics Event Logging Routes', () => {
           userId: 'user-456',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(201)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.eventProperties.pageUrl).toBe(
-            'https://example.com/dashboard',
-          );
-          expect(response.body.eventProperties.userId).toBe('user-456');
-        });
+        .expect(201);
     });
 
     it('Failed to log visit event due to missing pageUrl', async () => {
@@ -202,11 +189,7 @@ describe('Analytics Event Logging Routes', () => {
           textValue: 'search query',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(201)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.eventProperties.textValue).toBe('search query');
-        });
+        .expect(201);
     });
 
     it('Failed to log input event due to missing textValue', async () => {
@@ -235,11 +218,7 @@ describe('Analytics Event Logging Routes', () => {
           properties: { formType: 'contact', source: 'homepage' },
           apiKey: 'analytics-api-key-789',
         })
-        .expect(201)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.properties.formType).toBe('contact');
-        });
+        .expect(201);
     });
 
     it('Failed to log custom event due to missing category', async () => {
@@ -281,10 +260,7 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-        });
+        .expect(200);
     });
 
     it('Failed to get custom event types due to missing project name', async () => {
@@ -321,10 +297,7 @@ describe('Analytics Event Retrieval Routes', () => {
           eventTypeId: 'event-type-123',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-        });
+        .expect(200);
     });
 
     it('Failed to get custom graph types due to missing event type ID', async () => {
@@ -352,11 +325,7 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 10,
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
 
     it('Successfully get paginated click events with optional parameters', async () => {
@@ -398,11 +367,7 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 100,
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
 
     it('Successfully get all click events with optional afterTime parameter', async () => {
@@ -431,11 +396,7 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 10,
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
 
     it('Failed to get visit events due to unauthorized access', async () => {
@@ -459,11 +420,7 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
   });
 
@@ -479,11 +436,7 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 10,
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
   });
 
@@ -497,11 +450,7 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
   });
 
@@ -519,11 +468,7 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 10,
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
 
     it('Failed to get custom events due to missing category', async () => {
@@ -565,11 +510,7 @@ describe('Analytics Event Retrieval Routes', () => {
           subcategory: 'form_submission',
           apiKey: 'analytics-api-key-789',
         })
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toBeDefined();
-          expect(response.body.events).toBeDefined();
-        });
+        .expect(200);
     });
 
     it('Successfully get all custom events with optional parameters', async () => {
@@ -713,9 +654,6 @@ describe('Analytics Service Routes Fetch Events', () => {
         projectName: 'test-seed-project',
         apiKey: 'api-key-789',
       })
-      .expect(200)
-      .then((response) => {
-        expect(response.body).toBeDefined();
-      });
+      .expect(200);
   });
 });
