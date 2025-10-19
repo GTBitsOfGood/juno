@@ -20,8 +20,10 @@ import {
   JUNO_JWT_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/jwt';
 
-const { ANALYTICS_CONFIG_DB_SERVICE_NAME, JUNO_ANALYTICS_SERVICE_ANALYTICS_CONFIG_PACKAGE_NAME } =
-  AnalyticsConfigProto;
+const {
+  ANALYTICS_CONFIG_DB_SERVICE_NAME,
+  JUNO_ANALYTICS_SERVICE_ANALYTICS_CONFIG_PACKAGE_NAME,
+} = AnalyticsConfigProto;
 
 @Module({
   imports: [

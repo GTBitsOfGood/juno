@@ -17,9 +17,8 @@ export class AnalyticsConfigDbController
   async createAnalyticsConfig(
     request: AnalyticsConfigProto.CreateConfigRequest,
   ): Promise<AnalyticsConfigProto.AnalyticsServiceConfig> {
-    const config = await this.analyticsConfigService.createAnalyticsConfig(
-      request,
-    );
+    const config =
+      await this.analyticsConfigService.createAnalyticsConfig(request);
 
     return {
       id: config.id,
@@ -31,9 +30,8 @@ export class AnalyticsConfigDbController
   async readAnalyticsConfig(
     request: AnalyticsConfigProto.ReadConfigRequest,
   ): Promise<AnalyticsConfigProto.AnalyticsServiceConfig> {
-    const config = await this.analyticsConfigService.readAnalyticsConfig(
-      request,
-    );
+    const config =
+      await this.analyticsConfigService.readAnalyticsConfig(request);
 
     if (!config) {
       throw new RpcException({
@@ -90,9 +88,8 @@ export class AnalyticsConfigDbController
     request: AnalyticsConfigProto.DeleteConfigRequest,
   ): Promise<AnalyticsConfigProto.AnalyticsServiceConfig> {
     try {
-      const config = await this.analyticsConfigService.deleteAnalyticsConfig(
-        request,
-      );
+      const config =
+        await this.analyticsConfigService.deleteAnalyticsConfig(request);
 
       return {
         id: config.id,

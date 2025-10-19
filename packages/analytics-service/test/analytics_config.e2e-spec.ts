@@ -12,9 +12,13 @@ describe('AnalyticsConfigService (e2e)', () => {
         {
           provide: AnalyticsConfigService,
           useValue: {
-            getAnalyticsKey: jest.fn().mockImplementation(async (projectId: number, environment: string) => {
-              return 'test-key';
-            }),
+            getAnalyticsKey: jest
+              .fn()
+              .mockImplementation(
+                async (projectId: number, environment: string) => {
+                  return 'test-key';
+                },
+              ),
           },
         },
       ],
@@ -22,7 +26,7 @@ describe('AnalyticsConfigService (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-    
+
     service = moduleFixture.get<AnalyticsConfigService>(AnalyticsConfigService);
   });
 
@@ -48,7 +52,10 @@ describe('AnalyticsConfigService (e2e)', () => {
         const result = await service.getAnalyticsKey(projectId, environment);
 
         expect(result).toBe('test-key');
-        expect(service.getAnalyticsKey).toHaveBeenCalledWith(projectId, environment);
+        expect(service.getAnalyticsKey).toHaveBeenCalledWith(
+          projectId,
+          environment,
+        );
       });
     });
   });

@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { AnalyticsConfigProto } from 'juno-proto';
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
+import { ResetProtoFile } from 'juno-proto';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -31,36 +33,24 @@ describe('Analytics Config Routes (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .overrideProvider(AnalyticsConfigProto.ANALYTICS_CONFIG_DB_SERVICE_NAME)
-      .useValue({
-        getService: jest.fn().mockReturnValue({
-          createAnalyticsConfig: jest.fn().mockResolvedValue({
-            id: 1,
-            environment: 'prod',
-            analyticsKey: 'test-key',
-          }),
-          readAnalyticsConfig: jest.fn().mockResolvedValue({
-            id: 1,
-            environment: 'prod',
-            analyticsKey: 'test-key',
-          }),
-          updateAnalyticsConfig: jest.fn().mockResolvedValue({
-            id: 1,
-            environment: 'prod',
-            analyticsKey: 'updated-key',
-          }),
-          deleteAnalyticsConfig: jest.fn().mockResolvedValue({
-            id: 1,
-            environment: 'prod',
-            analyticsKey: 'test-key',
-          }),
-        }),
-      })
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
+
+    // Reset database to ensure seeded data is available
+    const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+    const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+    await new Promise((resolve, reject) => {
+      resetClient.resetDb({}, (err: any) => {
+        if (err) return reject(err);
+        resolve(0);
+      });
+    });
 
     apiKey = await createAPIKeyForProjectName('test-seed-project');
   });
@@ -192,7 +182,10 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('id', '0');
-          expect(res.body).toHaveProperty('analyticsKey', 'updated-analytics-key');
+          expect(res.body).toHaveProperty(
+            'analyticsKey',
+            'updated-analytics-key',
+          );
         });
     });
 

@@ -21,7 +21,10 @@ export class AnalyticsConfigService implements OnModuleInit {
       );
   }
 
-  async getAnalyticsKey(projectId: number, environment: string): Promise<string> {
+  async getAnalyticsKey(
+    projectId: number,
+    environment: string,
+  ): Promise<string> {
     const config = await lastValueFrom(
       this.analyticsConfigDbService.readAnalyticsConfig({
         id: projectId,

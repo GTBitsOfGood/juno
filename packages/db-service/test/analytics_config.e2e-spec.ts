@@ -37,22 +37,11 @@ async function initApp() {
 
   await app.init();
   await app.listen();
-  
+
   // Get PrismaService for direct database operations
   prismaService = moduleFixture.get<PrismaService>(PrismaService);
-  
-  return app;
-}
 
-async function cleanupAnalyticsConfigs() {
-  // Direct database cleanup using Prisma
-  console.log('Cleaning up analytics configs...');
-  const deleted = await prismaService.analyticsServiceConfig.deleteMany({
-    where: {
-      id: 0,
-    },
-  });
-  console.log(`Deleted ${deleted.count} analytics configs`);
+  return app;
 }
 
 beforeAll(async () => {
@@ -112,8 +101,8 @@ describe('Analytics Config Tests', () => {
   });
 
   it('creates a new analytics config', async () => {
-    const response: AnalyticsConfigProto.AnalyticsServiceConfig = await new Promise(
-      (resolve, reject) => {
+    const response: AnalyticsConfigProto.AnalyticsServiceConfig =
+      await new Promise((resolve, reject) => {
         configClient.createAnalyticsConfig(
           {
             projectId: 0,
@@ -129,8 +118,7 @@ describe('Analytics Config Tests', () => {
             }
           },
         );
-      },
-    );
+      });
 
     expect(response).toHaveProperty('id');
     expect(response.environment).toBe('test-env');
@@ -138,8 +126,8 @@ describe('Analytics Config Tests', () => {
   });
 
   it('creates a duplicate analytics config', async () => {
-    const response: AnalyticsConfigProto.AnalyticsServiceConfig = await new Promise(
-      (resolve, reject) => {
+    const response: AnalyticsConfigProto.AnalyticsServiceConfig =
+      await new Promise((resolve, reject) => {
         configClient.createAnalyticsConfig(
           {
             projectId: 0,
@@ -154,8 +142,7 @@ describe('Analytics Config Tests', () => {
             }
           },
         );
-      },
-    );
+      });
     expect(response).toHaveProperty('id');
     expect(response.environment).toBe('prod');
     expect(response.analyticsKey).toBe('prod-analytics-key');
@@ -163,8 +150,8 @@ describe('Analytics Config Tests', () => {
 
   it('reads an analytics config', async () => {
     await tryCreateConfig(configClient);
-    const readResponse: AnalyticsConfigProto.AnalyticsServiceConfig = await new Promise(
-      (resolve, reject) => {
+    const readResponse: AnalyticsConfigProto.AnalyticsServiceConfig =
+      await new Promise((resolve, reject) => {
         configClient.readAnalyticsConfig(
           { id: createdConfigId, environment: 'test-env' },
           (err, res) => {
@@ -175,8 +162,7 @@ describe('Analytics Config Tests', () => {
             }
           },
         );
-      },
-    );
+      });
 
     expect(readResponse).toHaveProperty('id', createdConfigId);
     expect(readResponse.environment).toBe('test-env');
@@ -198,22 +184,23 @@ describe('Analytics Config Tests', () => {
 
   it('updates an analytics config', async () => {
     await tryCreateConfig(configClient);
-    const updateResponse: AnalyticsConfigProto.AnalyticsServiceConfig = await new Promise((resolve, reject) => {
-      configClient.updateAnalyticsConfig(
-        {
-          id: createdConfigId,
-          environment: 'test-env',
-          analyticsKey: 'updated-analytics-key',
-        },
-        (err, res) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(res);
-          }
-        },
-      );
-    });
+    const updateResponse: AnalyticsConfigProto.AnalyticsServiceConfig =
+      await new Promise((resolve, reject) => {
+        configClient.updateAnalyticsConfig(
+          {
+            id: createdConfigId,
+            environment: 'test-env',
+            analyticsKey: 'updated-analytics-key',
+          },
+          (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          },
+        );
+      });
 
     expect(updateResponse).toHaveProperty('id', createdConfigId);
     expect(updateResponse.analyticsKey).toBe('updated-analytics-key');
@@ -238,18 +225,19 @@ describe('Analytics Config Tests', () => {
 
   it('deletes an analytics config', async () => {
     await tryCreateConfig(configClient);
-    const deleteResponse: AnalyticsConfigProto.AnalyticsServiceConfig = await new Promise((resolve, reject) => {
-      configClient.deleteAnalyticsConfig(
-        { id: createdConfigId, environment: 'test-env' },
-        (err, res) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(res);
-          }
-        },
-      );
-    });
+    const deleteResponse: AnalyticsConfigProto.AnalyticsServiceConfig =
+      await new Promise((resolve, reject) => {
+        configClient.deleteAnalyticsConfig(
+          { id: createdConfigId, environment: 'test-env' },
+          (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          },
+        );
+      });
 
     expect(deleteResponse).toHaveProperty('id', createdConfigId);
   });

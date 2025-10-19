@@ -7,7 +7,12 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AnalyticsConfigModule } from './modules/analytics_config/analytics_config.module';
 
 @Module({
-  imports: [SentryModule.forRoot(), HealthModule, AnalyticsModule, AnalyticsConfigModule],
+  imports: [
+    SentryModule.forRoot(),
+    HealthModule,
+    AnalyticsModule,
+    AnalyticsConfigModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
