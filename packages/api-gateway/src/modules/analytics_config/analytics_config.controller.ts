@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Body,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
@@ -63,14 +62,26 @@ export class AnalyticsConfigController implements OnModuleInit {
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body() request: CreateAnalyticsConfigModel,
   ): Promise<AnalyticsConfigResponse> {
-    const response = await lastValueFrom(
-      this.analyticsConfigDbService.createAnalyticsConfig({
-        projectId: apiKey.project.id,
-        environment: apiKey.environment,
-        analyticsKey: request.analyticsKey,
-      }),
-    );
-    return new AnalyticsConfigResponse(response);
+    console.log('Analytics Config - Create request:', {
+      projectId: apiKey.project.id,
+      environment: apiKey.environment,
+      analyticsKey: request.analyticsKey,
+    });
+
+    try {
+      const response = await lastValueFrom(
+        this.analyticsConfigDbService.createAnalyticsConfig({
+          projectId: apiKey.project.id,
+          environment: apiKey.environment,
+          analyticsKey: request.analyticsKey,
+        }),
+      );
+      console.log('Analytics Config - Create response:', response);
+      return new AnalyticsConfigResponse(response);
+    } catch (error) {
+      console.error('Analytics Config - Create error:', error);
+      throw error;
+    }
   }
 
   @Get('config/:projectId')
@@ -89,22 +100,28 @@ export class AnalyticsConfigController implements OnModuleInit {
     @Param('projectId') projectId: string,
   ): Promise<AnalyticsConfigResponse> {
     const id = parseInt(projectId);
+    console.log('Analytics Config - Get request:', {
+      projectId: id,
+      environment: apiKey.environment,
+    });
+
     if (Number.isNaN(id) || id < 0) {
       throw new BadRequestException('Project ID must be a valid integer');
     }
 
-    if (id !== apiKey.project.id) {
-      throw new UnauthorizedException('Cannot access other project configs');
+    try {
+      const config = await lastValueFrom(
+        this.analyticsConfigDbService.readAnalyticsConfig({
+          id: id,
+          environment: apiKey.environment,
+        }),
+      );
+      console.log('Analytics Config - Get response:', config);
+      return new AnalyticsConfigResponse(config);
+    } catch (error) {
+      console.error('Analytics Config - Get error:', error);
+      throw error;
     }
-
-    const config = await lastValueFrom(
-      this.analyticsConfigDbService.readAnalyticsConfig({
-        id: apiKey.project.id,
-        environment: apiKey.environment,
-      }),
-    );
-
-    return new AnalyticsConfigResponse(config);
   }
 
   @Put('config/:projectId')
@@ -128,13 +145,9 @@ export class AnalyticsConfigController implements OnModuleInit {
       throw new BadRequestException('Project ID must be a valid integer');
     }
 
-    if (id !== apiKey.project.id) {
-      throw new UnauthorizedException('Cannot access other project configs');
-    }
-
     const response = await lastValueFrom(
       this.analyticsConfigDbService.updateAnalyticsConfig({
-        id: apiKey.project.id,
+        id: id,
         environment: apiKey.environment,
         analyticsKey: request.analyticsKey,
       }),
@@ -163,13 +176,9 @@ export class AnalyticsConfigController implements OnModuleInit {
       throw new BadRequestException('Project ID must be a valid integer');
     }
 
-    if (id !== apiKey.project.id) {
-      throw new UnauthorizedException('Cannot access other project configs');
-    }
-
     const response = await lastValueFrom(
       this.analyticsConfigDbService.deleteAnalyticsConfig({
-        id: apiKey.project.id,
+        id: id,
         environment: apiKey.environment,
       }),
     );

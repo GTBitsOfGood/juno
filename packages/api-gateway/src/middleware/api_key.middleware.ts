@@ -34,17 +34,30 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
   }
 
   async use(req: ApiKeyReq, res: Response, next: NextFunction) {
+    console.log('ApiKeyMiddleware - Processing request:', req.path);
+    console.log(
+      'ApiKeyMiddleware - Authorization header:',
+      req.headers.authorization,
+    );
+
     if (
       req.headers.authorization === undefined ||
       req.headers.authorization.length === 0
     ) {
+      console.log('ApiKeyMiddleware - No authorization headers');
       throw new UnauthorizedException('No authorization headers');
     }
 
     const token = this.extractTokenFromHeader(req);
     if (!token) {
+      console.log('ApiKeyMiddleware - No bearer token found');
       throw new UnauthorizedException('Bearer token not found');
     }
+
+    console.log(
+      'ApiKeyMiddleware - Extracted token:',
+      token.substring(0, 10) + '...',
+    );
 
     // Try API key validation first
     try {
@@ -52,9 +65,14 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
         apiKey: token,
       });
       const res = await lastValueFrom(apiKeyValidation);
+      console.log('ApiKeyMiddleware - API key validation success:', res.key);
       req.apiKey = res.key;
       next();
     } catch (error) {
+      console.log(
+        'ApiKeyMiddleware - API key validation failed, trying JWT:',
+        error.message,
+      );
       // API key validation failed, try JWT validation
       try {
         const jwtValidation = this.jwtService.validateApiKeyJwt({ jwt: token });
@@ -64,9 +82,17 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
           throw new UnauthorizedException('Invalid JWT token');
         }
 
+        console.log(
+          'ApiKeyMiddleware - JWT validation success:',
+          jwtRes.apiKey,
+        );
         req.apiKey = jwtRes.apiKey;
         next();
       } catch (error) {
+        console.error(
+          'ApiKeyMiddleware - Both API key and JWT validation failed:',
+          error,
+        );
         throw new UnauthorizedException('Invalid authentication token');
       }
     }

@@ -1,4 +1,5 @@
 import { IsString, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateAnalyticsConfigModel {
   @IsString()
@@ -12,7 +13,8 @@ export class UpdateAnalyticsConfigModel {
 }
 
 export class AnalyticsConfigResponse {
-  id: string;
+  @Transform(({ value }) => Number(value))
+  id: number;
   environment: string;
   analyticsKey: string;
 

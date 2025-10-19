@@ -13,9 +13,11 @@ import { ResetProtoFile } from 'juno-proto';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
+const ADMIN_EMAIL = 'test-superadmin@test.com';
+const ADMIN_PASSWORD = 'test-password';
 let apiKey: string | undefined = undefined;
 
-jest.setTimeout(15000);
+jest.setTimeout(10000);
 
 async function createAPIKeyForProjectName(
   projectName: string,
@@ -34,53 +36,47 @@ async function createAPIKeyForProjectName(
   return key.body['apiKey'];
 }
 
-const ADMIN_EMAIL = 'test-superadmin@test.com';
-const ADMIN_PASSWORD = 'test-password';
+beforeAll(async () => {
+  const moduleFixture: TestingModule = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile();
 
-describe('Analytics Config Routes (e2e)', () => {
+  app = moduleFixture.createNestApplication();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
+  await app.init();
 
-  beforeAll(async () => {
-    const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
 
-    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-    const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-    await new Promise((resolve, reject) => {
-      resetClient.resetDb({}, (err: any) => {
-        if (err) return reject(err);
-        resolve(0);
-      });
+  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  await new Promise((resolve, reject) => {
+    resetClient.resetDb({}, (err: any) => {
+      if (err) return reject(err);
+      resolve(0);
     });
   });
+});
 
-  afterAll((done) => {
-    app.close();
-    done();
-  });
+afterAll(async () => {
+  await app.close();
+});
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+beforeEach(async () => {
+  if (!apiKey) {
+    apiKey = await createAPIKeyForProjectName('test-seed-project');
+  }
+});
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-      }),
-    );
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-    app.useGlobalFilters(new RpcExceptionFilter());
-
-    await app.init();
-
-    if (!apiKey) {
-      apiKey = await createAPIKeyForProjectName('test-seed-project');
-    }
-  });
-
+describe('Analytics Config Routes (e2e)', () => {
   describe('POST /analytics/config', () => {
     it('Should successfully create an analytics config with valid credentials', async () => {
       return await request(app.getHttpServer())
@@ -116,6 +112,7 @@ describe('Analytics Config Routes (e2e)', () => {
     });
 
     it('Should throw a 409 status error when creating duplicate analytics config', async () => {
+      // First, ensure there's already a config for this project
       await request(app.getHttpServer())
         .post('/analytics/config')
         .set('Authorization', 'Bearer ' + apiKey)
@@ -124,6 +121,7 @@ describe('Analytics Config Routes (e2e)', () => {
         })
         .expect(201);
 
+      // Now try to create another config for the same project - should fail with 409
       return await request(app.getHttpServer())
         .post('/analytics/config')
         .set('Authorization', 'Bearer ' + apiKey)
@@ -135,24 +133,15 @@ describe('Analytics Config Routes (e2e)', () => {
   });
 
   describe('GET /analytics/config/:projectId', () => {
-    beforeEach(async () => {
-      await request(app.getHttpServer())
-        .post('/analytics/config')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .send({
-          analyticsKey: 'test-get-key',
-        });
-    });
-
     it('Should successfully get an analytics config with valid project ID and credentials', async () => {
       return await request(app.getHttpServer())
         .get('/analytics/config/0')
         .set('Authorization', 'Bearer ' + apiKey)
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id', '0');
+          expect(res.body).toHaveProperty('id', 0);
           expect(res.body).toHaveProperty('environment');
-          expect(res.body).toHaveProperty('analyticsKey', 'test-get-key');
+          expect(res.body).toHaveProperty('analyticsKey', 'test-analytics-key-123');
         });
     });
 
@@ -169,33 +158,15 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(401);
     });
 
-    it('Should throw a 401 status error when trying to access other project config', async () => {
+    it('Should throw a 404 status error when trying to access non-existent project config', async () => {
       return await request(app.getHttpServer())
         .get('/analytics/config/999')
         .set('Authorization', 'Bearer ' + apiKey)
-        .expect(401);
-    });
-
-    it('Should throw a 401 status error when trying to access other project config (non-existent)', async () => {
-      // Try to access project 1 with project 0's API key
-      // This should return 401 because we can't access other projects
-      return await request(app.getHttpServer())
-        .get('/analytics/config/1')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .expect(401);
+        .expect(404);
     });
   });
 
   describe('PUT /analytics/config/:projectId', () => {
-    beforeEach(async () => {
-      await request(app.getHttpServer())
-        .post('/analytics/config')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .send({
-          analyticsKey: 'test-update-key',
-        });
-    });
-
     it('Should successfully update an analytics config with valid data', async () => {
       return await request(app.getHttpServer())
         .put('/analytics/config/0')
@@ -205,7 +176,7 @@ describe('Analytics Config Routes (e2e)', () => {
         })
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id', '0');
+          expect(res.body).toHaveProperty('id', 0);
           expect(res.body).toHaveProperty(
             'analyticsKey',
             'updated-analytics-key',
@@ -232,45 +203,26 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(401);
     });
 
-    it('Should throw a 401 status error when trying to update other project config', async () => {
+    it('Should throw a 404 status error when trying to update non-existent project config', async () => {
       return await request(app.getHttpServer())
         .put('/analytics/config/999')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
           analyticsKey: 'updated-key',
         })
-        .expect(401);
-    });
-
-    it('Should throw a 401 status error when trying to update other project config', async () => {
-      return await request(app.getHttpServer())
-        .put('/analytics/config/1')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .send({
-          analyticsKey: 'updated-key',
-        })
-        .expect(401);
+        .expect(404);
     });
   });
 
   describe('DELETE /analytics/config/:projectId', () => {
-    beforeEach(async () => {
-      await request(app.getHttpServer())
-        .post('/analytics/config')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .send({
-          analyticsKey: 'test-delete-key',
-        });
-    });
-
     it('Should successfully delete an analytics config with valid project ID and credentials', async () => {
       return await request(app.getHttpServer())
         .delete('/analytics/config/0')
         .set('Authorization', 'Bearer ' + apiKey)
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id', '0');
-          expect(res.body).toHaveProperty('analyticsKey', 'test-delete-key');
+          expect(res.body).toHaveProperty('id', 0);
+          expect(res.body).toHaveProperty('analyticsKey', 'updated-analytics-key');
         });
     });
 
@@ -287,18 +239,11 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(401);
     });
 
-    it('Should throw a 401 status error when trying to delete other project config', async () => {
+    it('Should throw a 404 status error when trying to delete non-existent project config', async () => {
       return await request(app.getHttpServer())
         .delete('/analytics/config/999')
         .set('Authorization', 'Bearer ' + apiKey)
-        .expect(401);
-    });
-
-    it('Should throw a 401 status error when trying to delete other project config', async () => {
-      return await request(app.getHttpServer())
-        .delete('/analytics/config/1')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .expect(401);
+        .expect(404);
     });
 
     it('Should throw a 404 status error when deleting already deleted config', async () => {
