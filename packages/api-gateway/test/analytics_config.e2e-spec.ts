@@ -112,21 +112,12 @@ describe('Analytics Config Routes (e2e)', () => {
     });
 
     it('Should throw a 409 status error when creating duplicate analytics config', async () => {
-      // First, ensure there's already a config for this project
-      await request(app.getHttpServer())
-        .post('/analytics/config')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .send({
-          analyticsKey: 'duplicate-test-key',
-        })
-        .expect(201);
-
-      // Now try to create another config for the same project - should fail with 409
+      // Try to create a config for the same project - should fail with 409 since one already exists
       return await request(app.getHttpServer())
         .post('/analytics/config')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
-          analyticsKey: 'duplicate-test-key-2',
+          analyticsKey: 'duplicate-test-key',
         })
         .expect(409);
     });
@@ -141,7 +132,10 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect((res) => {
           expect(res.body).toHaveProperty('id', 0);
           expect(res.body).toHaveProperty('environment');
-          expect(res.body).toHaveProperty('analyticsKey', 'test-analytics-key-123');
+          expect(res.body).toHaveProperty(
+            'analyticsKey',
+            'test-analytics-key-123',
+          );
         });
     });
 
@@ -222,7 +216,10 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('id', 0);
-          expect(res.body).toHaveProperty('analyticsKey', 'updated-analytics-key');
+          expect(res.body).toHaveProperty(
+            'analyticsKey',
+            'updated-analytics-key',
+          );
         });
     });
 
@@ -247,11 +244,7 @@ describe('Analytics Config Routes (e2e)', () => {
     });
 
     it('Should throw a 404 status error when deleting already deleted config', async () => {
-      await request(app.getHttpServer())
-        .delete('/analytics/config/0')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .expect(200);
-
+      // Try to delete a config that doesn't exist - should fail with 404
       return await request(app.getHttpServer())
         .delete('/analytics/config/0')
         .set('Authorization', 'Bearer ' + apiKey)
