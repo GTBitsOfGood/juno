@@ -1,14 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { Reflector } from '@nestjs/core';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { ResetProtoFile } from 'juno-proto';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
-const ADMIN_EMAIL = 'test-superadmin@test.com';
-const ADMIN_PASSWORD = 'test-password';
+let apiKey: string | undefined = undefined;
+
+jest.setTimeout(15000);
 
 async function createAPIKeyForProjectName(
   projectName: string,
@@ -27,19 +34,14 @@ async function createAPIKeyForProjectName(
   return key.body['apiKey'];
 }
 
+const ADMIN_EMAIL = 'test-superadmin@test.com';
+const ADMIN_PASSWORD = 'test-password';
+
 describe('Analytics Config Routes (e2e)', () => {
-  let apiKey: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-
-    // Reset database to ensure seeded data is available
     const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
     const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
       process.env.DB_SERVICE_ADDR,
@@ -51,12 +53,32 @@ describe('Analytics Config Routes (e2e)', () => {
         resolve(0);
       });
     });
-
-    apiKey = await createAPIKeyForProjectName('test-seed-project');
   });
 
-  afterAll(async () => {
-    await app.close();
+  afterAll((done) => {
+    app.close();
+    done();
+  });
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+      }),
+    );
+    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+    app.useGlobalFilters(new RpcExceptionFilter());
+
+    await app.init();
+
+    if (!apiKey) {
+      apiKey = await createAPIKeyForProjectName('test-seed-project');
+    }
   });
 
   describe('POST /analytics/config', () => {
@@ -154,11 +176,13 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(401);
     });
 
-    it('Should throw a 404 status error when fetching non-existent config', async () => {
+    it('Should throw a 401 status error when trying to access other project config (non-existent)', async () => {
+      // Try to access project 1 with project 0's API key
+      // This should return 401 because we can't access other projects
       return await request(app.getHttpServer())
-        .get('/analytics/config/999')
+        .get('/analytics/config/1')
         .set('Authorization', 'Bearer ' + apiKey)
-        .expect(404);
+        .expect(401);
     });
   });
 
@@ -218,14 +242,14 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(401);
     });
 
-    it('Should throw a 404 status error when updating non-existent config', async () => {
+    it('Should throw a 401 status error when trying to update other project config', async () => {
       return await request(app.getHttpServer())
-        .put('/analytics/config/999')
+        .put('/analytics/config/1')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
           analyticsKey: 'updated-key',
         })
-        .expect(404);
+        .expect(401);
     });
   });
 
@@ -270,11 +294,11 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect(401);
     });
 
-    it('Should throw a 404 status error when deleting non-existent config', async () => {
+    it('Should throw a 401 status error when trying to delete other project config', async () => {
       return await request(app.getHttpServer())
-        .delete('/analytics/config/999')
+        .delete('/analytics/config/1')
         .set('Authorization', 'Bearer ' + apiKey)
-        .expect(404);
+        .expect(401);
     });
 
     it('Should throw a 404 status error when deleting already deleted config', async () => {

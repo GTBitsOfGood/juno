@@ -10,11 +10,9 @@ import {
   ResetProtoFile,
 } from 'juno-proto';
 import { AppModule } from '../src/app.module';
-import { PrismaService } from '../src/prisma.service';
 
 let app: INestMicroservice;
 let createdConfigId: number;
-let prismaService: PrismaService;
 
 jest.setTimeout(15000);
 
@@ -37,9 +35,6 @@ async function initApp() {
 
   await app.init();
   await app.listen();
-
-  // Get PrismaService for direct database operations
-  prismaService = moduleFixture.get<PrismaService>(PrismaService);
 
   return app;
 }

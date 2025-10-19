@@ -12,13 +12,9 @@ describe('AnalyticsConfigService (e2e)', () => {
         {
           provide: AnalyticsConfigService,
           useValue: {
-            getAnalyticsKey: jest
-              .fn()
-              .mockImplementation(
-                async (projectId: number, environment: string) => {
-                  return 'test-key';
-                },
-              ),
+            getAnalyticsKey: jest.fn().mockImplementation(async () => {
+              return 'test-key';
+            }),
           },
         },
       ],
