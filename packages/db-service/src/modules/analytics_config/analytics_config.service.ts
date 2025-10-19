@@ -12,13 +12,9 @@ export class AnalyticsConfigService {
   ): Promise<AnalyticsServiceConfig> {
     return await this.prisma.analyticsServiceConfig.create({
       data: {
+        id: Number(configData.projectId),
         environment: configData.environment,
         analyticsKey: configData.analyticsKey,
-        Project: {
-          connect: {
-            id: Number(configData.projectId),
-          },
-        },
       },
       include: {
         Project: true,

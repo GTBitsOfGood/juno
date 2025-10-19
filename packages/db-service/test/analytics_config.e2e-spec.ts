@@ -87,7 +87,7 @@ function tryCreateConfig(configClient: any) {
   return new Promise<void>((resolve) => {
     configClient.createAnalyticsConfig(
       {
-        projectId: 3,
+        projectId: 0,
         environment: 'test-env',
         analyticsKey: 'test-analytics-key',
       },
@@ -116,7 +116,7 @@ describe('Analytics Config Tests', () => {
       (resolve, reject) => {
         configClient.createAnalyticsConfig(
           {
-            projectId: 1,
+            projectId: 0,
             environment: 'test-env',
             analyticsKey: 'test-analytics-key',
           },
@@ -142,7 +142,7 @@ describe('Analytics Config Tests', () => {
       (resolve, reject) => {
         configClient.createAnalyticsConfig(
           {
-            projectId: 2,
+            projectId: 0,
             environment: 'prod',
             analyticsKey: 'prod-analytics-key',
           },

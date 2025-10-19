@@ -72,7 +72,7 @@ export class AnalyticsConfigDbController
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2001'
+        e.code === 'P2025'
       ) {
         throw new RpcException({
           code: status.NOT_FOUND,
@@ -102,7 +102,7 @@ export class AnalyticsConfigDbController
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
-        e.code === 'P2001'
+        e.code === 'P2025'
       ) {
         throw new RpcException({
           code: status.NOT_FOUND,
