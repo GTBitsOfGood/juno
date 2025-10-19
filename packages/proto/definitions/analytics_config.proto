@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package juno.analytics_service.analytics_config;
+
+service AnalyticsConfigDbService {
+    rpc createAnalyticsConfig(CreateConfigRequest) returns (AnalyticsServiceConfig);
+    rpc readAnalyticsConfig(ReadConfigRequest) returns (AnalyticsServiceConfig);
+    rpc updateAnalyticsConfig(UpdateConfigRequest) returns (AnalyticsServiceConfig);
+    rpc deleteAnalyticsConfig(DeleteConfigRequest) returns (AnalyticsServiceConfig);
+}
+
+message CreateConfigRequest {
+    int64 projectId = 1;
+    string environment = 2;
+    string analyticsKey = 3;
+}
+
+message ReadConfigRequest {
+    int64 id = 1;
+    string environment = 2;
+}
+
+message UpdateConfigRequest {
+    int64 id = 1;
+    string environment = 2;
+    optional string analyticsKey = 3;
+}
+
+message DeleteConfigRequest {
+    int64 id = 1;
+    string environment = 2;
+}
+
+message AnalyticsServiceConfig {
+    int64 id = 1;
+    string environment = 2;
+    string analyticsKey = 3;
+}
+
