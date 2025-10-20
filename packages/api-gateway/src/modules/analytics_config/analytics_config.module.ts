@@ -64,6 +64,6 @@ const {
 })
 export class AnalyticsConfigModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ApiKeyMiddleware).forRoutes('analytics/*');
+    consumer.apply(ApiKeyMiddleware).forRoutes('analytics/config*');
   }
 }

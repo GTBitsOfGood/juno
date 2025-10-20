@@ -17,20 +17,16 @@ export class AnalyticsConfigDbController
   async createAnalyticsConfig(
     request: AnalyticsConfigProto.CreateConfigRequest,
   ): Promise<AnalyticsConfigProto.AnalyticsServiceConfig> {
-    console.log('DB Service - Create Analytics Config request:', request);
-
     try {
       const config =
         await this.analyticsConfigService.createAnalyticsConfig(request);
 
-      console.log('DB Service - Create Analytics Config success:', config);
       return {
         id: config.id,
         environment: config.environment,
         analyticsKey: config.analyticsKey,
       };
     } catch (e) {
-      console.error('DB Service - Create Analytics Config error:', e);
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === 'P2002'
@@ -50,13 +46,9 @@ export class AnalyticsConfigDbController
   async readAnalyticsConfig(
     request: AnalyticsConfigProto.ReadConfigRequest,
   ): Promise<AnalyticsConfigProto.AnalyticsServiceConfig> {
-    console.log('DB Service - Read Analytics Config request:', request);
-
     try {
       const config =
         await this.analyticsConfigService.readAnalyticsConfig(request);
-
-      console.log('DB Service - Read Analytics Config success:', config);
 
       if (!config) {
         throw new RpcException({
@@ -71,7 +63,6 @@ export class AnalyticsConfigDbController
         analyticsKey: config.analyticsKey,
       };
     } catch (error) {
-      console.error('DB Service - Read Analytics Config error:', error);
       throw error;
     }
   }

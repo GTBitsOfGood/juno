@@ -5,6 +5,7 @@ import { BogAnalyticsService } from 'src/bog-analytics.service';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
 import { EventEnvironment } from 'bog-analytics';
+import { AnalyticsConfigModule } from '../analytics_config/analytics_config.module';
 
 const {
   ANALYTICS_SERVICE_NAME,
@@ -23,6 +24,7 @@ const {
         },
       },
     ]),
+    AnalyticsConfigModule,
   ],
   controllers: [AnalyticsController],
   providers: [

@@ -34,7 +34,7 @@ const { ANALYTICS_CONFIG_DB_SERVICE_NAME } = AnalyticsConfigProto;
 
 @ApiBearerAuth('API_Key')
 @ApiTags('analytics_config')
-@Controller('analytics')
+@Controller('analytics/config')
 export class AnalyticsConfigController implements OnModuleInit {
   private analyticsConfigDbService: AnalyticsConfigProto.AnalyticsConfigDbServiceClient;
 
@@ -50,7 +50,7 @@ export class AnalyticsConfigController implements OnModuleInit {
       );
   }
 
-  @Post('config')
+  @Post()
   @ApiOperation({ summary: 'Create analytics configuration' })
   @ApiCreatedResponse({
     description: 'Analytics configuration created successfully',
@@ -62,29 +62,17 @@ export class AnalyticsConfigController implements OnModuleInit {
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Body() request: CreateAnalyticsConfigModel,
   ): Promise<AnalyticsConfigResponse> {
-    console.log('Analytics Config - Create request:', {
-      projectId: apiKey.project.id,
-      environment: apiKey.environment,
-      analyticsKey: request.analyticsKey,
-    });
-
-    try {
-      const response = await lastValueFrom(
-        this.analyticsConfigDbService.createAnalyticsConfig({
-          projectId: apiKey.project.id,
-          environment: apiKey.environment,
-          analyticsKey: request.analyticsKey,
-        }),
-      );
-      console.log('Analytics Config - Create response:', response);
-      return new AnalyticsConfigResponse(response);
-    } catch (error) {
-      console.error('Analytics Config - Create error:', error);
-      throw error;
-    }
+    const response = await lastValueFrom(
+      this.analyticsConfigDbService.createAnalyticsConfig({
+        projectId: apiKey.project.id,
+        environment: apiKey.environment,
+        analyticsKey: request.analyticsKey,
+      }),
+    );
+    return new AnalyticsConfigResponse(response);
   }
 
-  @Get('config/:projectId')
+  @Get(':projectId')
   @ApiOperation({ summary: 'Get analytics configuration' })
   @ApiOkResponse({
     description: 'Analytics configuration retrieved successfully',
@@ -100,31 +88,21 @@ export class AnalyticsConfigController implements OnModuleInit {
     @Param('projectId') projectId: string,
   ): Promise<AnalyticsConfigResponse> {
     const id = parseInt(projectId);
-    console.log('Analytics Config - Get request:', {
-      projectId: id,
-      environment: apiKey.environment,
-    });
-
+    
     if (Number.isNaN(id) || id < 0) {
       throw new BadRequestException('Project ID must be a valid integer');
     }
 
-    try {
-      const config = await lastValueFrom(
-        this.analyticsConfigDbService.readAnalyticsConfig({
-          id: id,
-          environment: apiKey.environment,
-        }),
-      );
-      console.log('Analytics Config - Get response:', config);
-      return new AnalyticsConfigResponse(config);
-    } catch (error) {
-      console.error('Analytics Config - Get error:', error);
-      throw error;
-    }
+    const config = await lastValueFrom(
+      this.analyticsConfigDbService.readAnalyticsConfig({
+        id: id,
+        environment: apiKey.environment,
+      }),
+    );
+    return new AnalyticsConfigResponse(config);
   }
 
-  @Put('config/:projectId')
+  @Put(':projectId')
   @ApiOperation({ summary: 'Update analytics configuration' })
   @ApiOkResponse({
     description: 'Analytics configuration updated successfully',
@@ -156,7 +134,7 @@ export class AnalyticsConfigController implements OnModuleInit {
     return new AnalyticsConfigResponse(response);
   }
 
-  @Delete('config/:projectId')
+  @Delete(':projectId')
   @ApiOperation({ summary: 'Delete analytics configuration' })
   @ApiOkResponse({
     description: 'Analytics configuration deleted successfully',

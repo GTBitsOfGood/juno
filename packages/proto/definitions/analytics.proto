@@ -15,7 +15,8 @@ message ClickEventRequest {
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    string api_key = 3; // API key for authenticating the request
+    int64 project_id = 3;  // Project ID for analytics config lookup
+    string environment = 4; // Environment for analytics config lookup
 }
 
 // Visit Event Request - matches bog-analytics VisitEventProperties  
@@ -24,7 +25,8 @@ message VisitEventRequest {
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    string api_key = 3; // API key for authenticating the request
+    int64 project_id = 3;  // Project ID for analytics config lookup
+    string environment = 4; // Environment for analytics config lookup
 }
 
 // Input Event Request - matches bog-analytics InputEventProperties
@@ -34,7 +36,8 @@ message InputEventRequest {
     string text_value = 3;  // textValue in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    string api_key = 4; // API key for authenticating the request
+    int64 project_id = 4;  // Project ID for analytics config lookup
+    string environment = 5; // Environment for analytics config lookup
 }
 
 // Custom Event Request - matches bog-analytics logCustomEvent parameters
@@ -44,7 +47,8 @@ message CustomEventRequest {
     map<string, string> properties = 3; // properties object in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    string api_key = 4; // API key for authenticating the request
+    int64 project_id = 4;  // Project ID for analytics config lookup
+    string environment = 5; // Environment for analytics config lookup
 }
 
 // Event Properties - match bog-analytics eventProperties

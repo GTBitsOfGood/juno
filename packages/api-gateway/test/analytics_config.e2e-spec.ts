@@ -113,6 +113,7 @@ describe('Analytics Config Routes (e2e)', () => {
 
     it('Should throw a 409 status error when creating duplicate analytics config', async () => {
       // Try to create a config for the same project - should fail with 409 since one already exists
+      //Duplicate because environment and project (defined in api key) are same
       return await request(app.getHttpServer())
         .post('/analytics/config')
         .set('Authorization', 'Bearer ' + apiKey)
