@@ -30,7 +30,10 @@ export class AnalyticsService {
   async logClickEvent(
     event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
-    await this.authenticateAnalytics(Number(event.projectId), event.environment);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||
@@ -70,7 +73,10 @@ export class AnalyticsService {
   async logInputEvent(
     event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
-    await this.authenticateAnalytics(Number(event.projectId), event.environment);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||
@@ -114,7 +120,10 @@ export class AnalyticsService {
   async logVisitEvent(
     event: AnalyticsProto.VisitEventRequest,
   ): Promise<AnalyticsProto.VisitEventResponse> {
-    await this.authenticateAnalytics(Number(event.projectId), event.environment);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||
@@ -154,7 +163,10 @@ export class AnalyticsService {
   async logCustomEvent(
     event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
-    await this.authenticateAnalytics(Number(event.projectId), event.environment);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||

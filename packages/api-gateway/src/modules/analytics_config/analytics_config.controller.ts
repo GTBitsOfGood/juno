@@ -88,7 +88,7 @@ export class AnalyticsConfigController implements OnModuleInit {
     @Param('projectId') projectId: string,
   ): Promise<AnalyticsConfigResponse> {
     const id = parseInt(projectId);
-    
+
     if (Number.isNaN(id) || id < 0) {
       throw new BadRequestException('Project ID must be a valid integer');
     }

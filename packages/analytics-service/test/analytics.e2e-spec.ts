@@ -8,15 +8,11 @@ import {
   ResetProtoFile,
   AnalyticsProto,
   AnalyticsProtoFile,
-  AnalyticsConfigProto,
   AnalyticsConfigProtoFile,
 } from 'juno-proto';
 import { BogAnalyticsService } from 'src/bog-analytics.service';
-import { AnalyticsConfigService } from 'src/modules/analytics_config/analytics_config.service';
 
 const { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } = AnalyticsProto;
-const { JUNO_ANALYTICS_SERVICE_ANALYTICS_CONFIG_PACKAGE_NAME } =
-  AnalyticsConfigProto;
 
 let app: INestMicroservice;
 let analyticsConfigClient: any;
