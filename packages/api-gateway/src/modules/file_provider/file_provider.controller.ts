@@ -22,7 +22,7 @@ import {
 
 const { FILE_PROVIDER_FILE_SERVICE_NAME } = FileProviderProto;
 
-@ApiBearerAuth('api_key')
+@ApiBearerAuth('API_Key')
 @ApiTags('file_provider')
 @Controller('file')
 export class FileProviderController implements OnModuleInit {

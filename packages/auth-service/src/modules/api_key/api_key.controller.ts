@@ -5,7 +5,7 @@ import { lastValueFrom } from 'rxjs';
 import { createHash, randomBytes } from 'crypto';
 import { status } from '@grpc/grpc-js';
 
-@Controller('api_key')
+@Controller('API_Key')
 @ApiKeyProto.ApiKeyServiceControllerMethods()
 export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   private userAuthService: UserProto.UserAuthServiceClient;
