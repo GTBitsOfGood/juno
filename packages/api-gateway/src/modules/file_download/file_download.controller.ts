@@ -23,7 +23,7 @@ import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { FILE_SERVICE_NAME } = FileProto;
 
-@ApiBearerAuth('api_key')
+@ApiBearerAuth('API_Key')
 @ApiTags('file_download')
 @Controller('file')
 export class FileDownloadController implements OnModuleInit {
