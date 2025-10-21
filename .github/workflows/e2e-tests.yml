@@ -92,5 +92,3 @@ jobs:
       - uses: pnpm/action-setup@v4
       - name: Test
         run: pnpm test:e2e:analytics-service
-        env:
-          NODE_OPTIONS: --experimental-vm-modules
