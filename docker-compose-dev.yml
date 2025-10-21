@@ -96,6 +96,7 @@ services:
       - 5000
     entrypoint: pnpm --filter analytics-service ${ANALYTICS_COMMAND-start:dev}
     environment:
+      NODE_OPTIONS: --experimental-vm-modules 
       AUTH_SERVICE_ADDR: auth-service:5000
       DB_SERVICE_ADDR: db-service:5000
       EMAIL_SERVICE_ADDR: email-service:5000
