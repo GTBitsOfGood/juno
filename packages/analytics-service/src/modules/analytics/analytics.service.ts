@@ -1,20 +1,27 @@
 import { status } from '@grpc/grpc-js';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { AnalyticsProto } from 'juno-proto';
-import { BogAnalyticsService } from 'src/bog-analytics.service';
+import { AnalyticsConfigService } from '../analytics_config/analytics_config.service';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private readonly bogAnalytics: BogAnalyticsService) {}
+  constructor(
+    @Inject('BOG_ANALYTICS') private readonly bogAnalytics: any,
+    private readonly analyticsConfigService: AnalyticsConfigService,
+  ) {}
 
-  authenticateAnalytics(key: string) {
+  async authenticateAnalytics(projectId: number, environment: string) {
     try {
+      const key = await this.analyticsConfigService.getAnalyticsKey(
+        projectId,
+        environment,
+      );
       this.bogAnalytics.authenticate(key);
     } catch (e) {
       throw new RpcException({
         code: status.UNAUTHENTICATED,
-        message: 'Invalid API key',
+        message: 'Invalid API key or analytics config not found',
       });
     }
   }
@@ -22,7 +29,10 @@ export class AnalyticsService {
   async logClickEvent(
     event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
-    this.authenticateAnalytics(event.apiKey);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||
@@ -62,7 +72,10 @@ export class AnalyticsService {
   async logInputEvent(
     event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
-    this.authenticateAnalytics(event.apiKey);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||
@@ -106,7 +119,10 @@ export class AnalyticsService {
   async logVisitEvent(
     event: AnalyticsProto.VisitEventRequest,
   ): Promise<AnalyticsProto.VisitEventResponse> {
-    this.authenticateAnalytics(event.apiKey);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||
@@ -146,7 +162,10 @@ export class AnalyticsService {
   async logCustomEvent(
     event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
-    this.authenticateAnalytics(event.apiKey);
+    await this.authenticateAnalytics(
+      Number(event.projectId),
+      event.environment,
+    );
 
     if (
       !event ||

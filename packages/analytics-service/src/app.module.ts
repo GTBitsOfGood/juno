@@ -4,9 +4,15 @@ import { AppService } from './app.service';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { HealthModule } from './modules/health/health.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { AnalyticsConfigModule } from './modules/analytics_config/analytics_config.module';
 
 @Module({
-  imports: [SentryModule.forRoot(), HealthModule, AnalyticsModule],
+  imports: [
+    SentryModule.forRoot(),
+    HealthModule,
+    AnalyticsModule,
+    AnalyticsConfigModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

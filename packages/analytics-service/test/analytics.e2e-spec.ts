@@ -4,12 +4,17 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ResetProtoFile, AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
-import { BogAnalyticsService } from 'src/bog-analytics.service';
+import {
+  ResetProtoFile,
+  AnalyticsProto,
+  AnalyticsProtoFile,
+  AnalyticsConfigProtoFile,
+} from 'juno-proto';
 
 const { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } = AnalyticsProto;
 
 let app: INestMicroservice;
+let analyticsConfigClient: any;
 
 const mockBogAnalyticsService = {
   authenticate: jest.fn(),
@@ -74,7 +79,7 @@ async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   })
-    .overrideProvider(BogAnalyticsService)
+    .overrideProvider('BOG_ANALYTICS')
     .useValue(mockBogAnalyticsService)
     .compile();
 
@@ -110,6 +115,30 @@ beforeAll(async () => {
       resolve(0);
     });
   });
+
+  // Setup analytics config client
+  const configProto = ProtoLoader.loadSync([AnalyticsConfigProtoFile]) as any;
+  const configProtoGRPC = GRPC.loadPackageDefinition(configProto) as any;
+  analyticsConfigClient =
+    new configProtoGRPC.juno.analytics_service.analytics_config.AnalyticsConfigDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+  // Create analytics config for testing
+  await new Promise((resolve, reject) => {
+    analyticsConfigClient.createAnalyticsConfig(
+      {
+        projectId: 0,
+        environment: 'test',
+        analyticsKey: 'mock-api-key-123',
+      },
+      (err, response) => {
+        if (err) reject(err);
+        else resolve(response);
+      },
+    );
+  });
 });
 
 afterAll((done) => {
@@ -130,9 +159,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
       );
   });
 
-  it('Log click event with valid api key', async () => {
+  it('Log click event with valid analytics config', async () => {
     const request = {
-      apiKey: 'mock-api-key-123',
+      projectId: 0,
+      environment: 'test',
       objectId: 'button-1',
       userId: 'user-123',
     } as AnalyticsProto.ClickEventRequest;
@@ -153,9 +183,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response.eventProperties.userId).toBe('user-123');
   });
 
-  it('Log click event with invalid api key', async () => {
+  it('Log click event with invalid analytics config', async () => {
     const request = {
-      apiKey: 'invalid-api-key',
+      projectId: 999,
+      environment: 'nonexistent',
       objectId: 'button-1',
       userId: 'user-123',
     };
@@ -176,9 +207,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     }
   });
 
-  it('Log visit event with valid api key', async () => {
+  it('Log visit event with valid analytics config', async () => {
     const request = {
-      apiKey: 'mock-api-key-123',
+      projectId: 0,
+      environment: 'test',
       pageUrl: 'https://example.com/page',
       userId: 'user-123',
     } as AnalyticsProto.VisitEventRequest;
@@ -199,9 +231,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response.eventProperties.userId).toBe('user-123');
   });
 
-  it('Log visit event with invalid api key', async () => {
+  it('Log visit event with invalid analytics config', async () => {
     const request = {
-      apiKey: 'invalid-api-key',
+      projectId: 999,
+      environment: 'nonexistent',
       pageUrl: 'https://example.com/page',
       userId: 'user-123',
     };
@@ -222,9 +255,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     }
   });
 
-  it('Log input event with valid api key', async () => {
+  it('Log input event with valid analytics config', async () => {
     const request = {
-      apiKey: 'mock-api-key-123',
+      projectId: 0,
+      environment: 'test',
       objectId: 'input-field-1',
       userId: 'user-123',
       textValue: 'user input text',
@@ -247,9 +281,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response.eventProperties.textValue).toBe('user input text');
   });
 
-  it('Log input event with invalid api key', async () => {
+  it('Log input event with invalid analytics config', async () => {
     const request = {
-      apiKey: 'invalid-api-key',
+      projectId: 999,
+      environment: 'nonexistent',
       objectId: 'input-field-1',
       userId: 'user-123',
       textValue: 'user input text',
@@ -271,9 +306,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     }
   });
 
-  it('Log custom event with valid api key', async () => {
+  it('Log custom event with valid analytics config', async () => {
     const request = {
-      apiKey: 'mock-api-key-123',
+      projectId: 0,
+      environment: 'test',
       category: 'user-action',
       subcategory: 'form-submit',
       properties: {
@@ -298,9 +334,10 @@ describe('Analytics Service Authenticate Domain Tests', () => {
     expect(response.properties.formId).toBe('contact-form-1');
   });
 
-  it('Log custom event with invalid api key', async () => {
+  it('Log custom event with invalid analytics config', async () => {
     const request = {
-      apiKey: 'invalid-api-key',
+      projectId: 999,
+      environment: 'nonexistent',
       category: 'user-action',
       subcategory: 'form-submit',
       properties: {

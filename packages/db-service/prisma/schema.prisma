@@ -27,6 +27,7 @@ model Project {
   users        User[]
   emailService EmailServiceConfig[]
   fileService  FileServiceConfig[]
+  analyticsService AnalyticsServiceConfig[]
 }
 
 model ApiKey {
@@ -47,6 +48,14 @@ enum Role {
   SUPERADMIN
   ADMIN
   USER
+}
+
+model AnalyticsServiceConfig {
+  id Int
+  environment String @default("test")
+  analyticsKey String @default("")
+  Project Project @relation(fields: [id], references: [id])
+  @@id([id, environment])
 }
 
 model EmailServiceConfig {

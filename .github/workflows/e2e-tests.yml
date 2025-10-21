@@ -83,3 +83,12 @@ jobs:
       - uses: pnpm/action-setup@v4
       - name: Test
         run: pnpm test:e2e:logging-service
+  analytics-service:
+    name: Analytics Service E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v4
+      - name: Test
+        run: pnpm test:e2e:analytics-service

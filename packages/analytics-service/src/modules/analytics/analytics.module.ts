@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
-import { BogAnalyticsService } from 'src/bog-analytics.service';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
-import { EventEnvironment } from 'bog-analytics';
+import { AnalyticsConfigModule } from '../analytics_config/analytics_config.module';
 
 const {
   ANALYTICS_SERVICE_NAME,
@@ -23,15 +22,22 @@ const {
         },
       },
     ]),
+    AnalyticsConfigModule,
   ],
   controllers: [AnalyticsController],
   providers: [
     AnalyticsService,
     {
-      provide: BogAnalyticsService,
-      useFactory: () => {
-        return new BogAnalyticsService({
-          environment: EventEnvironment.DEVELOPMENT, // TODO: we'll have to switch this later
+      provide: 'BOG_ANALYTICS',
+      useFactory: async () => {
+        // bog-analytics is absolutely cursed and outdated, have to do some shenanigans
+        // to get around ESM import
+        const loadModule = eval('(specifier) => import(specifier)');
+        const { AnalyticsLogger, EventEnvironment } =
+          await loadModule('bog-analytics');
+
+        return new AnalyticsLogger({
+          environment: EventEnvironment.DEVELOPMENT,
         });
       },
     },
