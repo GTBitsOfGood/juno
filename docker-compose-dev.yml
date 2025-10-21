@@ -103,7 +103,6 @@ services:
       LOGGING_SERVICE_ADDR: logging-service:5000
       FILE_SERVICE_ADDR: file-service:5000
       NODE_ENV: test
-      SENDGRID_API_KEY: test-key
       SENTRY_DSN: 'https://01e85b2d3c5222b4a54d0796db847b55@o4506876382609408.ingest.us.sentry.io/4510019961749504'
     networks:
       - bog-api-net

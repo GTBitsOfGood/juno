@@ -1,14 +1,13 @@
 import { status } from '@grpc/grpc-js';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { AnalyticsProto } from 'juno-proto';
-import { BogAnalyticsService } from 'src/bog-analytics.service';
 import { AnalyticsConfigService } from '../analytics_config/analytics_config.service';
 
 @Injectable()
 export class AnalyticsService {
   constructor(
-    private readonly bogAnalytics: BogAnalyticsService,
+    @Inject('BOG_ANALYTICS') private readonly bogAnalytics: any,
     private readonly analyticsConfigService: AnalyticsConfigService,
   ) {}
 
