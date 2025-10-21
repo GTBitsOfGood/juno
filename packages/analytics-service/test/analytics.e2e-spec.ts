@@ -10,7 +10,6 @@ import {
   AnalyticsProtoFile,
   AnalyticsConfigProtoFile,
 } from 'juno-proto';
-import { BogAnalyticsService } from 'src/bog-analytics.service';
 
 const { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } = AnalyticsProto;
 
