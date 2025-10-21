@@ -80,7 +80,7 @@ async function initApp() {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   })
-    .overrideProvider("BOG_ANALYTICS")
+    .overrideProvider('BOG_ANALYTICS')
     .useValue(mockBogAnalyticsService)
     .compile();
 
