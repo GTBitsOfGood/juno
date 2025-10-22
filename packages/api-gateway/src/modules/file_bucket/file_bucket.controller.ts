@@ -23,7 +23,7 @@ import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { BUCKET_FILE_SERVICE_NAME } = FileBucketProto;
 
-@ApiBearerAuth('api_key')
+@ApiBearerAuth('API_Key')
 @ApiTags('file_bucket')
 @Controller('file')
 export class FileBucketController implements OnModuleInit {
