@@ -31,7 +31,7 @@ const {
   FILE_SERVICE_CONFIG_SERVICE_NAME,
 } = FileConfigProto;
 
-@ApiBearerAuth('api_key')
+@ApiBearerAuth('API_Key')
 @ApiTags('file_config')
 @Controller('file')
 export class FileConfigController implements OnModuleInit {

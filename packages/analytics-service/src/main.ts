@@ -5,7 +5,14 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
 import { SentryFilter } from './sentry.filter';
-import { HealthProto, HealthProtoFile } from 'juno-proto';
+import {
+  AnalyticsProto,
+  HealthProto,
+  HealthProtoFile,
+  AnalyticsConfigProto,
+  AnalyticsConfigProtoFile,
+  AnalyticsProtoFile,
+} from 'juno-proto';
 
 async function bootstrap() {
   ConfigModule.forRoot({
@@ -16,8 +23,16 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: [HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME],
-        protoPath: [HealthProtoFile],
+        package: [
+          HealthProto.GRPC_HEALTH_V1_PACKAGE_NAME,
+          AnalyticsProto.JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME,
+          AnalyticsConfigProto.JUNO_ANALYTICS_SERVICE_ANALYTICS_CONFIG_PACKAGE_NAME,
+        ],
+        protoPath: [
+          HealthProtoFile,
+          AnalyticsProtoFile,
+          AnalyticsConfigProtoFile,
+        ],
         url: process.env.ANALYTICS_SERVICE_ADDR,
       },
     },
