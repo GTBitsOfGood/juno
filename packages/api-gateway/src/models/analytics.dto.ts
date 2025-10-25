@@ -29,13 +29,22 @@ export class LogClickEventRequest {
   userId: string;
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 export class LogVisitEventRequest {
@@ -58,13 +67,22 @@ export class LogVisitEventRequest {
   userId: string;
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 export class LogInputEventRequest {
@@ -96,13 +114,22 @@ export class LogInputEventRequest {
   textValue: string;
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 export class LogCustomEventRequest {
@@ -133,13 +160,22 @@ export class LogCustomEventRequest {
   properties: { [key: string]: string };
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 // Query DTOs for retrieving events
@@ -154,13 +190,22 @@ export class GetCustomEventTypesQuery {
   projectName: string;
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 export class GetCustomGraphTypesQuery {
@@ -183,13 +228,22 @@ export class GetCustomGraphTypesQuery {
   eventTypeId: string;
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 export class GetEventsQuery {
@@ -239,13 +293,22 @@ export class GetEventsQuery {
   afterTime?: string;
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 export class GetCustomEventsQuery extends GetEventsQuery {
@@ -297,13 +360,22 @@ export class GetAllEventsQuery {
   limit?: number;
 
   @ApiProperty({
+    type: 'number',
+    description: 'Project ID for analytics config lookup',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  apiProjectId: number;
+
+  @ApiProperty({
     type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
+    description: 'Environment for analytics config lookup',
+    example: 'production',
   })
   @IsNotEmpty()
   @IsString()
-  apiKey: string;
+  apiEnvironment: string;
 }
 
 export class GetAllCustomEventsQuery extends GetAllEventsQuery {

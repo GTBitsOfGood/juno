@@ -85,7 +85,8 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'button-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(201);
     });
@@ -96,7 +97,8 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'button-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(401);
     });
@@ -108,7 +110,8 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'button-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(401);
     });
@@ -120,7 +123,8 @@ describe('Analytics Event Logging Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -132,7 +136,8 @@ describe('Analytics Event Logging Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
           objectId: 'button-123',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -147,7 +152,8 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           pageUrl: 'https://example.com/dashboard',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(201);
     });
@@ -159,7 +165,8 @@ describe('Analytics Event Logging Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -187,7 +194,8 @@ describe('Analytics Event Logging Routes', () => {
           objectId: 'search-field-123',
           userId: 'user-456',
           textValue: 'search query',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(201);
     });
@@ -200,7 +208,8 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'search-field-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -216,7 +225,8 @@ describe('Analytics Event Logging Routes', () => {
           category: 'user_action',
           subcategory: 'form_submission',
           properties: { formType: 'contact', source: 'homepage' },
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(201);
     });
@@ -229,7 +239,8 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           subcategory: 'form_submission',
           properties: { formType: 'contact' },
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -242,7 +253,8 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           category: 'user_action',
           properties: { formType: 'contact' },
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -258,7 +270,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -269,7 +282,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .get('/analytics/custom-event-types')
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -295,7 +309,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           eventTypeId: 'event-type-123',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -307,7 +322,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -323,7 +339,8 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -339,7 +356,8 @@ describe('Analytics Event Retrieval Routes', () => {
           environment: 'development',
           limit: 5,
           afterTime: '2023-01-01T00:00:00Z',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -350,7 +368,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .get('/analytics/events/click')
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -365,7 +384,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           limit: 100,
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -378,7 +398,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           afterTime: '2023-01-01T00:00:00Z',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -394,7 +415,8 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -404,7 +426,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .get('/analytics/events/visit')
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(401);
     });
@@ -418,7 +441,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -434,7 +458,8 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -448,7 +473,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -466,7 +492,8 @@ describe('Analytics Event Retrieval Routes', () => {
           subcategory: 'form_submission',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -479,7 +506,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           subcategory: 'form_submission',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -492,7 +520,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           category: 'user_action',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -508,7 +537,8 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           category: 'user_action',
           subcategory: 'form_submission',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -524,7 +554,8 @@ describe('Analytics Event Retrieval Routes', () => {
           subcategory: 'form_submission',
           afterTime: '2023-01-01T00:00:00Z',
           limit: 50,
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(200);
     });
@@ -536,7 +567,8 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
         })
         .expect(400);
     });
@@ -564,7 +596,8 @@ describe('Analytics Authentication and Error Handling', () => {
         .set('Authorization', 'Bearer invalid.api.key')
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
           ...(endpoint.includes('custom') && !endpoint.includes('types')
             ? {
                 category: 'user_action',
@@ -593,7 +626,8 @@ describe('Analytics Authentication and Error Handling', () => {
         .get(endpoint)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
+          apiProjectId: 1,
+          apiEnvironment: 'production',
           ...(endpoint.includes('custom') && !endpoint.includes('types')
             ? {
                 category: 'user_action',
@@ -623,7 +657,8 @@ describe('Analytics Authentication and Error Handling', () => {
         category: '',
         subcategory: 'form_submission',
         properties: 'invalid-properties',
-        apiKey: 'analytics-api-key-789',
+        apiProjectId: 1,
+        apiEnvironment: 'production',
       })
       .expect(400);
   });

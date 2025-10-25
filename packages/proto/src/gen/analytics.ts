@@ -17,9 +17,9 @@ export interface ClickEventRequest {
   /** userId in bog-analytics */
   userId: string;
   /** Project ID for analytics config lookup */
-  projectId: number;
+  apiProjectId: number;
   /** Environment for analytics config lookup */
-  environment: string;
+  apiEnvironment: string;
 }
 
 /** Visit Event Request - matches bog-analytics VisitEventProperties */
@@ -29,9 +29,9 @@ export interface VisitEventRequest {
   /** userId in bog-analytics */
   userId: string;
   /** Project ID for analytics config lookup */
-  projectId: number;
+  apiProjectId: number;
   /** Environment for analytics config lookup */
-  environment: string;
+  apiEnvironment: string;
 }
 
 /** Input Event Request - matches bog-analytics InputEventProperties */
@@ -43,9 +43,9 @@ export interface InputEventRequest {
   /** textValue in bog-analytics */
   textValue: string;
   /** Project ID for analytics config lookup */
-  projectId: number;
+  apiProjectId: number;
   /** Environment for analytics config lookup */
-  environment: string;
+  apiEnvironment: string;
 }
 
 /** Custom Event Request - matches bog-analytics logCustomEvent parameters */
@@ -57,9 +57,9 @@ export interface CustomEventRequest {
   /** properties object in bog-analytics */
   properties: { [key: string]: string };
   /** Project ID for analytics config lookup */
-  projectId: number;
+  apiProjectId: number;
   /** Environment for analytics config lookup */
-  environment: string;
+  apiEnvironment: string;
 }
 
 export interface CustomEventRequest_PropertiesEntry {
@@ -69,13 +69,15 @@ export interface CustomEventRequest_PropertiesEntry {
 
 export interface CustomEventTypeRequest {
   projectName: string;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 export interface CustomGraphTypeRequest {
   projectName: string;
   eventTypeId: string;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 /** Paginated requests - matches bog-analytics GetEventsQueryParams */
@@ -89,7 +91,8 @@ export interface GetClickEventsRequest {
   limit: number;
   /** afterTime in bog-analytics (optional) */
   afterTime: string;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 export interface GetVisitEventsRequest {
@@ -98,7 +101,8 @@ export interface GetVisitEventsRequest {
   environment: string;
   limit: number;
   afterTime: string;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 export interface GetInputEventsRequest {
@@ -107,7 +111,8 @@ export interface GetInputEventsRequest {
   environment: string;
   limit: number;
   afterTime: string;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 /** Custom events extends the base pattern with category/subcategory */
@@ -121,7 +126,8 @@ export interface GetCustomEventsRequest {
   category: string;
   /** subcategory for custom events */
   subcategory: string;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 /** "Get All" requests - simpler, matches bog-analytics getAllXXXEvents */
@@ -131,21 +137,24 @@ export interface GetAllClickEventsRequest {
   afterTime: string;
   /** limit in bog-analytics (optional) */
   limit: number;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 export interface GetAllVisitEventsRequest {
   projectName: string;
   afterTime: string;
   limit: number;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 export interface GetAllInputEventsRequest {
   projectName: string;
   afterTime: string;
   limit: number;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 export interface GetAllCustomEventsRequest {
@@ -154,7 +163,8 @@ export interface GetAllCustomEventsRequest {
   subcategory: string;
   afterTime: string;
   limit: number;
-  apiKey: string;
+  apiProjectId: number;
+  apiEnvironment: string;
 }
 
 export interface ClickEventProperties {

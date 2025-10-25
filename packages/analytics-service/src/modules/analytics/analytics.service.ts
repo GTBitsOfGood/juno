@@ -5,6 +5,11 @@ import { AnalyticsProto } from 'juno-proto';
 import { AnalyticsViewerService } from 'src/bog-analytics.service';
 import { AnalyticsConfigService } from '../analytics_config/analytics_config.service';
 
+enum AnalyticsServiceType {
+  BOG_ANALYTICS = 'bog-analytics',
+  ANALYTICS_VIEWER = 'analytics-viewer',
+}
+
 @Injectable()
 export class AnalyticsService {
   constructor(
@@ -14,13 +19,27 @@ export class AnalyticsService {
     private readonly analyticsConfigService: AnalyticsConfigService,
   ) {}
 
-  async authenticateAnalytics(projectId: number, environment: string) {
+  async authenticateAnalytics(
+    apiProjectId: number,
+    apiEnvironment: string,
+    type: AnalyticsServiceType,
+  ) {
     try {
       const key = await this.analyticsConfigService.getAnalyticsKey(
-        projectId,
-        environment,
+        apiProjectId,
+        apiEnvironment,
       );
-      this.bogAnalytics.authenticate(key);
+
+      switch (type) {
+        case AnalyticsServiceType.BOG_ANALYTICS:
+          this.bogAnalytics.authenticate(key);
+          break;
+        case AnalyticsServiceType.ANALYTICS_VIEWER:
+          this.analyticsViewer.authenticate(key);
+          break;
+        default:
+          throw Error('Unknown Analytics Service Type');
+      }
     } catch (e) {
       throw new RpcException({
         code: status.UNAUTHENTICATED,
@@ -33,8 +52,9 @@ export class AnalyticsService {
     event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
     await this.authenticateAnalytics(
-      Number(event.projectId),
-      event.environment,
+      Number(event.apiProjectId),
+      event.apiEnvironment,
+      AnalyticsServiceType.BOG_ANALYTICS,
     );
 
     if (
@@ -76,8 +96,9 @@ export class AnalyticsService {
     event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
     await this.authenticateAnalytics(
-      Number(event.projectId),
-      event.environment,
+      Number(event.apiProjectId),
+      event.apiEnvironment,
+      AnalyticsServiceType.BOG_ANALYTICS,
     );
 
     if (
@@ -123,8 +144,9 @@ export class AnalyticsService {
     event: AnalyticsProto.VisitEventRequest,
   ): Promise<AnalyticsProto.VisitEventResponse> {
     await this.authenticateAnalytics(
-      Number(event.projectId),
-      event.environment,
+      Number(event.apiProjectId),
+      event.apiEnvironment,
+      AnalyticsServiceType.BOG_ANALYTICS,
     );
 
     if (
@@ -166,8 +188,9 @@ export class AnalyticsService {
     event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
     await this.authenticateAnalytics(
-      Number(event.projectId),
-      event.environment,
+      Number(event.apiProjectId),
+      event.apiEnvironment,
+      AnalyticsServiceType.BOG_ANALYTICS,
     );
 
     if (
@@ -210,21 +233,14 @@ export class AnalyticsService {
     };
   }
 
-  authenticateViewer(key: string) {
-    try {
-      this.analyticsViewer.authenticate(key);
-    } catch (e) {
-      throw new RpcException({
-        code: status.UNAUTHENTICATED,
-        message: 'Invalid API key',
-      });
-    }
-  }
-
   async getCustomEventTypes(
     request: AnalyticsProto.CustomEventTypeRequest,
   ): Promise<AnalyticsProto.CustomEventTypeResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -261,7 +277,11 @@ export class AnalyticsService {
   async getCustomGraphTypesById(
     request: AnalyticsProto.CustomGraphTypeRequest,
   ): Promise<AnalyticsProto.CustomGraphTypeResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -303,7 +323,11 @@ export class AnalyticsService {
   async getClickEventsPaginated(
     request: AnalyticsProto.GetClickEventsRequest,
   ): Promise<AnalyticsProto.GetClickEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -354,7 +378,11 @@ export class AnalyticsService {
   async getAllClickEvents(
     request: AnalyticsProto.GetAllClickEventsRequest,
   ): Promise<AnalyticsProto.GetAllClickEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -404,7 +432,11 @@ export class AnalyticsService {
   async getVisitEventsPaginated(
     request: AnalyticsProto.GetVisitEventsRequest,
   ): Promise<AnalyticsProto.GetVisitEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -455,7 +487,11 @@ export class AnalyticsService {
   async getAllVisitEvents(
     request: AnalyticsProto.GetAllVisitEventsRequest,
   ): Promise<AnalyticsProto.GetAllVisitEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -505,7 +541,11 @@ export class AnalyticsService {
   async getInputEventsPaginated(
     request: AnalyticsProto.GetInputEventsRequest,
   ): Promise<AnalyticsProto.GetInputEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -557,7 +597,11 @@ export class AnalyticsService {
   async getAllInputEvents(
     request: AnalyticsProto.GetAllInputEventsRequest,
   ): Promise<AnalyticsProto.GetAllInputEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -608,7 +652,11 @@ export class AnalyticsService {
   async getCustomEventsPaginated(
     request: AnalyticsProto.GetCustomEventsRequest,
   ): Promise<AnalyticsProto.GetCustomEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -673,7 +721,11 @@ export class AnalyticsService {
   async getAllCustomEvents(
     request: AnalyticsProto.GetAllCustomEventsRequest,
   ): Promise<AnalyticsProto.GetAllCustomEventsResponse> {
-    this.authenticateViewer(request.apiKey);
+    await this.authenticateAnalytics(
+      Number(request.apiProjectId),
+      request.apiEnvironment,
+      AnalyticsServiceType.ANALYTICS_VIEWER,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({

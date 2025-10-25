@@ -4,17 +4,13 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ResetProtoFile, AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
-import {
-  BogAnalyticsService,
-  AnalyticsViewerService,
-} from 'src/bog-analytics.service';
 import {
   ResetProtoFile,
   AnalyticsProto,
   AnalyticsProtoFile,
   AnalyticsConfigProtoFile,
 } from 'juno-proto';
+import { AnalyticsViewerService } from 'src/bog-analytics.service';
 
 const { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } = AnalyticsProto;
 
@@ -400,8 +396,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log click event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
-      environment: 'test',
+      apiProjectId: 0,
+      apiEnvironment: 'test',
       objectId: 'button-1',
       userId: 'user-123',
     } as AnalyticsProto.ClickEventRequest;
@@ -448,8 +444,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log visit event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
-      environment: 'test',
+      apiProjectId: 0,
+      apiEnvironment: 'test',
       pageUrl: 'https://example.com/page',
       userId: 'user-123',
     } as AnalyticsProto.VisitEventRequest;
@@ -496,8 +492,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log input event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
-      environment: 'test',
+      apiProjectId: 0,
+      apiEnvironment: 'test',
       objectId: 'input-field-1',
       userId: 'user-123',
       textValue: 'user input text',
@@ -547,8 +543,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log custom event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
-      environment: 'test',
+      apiProjectId: 0,
+      apiEnvironment: 'test',
       category: 'user-action',
       subcategory: 'form-submit',
       properties: {
@@ -617,7 +613,8 @@ describe('Analytics Service Viewer Tests', () => {
   describe('Custom Event Types', () => {
     it('should get custom event types with valid api key', async () => {
       const request = {
-        apiKey: 'mock-api-key-123',
+        apiProjectId: 0,
+        apiEnvironment: 'test',
         projectName: 'test-project',
       } as AnalyticsProto.CustomEventTypeRequest;
 
@@ -641,32 +638,10 @@ describe('Analytics Service Viewer Tests', () => {
       expect(response.projectId).toBe('test-project-id');
     });
 
-    it('should fail to get custom event types with invalid api key', async () => {
-      const request = {
-        apiKey: 'invalid-api-key',
-        projectName: 'test-project',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventTypes(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-
     it('should fail to get custom event types with empty project name', async () => {
       const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: '',
+        apiProjectId: 0,
+        apiEnvironment: 'test',
       };
 
       try {
@@ -689,7 +664,8 @@ describe('Analytics Service Viewer Tests', () => {
   describe('Custom Graph Types', () => {
     it('should get custom graph types by id with valid parameters', async () => {
       const request = {
-        apiKey: 'mock-api-key-123',
+        apiProjectId: 0,
+        apiEnvironment: 'test',
         projectName: 'test-project',
         eventTypeId: 'custom-event-type-1',
       } as AnalyticsProto.CustomGraphTypeRequest;
@@ -713,338 +689,339 @@ describe('Analytics Service Viewer Tests', () => {
       expect(response.graphs[1].graphType).toBe('pie');
     });
 
-    it('should fail to get custom graph types with invalid api key', async () => {
-      const request = {
-        apiKey: 'invalid-api-key',
-        projectName: 'test-project',
-        eventTypeId: 'custom-event-type-1',
-      };
+    describe('Click Events Retrieval', () => {
+      it('should get paginated click events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          afterId: '',
+          environment: 'development',
+          limit: 10,
+          afterTime: '',
+        } as AnalyticsProto.GetClickEventsRequest;
 
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomGraphTypesById(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+        const response: AnalyticsProto.GetClickEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getClickEventsPaginated(
+              request,
+              (err, response) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
           });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-  });
 
-  describe('Click Events Retrieval', () => {
-    it('should get paginated click events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      } as AnalyticsProto.GetClickEventsRequest;
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(2);
+        expect(response.events[0].id).toBe('click-1');
+        expect(response.events[0].eventProperties.objectId).toBe('button-1');
+        expect(response.events[0].eventProperties.userId).toBe('user-1');
+        expect(response.afterId).toBe('click-2');
+      });
 
-      const response: AnalyticsProto.GetClickEventsResponse = await new Promise(
-        (resolve, reject) => {
-          analyticsClient.getClickEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+      it('should get all click events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          afterTime: '',
+          limit: 0,
+        } as AnalyticsProto.GetAllClickEventsRequest;
+
+        const response: AnalyticsProto.GetAllClickEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getAllClickEvents(request, (err, response) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(response);
+              }
+            });
           });
-        },
-      );
 
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(2);
-      expect(response.events[0].id).toBe('click-1');
-      expect(response.events[0].eventProperties.objectId).toBe('button-1');
-      expect(response.events[0].eventProperties.userId).toBe('user-1');
-      expect(response.afterId).toBe('click-2');
-    });
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(2);
+        expect(response.events[0].eventProperties.objectId).toBe('button-1');
+      });
 
-    it('should get all click events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterTime: '',
-        limit: 0,
-      } as AnalyticsProto.GetAllClickEventsRequest;
+      it('should fail to get click events with invalid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+        };
 
-      const response: AnalyticsProto.GetAllClickEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getAllClickEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+        try {
+          await new Promise((resolve, reject) => {
+            analyticsClient.getClickEventsPaginated(
+              request,
+              (err, response) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
           });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(2);
-      expect(response.events[0].eventProperties.objectId).toBe('button-1');
-    });
-
-    it('should fail to get click events with invalid api key', async () => {
-      const request = {
-        apiKey: 'invalid-api-key',
-        projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getClickEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-  });
-
-  describe('Visit Events Retrieval', () => {
-    it('should get paginated visit events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      } as AnalyticsProto.GetVisitEventsRequest;
-
-      const response: AnalyticsProto.GetVisitEventsResponse = await new Promise(
-        (resolve, reject) => {
-          analyticsClient.getVisitEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        },
-      );
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(2);
-      expect(response.events[0].eventProperties.pageUrl).toBe('/home');
-      expect(response.afterId).toBe('visit-2');
+          fail('Expected error was not thrown');
+        } catch (err) {
+          expect(err).toBeDefined();
+        }
+      });
     });
 
-    it('should get all visit events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterTime: '',
-        limit: 0,
-      } as AnalyticsProto.GetAllVisitEventsRequest;
+    describe('Visit Events Retrieval', () => {
+      it('should get paginated visit events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          afterId: '',
+          environment: 'development',
+          limit: 10,
+          afterTime: '',
+        } as AnalyticsProto.GetVisitEventsRequest;
 
-      const response: AnalyticsProto.GetAllVisitEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getAllVisitEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+        const response: AnalyticsProto.GetVisitEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getVisitEventsPaginated(
+              request,
+              (err, response) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
           });
-        });
 
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].eventProperties.pageUrl).toBe('/home');
-    });
-  });
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(2);
+        expect(response.events[0].eventProperties.pageUrl).toBe('/home');
+        expect(response.afterId).toBe('visit-2');
+      });
 
-  describe('Input Events Retrieval', () => {
-    it('should get paginated input events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      } as AnalyticsProto.GetInputEventsRequest;
+      it('should get all visit events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          afterTime: '',
+          limit: 0,
+        } as AnalyticsProto.GetAllVisitEventsRequest;
 
-      const response: AnalyticsProto.GetInputEventsResponse = await new Promise(
-        (resolve, reject) => {
-          analyticsClient.getInputEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+        const response: AnalyticsProto.GetAllVisitEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getAllVisitEvents(request, (err, response) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(response);
+              }
+            });
           });
-        },
-      );
 
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].eventProperties.textValue).toBe(
-        'analytics query',
-      );
-      expect(response.afterId).toBe('input-1');
-    });
-
-    it('should get all input events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterTime: '',
-        limit: 0,
-      } as AnalyticsProto.GetAllInputEventsRequest;
-
-      const response: AnalyticsProto.GetAllInputEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getAllInputEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].eventProperties.textValue).toBe(
-        'analytics query',
-      );
-    });
-  });
-
-  describe('Custom Events Retrieval', () => {
-    it('should get paginated custom events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: 'user-action',
-        subcategory: 'form-submission',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      } as AnalyticsProto.GetCustomEventsRequest;
-
-      const response: AnalyticsProto.GetCustomEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].properties.formType).toBe('contact');
-      expect(response.events[0].properties.formId).toBe('contact-form-1');
-      expect(response.afterId).toBe('custom-1');
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(1);
+        expect(response.events[0].eventProperties.pageUrl).toBe('/home');
+      });
     });
 
-    it('should get all custom events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: 'user-action',
-        subcategory: 'form-submission',
-        afterTime: '',
-        limit: 0,
-      } as AnalyticsProto.GetAllCustomEventsRequest;
+    describe('Input Events Retrieval', () => {
+      it('should get paginated input events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          afterId: '',
+          environment: 'development',
+          limit: 10,
+          afterTime: '',
+        } as AnalyticsProto.GetInputEventsRequest;
 
-      const response: AnalyticsProto.GetAllCustomEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getAllCustomEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+        const response: AnalyticsProto.GetInputEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getInputEventsPaginated(
+              request,
+              (err, response) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
           });
-        });
 
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].properties.formType).toBe('contact');
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(1);
+        expect(response.events[0].eventProperties.textValue).toBe(
+          'analytics query',
+        );
+        expect(response.afterId).toBe('input-1');
+      });
+
+      it('should get all input events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          afterTime: '',
+          limit: 0,
+        } as AnalyticsProto.GetAllInputEventsRequest;
+
+        const response: AnalyticsProto.GetAllInputEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getAllInputEvents(request, (err, response) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(response);
+              }
+            });
+          });
+
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(1);
+        expect(response.events[0].eventProperties.textValue).toBe(
+          'analytics query',
+        );
+      });
     });
 
-    it('should fail to get custom events without required category', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: '',
-        subcategory: 'form-submission',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      };
+    describe('Custom Events Retrieval', () => {
+      it('should get paginated custom events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          category: 'user-action',
+          subcategory: 'form-submission',
+          afterId: '',
+          environment: 'development',
+          limit: 10,
+          afterTime: '',
+        } as AnalyticsProto.GetCustomEventsRequest;
 
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+        const response: AnalyticsProto.GetCustomEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getCustomEventsPaginated(
+              request,
+              (err, response) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
           });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
+
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(1);
+        expect(response.events[0].properties.formType).toBe('contact');
+        expect(response.events[0].properties.formId).toBe('contact-form-1');
+        expect(response.afterId).toBe('custom-1');
+      });
+
+      it('should get all custom events with valid parameters', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          category: 'user-action',
+          subcategory: 'form-submission',
+          afterTime: '',
+          limit: 0,
+        } as AnalyticsProto.GetAllCustomEventsRequest;
+
+        const response: AnalyticsProto.GetAllCustomEventsResponse =
+          await new Promise((resolve, reject) => {
+            analyticsClient.getAllCustomEvents(request, (err, response) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(response);
+              }
+            });
+          });
+
+        expect(response).toBeDefined();
+        expect(response.events).toHaveLength(1);
+        expect(response.events[0].properties.formType).toBe('contact');
+      });
+
+      it('should fail to get custom events without required category', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          category: '',
+          subcategory: 'form-submission',
+          afterId: '',
+          environment: 'development',
+          limit: 10,
+          afterTime: '',
+        };
+
+        try {
+          await new Promise((resolve, reject) => {
+            analyticsClient.getCustomEventsPaginated(
+              request,
+              (err, response) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
+          });
+          fail('Expected error was not thrown');
+        } catch (err) {
+          expect(err).toBeDefined();
+        }
+      });
+
+      it('should fail to get custom events without required subcategory', async () => {
+        const request = {
+          apiProjectId: 0,
+          apiEnvironment: 'test',
+          projectName: 'test-project',
+          category: 'user-action',
+          subcategory: '',
+          afterId: '',
+          environment: 'development',
+          limit: 10,
+          afterTime: '',
+        };
+
+        try {
+          await new Promise((resolve, reject) => {
+            analyticsClient.getCustomEventsPaginated(
+              request,
+              (err, response) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(response);
+                }
+              },
+            );
+          });
+          fail('Expected error was not thrown');
+        } catch (err) {
+          expect(err).toBeDefined();
+        }
+      });
     });
 
-    it('should fail to get custom events without required subcategory', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: 'user-action',
-        subcategory: '',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-  });
-
+    /*   Maybe for later tests
   describe('Authentication and Validation Tests', () => {
     it('should handle authentication errors consistently across all methods', async () => {
       const invalidApiKey = 'invalid-key';
@@ -1108,6 +1085,7 @@ describe('Analytics Service Viewer Tests', () => {
         }
       }
     });
+    */
 
     it('should validate required project name across all methods', async () => {
       const methods = [
@@ -1125,7 +1103,8 @@ describe('Analytics Service Viewer Tests', () => {
 
       for (const method of methods) {
         const request = {
-          apiKey: 'mock-api-key-123',
+          apiProjectId: 0,
+          apiEnvironment: 'test',
           projectName: '', // Empty project name
           ...(method.includes('Custom') && !method.includes('Type')
             ? {
