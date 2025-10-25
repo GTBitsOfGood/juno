@@ -12,7 +12,7 @@ describe('AnalyticsConfigService (e2e)', () => {
         {
           provide: AnalyticsConfigService,
           useValue: {
-            getAnalyticsKey: jest.fn().mockImplementation(async () => {
+            getAnalyticsKeys: jest.fn().mockImplementation(async () => {
               return 'test-key';
             }),
           },
@@ -41,14 +41,14 @@ describe('AnalyticsConfigService (e2e)', () => {
       expect(service).toBeDefined();
     });
 
-    describe('getAnalyticsKey', () => {
+    describe('getAnalyticsKeys', () => {
       it('should retrieve analytics key successfully', async () => {
         const projectId = 1;
         const environment = 'test';
-        const result = await service.getAnalyticsKey(projectId, environment);
+        const result = await service.getAnalyticsKeys(projectId, environment);
 
         expect(result).toBe('test-key');
-        expect(service.getAnalyticsKey).toHaveBeenCalledWith(
+        expect(service.getAnalyticsKeys).toHaveBeenCalledWith(
           projectId,
           environment,
         );

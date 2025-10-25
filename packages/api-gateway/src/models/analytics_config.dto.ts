@@ -3,24 +3,33 @@ import { Transform } from 'class-transformer';
 
 export class CreateAnalyticsConfigModel {
   @IsString()
-  analyticsKey: string;
+  serverAnalyticsKey: string;
+
+  @IsString()
+  clientAnalyticsKey: string;
 }
 
 export class UpdateAnalyticsConfigModel {
   @IsOptional()
   @IsString()
-  analyticsKey?: string;
+  serverAnalyticsKey?: string;
+
+  @IsOptional()
+  @IsString()
+  clientAnalyticsKey?: string;
 }
 
 export class AnalyticsConfigResponse {
   @Transform(({ value }) => Number(value))
   id: number;
   environment: string;
-  analyticsKey: string;
+  serverAnalyticsKey: string;
+  clientAnalyticsKey: string;
 
   constructor(config: any) {
     this.id = config.id;
     this.environment = config.environment;
-    this.analyticsKey = config.analyticsKey;
+    this.serverAnalyticsKey = config.serverAnalyticsKey;
+    this.clientAnalyticsKey = config.clientAnalyticsKey;
   }
 }

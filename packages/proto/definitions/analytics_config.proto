@@ -12,7 +12,8 @@ service AnalyticsConfigDbService {
 message CreateConfigRequest {
     int64 projectId = 1;
     string environment = 2;
-    string analyticsKey = 3;
+    string serverAnalyticsKey = 3;
+    string clientAnalyticsKey = 4;
 }
 
 message ReadConfigRequest {
@@ -23,7 +24,8 @@ message ReadConfigRequest {
 message UpdateConfigRequest {
     int64 id = 1;
     string environment = 2;
-    optional string analyticsKey = 3;
+    optional string serverAnalyticsKey = 3;
+    optional string clientAnalyticsKey = 4;
 }
 
 message DeleteConfigRequest {
@@ -34,6 +36,7 @@ message DeleteConfigRequest {
 message AnalyticsServiceConfig {
     int64 id = 1;
     string environment = 2;
-    string analyticsKey = 3;
+    string serverAnalyticsKey = 3;
+    string clientAnalyticsKey = 4;
 }
 

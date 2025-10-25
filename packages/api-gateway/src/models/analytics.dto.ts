@@ -545,6 +545,10 @@ export class GetAllClickEventsResponse {
   events: ClickEventResponse[];
 
   constructor(response: AnalyticsProto.GetAllClickEventsResponse) {
+    if (!response || !response.events) {
+      return;
+    }
+
     this.events = response.events.map((event) => new ClickEventResponse(event));
   }
 }

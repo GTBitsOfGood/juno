@@ -4,10 +4,7 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import {
-  BogAnalyticsService,
-  AnalyticsViewerService,
-} from 'src/bog-analytics.service';
+import { AnalyticsViewerService } from 'src/bog-analytics.service';
 import {
   ResetProtoFile,
   AnalyticsProto,
@@ -369,7 +366,8 @@ beforeAll(async () => {
       {
         projectId: 0,
         environment: 'test',
-        analyticsKey: 'mock-api-key-123',
+        serverAnalyticsKey: 'mock-api-key-123',
+        clientAnalyticsKey: 'mock-api-key-123',
       },
       (err, response) => {
         if (err) reject(err);

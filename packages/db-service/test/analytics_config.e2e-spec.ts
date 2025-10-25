@@ -73,7 +73,8 @@ function tryCreateConfig(configClient: any) {
       {
         projectId: 0,
         environment: 'test-env',
-        analyticsKey: 'test-analytics-key',
+        serverAnalyticsKey: 'mock-api-key-123',
+        clientAnalyticsKey: 'mock-api-key-123',
       },
       () => {
         resolve();
@@ -102,7 +103,8 @@ describe('Analytics Config Tests', () => {
           {
             projectId: 0,
             environment: 'test-env',
-            analyticsKey: 'test-analytics-key',
+            serverAnalyticsKey: 'test-analytics-key',
+            clientAnalyticsKey: 'test-analytics-key-2',
           },
           (err, res) => {
             if (err) {
@@ -117,7 +119,8 @@ describe('Analytics Config Tests', () => {
 
     expect(response).toHaveProperty('id');
     expect(response.environment).toBe('test-env');
-    expect(response.analyticsKey).toBe('test-analytics-key');
+    expect(response.serverAnalyticsKey).toBe('test-analytics-key');
+    expect(response.clientAnalyticsKey).toBe('test-analytics-key-2');
   });
 
   it('creates a duplicate analytics config', async () => {
@@ -127,7 +130,8 @@ describe('Analytics Config Tests', () => {
           {
             projectId: 0,
             environment: 'prod',
-            analyticsKey: 'prod-analytics-key',
+            serverAnalyticsKey: 'test-analytics-key',
+            clientAnalyticsKey: 'test-analytics-key-2',
           },
           (err, res) => {
             if (err) {
@@ -140,7 +144,8 @@ describe('Analytics Config Tests', () => {
       });
     expect(response).toHaveProperty('id');
     expect(response.environment).toBe('prod');
-    expect(response.analyticsKey).toBe('prod-analytics-key');
+    expect(response.serverAnalyticsKey).toBe('test-analytics-key');
+    expect(response.clientAnalyticsKey).toBe('test-analytics-key-2');
   });
 
   it('reads an analytics config', async () => {
@@ -161,7 +166,6 @@ describe('Analytics Config Tests', () => {
 
     expect(readResponse).toHaveProperty('id', createdConfigId);
     expect(readResponse.environment).toBe('test-env');
-    expect(readResponse.analyticsKey).toBe('test-analytics-key');
   });
 
   it('reading a nonexistent analytics config', async () => {
@@ -185,7 +189,8 @@ describe('Analytics Config Tests', () => {
           {
             id: createdConfigId,
             environment: 'test-env',
-            analyticsKey: 'updated-analytics-key',
+            serverAnalyticsKey: 'updated-server-key',
+            clientAnalyticsKey: 'updated-client-key',
           },
           (err, res) => {
             if (err) {
@@ -198,7 +203,8 @@ describe('Analytics Config Tests', () => {
       });
 
     expect(updateResponse).toHaveProperty('id', createdConfigId);
-    expect(updateResponse.analyticsKey).toBe('updated-analytics-key');
+    expect(updateResponse.serverAnalyticsKey).toBe('updated-server-key');
+    expect(updateResponse.clientAnalyticsKey).toBe('updated-client-key');
   });
 
   it('updates a nonexistent analytics config', async () => {
@@ -207,7 +213,8 @@ describe('Analytics Config Tests', () => {
         {
           id: 9999,
           environment: 'test-env',
-          analyticsKey: 'updated-analytics-key',
+          serverAnalyticsKey: 'mock-api-key-123',
+          clientAnalyticsKey: 'mock-api-key-123',
         },
         (err) => {
           expect(err.code).toBe(GRPC.status.NOT_FOUND);

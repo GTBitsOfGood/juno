@@ -144,7 +144,7 @@ export class AnalyticsController implements OnModuleInit {
         textValue: request.textValue,
         configId: apiKey.project.id,
         environment: apiKey.environment,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -172,7 +172,7 @@ export class AnalyticsController implements OnModuleInit {
         properties: request.properties,
         environment: apiKey.environment,
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -198,7 +198,7 @@ export class AnalyticsController implements OnModuleInit {
       this.analyticsService.getCustomEventTypes({
         projectName: query.projectName,
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -226,7 +226,7 @@ export class AnalyticsController implements OnModuleInit {
         projectName: query.projectName,
         eventTypeId: query.eventTypeId,
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -280,7 +280,7 @@ export class AnalyticsController implements OnModuleInit {
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -320,7 +320,7 @@ export class AnalyticsController implements OnModuleInit {
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -374,7 +374,7 @@ export class AnalyticsController implements OnModuleInit {
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -414,7 +414,7 @@ export class AnalyticsController implements OnModuleInit {
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -468,7 +468,7 @@ export class AnalyticsController implements OnModuleInit {
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -508,7 +508,7 @@ export class AnalyticsController implements OnModuleInit {
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -570,7 +570,7 @@ export class AnalyticsController implements OnModuleInit {
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -618,7 +618,7 @@ export class AnalyticsController implements OnModuleInit {
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
         configId: apiKey.project.id,
-        configEnvironment: apiKey.environment
+        configEnvironment: apiKey.environment,
       }),
     );
 

@@ -66,7 +66,8 @@ export class AnalyticsConfigController implements OnModuleInit {
       this.analyticsConfigDbService.createAnalyticsConfig({
         projectId: apiKey.project.id,
         environment: apiKey.environment,
-        analyticsKey: request.analyticsKey,
+        serverAnalyticsKey: request.serverAnalyticsKey,
+        clientAnalyticsKey: request.clientAnalyticsKey,
       }),
     );
     return new AnalyticsConfigResponse(response);
@@ -127,7 +128,8 @@ export class AnalyticsConfigController implements OnModuleInit {
       this.analyticsConfigDbService.updateAnalyticsConfig({
         id: id,
         environment: apiKey.environment,
-        analyticsKey: request.analyticsKey,
+        serverAnalyticsKey: request.serverAnalyticsKey,
+        clientAnalyticsKey: request.clientAnalyticsKey,
       }),
     );
 

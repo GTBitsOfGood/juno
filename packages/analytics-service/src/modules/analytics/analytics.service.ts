@@ -5,28 +5,29 @@ import { AnalyticsConfigProto, AnalyticsProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { ANALYTICS_CONFIG_DB_SERVICE_NAME } from 'juno-proto/dist/gen/analytics_config';
 
-type EventEnvironment = any;
-
 @Injectable()
 export class AnalyticsService implements OnModuleInit {
   private analyticsService: AnalyticsConfigProto.AnalyticsConfigDbServiceClient;
 
-  private AnalyticsLogger: any; 
+  private AnalyticsLogger: any;
   private AnalyticsViewer: any;
   private EventEnvironment: any;
 
-  constructor(@Inject(ANALYTICS_CONFIG_DB_SERVICE_NAME) private analyticsClient: ClientGrpc
+  constructor(
+    @Inject(ANALYTICS_CONFIG_DB_SERVICE_NAME)
+    private analyticsClient: ClientGrpc,
   ) {}
 
   async onModuleInit() {
-      this.analyticsService = this.analyticsClient.getService<AnalyticsConfigProto.AnalyticsConfigDbServiceClient>(
-        ANALYTICS_CONFIG_DB_SERVICE_NAME
-    );
+    this.analyticsService =
+      this.analyticsClient.getService<AnalyticsConfigProto.AnalyticsConfigDbServiceClient>(
+        ANALYTICS_CONFIG_DB_SERVICE_NAME,
+      );
 
     // bog-analytics is absolutely cursed and outdated, have to do some shenanigans
     // to get around ESM import
     const loadModule = eval('(specifier) => import(specifier)');
-   const bogAnalytics = await loadModule('bog-analytics');
+    const bogAnalytics = await loadModule('bog-analytics');
 
     this.AnalyticsLogger = bogAnalytics.AnalyticsLogger;
     this.AnalyticsViewer = bogAnalytics.AnalyticsViewer;
@@ -35,7 +36,11 @@ export class AnalyticsService implements OnModuleInit {
 
   // bog-analytics currently doesn't allow stateless requests with passing in a key,
   // so we have to compromise by re-instantiating the object each time
-  async getAnalyticsViewer(analyticsEnvironment: any, configId: number, junoEnvironment: string) {
+  async getAnalyticsViewer(
+    analyticsEnvironment: any,
+    configId: number,
+    junoEnvironment: string,
+  ) {
     const config = await lastValueFrom(
       this.analyticsService.readAnalyticsConfig({
         id: configId,
@@ -49,7 +54,7 @@ export class AnalyticsService implements OnModuleInit {
     });
 
     try {
-      viewer.authenticate(config.analyticsKey);
+      viewer.authenticate(config.serverAnalyticsKey);
     } catch (e) {
       throw new RpcException({
         code: status.UNAUTHENTICATED,
@@ -60,7 +65,11 @@ export class AnalyticsService implements OnModuleInit {
     return viewer;
   }
 
-  async getAnalyticsLogger(analyticsEnvironment: any, configId: number, junoEnvironment: string) {
+  async getAnalyticsLogger(
+    analyticsEnvironment: any,
+    configId: number,
+    junoEnvironment: string,
+  ) {
     const config = await lastValueFrom(
       this.analyticsService.readAnalyticsConfig({
         id: configId,
@@ -70,11 +79,11 @@ export class AnalyticsService implements OnModuleInit {
 
     const viewer = new this.AnalyticsLogger({
       apiBaseUrl: process.env.BOG_ANALYTICS_BASE_URL,
-      environment: analyticsEnvironment
+      environment: analyticsEnvironment,
     });
 
     try {
-      viewer.authenticate(config.analyticsKey);
+      viewer.authenticate(config.clientAnalyticsKey);
     } catch (e) {
       throw new RpcException({
         code: status.UNAUTHENTICATED,
@@ -88,7 +97,11 @@ export class AnalyticsService implements OnModuleInit {
   async logClickEvent(
     event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
-    const logger = await this.getAnalyticsLogger(this.EventEnvironment.DEVELOPMENT, event.configId, event.configEnvironment);
+    const logger = await this.getAnalyticsLogger(
+      this.EventEnvironment.DEVELOPMENT,
+      event.configId,
+      event.configEnvironment,
+    );
 
     if (
       !event ||
@@ -128,8 +141,12 @@ export class AnalyticsService implements OnModuleInit {
   async logInputEvent(
     event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
-    // TODO: we need to allow bog-analytics specific environments 
-    const logger = await this.getAnalyticsLogger(this.EventEnvironment.DEVELOPMENT, event.configId, event.environment);
+    // TODO: we need to allow bog-analytics specific environments
+    const logger = await this.getAnalyticsLogger(
+      this.EventEnvironment.DEVELOPMENT,
+      event.configId,
+      event.environment,
+    );
 
     if (
       !event ||
@@ -173,8 +190,12 @@ export class AnalyticsService implements OnModuleInit {
   async logVisitEvent(
     event: AnalyticsProto.VisitEventRequest,
   ): Promise<AnalyticsProto.VisitEventResponse> {
-    // TODO: we need to allow environments 
-    const logger = await this.getAnalyticsLogger(this.EventEnvironment.DEVELOPMENT, event.configId, event.environment);
+    // TODO: we need to allow environments
+    const logger = await this.getAnalyticsLogger(
+      this.EventEnvironment.DEVELOPMENT,
+      event.configId,
+      event.environment,
+    );
 
     if (
       !event ||
@@ -214,8 +235,12 @@ export class AnalyticsService implements OnModuleInit {
   async logCustomEvent(
     event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
-    // TODO: we need to allow environments 
-    const logger = await this.getAnalyticsLogger(this.EventEnvironment.DEVELOPMENT, event.configId, event.environment);
+    // TODO: we need to allow environments
+    const logger = await this.getAnalyticsLogger(
+      this.EventEnvironment.DEVELOPMENT,
+      event.configId,
+      event.environment,
+    );
 
     if (
       !event ||
@@ -261,7 +286,11 @@ export class AnalyticsService implements OnModuleInit {
     request: AnalyticsProto.CustomEventTypeRequest,
   ): Promise<AnalyticsProto.CustomEventTypeResponse> {
     // TODO: environments
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -270,9 +299,7 @@ export class AnalyticsService implements OnModuleInit {
       });
     }
 
-    const response = await viewer.getCustomEventTypes(
-      request.projectName,
-    );
+    const response = await viewer.getCustomEventTypes(request.projectName);
 
     if (!response || response.length === 0) {
       return {
@@ -299,7 +326,11 @@ export class AnalyticsService implements OnModuleInit {
     request: AnalyticsProto.CustomGraphTypeRequest,
   ): Promise<AnalyticsProto.CustomGraphTypeResponse> {
     // TODO: environments
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -341,7 +372,11 @@ export class AnalyticsService implements OnModuleInit {
   async getClickEventsPaginated(
     request: AnalyticsProto.GetClickEventsRequest,
   ): Promise<AnalyticsProto.GetClickEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.environment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.environment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -358,8 +393,7 @@ export class AnalyticsService implements OnModuleInit {
       afterTime: request.afterTime || undefined,
     };
 
-    const response =
-      await viewer.getClickEventsPaginated(queryParams);
+    const response = await viewer.getClickEventsPaginated(queryParams);
 
     if (!response) {
       return { events: [], afterId: '' };
@@ -392,7 +426,12 @@ export class AnalyticsService implements OnModuleInit {
   async getAllClickEvents(
     request: AnalyticsProto.GetAllClickEventsRequest,
   ): Promise<AnalyticsProto.GetAllClickEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    console.log('requesting new viewer ');
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -412,7 +451,10 @@ export class AnalyticsService implements OnModuleInit {
       limit,
     );
 
+    console.log(response);
+
     if (!response) {
+      console.log('null,');
       return { events: [] };
     }
 
@@ -442,7 +484,11 @@ export class AnalyticsService implements OnModuleInit {
   async getVisitEventsPaginated(
     request: AnalyticsProto.GetVisitEventsRequest,
   ): Promise<AnalyticsProto.GetVisitEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -459,8 +505,7 @@ export class AnalyticsService implements OnModuleInit {
       afterTime: request.afterTime || undefined,
     };
 
-    const response =
-      await viewer.getVisitEventsPaginated(queryParams);
+    const response = await viewer.getVisitEventsPaginated(queryParams);
 
     if (!response) {
       return { events: [], afterId: '' };
@@ -493,7 +538,11 @@ export class AnalyticsService implements OnModuleInit {
   async getAllVisitEvents(
     request: AnalyticsProto.GetAllVisitEventsRequest,
   ): Promise<AnalyticsProto.GetAllVisitEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -543,7 +592,11 @@ export class AnalyticsService implements OnModuleInit {
   async getInputEventsPaginated(
     request: AnalyticsProto.GetInputEventsRequest,
   ): Promise<AnalyticsProto.GetInputEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -560,8 +613,7 @@ export class AnalyticsService implements OnModuleInit {
       afterTime: request.afterTime || undefined,
     };
 
-    const response =
-      await viewer.getInputEventsPaginated(queryParams);
+    const response = await viewer.getInputEventsPaginated(queryParams);
 
     if (!response) {
       return { events: [], afterId: '' };
@@ -595,7 +647,11 @@ export class AnalyticsService implements OnModuleInit {
   async getAllInputEvents(
     request: AnalyticsProto.GetAllInputEventsRequest,
   ): Promise<AnalyticsProto.GetAllInputEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -646,7 +702,11 @@ export class AnalyticsService implements OnModuleInit {
   async getCustomEventsPaginated(
     request: AnalyticsProto.GetCustomEventsRequest,
   ): Promise<AnalyticsProto.GetCustomEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -679,8 +739,7 @@ export class AnalyticsService implements OnModuleInit {
       subcategory: request.subcategory,
     };
 
-    const response =
-      await viewer.getCustomEventsPaginated(queryParams);
+    const response = await viewer.getCustomEventsPaginated(queryParams);
 
     if (!response) {
       return { events: [], afterId: '' };
@@ -711,7 +770,11 @@ export class AnalyticsService implements OnModuleInit {
   async getAllCustomEvents(
     request: AnalyticsProto.GetAllCustomEventsRequest,
   ): Promise<AnalyticsProto.GetAllCustomEventsResponse> {
-    const viewer = await this.getAnalyticsViewer(this.EventEnvironment.DEVELOPMENT, request.configId, request.configEnvironment);
+    const viewer = await this.getAnalyticsViewer(
+      this.EventEnvironment.DEVELOPMENT,
+      request.configId,
+      request.configEnvironment,
+    );
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({

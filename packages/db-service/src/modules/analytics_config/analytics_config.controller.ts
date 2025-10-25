@@ -24,7 +24,8 @@ export class AnalyticsConfigDbController
       return {
         id: config.id,
         environment: config.environment,
-        analyticsKey: config.analyticsKey,
+        serverAnalyticsKey: config.serverAnalyticsKey,
+        clientAnalyticsKey: config.clientAnalyticsKey,
       };
     } catch (e) {
       if (
@@ -60,7 +61,8 @@ export class AnalyticsConfigDbController
       return {
         id: config.id,
         environment: config.environment,
-        analyticsKey: config.analyticsKey,
+        serverAnalyticsKey: config.serverAnalyticsKey,
+        clientAnalyticsKey: config.clientAnalyticsKey,
       };
     } catch (error) {
       throw error;
@@ -70,10 +72,13 @@ export class AnalyticsConfigDbController
   async updateAnalyticsConfig(
     request: AnalyticsConfigProto.UpdateConfigRequest,
   ): Promise<AnalyticsConfigProto.AnalyticsServiceConfig> {
-    //Can only update analyticsKey, is this how it should work?
     const updateData: any = {};
-    if (request.analyticsKey !== undefined) {
-      updateData.analyticsKey = request.analyticsKey;
+    if (request.serverAnalyticsKey !== undefined) {
+      updateData.serverAnalyticsKey = request.serverAnalyticsKey;
+    }
+
+    if (request.clientAnalyticsKey !== undefined) {
+      updateData.clientAnalyticsKey = request.clientAnalyticsKey;
     }
 
     try {
@@ -85,7 +90,8 @@ export class AnalyticsConfigDbController
       return {
         id: config.id,
         environment: config.environment,
-        analyticsKey: config.analyticsKey,
+        serverAnalyticsKey: config.serverAnalyticsKey,
+        clientAnalyticsKey: config.clientAnalyticsKey,
       };
     } catch (e) {
       if (
@@ -114,7 +120,8 @@ export class AnalyticsConfigDbController
       return {
         id: config.id,
         environment: config.environment,
-        analyticsKey: config.analyticsKey,
+        clientAnalyticsKey: config.clientAnalyticsKey,
+        serverAnalyticsKey: config.serverAnalyticsKey,
       };
     } catch (e) {
       if (

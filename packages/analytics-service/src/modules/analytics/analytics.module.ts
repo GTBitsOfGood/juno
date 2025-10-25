@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AnalyticsConfigProto, AnalyticsConfigProtoFile, AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
+import { AnalyticsConfigProto, AnalyticsConfigProtoFile } from 'juno-proto';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
 import { AnalyticsConfigModule } from '../analytics_config/analytics_config.module';
@@ -13,7 +13,8 @@ import { AnalyticsConfigModule } from '../analytics_config/analytics_config.modu
         transport: Transport.GRPC,
         options: {
           url: process.env.DB_SERVICE_ADDR,
-          package: AnalyticsConfigProto.JUNO_ANALYTICS_SERVICE_ANALYTICS_CONFIG_PACKAGE_NAME,
+          package:
+            AnalyticsConfigProto.JUNO_ANALYTICS_SERVICE_ANALYTICS_CONFIG_PACKAGE_NAME,
           protoPath: AnalyticsConfigProtoFile,
         },
       },
@@ -21,8 +22,6 @@ import { AnalyticsConfigModule } from '../analytics_config/analytics_config.modu
     AnalyticsConfigModule,
   ],
   controllers: [AnalyticsController],
-  providers: [
-    AnalyticsService,
-  ],
+  providers: [AnalyticsService],
 })
 export class AnalyticsModule {}
