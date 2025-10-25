@@ -123,7 +123,7 @@ With [OpenAPI](https://docs.nestjs.com/openapi/introduction), much of the intern
 
 We use [Prisma](https://www.prisma.io/) in `db-service` as an ORM to define all database schemas/relationships. After a change has been made to the Prisma schema, a migration must be made. There are two options:
 
-1. While Juno is running, run `DATABASE_URL=postgresql://user:password@localhost:<port> pnpm prisma migrate` to generate the migration
+1. While Juno is running, run `DATABASE_URL=postgresql://user:password@localhost:<port> pnpm prisma migrate dev --schema=<path to schema.prisma>` to generate the migration
 2. Verify a new migration has been created under the `migrations` folder
 
 ### Force rebuilding docker containers

@@ -397,7 +397,7 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log click event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
+      configId: 0,
       environment: 'test',
       objectId: 'button-1',
       userId: 'user-123',
@@ -445,7 +445,7 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log visit event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
+      configId: 0,
       environment: 'test',
       pageUrl: 'https://example.com/page',
       userId: 'user-123',
@@ -493,7 +493,7 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log input event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
+      configId: 0,
       environment: 'test',
       objectId: 'input-field-1',
       userId: 'user-123',
@@ -544,7 +544,7 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log custom event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
+      configId: 0,
       environment: 'test',
       category: 'user-action',
       subcategory: 'form-submit',
@@ -552,6 +552,7 @@ describe('Analytics Service Authenticate Domain Tests', () => {
         formType: 'contact',
         formId: 'contact-form-1',
       },
+      configEnvironment: 'test',
     } as AnalyticsProto.CustomEventRequest;
     const response: AnalyticsProto.CustomEventResponse = await new Promise(
       (resolve, reject) => {
@@ -616,6 +617,8 @@ describe('Analytics Service Viewer Tests', () => {
       const request = {
         apiKey: 'mock-api-key-123',
         projectName: 'test-project',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.CustomEventTypeRequest;
 
       const response: AnalyticsProto.CustomEventTypeResponse =
@@ -689,6 +692,8 @@ describe('Analytics Service Viewer Tests', () => {
         apiKey: 'mock-api-key-123',
         projectName: 'test-project',
         eventTypeId: 'custom-event-type-1',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.CustomGraphTypeRequest;
 
       const response: AnalyticsProto.CustomGraphTypeResponse =
@@ -743,6 +748,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetClickEventsRequest;
 
       const response: AnalyticsProto.GetClickEventsResponse = await new Promise(
@@ -771,6 +778,8 @@ describe('Analytics Service Viewer Tests', () => {
         projectName: 'test-project',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllClickEventsRequest;
 
       const response: AnalyticsProto.GetAllClickEventsResponse =
@@ -825,6 +834,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetVisitEventsRequest;
 
       const response: AnalyticsProto.GetVisitEventsResponse = await new Promise(
@@ -851,6 +862,8 @@ describe('Analytics Service Viewer Tests', () => {
         projectName: 'test-project',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllVisitEventsRequest;
 
       const response: AnalyticsProto.GetAllVisitEventsResponse =
@@ -879,6 +892,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configEnvironment: 'test',
+        configId: 0,
       } as AnalyticsProto.GetInputEventsRequest;
 
       const response: AnalyticsProto.GetInputEventsResponse = await new Promise(
@@ -907,6 +922,8 @@ describe('Analytics Service Viewer Tests', () => {
         projectName: 'test-project',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllInputEventsRequest;
 
       const response: AnalyticsProto.GetAllInputEventsResponse =
@@ -939,6 +956,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetCustomEventsRequest;
 
       const response: AnalyticsProto.GetCustomEventsResponse =
@@ -967,6 +986,8 @@ describe('Analytics Service Viewer Tests', () => {
         subcategory: 'form-submission',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllCustomEventsRequest;
 
       const response: AnalyticsProto.GetAllCustomEventsResponse =
