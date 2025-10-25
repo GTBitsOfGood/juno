@@ -28,8 +28,9 @@ message ClickEventRequest {
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 3;  // Project ID for analytics config lookup
     string environment = 4; // Environment for analytics config lookup
+    string configEnvironment = 5;
+    int64 configId = 6;
 }
 
 // Visit Event Request - matches bog-analytics VisitEventProperties  
@@ -38,8 +39,10 @@ message VisitEventRequest {
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 3;  // Project ID for analytics config lookup
     string environment = 4; // Environment for analytics config lookup
+  //
+    string configEnvironment = 5;
+    int64 configId = 6;
 }
 
 // Input Event Request - matches bog-analytics InputEventProperties
@@ -49,8 +52,9 @@ message InputEventRequest {
     string text_value = 3;  // textValue in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 4;  // Project ID for analytics config lookup
     string environment = 5; // Environment for analytics config lookup
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 // Custom Event Request - matches bog-analytics logCustomEvent parameters
@@ -60,20 +64,24 @@ message CustomEventRequest {
     map<string, string> properties = 3; // properties object in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 4;  // Project ID for analytics config lookup
     string environment = 5; // Environment for analytics config lookup
+
+
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 message CustomEventTypeRequest {
     string project_name = 1;
-
-    string api_key = 2;
+    string configEnvironment = 2;
+    int64 configId = 3;
 }
 
 message CustomGraphTypeRequest {
     string project_name = 1;
     string event_type_id = 2;
-    string api_key = 3;
+    string configEnvironment = 3;
+    int64 configId = 4;
 }
 
 // Paginated requests - matches bog-analytics GetEventsQueryParams
@@ -83,7 +91,8 @@ message GetClickEventsRequest {
     string environment = 3;     // environment in bog-analytics
     int32 limit = 4;           // limit in bog-analytics (optional)
     string after_time = 5;     // afterTime in bog-analytics (optional)
-    string api_key = 6;
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 message GetVisitEventsRequest {
@@ -92,7 +101,9 @@ message GetVisitEventsRequest {
     string environment = 3;
     int32 limit = 4;
     string after_time = 5;
-    string api_key = 6;
+
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 message GetInputEventsRequest {
@@ -101,7 +112,8 @@ message GetInputEventsRequest {
     string environment = 3;
     int32 limit = 4;
     string after_time = 5;
-    string api_key = 6;
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 // Custom events extends the base pattern with category/subcategory
@@ -113,7 +125,8 @@ message GetCustomEventsRequest {
     string after_time = 5;
     string category = 6;        // category for custom events
     string subcategory = 7;     // subcategory for custom events
-    string api_key = 8;
+    string configEnvironment = 8;
+    int64 configId = 9;
 }
 
 // "Get All" requests - simpler, matches bog-analytics getAllXXXEvents
@@ -121,21 +134,24 @@ message GetAllClickEventsRequest {
     string project_name = 1;
     string after_time = 2;      // afterTime in bog-analytics (optional)
     int32 limit = 3;           // limit in bog-analytics (optional)
-    string api_key = 4;
+    string configEnvironment = 4;
+    int64 configId = 5;
 }
 
 message GetAllVisitEventsRequest {
     string project_name = 1;
     string after_time = 2;
     int32 limit = 3;
-    string api_key = 4;
+    string configEnvironment = 4;
+    int64 configId = 5;
 }
 
 message GetAllInputEventsRequest {
     string project_name = 1;
     string after_time = 2;
     int32 limit = 3;
-    string api_key = 4;
+    string configEnvironment = 4;
+    int64 configId = 5;
 }
 
 message GetAllCustomEventsRequest {
@@ -144,7 +160,8 @@ message GetAllCustomEventsRequest {
     string subcategory = 3;
     string after_time = 4;
     int32 limit = 5;
-    string api_key = 6;
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 // Event Properties - match bog-analytics eventProperties

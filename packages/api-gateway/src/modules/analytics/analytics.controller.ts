@@ -87,7 +87,9 @@ export class AnalyticsController implements OnModuleInit {
       this.analyticsService.logClickEvent({
         objectId: request.objectId,
         userId: request.userId,
-        apiKey: request.apiKey,
+        configId: apiKey.project.id,
+        environment: apiKey.environment,
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -112,7 +114,9 @@ export class AnalyticsController implements OnModuleInit {
       this.analyticsService.logVisitEvent({
         pageUrl: request.pageUrl,
         userId: request.userId,
-        apiKey: request.apiKey,
+        configId: apiKey.project.id,
+        environment: apiKey.environment,
+        configEnvironment: apiKey.environment,
       }),
     );
 
@@ -138,7 +142,9 @@ export class AnalyticsController implements OnModuleInit {
         objectId: request.objectId,
         userId: request.userId,
         textValue: request.textValue,
-        apiKey: request.apiKey,
+        configId: apiKey.project.id,
+        environment: apiKey.environment,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -164,7 +170,9 @@ export class AnalyticsController implements OnModuleInit {
         category: request.category,
         subcategory: request.subcategory,
         properties: request.properties,
-        apiKey: request.apiKey,
+        environment: apiKey.environment,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -189,7 +197,8 @@ export class AnalyticsController implements OnModuleInit {
     const response = await lastValueFrom(
       this.analyticsService.getCustomEventTypes({
         projectName: query.projectName,
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -216,7 +225,8 @@ export class AnalyticsController implements OnModuleInit {
       this.analyticsService.getCustomGraphTypesById({
         projectName: query.projectName,
         eventTypeId: query.eventTypeId,
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -269,7 +279,8 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -308,7 +319,8 @@ export class AnalyticsController implements OnModuleInit {
         projectName: query.projectName,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -361,7 +373,8 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -400,7 +413,8 @@ export class AnalyticsController implements OnModuleInit {
         projectName: query.projectName,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -453,7 +467,8 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -492,7 +507,8 @@ export class AnalyticsController implements OnModuleInit {
         projectName: query.projectName,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -553,7 +569,8 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 
@@ -600,7 +617,8 @@ export class AnalyticsController implements OnModuleInit {
         subcategory: query.subcategory,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        apiKey: query.apiKey,
+        configId: apiKey.project.id,
+        configEnvironment: apiKey.environment
       }),
     );
 

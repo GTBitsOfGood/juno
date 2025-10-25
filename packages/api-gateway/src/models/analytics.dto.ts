@@ -27,15 +27,6 @@ export class LogClickEventRequest {
   @IsNotEmpty()
   @IsString()
   userId: string;
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 export class LogVisitEventRequest {
@@ -56,15 +47,6 @@ export class LogVisitEventRequest {
   @IsNotEmpty()
   @IsString()
   userId: string;
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 export class LogInputEventRequest {
@@ -94,15 +76,6 @@ export class LogInputEventRequest {
   @IsNotEmpty()
   @IsString()
   textValue: string;
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 export class LogCustomEventRequest {
@@ -131,15 +104,6 @@ export class LogCustomEventRequest {
   })
   @IsObject()
   properties: { [key: string]: string };
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 // Query DTOs for retrieving events
@@ -152,15 +116,6 @@ export class GetCustomEventTypesQuery {
   @IsNotEmpty()
   @IsString()
   projectName: string;
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 export class GetCustomGraphTypesQuery {
@@ -181,15 +136,6 @@ export class GetCustomGraphTypesQuery {
   @IsNotEmpty()
   @IsString()
   eventTypeId: string;
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 export class GetEventsQuery {
@@ -237,15 +183,6 @@ export class GetEventsQuery {
   @IsOptional()
   @IsString()
   afterTime?: string;
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 export class GetCustomEventsQuery extends GetEventsQuery {
@@ -295,15 +232,6 @@ export class GetAllEventsQuery {
   @IsOptional()
   @IsNumber()
   limit?: number;
-
-  @ApiProperty({
-    type: 'string',
-    description: 'API key for analytics service authentication',
-    example: 'analytics_api_key_123',
-  })
-  @IsNotEmpty()
-  @IsString()
-  apiKey: string;
 }
 
 export class GetAllCustomEventsQuery extends GetAllEventsQuery {
