@@ -311,6 +311,7 @@ export class AnalyticsService implements OnModuleInit {
       };
     }
 
+    // TODO: This should not return only the first type
     // Return the first custom event type for now
     const eventType = response[0];
     return {
