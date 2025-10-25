@@ -123,7 +123,7 @@ describe('Analytics Config Tests', () => {
     expect(response.clientAnalyticsKey).toBe('test-analytics-key-2');
   });
 
-  it('creates a duplicate analytics config', async () => {
+  it('creates a duplicate analytics config in different environment', async () => {
     const response: AnalyticsConfigProto.AnalyticsServiceConfig =
       await new Promise((resolve, reject) => {
         configClient.createAnalyticsConfig(
@@ -146,6 +146,24 @@ describe('Analytics Config Tests', () => {
     expect(response.environment).toBe('prod');
     expect(response.serverAnalyticsKey).toBe('test-analytics-key');
     expect(response.clientAnalyticsKey).toBe('test-analytics-key-2');
+  });
+
+  it('creates a duplicate analytics config in same environment', async () => {
+    await new Promise((resolve) => {
+      configClient.createAnalyticsConfig(
+        {
+          projectId: 0,
+          environment: 'prod',
+          serverAnalyticsKey: 'test-analytics-key',
+          clientAnalyticsKey: 'test-analytics-key-2',
+        },
+        (err) => {
+          expect(err.code).toBe(GRPC.status.ALREADY_EXISTS);
+          expect(err.details).toBe('Analytics configuration already exists');
+          resolve(err);
+        },
+      );
+    });
   });
 
   it('reads an analytics config', async () => {

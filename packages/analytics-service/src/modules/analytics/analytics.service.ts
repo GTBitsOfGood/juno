@@ -485,11 +485,13 @@ export class AnalyticsService implements OnModuleInit {
   async getVisitEventsPaginated(
     request: AnalyticsProto.GetVisitEventsRequest,
   ): Promise<AnalyticsProto.GetVisitEventsResponse> {
+    console.log('Get VisitEventsPaginated.');
     const viewer = await this.getAnalyticsViewer(
       this.EventEnvironment.DEVELOPMENT,
       request.configId,
       request.configEnvironment,
     );
+    console.log('Got viewer');
 
     if (!request.projectName || request.projectName.length === 0) {
       throw new RpcException({
@@ -497,6 +499,7 @@ export class AnalyticsService implements OnModuleInit {
         message: 'Invalid GetVisitEventsRequest: projectName is required',
       });
     }
+    console.log('past project name validation.');
 
     const queryParams = {
       projectName: request.projectName,
@@ -505,10 +508,12 @@ export class AnalyticsService implements OnModuleInit {
       limit: request.limit || undefined,
       afterTime: request.afterTime || undefined,
     };
+    console.log('Defined query params', queryParams);
 
     const response = await viewer.getVisitEventsPaginated(queryParams);
-
+    console.log('Past getting biewier events.');
     if (!response) {
+      console.log('Failed to get response.');
       return { events: [], afterId: '' };
     }
 

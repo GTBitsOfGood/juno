@@ -4,7 +4,7 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AnalyticsViewerService } from 'src/bog-analytics.service';
+//import { AnalyticsViewerService } from 'src/bog-analytics.service';
 import {
   ResetProtoFile,
   AnalyticsProto,
@@ -309,12 +309,15 @@ const mockAnalyticsViewerService = {
 jest.setTimeout(10000);
 
 async function initApp() {
+  const loadModule = eval('(specifier) => import(specifier)');
+  const bogAnalytics = await loadModule('bog-analytics');
+
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   })
     .overrideProvider('BOG_ANALYTICS')
     .useValue(mockBogAnalyticsService)
-    .overrideProvider(AnalyticsViewerService)
+    .overrideProvider(bogAnalytics.AnalyticsViewer)
     .useValue(mockAnalyticsViewerService)
     .compile();
 

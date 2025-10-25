@@ -11,6 +11,9 @@ import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
+import { of } from 'rxjs';
+import { AnalyticsProto } from 'juno-proto';
+const { ANALYTICS_SERVICE_NAME } = AnalyticsProto;
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -54,10 +57,130 @@ async function createApiKey(proj: string, env: string): Promise<string> {
   return key.body['apiKey'];
 }
 
+const mockAnalyticsService = {
+  logClickEvent: jest.fn((data) =>
+    of({
+      id: 'mock-click-event-id',
+      category: 'Interaction',
+      subcategory: 'Click',
+      projectId: data.configId,
+      environment: data.environment,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      eventProperties: {
+        objectId: data.objectId,
+        userId: data.userId,
+      },
+    }),
+  ),
+  logVisitEvent: jest.fn((data) =>
+    of({
+      id: 'mock-visit-event-id',
+      category: 'Interaction',
+      subcategory: 'Visit',
+      projectId: data.configId,
+      environment: data.environment,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      eventProperties: {
+        pageUrl: data.pageUrl,
+        userId: data.userId,
+      },
+    }),
+  ),
+  logInputEvent: jest.fn((data) =>
+    of({
+      id: 'mock-input-event-id',
+      category: 'Interaction',
+      subcategory: 'Input',
+      projectId: data.configId,
+      environment: data.environment,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      eventProperties: {
+        objectId: data.objectId,
+        userId: data.userId,
+        textValue: data.textValue,
+      },
+    }),
+  ),
+  logCustomEvent: jest.fn((data) =>
+    of({
+      id: 'mock-custom-event-id',
+      category: data.category,
+      subcategory: data.subcategory,
+      projectId: data.configId,
+      environment: data.environment,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      eventProperties: data.properties,
+    }),
+  ),
+  getCustomEventTypes: jest.fn(() =>
+    of({
+      eventTypes: [],
+    }),
+  ),
+  getCustomGraphTypesById: jest.fn(() =>
+    of({
+      graphTypes: [],
+    }),
+  ),
+  getClickEventsPaginated: jest.fn(() =>
+    of({
+      events: [],
+      nextCursor: null,
+    }),
+  ),
+  getAllClickEvents: jest.fn(() =>
+    of({
+      events: [],
+    }),
+  ),
+  getVisitEventsPaginated: jest.fn(() =>
+    of({
+      events: [],
+      nextCursor: null,
+    }),
+  ),
+  getAllVisitEvents: jest.fn(() =>
+    of({
+      events: [],
+    }),
+  ),
+  getInputEventsPaginated: jest.fn(() =>
+    of({
+      events: [],
+      nextCursor: null,
+    }),
+  ),
+  getAllInputEvents: jest.fn(() =>
+    of({
+      events: [],
+    }),
+  ),
+  getCustomEventsPaginated: jest.fn(() =>
+    of({
+      events: [],
+      nextCursor: null,
+    }),
+  ),
+  getAllCustomEvents: jest.fn(() =>
+    of({
+      events: [],
+    }),
+  ),
+};
+
 beforeEach(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider(ANALYTICS_SERVICE_NAME) // <-- This is the key line
+    .useValue({
+      getService: () => mockAnalyticsService, // <-- Mock the getService method
+    })
+    .compile();
 
   app = moduleFixture.createNestApplication();
   app.useGlobalPipes(
@@ -69,9 +192,21 @@ beforeEach(async () => {
   app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
-
+  // How do i mock the analytics service completely here.
   if (!apiKey) {
     apiKey = await createApiKey('test-seed-project', 'prod');
+    // Create analytics config for the project
+    try {
+      await request(app.getHttpServer())
+        .post('/analytics/config')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .send({
+          serverAnalyticsKey: 'test-server-analytics-key',
+          clientAnalyticsKey: 'test-client-analytics-key',
+        });
+    } catch (e) {
+      // Config might already exist, that's okay
+    }
   }
 });
 
@@ -85,7 +220,6 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'button-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(201);
     });
@@ -96,7 +230,6 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'button-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(401);
     });
@@ -108,7 +241,6 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'button-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(401);
     });
@@ -120,7 +252,6 @@ describe('Analytics Event Logging Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -132,7 +263,6 @@ describe('Analytics Event Logging Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
           objectId: 'button-123',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -147,7 +277,6 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           pageUrl: 'https://example.com/dashboard',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(201);
     });
@@ -158,19 +287,6 @@ describe('Analytics Event Logging Routes', () => {
         .post('/analytics/events/visit')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
-          userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
-        })
-        .expect(400);
-    });
-
-    it('Failed to log visit event due to missing analytics API key', async () => {
-      const apiKey = await createApiKey('test-seed-project', 'prod');
-      return await request(app.getHttpServer())
-        .post('/analytics/events/visit')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .send({
-          pageUrl: 'https://example.com/dashboard',
           userId: 'user-456',
         })
         .expect(400);
@@ -187,7 +303,6 @@ describe('Analytics Event Logging Routes', () => {
           objectId: 'search-field-123',
           userId: 'user-456',
           textValue: 'search query',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(201);
     });
@@ -200,7 +315,6 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           objectId: 'search-field-123',
           userId: 'user-456',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -216,7 +330,6 @@ describe('Analytics Event Logging Routes', () => {
           category: 'user_action',
           subcategory: 'form_submission',
           properties: { formType: 'contact', source: 'homepage' },
-          apiKey: 'analytics-api-key-789',
         })
         .expect(201);
     });
@@ -229,7 +342,6 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           subcategory: 'form_submission',
           properties: { formType: 'contact' },
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -242,7 +354,6 @@ describe('Analytics Event Logging Routes', () => {
         .send({
           category: 'user_action',
           properties: { formType: 'contact' },
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -258,7 +369,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -268,20 +378,7 @@ describe('Analytics Event Retrieval Routes', () => {
       return await request(app.getHttpServer())
         .get('/analytics/custom-event-types')
         .set('Authorization', 'Bearer ' + apiKey)
-        .query({
-          apiKey: 'analytics-api-key-789',
-        })
-        .expect(400);
-    });
-
-    it('Failed to get custom event types due to missing analytics API key', async () => {
-      const apiKey = await createApiKey('test-seed-project', 'prod');
-      return await request(app.getHttpServer())
-        .get('/analytics/custom-event-types')
-        .set('Authorization', 'Bearer ' + apiKey)
-        .query({
-          projectName: 'test-seed-project',
-        })
+        .query({})
         .expect(400);
     });
   });
@@ -295,7 +392,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           eventTypeId: 'event-type-123',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -307,7 +403,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -323,7 +418,6 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -339,7 +433,6 @@ describe('Analytics Event Retrieval Routes', () => {
           environment: 'development',
           limit: 5,
           afterTime: '2023-01-01T00:00:00Z',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -349,9 +442,7 @@ describe('Analytics Event Retrieval Routes', () => {
       return await request(app.getHttpServer())
         .get('/analytics/events/click')
         .set('Authorization', 'Bearer ' + apiKey)
-        .query({
-          apiKey: 'analytics-api-key-789',
-        })
+        .query({})
         .expect(400);
     });
   });
@@ -365,7 +456,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           limit: 100,
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -378,7 +468,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           afterTime: '2023-01-01T00:00:00Z',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -394,7 +483,6 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -404,7 +492,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .get('/analytics/events/visit')
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(401);
     });
@@ -418,7 +505,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -434,7 +520,6 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -448,7 +533,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -466,7 +550,6 @@ describe('Analytics Event Retrieval Routes', () => {
           subcategory: 'form_submission',
           environment: 'production',
           limit: 10,
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -479,7 +562,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           subcategory: 'form_submission',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -492,7 +574,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .query({
           projectName: 'test-seed-project',
           category: 'user_action',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -508,7 +589,6 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
           category: 'user_action',
           subcategory: 'form_submission',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -524,7 +604,6 @@ describe('Analytics Event Retrieval Routes', () => {
           subcategory: 'form_submission',
           afterTime: '2023-01-01T00:00:00Z',
           limit: 50,
-          apiKey: 'analytics-api-key-789',
         })
         .expect(200);
     });
@@ -536,7 +615,6 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
         })
         .expect(400);
     });
@@ -564,7 +642,6 @@ describe('Analytics Authentication and Error Handling', () => {
         .set('Authorization', 'Bearer invalid.api.key')
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
           ...(endpoint.includes('custom') && !endpoint.includes('types')
             ? {
                 category: 'user_action',
@@ -593,7 +670,6 @@ describe('Analytics Authentication and Error Handling', () => {
         .get(endpoint)
         .query({
           projectName: 'test-seed-project',
-          apiKey: 'analytics-api-key-789',
           ...(endpoint.includes('custom') && !endpoint.includes('types')
             ? {
                 category: 'user_action',
@@ -623,7 +699,6 @@ describe('Analytics Authentication and Error Handling', () => {
         category: '',
         subcategory: 'form_submission',
         properties: 'invalid-properties',
-        apiKey: 'analytics-api-key-789',
       })
       .expect(400);
   });
@@ -638,7 +713,6 @@ describe('Analytics Service Routes Log Events', () => {
       .send({
         objectId: 'button-123',
         userId: 'user-456',
-        apiKey: 'api-key-789',
       })
       .expect(201);
   });
@@ -652,7 +726,6 @@ describe('Analytics Service Routes Fetch Events', () => {
       .set('Authorization', 'Bearer ' + apiKey)
       .query({
         projectName: 'test-seed-project',
-        apiKey: 'api-key-789',
       })
       .expect(200);
   });
