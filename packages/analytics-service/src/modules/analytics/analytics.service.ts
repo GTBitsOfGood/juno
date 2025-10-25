@@ -346,7 +346,7 @@ export class AnalyticsService implements OnModuleInit {
       });
     }
 
-    const response = await viewer.getCustomGraphTypesbyId(
+    const response = await viewer.getCustomGraphTypesById(
       request.projectName,
       request.eventTypeId,
     );
