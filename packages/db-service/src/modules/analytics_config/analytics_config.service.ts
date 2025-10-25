@@ -14,7 +14,8 @@ export class AnalyticsConfigService {
       data: {
         id: Number(configData.projectId),
         environment: configData.environment,
-        analyticsKey: configData.analyticsKey,
+        serverAnalyticsKey: configData.serverAnalyticsKey,
+        clientAnalyticsKey: configData.clientAnalyticsKey,
       },
       include: {
         Project: true,

@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { AnalyticsLogger as BogAnalyticsLogger } from 'bog-analytics';
+import {
+  AnalyticsViewer,
+  AnalyticsLogger as BogAnalyticsLogger,
+} from 'bog-analytics';
 
 @Injectable()
 export class BogAnalyticsService extends BogAnalyticsLogger {}
+
+@Injectable()
+export class AnalyticsViewerService extends AnalyticsViewer {}

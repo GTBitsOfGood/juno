@@ -9,6 +9,7 @@ import { FileDownloadModule } from './modules/file_download/file_download.module
 import { FileUploadModule } from './modules/file_upload/file_upload.module';
 import { FileBucketModule } from './modules/file_bucket/file_bucket.module';
 import { FileConfigModule } from './modules/file_config/file_config.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AnalyticsConfigModule } from './modules/analytics_config/analytics_config.module';
 
 @Module({
@@ -23,6 +24,7 @@ import { AnalyticsConfigModule } from './modules/analytics_config/analytics_conf
     FileUploadModule,
     FileBucketModule,
     FileConfigModule,
+    AnalyticsModule,
     AnalyticsConfigModule,
   ],
 })

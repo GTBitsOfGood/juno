@@ -53,7 +53,8 @@ enum Role {
 model AnalyticsServiceConfig {
   id Int
   environment String @default("test")
-  analyticsKey String @default("")
+  serverAnalyticsKey String @default("")
+  clientAnalyticsKey String @default("")
   Project Project @relation(fields: [id], references: [id])
   @@id([id, environment])
 }

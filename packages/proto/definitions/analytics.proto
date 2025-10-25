@@ -3,10 +3,23 @@ syntax = "proto3";
 package juno.analytics_service.analytics;
 
 service AnalyticsService {
+    // BogAnalyticsLogger methods
     rpc logClickEvent(ClickEventRequest) returns (ClickEventResponse);
     rpc logVisitEvent(VisitEventRequest) returns (VisitEventResponse);
     rpc logInputEvent(InputEventRequest) returns (InputEventResponse);
     rpc logCustomEvent(CustomEventRequest) returns (CustomEventResponse);
+
+    // AnalyticsViewer methods
+    rpc getCustomEventTypes(CustomEventTypeRequest) returns (CustomEventTypeResponse);
+    rpc getCustomGraphTypesById(CustomGraphTypeRequest) returns (CustomGraphTypeResponse);
+    rpc getClickEventsPaginated(GetClickEventsRequest) returns (GetClickEventsResponse);
+    rpc getAllClickEvents(GetAllClickEventsRequest) returns (GetAllClickEventsResponse);
+    rpc getVisitEventsPaginated(GetVisitEventsRequest) returns (GetVisitEventsResponse);
+    rpc getAllVisitEvents(GetAllVisitEventsRequest) returns (GetAllVisitEventsResponse);
+    rpc getInputEventsPaginated(GetInputEventsRequest) returns (GetInputEventsResponse);
+    rpc getAllInputEvents(GetAllInputEventsRequest) returns (GetAllInputEventsResponse);
+    rpc getCustomEventsPaginated(GetCustomEventsRequest) returns (GetCustomEventsResponse);
+    rpc getAllCustomEvents(GetAllCustomEventsRequest) returns (GetAllCustomEventsResponse);
 }
 
 // Click Event Request - matches bog-analytics ClickEventProperties
@@ -15,8 +28,9 @@ message ClickEventRequest {
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 3;  // Project ID for analytics config lookup
     string environment = 4; // Environment for analytics config lookup
+    string configEnvironment = 5;
+    int64 configId = 6;
 }
 
 // Visit Event Request - matches bog-analytics VisitEventProperties  
@@ -25,8 +39,10 @@ message VisitEventRequest {
     string user_id = 2;    // userId in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 3;  // Project ID for analytics config lookup
     string environment = 4; // Environment for analytics config lookup
+  //
+    string configEnvironment = 5;
+    int64 configId = 6;
 }
 
 // Input Event Request - matches bog-analytics InputEventProperties
@@ -36,8 +52,9 @@ message InputEventRequest {
     string text_value = 3;  // textValue in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 4;  // Project ID for analytics config lookup
     string environment = 5; // Environment for analytics config lookup
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 // Custom Event Request - matches bog-analytics logCustomEvent parameters
@@ -47,8 +64,104 @@ message CustomEventRequest {
     map<string, string> properties = 3; // properties object in bog-analytics
     // Note: bog-analytics handles createdAt automatically
 
-    int64 project_id = 4;  // Project ID for analytics config lookup
     string environment = 5; // Environment for analytics config lookup
+
+
+    string configEnvironment = 6;
+    int64 configId = 7;
+}
+
+message CustomEventTypeRequest {
+    string project_name = 1;
+    string configEnvironment = 2;
+    int64 configId = 3;
+}
+
+message CustomGraphTypeRequest {
+    string project_name = 1;
+    string event_type_id = 2;
+    string configEnvironment = 3;
+    int64 configId = 4;
+}
+
+// Paginated requests - matches bog-analytics GetEventsQueryParams
+message GetClickEventsRequest {
+    string project_name = 1;
+    string after_id = 2;        // afterId in bog-analytics (optional)
+    string environment = 3;     // environment in bog-analytics
+    int32 limit = 4;           // limit in bog-analytics (optional)
+    string after_time = 5;     // afterTime in bog-analytics (optional)
+    string configEnvironment = 6;
+    int64 configId = 7;
+}
+
+message GetVisitEventsRequest {
+    string project_name = 1;
+    string after_id = 2;
+    string environment = 3;
+    int32 limit = 4;
+    string after_time = 5;
+
+    string configEnvironment = 6;
+    int64 configId = 7;
+}
+
+message GetInputEventsRequest {
+    string project_name = 1;
+    string after_id = 2;
+    string environment = 3;
+    int32 limit = 4;
+    string after_time = 5;
+    string configEnvironment = 6;
+    int64 configId = 7;
+}
+
+// Custom events extends the base pattern with category/subcategory
+message GetCustomEventsRequest {
+    string project_name = 1;
+    string after_id = 2;
+    string environment = 3;
+    int32 limit = 4;
+    string after_time = 5;
+    string category = 6;        // category for custom events
+    string subcategory = 7;     // subcategory for custom events
+    string configEnvironment = 8;
+    int64 configId = 9;
+}
+
+// "Get All" requests - simpler, matches bog-analytics getAllXXXEvents
+message GetAllClickEventsRequest {
+    string project_name = 1;
+    string after_time = 2;      // afterTime in bog-analytics (optional)
+    int32 limit = 3;           // limit in bog-analytics (optional)
+    string configEnvironment = 4;
+    int64 configId = 5;
+}
+
+message GetAllVisitEventsRequest {
+    string project_name = 1;
+    string after_time = 2;
+    int32 limit = 3;
+    string configEnvironment = 4;
+    int64 configId = 5;
+}
+
+message GetAllInputEventsRequest {
+    string project_name = 1;
+    string after_time = 2;
+    int32 limit = 3;
+    string configEnvironment = 4;
+    int64 configId = 5;
+}
+
+message GetAllCustomEventsRequest {
+    string project_name = 1;
+    string category = 2;
+    string subcategory = 3;
+    string after_time = 4;
+    int32 limit = 5;
+    string configEnvironment = 6;
+    int64 configId = 7;
 }
 
 // Event Properties - match bog-analytics eventProperties
@@ -122,4 +235,65 @@ message CustomEventResponse {
     string created_at = 5;                      // createdAt field
     string updated_at = 6;                      // updatedAt field
     map<string, string> properties = 7;        // Custom properties object
+}
+
+message CustomEventTypeResponse {
+    string id = 1;
+    string category = 2;
+    string subcategory = 3;
+    repeated string properties = 4;
+    string project_id = 5;
+}
+
+message CustomGraphTypeResponse {
+    repeated CustomGraphType graphs = 1;
+}
+
+message CustomGraphType {
+    string id = 1;
+    string event_type_id = 2;
+    string project_id = 3;
+    string graph_title = 4;
+    string x_property = 5;
+    string y_property = 6;
+    string graph_type = 7;
+    string caption = 8;         // optional field
+}
+
+// Paginated responses - reuse existing response types in arrays + afterId
+message GetClickEventsResponse {
+    repeated ClickEventResponse events = 1;
+    string after_id = 2;
+}
+
+message GetVisitEventsResponse {
+    repeated VisitEventResponse events = 1;
+    string after_id = 2;
+}
+
+message GetInputEventsResponse {
+    repeated InputEventResponse events = 1;
+    string after_id = 2;
+}
+
+message GetCustomEventsResponse {
+    repeated CustomEventResponse events = 1;
+    string after_id = 2;
+}
+
+// "Get All" responses - just arrays of existing response types
+message GetAllClickEventsResponse {
+    repeated ClickEventResponse events = 1;
+}
+
+message GetAllVisitEventsResponse {
+    repeated VisitEventResponse events = 1;
+}
+
+message GetAllInputEventsResponse {
+    repeated InputEventResponse events = 1;
+}
+
+message GetAllCustomEventsResponse {
+    repeated CustomEventResponse events = 1;
 }

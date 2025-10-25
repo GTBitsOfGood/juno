@@ -83,14 +83,16 @@ describe('Analytics Config Routes (e2e)', () => {
         .post('/analytics/config')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
-          analyticsKey: 'test-analytics-key-123',
+          serverAnalyticsKey: 'test-analytics-key-123',
+          clientAnalyticsKey: 'test-analytics-key-123',
         })
         .expect(201)
         .expect((res) => {
           expect(res.body).toHaveProperty('id');
           expect(res.body).toHaveProperty('environment');
           expect(res.body).toHaveProperty('analyticsKey');
-          expect(res.body.analyticsKey).toBe('test-analytics-key-123');
+          expect(res.body.serverAnalyticsKey).toBe('test-analytics-key-123');
+          expect(res.body.clientAnalyticsKey).toBe('test-analytics-key-123');
         });
     });
 
@@ -106,7 +108,8 @@ describe('Analytics Config Routes (e2e)', () => {
       return await request(app.getHttpServer())
         .post('/analytics/config')
         .send({
-          analyticsKey: 'test-analytics-key-123',
+          serverAnalyticsKey: 'test-analytics-key-123',
+          clientAnalyticsKey: 'test-analytics-key-123',
         })
         .expect(401);
     });
@@ -118,7 +121,8 @@ describe('Analytics Config Routes (e2e)', () => {
         .post('/analytics/config')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
-          analyticsKey: 'duplicate-test-key',
+          serverAnalyticsKey: 'test-analytics-key-123',
+          clientAnalyticsKey: 'test-analytics-key-123',
         })
         .expect(409);
     });
@@ -134,7 +138,11 @@ describe('Analytics Config Routes (e2e)', () => {
           expect(res.body).toHaveProperty('id', 0);
           expect(res.body).toHaveProperty('environment');
           expect(res.body).toHaveProperty(
-            'analyticsKey',
+            'serverAnalyticsKey',
+            'test-analytics-key-123',
+          );
+          expect(res.body).toHaveProperty(
+            'clientAnalyticsKey',
             'test-analytics-key-123',
           );
         });
@@ -167,13 +175,18 @@ describe('Analytics Config Routes (e2e)', () => {
         .put('/analytics/config/0')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
-          analyticsKey: 'updated-analytics-key',
+          serverAnalyticsKey: 'updated-analytics-key',
+          clientAnalyticsKey: 'updated-analytics-key',
         })
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('id', 0);
           expect(res.body).toHaveProperty(
-            'analyticsKey',
+            'serverAnalyticsKey',
+            'updated-analytics-key',
+          );
+          expect(res.body).toHaveProperty(
+            'clientAnalyticsKey',
             'updated-analytics-key',
           );
         });
@@ -184,7 +197,8 @@ describe('Analytics Config Routes (e2e)', () => {
         .put('/analytics/config/invalid-id')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
-          analyticsKey: 'updated-key',
+          serverAnalyticsKey: 'updated-key',
+          clientAnalyticsKey: 'updated-key',
         })
         .expect(400);
     });
@@ -193,7 +207,8 @@ describe('Analytics Config Routes (e2e)', () => {
       return await request(app.getHttpServer())
         .put('/analytics/config/0')
         .send({
-          analyticsKey: 'updated-key',
+          serverAnalyticsKey: 'updated-key',
+          clientAnalyticsKey: 'updated-key',
         })
         .expect(401);
     });
@@ -203,7 +218,8 @@ describe('Analytics Config Routes (e2e)', () => {
         .put('/analytics/config/999')
         .set('Authorization', 'Bearer ' + apiKey)
         .send({
-          analyticsKey: 'updated-key',
+          serverAnalyticsKey: 'updated-key',
+          clientAnalyticsKey: 'updated-key',
         })
         .expect(404);
     });
@@ -218,7 +234,7 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect((res) => {
           expect(res.body).toHaveProperty('id', 0);
           expect(res.body).toHaveProperty(
-            'analyticsKey',
+            'serverAnalyticsKey',
             'updated-analytics-key',
           );
         });
