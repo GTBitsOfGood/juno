@@ -239,7 +239,7 @@ export class AnalyticsService implements OnModuleInit {
     const logger = await this.getAnalyticsLogger(
       this.EventEnvironment.DEVELOPMENT,
       event.configId,
-      event.environment,
+      event.configEnvironment,
     );
 
     if (
