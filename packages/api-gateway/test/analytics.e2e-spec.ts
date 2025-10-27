@@ -176,9 +176,9 @@ beforeEach(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   })
-    .overrideProvider(ANALYTICS_SERVICE_NAME) // <-- This is the key line
+    .overrideProvider(ANALYTICS_SERVICE_NAME)
     .useValue({
-      getService: () => mockAnalyticsService, // <-- Mock the getService method
+      getService: () => mockAnalyticsService,
     })
     .compile();
 
@@ -192,9 +192,10 @@ beforeEach(async () => {
   app.useGlobalFilters(new RpcExceptionFilter());
 
   await app.init();
-  // How do i mock the analytics service completely here.
+
   if (!apiKey) {
     apiKey = await createApiKey('test-seed-project', 'prod');
+
     // Create analytics config for the project
     try {
       await request(app.getHttpServer())
