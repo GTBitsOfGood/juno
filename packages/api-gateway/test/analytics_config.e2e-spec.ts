@@ -90,7 +90,6 @@ describe('Analytics Config Routes (e2e)', () => {
         .expect((res) => {
           expect(res.body).toHaveProperty('id');
           expect(res.body).toHaveProperty('environment');
-          expect(res.body).toHaveProperty('analyticsKey');
           expect(res.body.serverAnalyticsKey).toBe('test-analytics-key-123');
           expect(res.body.clientAnalyticsKey).toBe('test-analytics-key-123');
         });

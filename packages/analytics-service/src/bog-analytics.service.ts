@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import {
   AnalyticsViewer,
   AnalyticsLogger as BogAnalyticsLogger,

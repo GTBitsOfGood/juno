@@ -4,13 +4,14 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AnalyticsViewerService } from 'src/bog-analytics.service';
+import { AnalyticsService } from 'src/modules/analytics/analytics.service';
 import {
   ResetProtoFile,
   AnalyticsProto,
   AnalyticsProtoFile,
   AnalyticsConfigProtoFile,
 } from 'juno-proto';
+import { ANALYTICS_CONFIG_DB_SERVICE_NAME } from 'juno-proto/dist/gen/analytics_config';
 
 const { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } = AnalyticsProto;
 
@@ -18,7 +19,7 @@ let app: INestMicroservice;
 let analyticsConfigClient: any;
 
 const mockBogAnalyticsService = {
-  authenticate: jest.fn(),
+  authenticate: jest.fn().mockReturnValue(undefined),
   logClickEvent: jest.fn().mockImplementation((event) =>
     Promise.resolve({
       _id: 'mock-click-event-id',
@@ -74,11 +75,12 @@ const mockBogAnalyticsService = {
     ),
 };
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const mockAnalyticsViewerService = {
-  authenticate: jest.fn(),
+  authenticate: jest.fn().mockReturnValue(undefined),
 
   // Custom Event Types
-  getCustomEventTypes: jest.fn().mockImplementation(() =>
+  getCustomEventTypes: jest.fn().mockImplementation((_projectName) =>
     Promise.resolve([
       {
         _id: 'custom-event-type-1',
@@ -100,33 +102,35 @@ const mockAnalyticsViewerService = {
   ),
 
   // Custom Graph Types
-  getCustomGraphTypesbyId: jest.fn().mockImplementation(() =>
-    Promise.resolve([
-      {
-        _id: 'graph-1',
-        eventTypeId: 'custom-event-type-1',
-        projectId: 'test-project-id',
-        graphTitle: 'Form Submissions Over Time',
-        xProperty: 'createdAt',
-        yProperty: 'count',
-        graphType: 'line',
-        caption: 'Track form submission trends',
-      },
-      {
-        _id: 'graph-2',
-        eventTypeId: 'custom-event-type-1',
-        projectId: 'test-project-id',
-        graphTitle: 'Form Types Distribution',
-        xProperty: 'formType',
-        yProperty: 'count',
-        graphType: 'pie',
-        caption: 'Distribution of form types',
-      },
-    ]),
-  ),
+  getCustomGraphTypesById: jest
+    .fn()
+    .mockImplementation((_projectName, _eventTypeId) =>
+      Promise.resolve([
+        {
+          _id: 'graph-1',
+          eventTypeId: 'custom-event-type-1',
+          projectId: 'test-project-id',
+          graphTitle: 'Form Submissions Over Time',
+          xProperty: 'createdAt',
+          yProperty: 'count',
+          graphType: 'line',
+          caption: 'Track form submission trends',
+        },
+        {
+          _id: 'graph-2',
+          eventTypeId: 'custom-event-type-1',
+          projectId: 'test-project-id',
+          graphTitle: 'Form Types Distribution',
+          xProperty: 'formType',
+          yProperty: 'count',
+          graphType: 'pie',
+          caption: 'Distribution of form types',
+        },
+      ]),
+    ),
 
   // Click Events
-  getClickEventsPaginated: jest.fn().mockImplementation(() =>
+  getClickEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
     Promise.resolve({
       events: [
         {
@@ -154,33 +158,35 @@ const mockAnalyticsViewerService = {
     }),
   ),
 
-  getAllClickEvents: jest.fn().mockImplementation(() =>
-    Promise.resolve([
-      {
-        _id: 'click-1',
-        category: 'Interaction',
-        subcategory: 'Click',
-        projectId: 'test-project-id',
-        environment: 'development',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventProperties: { objectId: 'button-1', userId: 'user-1' },
-      },
-      {
-        _id: 'click-2',
-        category: 'Interaction',
-        subcategory: 'Click',
-        projectId: 'test-project-id',
-        environment: 'development',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventProperties: { objectId: 'button-2', userId: 'user-2' },
-      },
-    ]),
-  ),
+  getAllClickEvents: jest
+    .fn()
+    .mockImplementation((_projectName, _afterTime, _limit) =>
+      Promise.resolve([
+        {
+          _id: 'click-1',
+          category: 'Interaction',
+          subcategory: 'Click',
+          projectId: 'test-project-id',
+          environment: 'development',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          eventProperties: { objectId: 'button-1', userId: 'user-1' },
+        },
+        {
+          _id: 'click-2',
+          category: 'Interaction',
+          subcategory: 'Click',
+          projectId: 'test-project-id',
+          environment: 'development',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          eventProperties: { objectId: 'button-2', userId: 'user-2' },
+        },
+      ]),
+    ),
 
   // Visit Events
-  getVisitEventsPaginated: jest.fn().mockImplementation(() =>
+  getVisitEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
     Promise.resolve({
       events: [
         {
@@ -208,23 +214,25 @@ const mockAnalyticsViewerService = {
     }),
   ),
 
-  getAllVisitEvents: jest.fn().mockImplementation(() =>
-    Promise.resolve([
-      {
-        _id: 'visit-1',
-        category: 'Activity',
-        subcategory: 'Visit',
-        projectId: 'test-project-id',
-        environment: 'development',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventProperties: { pageUrl: '/home', userId: 'user-1' },
-      },
-    ]),
-  ),
+  getAllVisitEvents: jest
+    .fn()
+    .mockImplementation((_projectName, _afterTime, _limit) =>
+      Promise.resolve([
+        {
+          _id: 'visit-1',
+          category: 'Activity',
+          subcategory: 'Visit',
+          projectId: 'test-project-id',
+          environment: 'development',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          eventProperties: { pageUrl: '/home', userId: 'user-1' },
+        },
+      ]),
+    ),
 
   // Input Events
-  getInputEventsPaginated: jest.fn().mockImplementation(() =>
+  getInputEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
     Promise.resolve({
       events: [
         {
@@ -246,27 +254,29 @@ const mockAnalyticsViewerService = {
     }),
   ),
 
-  getAllInputEvents: jest.fn().mockImplementation(() =>
-    Promise.resolve([
-      {
-        _id: 'input-1',
-        category: 'Interaction',
-        subcategory: 'Input',
-        projectId: 'test-project-id',
-        environment: 'development',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventProperties: {
-          objectId: 'search-field',
-          userId: 'user-1',
-          textValue: 'analytics query',
+  getAllInputEvents: jest
+    .fn()
+    .mockImplementation((_projectName, _afterTime, _limit) =>
+      Promise.resolve([
+        {
+          _id: 'input-1',
+          category: 'Interaction',
+          subcategory: 'Input',
+          projectId: 'test-project-id',
+          environment: 'development',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          eventProperties: {
+            objectId: 'search-field',
+            userId: 'user-1',
+            textValue: 'analytics query',
+          },
         },
-      },
-    ]),
-  ),
+      ]),
+    ),
 
   // Custom Events
-  getCustomEventsPaginated: jest.fn().mockImplementation(() =>
+  getCustomEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
     Promise.resolve({
       events: [
         {
@@ -287,36 +297,72 @@ const mockAnalyticsViewerService = {
     }),
   ),
 
-  getAllCustomEvents: jest.fn().mockImplementation(() =>
-    Promise.resolve([
-      {
-        _id: 'custom-1',
-        eventTypeId: 'custom-event-type-1',
-        projectId: 'test-project-id',
-        environment: 'development',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        properties: {
-          formType: 'contact',
-          formId: 'contact-form-1',
-          userId: 'user-1',
-        },
-      },
-    ]),
-  ),
+  getAllCustomEvents: jest
+    .fn()
+    .mockImplementation(
+      (_projectName, _category, _subcategory, _afterTime, _limit) =>
+        Promise.resolve([
+          {
+            _id: 'custom-1',
+            eventTypeId: 'custom-event-type-1',
+            projectId: 'test-project-id',
+            environment: 'development',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            properties: {
+              formType: 'contact',
+              formId: 'contact-form-1',
+              userId: 'user-1',
+            },
+          },
+        ]),
+    ),
 };
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 jest.setTimeout(10000);
 
 async function initApp() {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  const MockAnalyticsLoggerConstructor = jest.fn().mockImplementation(function (
+    _config: any,
+  ) {
+    return mockBogAnalyticsService;
+  });
+
+  const MockAnalyticsViewerConstructor = jest.fn().mockImplementation(function (
+    _config: any,
+  ) {
+    return mockAnalyticsViewerService;
+  });
+  /* eslint-enable @typescript-eslint/no-unused-vars */
+
+  const MockEventEnvironment = {
+    DEVELOPMENT: 'development',
+    PRODUCTION: 'production',
+    STAGING: 'staging',
+  };
+
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  })
-    .overrideProvider('BOG_ANALYTICS')
-    .useValue(mockBogAnalyticsService)
-    .overrideProvider(AnalyticsViewerService)
-    .useValue(mockAnalyticsViewerService)
-    .compile();
+  }).compile();
+
+  const analyticsService = moduleFixture.get(AnalyticsService);
+
+  // Replace onModuleInit to set up gRPC client but skip bog-analytics import
+  analyticsService.onModuleInit = jest.fn().mockImplementation(async function (
+    this: any,
+  ) {
+    // Set up the analytics config gRPC client (needed for getAnalyticsViewer)
+    this.analyticsService = this.analyticsClient.getService(
+      ANALYTICS_CONFIG_DB_SERVICE_NAME,
+    );
+
+    // Skip the bog-analytics import and use our mocks instead
+    this.AnalyticsLogger = MockAnalyticsLoggerConstructor;
+    this.AnalyticsViewer = MockAnalyticsViewerConstructor;
+    this.EventEnvironment = MockEventEnvironment;
+  });
 
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
@@ -397,8 +443,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log click event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
-      environment: 'test',
+      configId: 0,
+      configEnvironment: 'test',
       objectId: 'button-1',
       userId: 'user-123',
     } as AnalyticsProto.ClickEventRequest;
@@ -421,8 +467,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log click event with invalid analytics config', async () => {
     const request = {
-      projectId: 999,
-      environment: 'nonexistent',
+      configId: 999,
+      configEnvironment: 'nonexistent',
       objectId: 'button-1',
       userId: 'user-123',
     };
@@ -445,8 +491,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log visit event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
-      environment: 'test',
+      configId: 0,
+      configEnvironment: 'test',
       pageUrl: 'https://example.com/page',
       userId: 'user-123',
     } as AnalyticsProto.VisitEventRequest;
@@ -469,8 +515,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log visit event with invalid analytics config', async () => {
     const request = {
-      projectId: 999,
-      environment: 'nonexistent',
+      configId: 999,
+      configEnvironment: 'nonexistent',
       pageUrl: 'https://example.com/page',
       userId: 'user-123',
     };
@@ -493,8 +539,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log input event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
-      environment: 'test',
+      configId: 0,
+      configEnvironment: 'test',
       objectId: 'input-field-1',
       userId: 'user-123',
       textValue: 'user input text',
@@ -519,8 +565,8 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log input event with invalid analytics config', async () => {
     const request = {
-      projectId: 999,
-      environment: 'nonexistent',
+      configId: 999,
+      configEnvironment: 'nonexistent',
       objectId: 'input-field-1',
       userId: 'user-123',
       textValue: 'user input text',
@@ -544,8 +590,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log custom event with valid analytics config', async () => {
     const request = {
-      projectId: 0,
+      configId: 0,
       environment: 'test',
+      configEnvironment: 'test',
       category: 'user-action',
       subcategory: 'form-submit',
       properties: {
@@ -572,8 +619,9 @@ describe('Analytics Service Authenticate Domain Tests', () => {
 
   it('Log custom event with invalid analytics config', async () => {
     const request = {
-      projectId: 999,
+      configId: 999,
       environment: 'nonexistent',
+      configEnvironment: 'nonexistent',
       category: 'user-action',
       subcategory: 'form-submit',
       properties: {
@@ -616,6 +664,8 @@ describe('Analytics Service Viewer Tests', () => {
       const request = {
         apiKey: 'mock-api-key-123',
         projectName: 'test-project',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.CustomEventTypeRequest;
 
       const response: AnalyticsProto.CustomEventTypeResponse =
@@ -642,6 +692,8 @@ describe('Analytics Service Viewer Tests', () => {
       const request = {
         apiKey: 'invalid-api-key',
         projectName: 'test-project',
+        configId: 0,
+        configEnvironment: 'test',
       };
 
       try {
@@ -664,6 +716,8 @@ describe('Analytics Service Viewer Tests', () => {
       const request = {
         apiKey: 'mock-api-key-123',
         projectName: '',
+        configId: 0,
+        configEnvironment: 'test',
       };
 
       try {
@@ -689,6 +743,8 @@ describe('Analytics Service Viewer Tests', () => {
         apiKey: 'mock-api-key-123',
         projectName: 'test-project',
         eventTypeId: 'custom-event-type-1',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.CustomGraphTypeRequest;
 
       const response: AnalyticsProto.CustomGraphTypeResponse =
@@ -715,6 +771,8 @@ describe('Analytics Service Viewer Tests', () => {
         apiKey: 'invalid-api-key',
         projectName: 'test-project',
         eventTypeId: 'custom-event-type-1',
+        configId: 0,
+        configEnvironment: 'test',
       };
 
       try {
@@ -743,6 +801,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetClickEventsRequest;
 
       const response: AnalyticsProto.GetClickEventsResponse = await new Promise(
@@ -771,6 +831,8 @@ describe('Analytics Service Viewer Tests', () => {
         projectName: 'test-project',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllClickEventsRequest;
 
       const response: AnalyticsProto.GetAllClickEventsResponse =
@@ -797,6 +859,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configId: 0,
+        configEnvironment: 'test',
       };
 
       try {
@@ -825,6 +889,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetVisitEventsRequest;
 
       const response: AnalyticsProto.GetVisitEventsResponse = await new Promise(
@@ -851,6 +917,8 @@ describe('Analytics Service Viewer Tests', () => {
         projectName: 'test-project',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllVisitEventsRequest;
 
       const response: AnalyticsProto.GetAllVisitEventsResponse =
@@ -879,6 +947,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configEnvironment: 'test',
+        configId: 0,
       } as AnalyticsProto.GetInputEventsRequest;
 
       const response: AnalyticsProto.GetInputEventsResponse = await new Promise(
@@ -907,6 +977,8 @@ describe('Analytics Service Viewer Tests', () => {
         projectName: 'test-project',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllInputEventsRequest;
 
       const response: AnalyticsProto.GetAllInputEventsResponse =
@@ -939,6 +1011,8 @@ describe('Analytics Service Viewer Tests', () => {
         environment: 'development',
         limit: 10,
         afterTime: '',
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetCustomEventsRequest;
 
       const response: AnalyticsProto.GetCustomEventsResponse =
@@ -967,6 +1041,8 @@ describe('Analytics Service Viewer Tests', () => {
         subcategory: 'form-submission',
         afterTime: '',
         limit: 0,
+        configId: 0,
+        configEnvironment: 'test',
       } as AnalyticsProto.GetAllCustomEventsRequest;
 
       const response: AnalyticsProto.GetAllCustomEventsResponse =
@@ -1062,6 +1138,8 @@ describe('Analytics Service Viewer Tests', () => {
         const request = {
           apiKey: invalidApiKey,
           projectName: 'test-project',
+          configId: 0,
+          configEnvironment: 'test',
           ...(method.includes('Custom') && !method.includes('Type')
             ? {
                 category: 'user-action',
@@ -1124,6 +1202,8 @@ describe('Analytics Service Viewer Tests', () => {
         const request = {
           apiKey: 'mock-api-key-123',
           projectName: '', // Empty project name
+          configId: 0,
+          configEnvironment: 'test',
           ...(method.includes('Custom') && !method.includes('Type')
             ? {
                 category: 'user-action',

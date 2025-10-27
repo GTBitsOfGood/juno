@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsObject,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { AnalyticsProto } from 'juno-proto';
 
 // Request DTOs for logging events
@@ -173,6 +174,7 @@ export class GetEventsQuery {
   })
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   limit?: number;
 
   @ApiPropertyOptional({
@@ -231,6 +233,7 @@ export class GetAllEventsQuery {
   })
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   limit?: number;
 }
 

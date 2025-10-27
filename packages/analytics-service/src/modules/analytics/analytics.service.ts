@@ -145,7 +145,7 @@ export class AnalyticsService implements OnModuleInit {
     const logger = await this.getAnalyticsLogger(
       this.EventEnvironment.DEVELOPMENT,
       event.configId,
-      event.environment,
+      event.configEnvironment,
     );
 
     if (
@@ -194,7 +194,7 @@ export class AnalyticsService implements OnModuleInit {
     const logger = await this.getAnalyticsLogger(
       this.EventEnvironment.DEVELOPMENT,
       event.configId,
-      event.environment,
+      event.configEnvironment,
     );
 
     if (
@@ -239,7 +239,7 @@ export class AnalyticsService implements OnModuleInit {
     const logger = await this.getAnalyticsLogger(
       this.EventEnvironment.DEVELOPMENT,
       event.configId,
-      event.environment,
+      event.configEnvironment,
     );
 
     if (
@@ -376,7 +376,7 @@ export class AnalyticsService implements OnModuleInit {
     const viewer = await this.getAnalyticsViewer(
       this.EventEnvironment.DEVELOPMENT,
       request.configId,
-      request.environment,
+      request.configEnvironment,
     );
 
     if (!request.projectName || request.projectName.length === 0) {
@@ -427,7 +427,6 @@ export class AnalyticsService implements OnModuleInit {
   async getAllClickEvents(
     request: AnalyticsProto.GetAllClickEventsRequest,
   ): Promise<AnalyticsProto.GetAllClickEventsResponse> {
-    console.log('requesting new viewer ');
     const viewer = await this.getAnalyticsViewer(
       this.EventEnvironment.DEVELOPMENT,
       request.configId,
@@ -452,10 +451,7 @@ export class AnalyticsService implements OnModuleInit {
       limit,
     );
 
-    console.log(response);
-
     if (!response) {
-      console.log('null,');
       return { events: [] };
     }
 
@@ -507,7 +503,6 @@ export class AnalyticsService implements OnModuleInit {
     };
 
     const response = await viewer.getVisitEventsPaginated(queryParams);
-
     if (!response) {
       return { events: [], afterId: '' };
     }
