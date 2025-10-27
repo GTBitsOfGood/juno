@@ -117,6 +117,14 @@ export class AnalyticsService implements OnModuleInit {
     }
 
     const response = await logger.logClickEvent(event);
+
+    if (!response) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid analytics configuration',
+      });
+    }
+
     return {
       id: response._id,
       category: response.category,
@@ -165,6 +173,14 @@ export class AnalyticsService implements OnModuleInit {
     }
 
     const response = await logger.logInputEvent(event);
+
+    if (!response) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid analytics configuration',
+      });
+    }
+
     return {
       id: response._id,
       category: response.category,
@@ -211,6 +227,14 @@ export class AnalyticsService implements OnModuleInit {
     }
 
     const response = await logger.logVisitEvent(event);
+
+    if (!response) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid analytics configuration',
+      });
+    }
+
     return {
       id: response._id,
       category: response.category,
@@ -263,6 +287,14 @@ export class AnalyticsService implements OnModuleInit {
       subcategory,
       properties,
     );
+
+    if (!response) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid analytics configuration',
+      });
+    }
+
     return {
       id: response._id,
       eventTypeId: response.eventTypeId,
