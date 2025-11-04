@@ -2,7 +2,7 @@ import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Prisma } from '@prisma/client';
-import { FileConfigProto } from 'juno-proto';
+import { FileBucketProto, FileConfigProto, FileProto } from 'juno-proto';
 import { FileServiceConfigService } from './file_config.service';
 
 @Controller()
@@ -61,11 +61,66 @@ export class FileConfigController
       });
     }
 
+    // TODO: find a way to hook this up with the standard proto definitions
+    type PrismaConfigWithRelations = {
+      id: number;
+      environment: string;
+      FileServiceFile: Array<{
+        path: string;
+        bucketName: string;
+        configId: number;
+        configEnv: string;
+        metadata: string;
+      }>;
+      buckets: Array<{
+        name: string;
+        configId: number;
+        configEnv: string;
+        fileProviderName: string;
+      }>;
+    };
+
+    const prismaConfig = config as unknown as PrismaConfigWithRelations;
+
+    const files: FileProto.File[] = (prismaConfig.FileServiceFile ?? []).map(
+      (f) => ({
+        fileId: {
+          path: f.path,
+          bucketName: f.bucketName,
+          configId: f.configId,
+          configEnv: f.configEnv,
+        },
+        metadata: f.metadata,
+      }),
+    );
+
+    const buckets: FileBucketProto.Bucket[] = (prismaConfig.buckets ?? []).map(
+      (b) => ({
+        name: b.name,
+        configId: b.configId,
+        configEnv: b.configEnv,
+        fileProviderName: b.fileProviderName,
+        FileServiceFile: (prismaConfig.FileServiceFile ?? [])
+          .filter(
+            (f) =>
+              f.bucketName === b.name &&
+              f.configId === b.configId &&
+              f.configEnv === b.configEnv,
+          )
+          .map((f) => ({
+            path: f.path,
+            bucketName: f.bucketName,
+            configId: f.configId,
+            configEnv: f.configEnv,
+          })),
+      }),
+    );
+
     return {
       id: config.id,
       environment: config.environment,
-      files: [],
-      buckets: [],
+      files,
+      buckets,
     };
   }
 

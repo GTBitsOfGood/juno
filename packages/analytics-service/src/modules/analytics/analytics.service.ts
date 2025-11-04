@@ -282,16 +282,20 @@ export class AnalyticsService implements OnModuleInit {
     }
 
     const { category, subcategory, properties } = event;
-    const response = await logger.logCustomEvent(
-      category,
-      subcategory,
-      properties,
-    );
+    let response;
+    try {
+      response = await logger.logCustomEvent(category, subcategory, properties);
+    } catch (error: any) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: `Failed to log custom event: ${error?.message || error?.toString() || 'Unknown error'}..`,
+      });
+    }
 
     if (!response) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
-        message: 'Invalid analytics configuration',
+        message: `Invalid analytics configuration for custom event: ${category} ${subcategory}`,
       });
     }
 
