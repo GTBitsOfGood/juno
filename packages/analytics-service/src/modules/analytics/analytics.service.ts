@@ -320,7 +320,7 @@ export class AnalyticsService implements OnModuleInit {
 
   async getCustomEventTypes(
     request: AnalyticsProto.CustomEventTypeRequest,
-  ): Promise<AnalyticsProto.CustomEventTypeResponse> {
+  ): Promise<AnalyticsProto.GetAllCustomEventTypeResponse> {
     // TODO: environments
     const viewer = await this.getAnalyticsViewer(
       this.EventEnvironment.DEVELOPMENT,
@@ -339,23 +339,18 @@ export class AnalyticsService implements OnModuleInit {
 
     if (!response || response.length === 0) {
       return {
-        id: '',
-        category: '',
-        subcategory: '',
-        properties: [],
-        projectId: '',
+        eventTypes: [],
       };
     }
 
-    // TODO: This should not return only the first type
-    // Return the first custom event type for now
-    const eventType = response[0];
     return {
-      id: eventType._id || '',
-      category: eventType.category,
-      subcategory: eventType.subcategory,
-      properties: eventType.properties,
-      projectId: eventType.projectId,
+      eventTypes: response.map((eventType) => ({
+        id: eventType._id,
+        category: eventType.category,
+        subcategory: eventType.subcategory,
+        properties: [...eventType.properties],
+        projectId: eventType.projectId,
+      })),
     };
   }
 

@@ -454,6 +454,24 @@ export class CustomEventTypeResponse {
   }
 }
 
+export class GetAllCustomEventTypeResponse {
+  @ApiProperty({
+    type: [CustomEventTypeResponse],
+    description: 'All custom event types',
+  })
+  eventTypes: CustomEventTypeResponse[];
+
+  constructor(response: AnalyticsProto.GetAllCustomEventTypeResponse) {
+    if (!response || !response.eventTypes) {
+      return;
+    }
+
+    this.eventTypes = response.eventTypes.map(
+      (eventType) => new CustomEventTypeResponse(eventType),
+    );
+  }
+}
+
 export class CustomGraphType {
   @ApiProperty({ type: 'string', description: 'Graph ID' })
   id: string;

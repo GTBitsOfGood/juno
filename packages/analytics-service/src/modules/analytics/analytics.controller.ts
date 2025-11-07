@@ -35,7 +35,7 @@ export class AnalyticsController
 
   async getCustomEventTypes(
     request: AnalyticsProto.CustomEventTypeRequest,
-  ): Promise<AnalyticsProto.CustomEventTypeResponse> {
+  ): Promise<AnalyticsProto.GetAllCustomEventTypeResponse> {
     return await this.analyticsService.getCustomEventTypes(request);
   }
 

@@ -10,7 +10,7 @@ service AnalyticsService {
     rpc logCustomEvent(CustomEventRequest) returns (CustomEventResponse);
 
     // AnalyticsViewer methods
-    rpc getCustomEventTypes(CustomEventTypeRequest) returns (CustomEventTypeResponse);
+    rpc getCustomEventTypes(CustomEventTypeRequest) returns (GetAllCustomEventTypeResponse);
     rpc getCustomGraphTypesById(CustomGraphTypeRequest) returns (CustomGraphTypeResponse);
     rpc getClickEventsPaginated(GetClickEventsRequest) returns (GetClickEventsResponse);
     rpc getAllClickEvents(GetAllClickEventsRequest) returns (GetAllClickEventsResponse);
@@ -243,6 +243,10 @@ message CustomEventTypeResponse {
     string subcategory = 3;
     repeated string properties = 4;
     string project_id = 5;
+}
+
+message GetAllCustomEventTypeResponse {
+    repeated CustomEventTypeResponse eventTypes = 1;
 }
 
 message CustomGraphTypeResponse {
