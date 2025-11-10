@@ -113,6 +113,9 @@ export class JWTController implements JwtProto.JwtServiceController {
         user: user,
       },
       process.env.JWT_SECRET ?? 'secret',
+      {
+        expiresIn: '1h',
+      },
     );
 
     return { jwt: token };
@@ -137,7 +140,10 @@ export class JWTController implements JwtProto.JwtServiceController {
         };
       }
       return { valid: false };
-    } catch (e) {
+    } catch (e: any) {
+      if (e?.name === 'TokenExpiredError') {
+        return { valid: false };
+      }
       throw new RpcException({
         code: status.NOT_FOUND,
         message: 'Invalid JWT',
