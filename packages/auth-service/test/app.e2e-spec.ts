@@ -514,14 +514,15 @@ describe('Auth Service User JWT Tests', () => {
       },
     );
 
-    await expect(
-      new Promise((resolve, reject) => {
-        jwtClient.validateUserJwt({ jwt: jwt }, (err, resp) => {
-          if (err) return reject(err);
-          return resolve(resp);
-        });
-      }),
-    ).rejects.toBeDefined(); // Expecting an error because jwt is expired
+    const response = await new Promise((resolve, reject) => {
+      jwtClient.validateUserJwt({ jwt: jwt }, (err, resp) => {
+        if (err) return reject(err);
+        return resolve(resp);
+      });
+    });
+
+    expect(response['valid']).toBeDefined();
+    expect(response['valid']).toEqual(false);
   });
 });
 

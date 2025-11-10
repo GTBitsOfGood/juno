@@ -38,7 +38,7 @@ export class ProjectController
     // requiring extra check for input
     const projects = await this.projectService.projects({
       where:
-        input.projectIds !== undefined
+        input.projectIds !== undefined && input.projectIds.length > 0
           ? {
               id: {
                 in: input.projectIds.map((id: any) => Number(id)),
