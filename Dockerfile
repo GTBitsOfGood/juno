@@ -161,9 +161,7 @@ WORKDIR /app/db-service
 
 EXPOSE 5000
 
-RUN pnpm install -g prisma
-
-RUN prisma generate
+RUN pnpm prisma generate
 
 RUN pnpm build
 
