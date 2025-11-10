@@ -668,24 +668,41 @@ describe('Analytics Service Viewer Tests', () => {
         configEnvironment: 'test',
       } as AnalyticsProto.CustomEventTypeRequest;
 
-      const response: AnalyticsProto.CustomEventTypeResponse =
+      const response: AnalyticsProto.GetAllCustomEventTypeResponse =
         await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventTypes(request, (err, response) => {
+          analyticsClient.getCustomEventTypes(request, (err, result) => {
             if (err) {
               reject(err);
             } else {
-              resolve(response);
+              resolve(result);
             }
           });
         });
 
       expect(response).toBeDefined();
-      expect(response.id).toBe('custom-event-type-1');
-      expect(response.category).toBe('user-action');
-      expect(response.subcategory).toBe('form-submission');
-      expect(response.properties).toContain('formType');
-      expect(response.properties).toContain('userId');
-      expect(response.projectId).toBe('test-project-id');
+      expect(response.eventTypes).toBeDefined();
+      if (!response.eventTypes) {
+        fail('Expected eventTypes to be defined');
+        return;
+      }
+      expect(response.eventTypes.length).toBe(2);
+
+      const [firstEventType, secondEventType] = response.eventTypes;
+
+      if (!firstEventType || !secondEventType) {
+        fail('Expected at least two event types in response');
+        return;
+      }
+
+      expect(firstEventType.id).toBe('custom-event-type-1');
+      expect(firstEventType.category).toBe('user-action');
+      expect(firstEventType.subcategory).toBe('form-submission');
+      expect(firstEventType.properties).toContain('formType');
+      expect(firstEventType.properties).toContain('userId');
+      expect(firstEventType.projectId).toBe('test-project-id');
+
+      expect(secondEventType.id).toBe('custom-event-type-2');
+      expect(secondEventType.subcategory).toBe('button-click');
     });
 
     it('should fail to get custom event types with invalid api key', async () => {

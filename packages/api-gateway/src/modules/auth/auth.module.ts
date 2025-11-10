@@ -19,7 +19,6 @@ import {
   UserProtoFile,
 } from 'juno-proto';
 import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
-import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
 
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
@@ -79,10 +78,7 @@ export class AuthModule implements NestModule {
       .forRoutes(
         { path: 'auth/key', method: RequestMethod.POST },
         { path: 'auth/user/jwt', method: RequestMethod.POST },
+        { path: 'auth/test-auth', method: RequestMethod.GET },
       );
-
-    consumer
-      .apply(ApiKeyMiddleware)
-      .forRoutes({ path: 'auth/test-auth', method: RequestMethod.GET });
   }
 }

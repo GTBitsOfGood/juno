@@ -282,6 +282,10 @@ export interface CustomEventTypeResponse {
   projectId: string;
 }
 
+export interface GetAllCustomEventTypeResponse {
+  eventTypes: CustomEventTypeResponse[];
+}
+
 export interface CustomGraphTypeResponse {
   graphs: CustomGraphType[];
 }
@@ -354,7 +358,7 @@ export interface AnalyticsServiceClient {
 
   getCustomEventTypes(
     request: CustomEventTypeRequest,
-  ): Observable<CustomEventTypeResponse>;
+  ): Observable<GetAllCustomEventTypeResponse>;
 
   getCustomGraphTypesById(
     request: CustomGraphTypeRequest,
@@ -429,9 +433,9 @@ export interface AnalyticsServiceController {
   getCustomEventTypes(
     request: CustomEventTypeRequest,
   ):
-    | Promise<CustomEventTypeResponse>
-    | Observable<CustomEventTypeResponse>
-    | CustomEventTypeResponse;
+    | Promise<GetAllCustomEventTypeResponse>
+    | Observable<GetAllCustomEventTypeResponse>
+    | GetAllCustomEventTypeResponse;
 
   getCustomGraphTypesById(
     request: CustomGraphTypeRequest,

@@ -222,21 +222,37 @@ export class AuthController implements OnModuleInit {
 
   @Get('/test-auth')
   @ApiOperation({
-    summary: 'Test endpoint for validating middleware authentication',
+    summary: 'Validates user JWT and returns user data',
     description:
-      'This endpoint is used to test if authentication is working correctly.',
+      'This endpoint validates a user JWT token and returns the associated user information if valid',
   })
   @ApiResponse({
     status: 200,
-    description: 'Authentication successful',
+    description: 'JWT is valid, returns user',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired JWT',
   })
   @ApiHeader({
     name: 'Authorization',
-    description: 'Bearer token (API Key or JWT)',
+    description: 'Bearer token (User JWT)',
     required: true,
   })
-  @ApiBearerAuth()
-  async testAuth() {
-    return { status: 'ok' };
+  @ApiBearerAuth('API_Key')
+  async testAuth(@User() user: CommonProto.User) {
+    if (!user) {
+      throw new HttpException('Invalid JWT', HttpStatus.UNAUTHORIZED);
+    }
+    return {
+      valid: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        type: user.type,
+        projectIds: user.projectIds,
+      },
+    };
   }
 }

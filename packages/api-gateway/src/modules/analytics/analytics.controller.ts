@@ -38,7 +38,6 @@ import {
   VisitEventResponse,
   InputEventResponse,
   CustomEventResponse,
-  CustomEventTypeResponse,
   CustomGraphTypeResponse,
   GetClickEventsResponse,
   GetVisitEventsResponse,
@@ -48,6 +47,7 @@ import {
   GetAllVisitEventsResponse,
   GetAllInputEventsResponse,
   GetAllCustomEventsResponse,
+  GetAllCustomEventTypeResponse,
 } from 'src/models/analytics.dto';
 
 const { ANALYTICS_SERVICE_NAME } = AnalyticsProto;
@@ -183,7 +183,7 @@ export class AnalyticsController implements OnModuleInit {
   @ApiOperation({ summary: 'Get custom event types for a project' })
   @ApiOkResponse({
     description: 'Custom event types retrieved successfully',
-    type: CustomEventTypeResponse,
+    type: GetAllCustomEventTypeResponse,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -191,7 +191,7 @@ export class AnalyticsController implements OnModuleInit {
   async getCustomEventTypes(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
     @Query() query: GetCustomEventTypesQuery,
-  ): Promise<CustomEventTypeResponse> {
+  ): Promise<GetAllCustomEventTypeResponse> {
     await validateOrReject(query);
 
     const response = await lastValueFrom(
@@ -202,7 +202,7 @@ export class AnalyticsController implements OnModuleInit {
       }),
     );
 
-    return new CustomEventTypeResponse(response);
+    return new GetAllCustomEventTypeResponse(response);
   }
 
   @Get('custom-graph-types')
