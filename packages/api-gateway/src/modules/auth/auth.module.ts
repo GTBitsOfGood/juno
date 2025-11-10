@@ -79,10 +79,7 @@ export class AuthModule implements NestModule {
       .forRoutes(
         { path: 'auth/key', method: RequestMethod.POST },
         { path: 'auth/user/jwt', method: RequestMethod.POST },
+        { path: 'auth/test-auth', method: RequestMethod.GET },
       );
-
-    consumer
-      .apply(ApiKeyMiddleware)
-      .forRoutes({ path: 'auth/test-auth', method: RequestMethod.GET });
   }
 }
