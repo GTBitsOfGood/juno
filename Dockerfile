@@ -45,7 +45,7 @@ RUN mkdir /deploy
 
 RUN pnpm deploy --filter=api-gateway --prod /deploy/api-gateway 
 RUN pnpm deploy --filter=auth-service --prod /deploy/auth-service
-RUN pnpm deploy --filter=db-service --prod /deploy/db-service
+RUN pnpm deploy --filter=db-service /deploy/db-service
 RUN pnpm deploy --filter=email-service --prod /deploy/email-service
 RUN pnpm deploy --filter=logging-service --prod /deploy/logging-service
 RUN pnpm deploy --filter=file-service --prod /deploy/file-service
@@ -56,7 +56,7 @@ FROM node:18 AS base-service
 
 ARG SENTRY_AUTH_TOKEN
 # TODO: Move over to a direct wget (no more npm usage)
-RUN npm install -g pnpm @nestjs/cli
+RUN npm install -g pnpm @nestjs/cli 
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -157,11 +157,13 @@ WORKDIR /app
 
 COPY --from=deps /deploy/db-service/ ./db-service/
 
+COPY --from=deps /app/packages/db-service/prisma/schema.prisma ./db-service/prisma/schema.prisma
+
 WORKDIR /app/db-service
 
-EXPOSE 5000
+RUN pnpm exec prisma generate
 
-RUN pnpm prisma generate
+EXPOSE 5000
 
 RUN pnpm build
 
