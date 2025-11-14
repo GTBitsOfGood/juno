@@ -434,6 +434,42 @@ describe('DB Service User Tests', () => {
     await getUserPasswordHashPromise;
   });
 
+  it('throws NOT_FOUND error when getting password hash for non-existent user by email', async () => {
+    const promise = new Promise((resolve) => {
+      userClient.getUserPasswordHash(
+        {
+          email: 'nonexistent@test.com',
+        },
+        (err) => {
+          expect(err).toBeDefined();
+          expect(err.code).toBe(GRPC.status.NOT_FOUND);
+          expect(err.details).toBe('User not found');
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
+  it('throws NOT_FOUND error when getting password hash for non-existent user by id', async () => {
+    const promise = new Promise((resolve) => {
+      userClient.getUserPasswordHash(
+        {
+          id: 99999,
+        },
+        (err) => {
+          expect(err).toBeDefined();
+          expect(err.code).toBe(GRPC.status.NOT_FOUND);
+          expect(err.details).toBe('User not found');
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
   it('throws an error when both id and email are provided', async () => {
     const promise = new Promise((resolve) => {
       userClient.updateUser(
