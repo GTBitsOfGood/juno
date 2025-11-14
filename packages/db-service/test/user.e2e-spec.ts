@@ -470,6 +470,55 @@ describe('DB Service User Tests', () => {
     await promise;
   });
 
+  it('throws NOT_FOUND error when getting password hash for a deleted user', async () => {
+    // Create a user
+    const userId: number = await new Promise((resolve) => {
+      userClient.createUser(
+        {
+          email: 'todelete@test.com',
+          password: 'some-password',
+          name: 'to-delete',
+          type: 'USER',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(Number(resp['id']));
+        },
+      );
+    });
+
+    // Delete the user
+    await new Promise((resolve) => {
+      userClient.deleteUser(
+        {
+          id: userId,
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          expect(resp).toBeDefined();
+          resolve({});
+        },
+      );
+    });
+
+    // Try to get password hash for deleted user - should throw NOT_FOUND
+    const promise = new Promise((resolve) => {
+      userClient.getUserPasswordHash(
+        {
+          id: userId,
+        },
+        (err) => {
+          expect(err).toBeDefined();
+          expect(err.code).toBe(GRPC.status.NOT_FOUND);
+          expect(err.details).toBe('User not found');
+          resolve({});
+        },
+      );
+    });
+
+    await promise;
+  });
+
   it('throws an error when both id and email are provided', async () => {
     const promise = new Promise((resolve) => {
       userClient.updateUser(

@@ -30,7 +30,12 @@ export class UserController implements UserProto.UserAuthServiceController {
         }),
       );
     } catch (e) {
-      console.log(`${JSON.stringify(e)}`);
+      // Only log unexpected errors to Sentry (NOT_FOUND is expected for invalid/deleted users)
+      if (e.code !== status.NOT_FOUND) {
+        console.log(
+          `Unexpected error in getUserPasswordHash: ${JSON.stringify(e)}`,
+        );
+      }
       throw new RpcException({
         code: status.NOT_FOUND,
         message: 'No user found for email',
