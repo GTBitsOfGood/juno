@@ -51,6 +51,14 @@ export class UserController implements UserProto.UserServiceController {
   ): Promise<UserProto.UserPasswordHash> {
     const userFind = validate.validateUserIdentifier(identifier);
     const user = await this.userService.user(userFind);
+
+    if (!user) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
     return {
       hash: user.password,
     };
