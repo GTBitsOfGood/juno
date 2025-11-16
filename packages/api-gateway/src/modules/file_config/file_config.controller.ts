@@ -1,8 +1,8 @@
 import {
   BadRequestException,
   Controller,
+  Delete,
   Get,
-  HttpCode,
   Inject,
   OnModuleInit,
   Param,
@@ -115,8 +115,7 @@ export class FileConfigController implements OnModuleInit {
     return new SetupFileServiceResponse(setupResponse);
   }
 
-  @Post('config/delete/:projectId')
-  @HttpCode(200)
+  @Delete('config/delete/:projectId')
   @ApiOperation({ summary: 'Delete file configuration by project ID' })
   @ApiBadRequestResponse({
     description: 'Parameters are invalid',
