@@ -63,6 +63,10 @@ export const ProjectId = createParamDecorator(
       return projectId;
     }
 
+    if (!apiKey || !apiKey.project) {
+      throw new UnauthorizedException('API key missing');
+    }
+
     return apiKey.project.id;
   },
 );
