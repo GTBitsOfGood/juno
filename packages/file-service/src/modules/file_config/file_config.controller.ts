@@ -14,4 +14,10 @@ export class FileConfigController
   ): Promise<FileConfigProto.SetupResponse> {
     return this.fileConfigService.setup(request);
   }
+
+  async deleteConfig(
+    request: FileConfigProto.DeleteFileServiceConfigRequest,
+  ): Promise<FileConfigProto.FileServiceConfig> {
+    return this.fileConfigService.deleteConfig(request);
+  }
 }
