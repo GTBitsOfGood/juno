@@ -1,8 +1,8 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { status } from '@grpc/grpc-js';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { FileConfigProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
-import { status } from '@grpc/grpc-js';
 
 @Injectable()
 export class FileConfigService implements OnModuleInit {
@@ -42,5 +42,22 @@ export class FileConfigService implements OnModuleInit {
       success: true,
       config,
     };
+  }
+
+  async deleteConfig(
+    request: FileConfigProto.DeleteFileServiceConfigRequest,
+  ): Promise<FileConfigProto.FileServiceConfig> {
+    const config = await lastValueFrom(
+      this.fileConfigDbService.deleteConfig(request),
+    );
+
+    if (!config) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Failed to delete file service config',
+      });
+    }
+
+    return config;
   }
 }
