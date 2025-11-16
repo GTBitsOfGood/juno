@@ -30,16 +30,23 @@ export class UserController implements UserProto.UserAuthServiceController {
         }),
       );
     } catch (e) {
-      // Only log unexpected errors to Sentry (NOT_FOUND is expected for invalid/deleted users)
-      if (e.code !== status.NOT_FOUND) {
+      // Handle expected NOT_FOUND errors (invalid/deleted users) vs unexpected errors
+      if (e.code === status.NOT_FOUND) {
+        // Expected case - user doesn't exist, don't log to Sentry
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: 'No user found for email',
+        });
+      } else {
+        // Unexpected error (database failure, network issue, etc.) - log to Sentry
         console.log(
           `Unexpected error in getUserPasswordHash: ${JSON.stringify(e)}`,
         );
+        throw new RpcException({
+          code: status.UNKNOWN,
+          message: 'An unexpected error occurred during authentication',
+        });
       }
-      throw new RpcException({
-        code: status.NOT_FOUND,
-        message: 'No user found for email',
-      });
     }
 
     const passwordEquals = await bcrypt.compare(
