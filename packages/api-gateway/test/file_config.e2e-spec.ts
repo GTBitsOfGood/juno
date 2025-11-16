@@ -114,4 +114,24 @@ describe('File Config Routes', () => {
       .post('/file/config/setup')
       .expect(401);
   });
+
+  it('Should successfully delete a file config given a valid project ID and credentials', async () => {
+    await request(app.getHttpServer())
+      .post('/file/config/delete/0')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+  });
+
+  it('Should throw a 400 status error when deleting a config via invalid ID', async () => {
+    return await request(app.getHttpServer())
+      .post('/file/config/delete/1')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(400);
+  });
+
+  it('Should throw a 401 status error when deleting a config without valid credentials', async () => {
+    return await request(app.getHttpServer())
+      .post('/file/config/delete/0')
+      .expect(401);
+  });
 });
