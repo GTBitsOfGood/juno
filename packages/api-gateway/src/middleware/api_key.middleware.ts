@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { ClientGrpc } from '@nestjs/microservices';
-import { ApiKeyProto, JwtProto, AuthCommonProto } from 'juno-proto';
+import {
+  ApiKeyProto,
+  JwtProto,
+  AuthCommonProto,
+  CommonProto,
+} from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 
 const { API_KEY_SERVICE_NAME } = ApiKeyProto;
@@ -53,6 +58,20 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
       });
       const res = await lastValueFrom(apiKeyValidation);
       req.apiKey = res.key;
+
+      const userJwt = req.headers['x-user-jwt'] as string | undefined;
+      if (userJwt) {
+        try {
+          const userJwtValidation = this.jwtService.validateUserJwt({
+            jwt: userJwt,
+          });
+          const userJwtRes = await lastValueFrom(userJwtValidation);
+          if (userJwtRes.valid && userJwtRes.user) {
+            req.user = userJwtRes.user;
+          }
+        } catch (error) {}
+      }
+
       next();
     } catch (error) {
       // API key validation failed, try JWT validation
@@ -65,6 +84,20 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
         }
 
         req.apiKey = jwtRes.apiKey;
+
+        const userJwt = req.headers['x-user-jwt'] as string | undefined;
+        if (userJwt) {
+          try {
+            const userJwtValidation = this.jwtService.validateUserJwt({
+              jwt: userJwt,
+            });
+            const userJwtRes = await lastValueFrom(userJwtValidation);
+            if (userJwtRes.valid && userJwtRes.user) {
+              req.user = userJwtRes.user;
+            }
+          } catch (error) {}
+        }
+
         next();
       } catch (error) {
         throw new UnauthorizedException('Invalid authentication token');
@@ -79,4 +112,5 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
 }
 type ApiKeyReq = Request & {
   apiKey: AuthCommonProto.ApiKey;
+  user?: CommonProto.User;
 };

@@ -42,6 +42,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import { ProjectId } from 'src/decorators/project_id.decorator';
 
 const { EMAIL_SERVICE_NAME, EMAIL_DB_SERVICE_NAME } = EmailProto;
 
@@ -114,12 +115,13 @@ export class EmailController implements OnModuleInit {
   @Post('/setup')
   async setup(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body('') params: SetupEmailServiceModel,
   ): Promise<SetupEmailResponse> {
     const setupResponse = await lastValueFrom(
       this.emailService.setup({
         sendgridKey: params.sendgridKey,
-        projectId: apiKey.project.id,
+        projectId: projectId,
         environment: apiKey.environment,
       }),
     );
@@ -139,6 +141,7 @@ export class EmailController implements OnModuleInit {
   @Post('/register-sender')
   async registerSenderAddress(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body('') params: RegisterEmailModel,
   ) {
     await lastValueFrom(
@@ -146,7 +149,7 @@ export class EmailController implements OnModuleInit {
         fromName: params.name,
         fromEmail: params.email,
         replyTo: params.replyTo ?? params.email,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
         nickname: params.nickname ?? params.name,
         address: params.address,
@@ -172,6 +175,7 @@ export class EmailController implements OnModuleInit {
   @Post('/register-domain')
   async registerEmailDomain(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() req: RegisterDomainModel,
   ): Promise<RegisterDomainResponse> {
     if (!req.domain) {
@@ -185,7 +189,7 @@ export class EmailController implements OnModuleInit {
       this.emailService.authenticateDomain({
         domain: req.domain,
         subdomain: req.subdomain,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -206,6 +210,7 @@ export class EmailController implements OnModuleInit {
   @Post('/verify-domain')
   async verifySenderDomain(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() req: VerifyDomainModel,
   ): Promise<RegisterDomainResponse> {
     if (!req.domain || req.domain.length == 0) {
@@ -217,7 +222,7 @@ export class EmailController implements OnModuleInit {
 
     const res = this.emailService.verifyDomain({
       domain: req.domain,
-      configId: apiKey.project.id,
+      configId: projectId,
       configEnvironment: apiKey.environment,
     });
 
@@ -236,6 +241,7 @@ export class EmailController implements OnModuleInit {
   @Post('/send')
   async sendEmail(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() req: SendEmailModel,
   ): Promise<SendEmailResponse> {
     if (!req) {
@@ -265,7 +271,7 @@ export class EmailController implements OnModuleInit {
           replyToList: req.replyToList,
           subject: req.subject,
           content: req.content,
-          configId: apiKey.project.id,
+          configId: projectId,
           configEnvironment: apiKey.environment,
         }),
       ),
@@ -316,6 +322,7 @@ export class EmailController implements OnModuleInit {
   @Get('/analytics')
   async getStatistics(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query('startDate') startDate: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
@@ -339,7 +346,7 @@ export class EmailController implements OnModuleInit {
           startDate: startDate,
           endDate: endDate,
           aggregatedBy: intervalMap[aggregatedBy], //TODO: Validate that this works
-          configId: apiKey.project.id,
+          configId: projectId,
           configEnvironment: apiKey.environment,
         }),
       ),
