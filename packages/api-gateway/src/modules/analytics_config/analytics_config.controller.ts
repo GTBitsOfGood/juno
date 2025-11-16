@@ -24,6 +24,7 @@ import {
 import { AuthCommonProto, AnalyticsConfigProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import { ProjectId } from 'src/decorators/project_id.decorator';
 import {
   AnalyticsConfigResponse,
   CreateAnalyticsConfigModel,
@@ -60,11 +61,12 @@ export class AnalyticsConfigController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   async createAnalyticsConfig(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() request: CreateAnalyticsConfigModel,
   ): Promise<AnalyticsConfigResponse> {
     const response = await lastValueFrom(
       this.analyticsConfigDbService.createAnalyticsConfig({
-        projectId: apiKey.project.id,
+        projectId: projectId,
         environment: apiKey.environment,
         serverAnalyticsKey: request.serverAnalyticsKey,
         clientAnalyticsKey: request.clientAnalyticsKey,

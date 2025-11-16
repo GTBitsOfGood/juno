@@ -22,6 +22,7 @@ import {
 import { AuthCommonProto, FileConfigProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import { ProjectId } from 'src/decorators/project_id.decorator';
 import {
   FileConfigResponse,
   SetupFileServiceResponse,
@@ -104,10 +105,11 @@ export class FileConfigController implements OnModuleInit {
   @Post('config/setup')
   async setup(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
   ): Promise<SetupFileServiceResponse> {
     const setupResponse = await lastValueFrom(
       this.fileConfigService.setup({
-        projectId: apiKey.project.id,
+        projectId: projectId,
         environment: apiKey.environment,
       }),
     );
