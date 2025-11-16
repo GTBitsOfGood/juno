@@ -16,6 +16,7 @@ service FileServiceConfigDbService {
 
 service FileServiceConfigService {
   rpc setup(SetupRequest) returns (SetupResponse);
+  rpc deleteConfig(DeleteFileServiceConfigRequest) returns (FileServiceConfig);
 }
 
 message SetupRequest {

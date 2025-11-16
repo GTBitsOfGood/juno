@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Controller,
+  Delete,
   Get,
   Inject,
   OnModuleInit,
@@ -114,5 +115,40 @@ export class FileConfigController implements OnModuleInit {
     );
 
     return new SetupFileServiceResponse(setupResponse);
+  }
+
+  @Delete('config/delete/:projectId')
+  @ApiOperation({ summary: 'Delete file configuration by project ID' })
+  @ApiBadRequestResponse({
+    description: 'Parameters are invalid',
+  })
+  @ApiNotFoundResponse({
+    description: 'No file config with specified project ID was found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid API key provided',
+  })
+  @ApiOkResponse({
+    description:
+      'Deleted the file config associated with the specified project ID',
+    type: FileConfigResponse,
+  })
+  async deleteFileConfigByProjectId(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Param('projectId') projectId: string,
+  ): Promise<FileConfigResponse> {
+    const id = parseInt(projectId);
+    if (Number.isNaN(id) || id < 0) {
+      throw new BadRequestException(
+        'Id must be an int greater than or equal to 0',
+      );
+    }
+
+    const config = this.fileConfigService.deleteConfig({
+      id: id,
+      environment: apiKey.environment,
+    });
+
+    return new FileConfigResponse(await lastValueFrom(config));
   }
 }

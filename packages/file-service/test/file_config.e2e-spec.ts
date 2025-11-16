@@ -1,14 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestMicroservice } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
-import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
+import { INestMicroservice } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
   FileConfigProto,
   FileConfigProtoFile,
   ResetProtoFile,
 } from 'juno-proto';
+import { AppModule } from './../src/app.module';
 
 let app: INestMicroservice;
 
@@ -118,6 +118,41 @@ describe('File Config Tests', () => {
       expect(response2).toBeDefined();
     } catch (err) {
       expect(err).toBeNull();
+    }
+  });
+
+  it('Delete a config with valid parameters', async () => {
+    try {
+      const deleteRequest: FileConfigProto.DeleteFileServiceConfigRequest = {
+        id: 0,
+        environment: 'prod',
+      };
+      const response = await new Promise((resolve) => {
+        fileConfigClient.deleteConfig(deleteRequest, (err: any, resp: any) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        });
+      });
+      expect(response).toBeDefined();
+    } catch (err) {
+      expect(err).toBeNull();
+    }
+  });
+
+  it('Delete a non-existent config', async () => {
+    try {
+      const deleteRequest: FileConfigProto.DeleteFileServiceConfigRequest = {
+        id: 1,
+        environment: 'prod',
+      };
+      await new Promise((resolve) => {
+        fileConfigClient.deleteConfig(deleteRequest, (err: any, resp: any) => {
+          expect(err).toBeDefined();
+          resolve(resp);
+        });
+      });
+    } catch (err) {
+      expect(err).toBeDefined();
     }
   });
 });
