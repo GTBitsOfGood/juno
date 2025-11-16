@@ -23,6 +23,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import { ProjectId } from 'src/decorators/project_id.decorator';
 import {
   LogClickEventRequest,
   LogVisitEventRequest,
@@ -79,6 +80,7 @@ export class AnalyticsController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   async logClickEvent(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() request: LogClickEventRequest,
   ): Promise<ClickEventResponse> {
     await validateOrReject(request);
@@ -87,7 +89,7 @@ export class AnalyticsController implements OnModuleInit {
       this.analyticsService.logClickEvent({
         objectId: request.objectId,
         userId: request.userId,
-        configId: apiKey.project.id,
+        configId: projectId,
         environment: apiKey.environment,
         configEnvironment: apiKey.environment,
       }),
@@ -106,6 +108,7 @@ export class AnalyticsController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   async logVisitEvent(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() request: LogVisitEventRequest,
   ): Promise<VisitEventResponse> {
     await validateOrReject(request);
@@ -114,7 +117,7 @@ export class AnalyticsController implements OnModuleInit {
       this.analyticsService.logVisitEvent({
         pageUrl: request.pageUrl,
         userId: request.userId,
-        configId: apiKey.project.id,
+        configId: projectId,
         environment: apiKey.environment,
         configEnvironment: apiKey.environment,
       }),
@@ -133,6 +136,7 @@ export class AnalyticsController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   async logInputEvent(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() request: LogInputEventRequest,
   ): Promise<InputEventResponse> {
     await validateOrReject(request);
@@ -142,7 +146,7 @@ export class AnalyticsController implements OnModuleInit {
         objectId: request.objectId,
         userId: request.userId,
         textValue: request.textValue,
-        configId: apiKey.project.id,
+        configId: projectId,
         environment: apiKey.environment,
         configEnvironment: apiKey.environment,
       }),
@@ -161,6 +165,7 @@ export class AnalyticsController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   async logCustomEvent(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Body() request: LogCustomEventRequest,
   ): Promise<CustomEventResponse> {
     await validateOrReject(request);
@@ -171,7 +176,7 @@ export class AnalyticsController implements OnModuleInit {
         subcategory: request.subcategory,
         properties: request.properties,
         environment: apiKey.environment,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -190,6 +195,7 @@ export class AnalyticsController implements OnModuleInit {
   @ApiQuery({ name: 'projectName', type: String, description: 'Project name' })
   async getCustomEventTypes(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetCustomEventTypesQuery,
   ): Promise<GetAllCustomEventTypeResponse> {
     await validateOrReject(query);
@@ -197,7 +203,7 @@ export class AnalyticsController implements OnModuleInit {
     const response = await lastValueFrom(
       this.analyticsService.getCustomEventTypes({
         projectName: query.projectName,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -217,6 +223,7 @@ export class AnalyticsController implements OnModuleInit {
   @ApiQuery({ name: 'eventTypeId', type: String, description: 'Event type ID' })
   async getCustomGraphTypesById(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetCustomGraphTypesQuery,
   ): Promise<CustomGraphTypeResponse> {
     await validateOrReject(query);
@@ -225,7 +232,7 @@ export class AnalyticsController implements OnModuleInit {
       this.analyticsService.getCustomGraphTypesById({
         projectName: query.projectName,
         eventTypeId: query.eventTypeId,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -268,6 +275,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getClickEventsPaginated(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetEventsQuery,
   ): Promise<GetClickEventsResponse> {
     await validateOrReject(query);
@@ -279,7 +287,7 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -310,6 +318,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getAllClickEvents(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetAllEventsQuery,
   ): Promise<GetAllClickEventsResponse> {
     await validateOrReject(query);
@@ -319,7 +328,7 @@ export class AnalyticsController implements OnModuleInit {
         projectName: query.projectName,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -362,6 +371,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getVisitEventsPaginated(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetEventsQuery,
   ): Promise<GetVisitEventsResponse> {
     await validateOrReject(query);
@@ -373,7 +383,7 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -404,6 +414,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getAllVisitEvents(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetAllEventsQuery,
   ): Promise<GetAllVisitEventsResponse> {
     await validateOrReject(query);
@@ -413,7 +424,7 @@ export class AnalyticsController implements OnModuleInit {
         projectName: query.projectName,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -456,6 +467,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getInputEventsPaginated(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetEventsQuery,
   ): Promise<GetInputEventsResponse> {
     await validateOrReject(query);
@@ -467,7 +479,7 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -498,6 +510,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getAllInputEvents(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetAllEventsQuery,
   ): Promise<GetAllInputEventsResponse> {
     await validateOrReject(query);
@@ -507,7 +520,7 @@ export class AnalyticsController implements OnModuleInit {
         projectName: query.projectName,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -556,6 +569,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getCustomEventsPaginated(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetCustomEventsQuery,
   ): Promise<GetCustomEventsResponse> {
     await validateOrReject(query);
@@ -569,7 +583,7 @@ export class AnalyticsController implements OnModuleInit {
         environment: query.environment || '',
         limit: query.limit || 0,
         afterTime: query.afterTime || '',
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
@@ -606,6 +620,7 @@ export class AnalyticsController implements OnModuleInit {
   })
   async getAllCustomEvents(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
     @Query() query: GetAllCustomEventsQuery,
   ): Promise<GetAllCustomEventsResponse> {
     await validateOrReject(query);
@@ -617,7 +632,7 @@ export class AnalyticsController implements OnModuleInit {
         subcategory: query.subcategory,
         afterTime: query.afterTime || '',
         limit: query.limit || 0,
-        configId: apiKey.project.id,
+        configId: projectId,
         configEnvironment: apiKey.environment,
       }),
     );
