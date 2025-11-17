@@ -1,17 +1,13 @@
-import { FileBucketProto, FileProviderProto } from 'juno-proto';
-import { RpcException } from '@nestjs/microservices';
-import { status } from '@grpc/grpc-js';
-import { lastValueFrom } from 'rxjs';
 import {
   BlobServiceClient,
   StorageSharedKeyCredential,
 } from '@azure/storage-blob';
+import { status } from '@grpc/grpc-js';
+import { RpcException } from '@nestjs/microservices';
+import { FileBucketProto, FileProviderProto } from 'juno-proto';
 
 export class AzureBucketHandler {
-  constructor(
-    private fileDBService: FileBucketProto.BucketDbServiceClient,
-    private provider: FileProviderProto.FileProvider,
-  ) {}
+  constructor(private provider: FileProviderProto.FileProvider) {}
 
   async getBlobServiceClient(): Promise<BlobServiceClient> {
     try {
@@ -41,9 +37,7 @@ export class AzureBucketHandler {
     }
   }
 
-  async registerBucket(
-    request: FileBucketProto.RegisterBucketRequest,
-  ): Promise<FileBucketProto.Bucket> {
+  async registerBucket(request: FileBucketProto.RegisterBucketRequest) {
     try {
       const blobClient = await this.getBlobServiceClient();
       await blobClient
@@ -51,11 +45,6 @@ export class AzureBucketHandler {
           `${request.name}-${request.configId}-${request.configEnv}`,
         )
         .create();
-
-      const dbBucket = await lastValueFrom(
-        this.fileDBService.createBucket(request),
-      );
-      return dbBucket;
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
@@ -64,24 +53,14 @@ export class AzureBucketHandler {
     }
   }
 
-  async removeBucket(
-    request: FileBucketProto.RemoveBucketRequest,
-  ): Promise<FileBucketProto.Bucket> {
+  async removeBucket(request: FileBucketProto.RemoveBucketRequest) {
     try {
-      const bucket = await lastValueFrom(
-        this.fileDBService.deleteBucket({
-          name: request.name,
-          configId: request.configId,
-          configEnv: request.configEnv,
-        }),
-      );
       const blobClient = await this.getBlobServiceClient();
       await blobClient
         .getContainerClient(
           `${request.name}-${request.configId}-${request.configEnv}`,
         )
         .delete();
-      return bucket;
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,

@@ -1,10 +1,10 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
-import { FileBucketProto, FileProviderProto } from 'juno-proto';
-import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
+import { FileBucketProto, FileProviderProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
-import { S3BucketHandler } from './s3_handler';
 import { AzureBucketHandler } from './azure_handler';
+import { S3BucketHandler } from './s3_handler';
 
 @Injectable()
 export class FileBucketService implements OnModuleInit {
@@ -53,12 +53,14 @@ export class FileBucketService implements OnModuleInit {
       const provider = await this.getProvider(request.fileProviderName);
       switch (provider.providerType) {
         case FileProviderProto.ProviderType.S3: {
-          const handler = new S3BucketHandler(this.fileDBService, provider);
-          return handler.registerBucket(request);
+          const handler = new S3BucketHandler(provider);
+          handler.registerBucket(request);
+          break;
         }
         case FileProviderProto.ProviderType.AZURE: {
-          const handler = new AzureBucketHandler(this.fileDBService, provider);
-          return handler.registerBucket(request);
+          const handler = new AzureBucketHandler(provider);
+          handler.registerBucket(request);
+          break;
         }
         default:
           throw new RpcException({
@@ -66,6 +68,13 @@ export class FileBucketService implements OnModuleInit {
             message: `Unsupported provider type: ${provider.providerType} `,
           });
       }
+
+      // Save bucket to Juno DB after successfully registered with provider
+      const bucket = await lastValueFrom(
+        this.fileDBService.createBucket(request),
+      );
+
+      return bucket;
     } catch (error) {
       if (error.message.toLowerCase().includes('you already own it')) {
         throw new RpcException({
@@ -84,22 +93,17 @@ export class FileBucketService implements OnModuleInit {
     request: FileBucketProto.RemoveBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
     try {
-      const bucket = await lastValueFrom(
-        this.fileDBService.deleteBucket({
-          name: request.name,
-          configId: request.configId,
-          configEnv: request.configEnv,
-        }),
-      );
-      const provider = await this.getProvider(bucket.fileProviderName);
+      const provider = await this.getProvider(request.fileProviderName);
       switch (provider.providerType) {
         case FileProviderProto.ProviderType.S3: {
-          const handler = new S3BucketHandler(this.fileDBService, provider);
-          return handler.removeBucket(request);
+          const handler = new S3BucketHandler(provider);
+          handler.removeBucket(request);
+          break;
         }
         case FileProviderProto.ProviderType.AZURE: {
-          const handler = new AzureBucketHandler(this.fileDBService, provider);
-          return handler.removeBucket(request);
+          const handler = new AzureBucketHandler(provider);
+          handler.removeBucket(request);
+          break;
         }
         default:
           throw new RpcException({
@@ -107,6 +111,16 @@ export class FileBucketService implements OnModuleInit {
             message: `Unsupported provider type: ${provider.providerType} `,
           });
       }
+
+      // Delete bucket from Juno DB after successfully deleted from provider
+      const bucket = await lastValueFrom(
+        this.fileDBService.deleteBucket({
+          name: request.name,
+          configId: request.configId,
+          configEnv: request.configEnv,
+        }),
+      );
+      return bucket;
     } catch (error) {
       if (error.message.includes('NoSuchBucket')) {
         throw new RpcException({
