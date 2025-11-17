@@ -1,25 +1,29 @@
 import {
   Body,
   Controller,
-  HttpStatus,
+  Delete,
   Inject,
   OnModuleInit,
   Post,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
-import { AuthCommonProto, FileBucketProto } from 'juno-proto';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import {
-  RegisterFileBucketModel,
-  FileBucket,
-} from 'src/models/file_bucket.dto';
+import { AuthCommonProto, FileBucketProto } from 'juno-proto';
+import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import {
+  DeleteFileBucketModel,
+  FileBucket,
+  RegisterFileBucketModel,
+} from 'src/models/file_bucket.dto';
 
 const { BUCKET_FILE_SERVICE_NAME } = FileBucketProto;
 
@@ -43,12 +47,9 @@ export class FileBucketController implements OnModuleInit {
 
   @Post('bucket')
   @ApiOperation({ summary: 'Registers a File Bucket.' })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Parameters are invalid',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiBadRequestResponse({ description: 'Parameters are invalid' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiCreatedResponse({
     description: 'Returned the file bucket associated with the given data',
     type: FileBucket,
   })
@@ -61,6 +62,30 @@ export class FileBucketController implements OnModuleInit {
       configId: params.configId,
       fileProviderName: params.fileProviderName,
       FileServiceFile: params.FileServiceFile,
+      configEnv: apiKey.environment,
+    });
+
+    const bucketData = await lastValueFrom(grpcResponse);
+
+    return new FileBucket(bucketData);
+  }
+
+  @Delete('bucket')
+  @ApiOperation({ summary: 'Delete a File Bucket.' })
+  @ApiBadRequestResponse({ description: 'Parameters are invalid' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiOkResponse({
+    description: 'Deleted and returned the file bucket',
+    type: FileBucket,
+  })
+  async deleteFileBucket(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Body() params: DeleteFileBucketModel,
+  ): Promise<FileBucket> {
+    const grpcResponse = this.fileBucketService.removeBucket({
+      name: params.name,
+      configId: params.configId,
+      fileProviderName: params.fileProviderName,
       configEnv: apiKey.environment,
     });
 
