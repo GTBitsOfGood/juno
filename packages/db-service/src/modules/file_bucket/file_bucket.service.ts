@@ -26,7 +26,7 @@ export class FileBucketService {
 
   async getBucketsByConfigIdAndEnv(
     request: FileBucketProto.GetBucketsByConfigIdAndEnvRequest,
-  ): Promise<FileBucketProto.Bucket[]> {
+  ): Promise<FileBucketProto.Buckets> {
     const buckets = await this.prisma.fileServiceBucket.findMany({
       where: {
         configId: request.configId,
@@ -36,7 +36,7 @@ export class FileBucketService {
         FileServiceFile: true,
       },
     });
-    return buckets.map((bucket: any) => convertDbBucket(bucket));
+    return { buckets: buckets.map((bucket: any) => convertDbBucket(bucket)) };
   }
 
   async createBucket(input: FileBucketProto.CreateBucketRequest) {

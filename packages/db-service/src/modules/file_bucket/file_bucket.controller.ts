@@ -30,7 +30,7 @@ export class FileBucketController implements BucketDbServiceController {
 
   async getBucketsByConfigIdAndEnv(
     request: FileBucketProto.GetBucketsByConfigIdAndEnvRequest,
-  ): Promise<FileBucketProto.Bucket[]> {
+  ): Promise<FileBucketProto.Buckets> {
     if (!request.configEnv || request.configId == undefined) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
