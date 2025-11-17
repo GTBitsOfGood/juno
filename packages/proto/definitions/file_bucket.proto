@@ -64,4 +64,5 @@ message RemoveBucketRequest {
   string name = 1;
   int32 configId = 2;
   string configEnv = 3;
+  string fileProviderName = 4;
 }
