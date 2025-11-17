@@ -8,7 +8,7 @@ import { S3BucketHandler } from './s3_handler';
 
 @Injectable()
 export class FileBucketService implements OnModuleInit {
-  private fileDBService: FileBucketProto.BucketDbServiceClient;
+  private fileBucketDBService: FileBucketProto.BucketDbServiceClient;
   private fileProviderDBService: FileProviderProto.FileProviderDbServiceClient;
 
   constructor(
@@ -19,7 +19,7 @@ export class FileBucketService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.fileDBService =
+    this.fileBucketDBService =
       this.fileDBClient.getService<FileBucketProto.BucketDbServiceClient>(
         FileBucketProto.BUCKET_DB_SERVICE_NAME,
       );
@@ -71,7 +71,7 @@ export class FileBucketService implements OnModuleInit {
 
       // Save bucket to Juno DB after successfully registered with provider
       const bucket = await lastValueFrom(
-        this.fileDBService.createBucket(request),
+        this.fileBucketDBService.createBucket(request),
       );
 
       return bucket;
@@ -114,7 +114,7 @@ export class FileBucketService implements OnModuleInit {
 
       // Delete bucket from Juno DB after successfully deleted from provider
       const bucket = await lastValueFrom(
-        this.fileDBService.deleteBucket({
+        this.fileBucketDBService.deleteBucket({
           name: request.name,
           configId: request.configId,
           configEnv: request.configEnv,
