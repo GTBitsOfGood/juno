@@ -59,15 +59,20 @@ export class FileProvider {
     this.providerName = fileProvider.providerName;
     this.type = fileProvider.providerType;
 
-    this.baseUrl = JSON.parse(fileProvider.metadata)?.endpoint;
+    try {
+      this.baseUrl = JSON.parse(fileProvider.metadata)?.endpoint;
 
-    const parsedAccessKey = JSON.parse(fileProvider.accessKey);
-    this.accessKey = {
-      publicAccessKey:
-        parsedAccessKey?.accessKeyId || parsedAccessKey?.accountName,
-      privateAccessKey:
-        parsedAccessKey?.secretAccessKey || parsedAccessKey?.accountKey,
-    };
+      const parsedAccessKey = JSON.parse(fileProvider.accessKey);
+      this.accessKey = {
+        publicAccessKey:
+          parsedAccessKey?.accessKeyId || parsedAccessKey?.accountName,
+        privateAccessKey:
+          parsedAccessKey?.secretAccessKey || parsedAccessKey?.accountKey,
+      };
+    } catch {
+      this.baseUrl = 'N/A';
+      this.accessKey = { publicAccessKey: 'N/A', privateAccessKey: 'N/A' };
+    }
   }
 }
 
