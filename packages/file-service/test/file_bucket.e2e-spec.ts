@@ -210,7 +210,7 @@ describe('File Bucket Creation Tests', () => {
     const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
-          name: 'successful-bucket-Azure',
+          name: 'successful-azure',
           configId,
           configEnv,
           fileProviderName: providerNameAzure,
@@ -227,7 +227,7 @@ describe('File Bucket Creation Tests', () => {
     await createBucketPromise;
 
     await client
-      .getContainerClient(`successful--azure-${configId}-${configEnv}`)
+      .getContainerClient(`successful-azure-${configId}-${configEnv}`)
       .delete();
   });
 
