@@ -1,9 +1,9 @@
+import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
-import { FileProviderProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
+import { FileProviderProto } from 'juno-proto';
 import { FileProviderDbServiceController } from 'juno-proto/dist/gen/file_provider';
 import { FileProviderService } from './file_provider.service';
-import { status } from '@grpc/grpc-js';
 
 @Controller()
 @FileProviderProto.FileProviderDbServiceControllerMethods()
@@ -21,6 +21,11 @@ export class FileProviderController implements FileProviderDbServiceController {
     const fileProvider = await this.fileProviderService.getProvider(request);
     return fileProvider;
   }
+
+  async getAllProviders(): Promise<FileProviderProto.FileProviders> {
+    return await this.fileProviderService.getAllProviders();
+  }
+
   async createProvider(
     request: FileProviderProto.CreateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
