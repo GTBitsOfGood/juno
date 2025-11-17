@@ -25,6 +25,11 @@ export interface GetBucketRequest {
   configEnv: string;
 }
 
+export interface GetBucketsByConfigIdAndEnvRequest {
+  configId: number;
+  configEnv: string;
+}
+
 export interface CreateBucketRequest {
   name: string;
   configId: number;
