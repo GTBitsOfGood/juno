@@ -79,6 +79,23 @@ export class FileProviderController implements OnModuleInit {
     return new FileProviderPartial(await lastValueFrom(fileProvider));
   }
 
+  @Get('provider/all')
+  @ApiOperation({ summary: 'Get All File Providers.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiOkResponse({
+    description: 'Returned all file providers',
+    type: Array<FileProvider>,
+  })
+  async getAllFileProviders(): Promise<FileProvider[]> {
+    const grpcResponse = this.fileProviderDbService.getAllProviders({});
+
+    const providersData = await lastValueFrom(grpcResponse);
+
+    return providersData.providers.map(
+      (provider) => new FileProvider(provider),
+    );
+  }
+
   @Delete('provider/:name')
   @ApiOperation({ summary: 'Delete File Provider.' })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
@@ -95,22 +112,5 @@ export class FileProviderController implements OnModuleInit {
     });
 
     return new FileProviderPartial(await lastValueFrom(grpcResponse));
-  }
-
-  @Get('provider/all')
-  @ApiOperation({ summary: 'Get All File Providers.' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiOkResponse({
-    description: 'Returned all file providers',
-    type: Array<FileProvider>,
-  })
-  async getAllFileProviders(): Promise<FileProvider[]> {
-    const grpcResponse = this.fileProviderDbService.getAllProviders({});
-
-    const providersData = await lastValueFrom(grpcResponse);
-
-    return providersData.providers.map(
-      (provider) => new FileProvider(provider),
-    );
   }
 }

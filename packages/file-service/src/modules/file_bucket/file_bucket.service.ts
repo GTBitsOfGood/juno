@@ -54,12 +54,12 @@ export class FileBucketService implements OnModuleInit {
       switch (provider.providerType) {
         case FileProviderProto.ProviderType.S3: {
           const handler = new S3BucketHandler(provider);
-          handler.registerBucket(request);
+          await handler.registerBucket(request);
           break;
         }
         case FileProviderProto.ProviderType.AZURE: {
           const handler = new AzureBucketHandler(provider);
-          handler.registerBucket(request);
+          await handler.registerBucket(request);
           break;
         }
         default:
@@ -97,12 +97,12 @@ export class FileBucketService implements OnModuleInit {
       switch (provider.providerType) {
         case FileProviderProto.ProviderType.S3: {
           const handler = new S3BucketHandler(provider);
-          handler.removeBucket(request);
+          await handler.removeBucket(request);
           break;
         }
         case FileProviderProto.ProviderType.AZURE: {
           const handler = new AzureBucketHandler(provider);
-          handler.removeBucket(request);
+          await handler.removeBucket(request);
           break;
         }
         default:
