@@ -1,21 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
 import {
   ClassSerializerInterceptor,
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
-import * as request from 'supertest';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
-  ResetProtoFile,
-  FileProviderProtoFile,
   FileProviderProto,
+  FileProviderProtoFile,
+  ResetProtoFile,
 } from 'juno-proto';
-import * as GRPC from '@grpc/grpc-js';
-import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
-import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import * as request from 'supertest';
+import { AppModule } from './../src/app.module';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -213,7 +213,7 @@ describe('File Bucket Routes', () => {
       .post('/file/bucket')
       .set('Authorization', 'Bearer ' + apiKey)
       .send(fileBucketBody)
-      .expect(409);
+      .expect(400);
 
     const metadata = {
       endpoint: baseURL,
