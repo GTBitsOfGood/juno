@@ -19,6 +19,10 @@ export interface Bucket {
   FileServiceFile: FileIdentifier[];
 }
 
+export interface Buckets {
+  buckets: Bucket[];
+}
+
 export interface GetBucketRequest {
   name: string;
   configId: number;
@@ -76,6 +80,10 @@ export interface BucketDbServiceClient {
   deleteBucket(request: DeleteBucketRequest): Observable<Bucket>;
 
   updateBucket(request: UpdateBucketRequest): Observable<Bucket>;
+
+  getBucketsByConfigIdAndEnv(
+    request: GetBucketsByConfigIdAndEnvRequest,
+  ): Observable<Buckets>;
 }
 
 export interface BucketDbServiceController {
@@ -94,6 +102,10 @@ export interface BucketDbServiceController {
   updateBucket(
     request: UpdateBucketRequest,
   ): Promise<Bucket> | Observable<Bucket> | Bucket;
+
+  getBucketsByConfigIdAndEnv(
+    request: GetBucketsByConfigIdAndEnvRequest,
+  ): Promise<Buckets> | Observable<Buckets> | Buckets;
 }
 
 export function BucketDbServiceControllerMethods() {
@@ -103,6 +115,7 @@ export function BucketDbServiceControllerMethods() {
       'createBucket',
       'deleteBucket',
       'updateBucket',
+      'getBucketsByConfigIdAndEnv',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

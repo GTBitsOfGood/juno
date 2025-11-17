@@ -10,6 +10,7 @@ service BucketDbService {
   rpc createBucket(CreateBucketRequest) returns (Bucket);
   rpc deleteBucket(DeleteBucketRequest) returns (Bucket);
   rpc updateBucket(UpdateBucketRequest) returns (Bucket);
+  rpc getBucketsByConfigIdAndEnv(GetBucketsByConfigIdAndEnvRequest) returns (Buckets);
 }
 
 service BucketFileService {
@@ -23,6 +24,10 @@ message Bucket {
   string configEnv = 5;
   string fileProviderName = 3;
   repeated identifiers.FileIdentifier FileServiceFile = 4;
+}
+
+message Buckets {
+  repeated Bucket buckets = 1;
 }
 
 message GetBucketRequest {
