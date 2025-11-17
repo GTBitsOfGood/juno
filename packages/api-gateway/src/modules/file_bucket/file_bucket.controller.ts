@@ -130,6 +130,6 @@ export class FileBucketController implements OnModuleInit {
 
     const bucketsData = await lastValueFrom(grpcResponse);
 
-    return bucketsData.buckets.map((bucket) => new FileBucket(bucket));
+    return bucketsData.buckets?.map((bucket) => new FileBucket(bucket)) ?? [];
   }
 }
