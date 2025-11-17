@@ -6,8 +6,11 @@ import "identifiers.proto";
 
 import "file_bucket.proto";
 
+import "google/protobuf/empty.proto";
+
 service FileProviderDbService {
   rpc getProvider(GetFileProviderRequest) returns (FileProvider);
+  rpc getAllProviders(google.protobuf.Empty) returns (FileProviders);
   rpc createProvider(CreateFileProviderRequest) returns (FileProvider);
   rpc deleteProvider(DeleteFileProviderRequest) returns (FileProvider);
   rpc updateProvider(UpdateFileProviderRequest) returns (FileProvider);
@@ -29,6 +32,10 @@ message FileProvider {
   string metadata = 3;
   repeated bucket.Bucket bucket = 4;
   ProviderType provider_type = 5;
+}
+
+message FileProviders {
+  repeated FileProvider providers = 1;
 }
 
 message GetFileProviderRequest { string provider_name = 1; }
