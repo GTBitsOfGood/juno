@@ -227,7 +227,7 @@ describe('File Bucket Creation Tests', () => {
     await createBucketPromise;
 
     await client
-      .getContainerClient(`successful-bucket-Azure-${configId}-${configEnv}`)
+      .getContainerClient(`successful--azure-${configId}-${configEnv}`)
       .delete();
   });
 
