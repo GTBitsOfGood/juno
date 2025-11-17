@@ -143,7 +143,7 @@ export const FILE_PROVIDER_DB_SERVICE_NAME = 'FileProviderDbService';
 export interface FileProviderFileServiceClient {
   registerProvider(request: RegisterProviderRequest): Observable<FileProvider>;
 
-  removeProvider(request: RegisterProviderRequest): Observable<FileProvider>;
+  removeProvider(request: DeleteFileProviderRequest): Observable<FileProvider>;
 }
 
 export interface FileProviderFileServiceController {
@@ -152,7 +152,7 @@ export interface FileProviderFileServiceController {
   ): Promise<FileProvider> | Observable<FileProvider> | FileProvider;
 
   removeProvider(
-    request: RegisterProviderRequest,
+    request: DeleteFileProviderRequest,
   ): Promise<FileProvider> | Observable<FileProvider> | FileProvider;
 }
 

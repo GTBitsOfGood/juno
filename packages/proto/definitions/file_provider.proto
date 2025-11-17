@@ -18,7 +18,7 @@ service FileProviderDbService {
 
 service FileProviderFileService {
   rpc registerProvider(RegisterProviderRequest) returns (FileProvider);
-  rpc removeProvider(RegisterProviderRequest) returns (FileProvider);
+  rpc removeProvider(DeleteFileProviderRequest) returns (FileProvider);
 }
 
 enum ProviderType {
