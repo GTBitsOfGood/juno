@@ -8,7 +8,6 @@
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { Bucket } from './file_bucket';
-import { Empty } from './google/protobuf/empty';
 
 export const protobufPackage = 'juno.file_service.provider';
 
@@ -17,6 +16,8 @@ export enum ProviderType {
   AZURE = 1,
   UNRECOGNIZED = -1,
 }
+
+export interface Empty {}
 
 export interface FileProvider {
   providerName: string;

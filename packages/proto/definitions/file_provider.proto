@@ -6,11 +6,9 @@ import "identifiers.proto";
 
 import "file_bucket.proto";
 
-import "google/protobuf/empty.proto";
-
 service FileProviderDbService {
   rpc getProvider(GetFileProviderRequest) returns (FileProvider);
-  rpc getAllProviders(google.protobuf.Empty) returns (FileProviders);
+  rpc getAllProviders(Empty) returns (FileProviders);
   rpc createProvider(CreateFileProviderRequest) returns (FileProvider);
   rpc deleteProvider(DeleteFileProviderRequest) returns (FileProvider);
   rpc updateProvider(UpdateFileProviderRequest) returns (FileProvider);
@@ -25,6 +23,8 @@ enum ProviderType {
   S3 = 0;
   AZURE = 1;
 }
+
+message Empty {}
 
 message FileProvider {
   string provider_name = 1;
