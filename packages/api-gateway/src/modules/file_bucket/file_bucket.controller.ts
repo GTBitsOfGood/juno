@@ -1,9 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  Get,
   Inject,
   OnModuleInit,
+  Param,
   Post,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -25,23 +28,30 @@ import {
   RegisterFileBucketModel,
 } from 'src/models/file_bucket.dto';
 
-const { BUCKET_FILE_SERVICE_NAME } = FileBucketProto;
+const { BUCKET_FILE_SERVICE_NAME, BUCKET_DB_SERVICE_NAME } = FileBucketProto;
 
 @ApiBearerAuth('API_Key')
 @ApiTags('file_bucket')
 @Controller('file')
 export class FileBucketController implements OnModuleInit {
   private fileBucketService: FileBucketProto.BucketFileServiceClient;
+  private fileBucketDBService: FileBucketProto.BucketDbServiceClient;
 
   constructor(
     @Inject(BUCKET_FILE_SERVICE_NAME)
     private fileBucketClient: ClientGrpc,
+    @Inject(BUCKET_DB_SERVICE_NAME)
+    private fileBucketDBClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.fileBucketService =
       this.fileBucketClient.getService<FileBucketProto.BucketFileServiceClient>(
         BUCKET_FILE_SERVICE_NAME,
+      );
+    this.fileBucketDBService =
+      this.fileBucketDBClient.getService<FileBucketProto.BucketDbServiceClient>(
+        BUCKET_DB_SERVICE_NAME,
       );
   }
 
@@ -92,5 +102,33 @@ export class FileBucketController implements OnModuleInit {
     const bucketData = await lastValueFrom(grpcResponse);
 
     return new FileBucket(bucketData);
+  }
+
+  @Get('buckets/:configId')
+  @ApiOperation({ summary: 'Get File Buckets by Config Id and Config Env.' })
+  @ApiBadRequestResponse({ description: 'Parameters are invalid' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiOkResponse({
+    description: 'Returned file buckets with Config Id and Config Env',
+    type: Array<FileBucket>,
+  })
+  async getBucketsByConfigIdAndEnv(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Param('configId') configId: string,
+  ): Promise<FileBucket[]> {
+    const id = parseInt(configId);
+    if (Number.isNaN(id) || id < 0) {
+      throw new BadRequestException(
+        'Id must be an int greater than or equal to 0',
+      );
+    }
+    const grpcResponse = this.fileBucketDBService.getBucketsByConfigIdAndEnv({
+      configId: id,
+      configEnv: apiKey.environment,
+    });
+
+    const bucketsData = await lastValueFrom(grpcResponse);
+
+    return bucketsData.buckets.map((bucket) => new FileBucket(bucket));
   }
 }
