@@ -1,9 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
@@ -77,8 +72,6 @@ import {
 })
 export class FileBucketModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(ApiKeyMiddleware)
-      .forRoutes({ path: '/file/bucket', method: RequestMethod.POST });
+    consumer.apply(ApiKeyMiddleware).forRoutes('/file/bucket', 'file/bucket/*');
   }
 }

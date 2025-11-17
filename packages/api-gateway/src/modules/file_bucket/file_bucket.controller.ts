@@ -104,7 +104,7 @@ export class FileBucketController implements OnModuleInit {
     return new FileBucket(bucketData);
   }
 
-  @Get('buckets/:configId')
+  @Get('bucket/:configId')
   @ApiOperation({ summary: 'Get File Buckets by Config Id and Config Env.' })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
