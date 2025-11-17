@@ -20,6 +20,42 @@ class AccessKey {
   privateAccessKey: string;
 }
 
+export class RegisterFileProviderModel {
+  @ApiProperty({
+    type: AccessKey,
+    description: 'The access key to register with',
+  })
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => AccessKey)
+  accessKey: AccessKey;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'https://s3.us-west-004.backblazeb2.com',
+    description: 'The base url associated with file provider.',
+  })
+  @IsNotEmpty()
+  baseUrl: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'AWS S3',
+    description: 'The file provider name being registered.',
+  })
+  @IsNotEmpty()
+  providerName: string;
+
+  @IsNotEmpty()
+  @Transform(toEnum)
+  @ApiProperty({
+    type: 'string',
+    description: 'File provider type (one of S3 or AZURE)',
+    example: 'S3',
+  })
+  type: FileProviderProto.ProviderType;
+}
+
 export class FileProvider {
   @ApiProperty({
     type: AccessKey,

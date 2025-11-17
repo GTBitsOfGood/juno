@@ -24,6 +24,7 @@ import { lastValueFrom } from 'rxjs';
 import {
   FileProvider,
   FileProviderPartial,
+  RegisterFileProviderModel,
 } from 'src/models/file_provider.dto';
 
 const { FILE_PROVIDER_FILE_SERVICE_NAME, FILE_PROVIDER_DB_SERVICE_NAME } =
@@ -66,7 +67,7 @@ export class FileProviderController implements OnModuleInit {
     type: FileProviderPartial,
   })
   async registerFileProvider(
-    @Body('') params: FileProvider,
+    @Body('') params: RegisterFileProviderModel,
   ): Promise<FileProviderPartial> {
     const fileProvider = this.fileProviderService.registerProvider({
       baseUrl: params.baseUrl,
