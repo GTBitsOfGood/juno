@@ -85,7 +85,8 @@ export class FileProviderController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
     description: 'Returned all file providers',
-    type: Array<FileProvider>,
+    type: FileProvider,
+    isArray: true,
   })
   async getAllFileProviders(): Promise<FileProvider[]> {
     const grpcResponse = this.fileProviderDbService.getAllProviders({});

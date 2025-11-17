@@ -110,7 +110,8 @@ export class FileBucketController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
     description: 'Returned file buckets with Config Id and Config Env',
-    type: Array<FileBucket>,
+    type: FileBucket,
+    isArray: true,
   })
   async getBucketsByConfigIdAndEnv(
     @ApiKey() apiKey: AuthCommonProto.ApiKey,
