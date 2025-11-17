@@ -1,8 +1,8 @@
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { FileProviderProto } from 'juno-proto';
 import { Transform, Type } from 'class-transformer';
+import { FileProviderProto } from 'juno-proto';
 
 class AccessKey {
   @ApiProperty({
@@ -20,7 +20,7 @@ class AccessKey {
   privateAccessKey: string;
 }
 
-export class RegisterFileProviderModel {
+export class FileProvider {
   @ApiProperty({
     type: AccessKey,
     description: 'The access key to register with',
@@ -54,9 +54,24 @@ export class RegisterFileProviderModel {
     example: 'S3',
   })
   type: FileProviderProto.ProviderType;
+
+  constructor(fileProvider: FileProviderProto.FileProvider) {
+    this.providerName = fileProvider.providerName;
+    this.type = fileProvider.providerType;
+
+    this.baseUrl = JSON.parse(fileProvider.metadata)?.endpoint;
+
+    const parsedAccessKey = JSON.parse(fileProvider.accessKey);
+    this.accessKey = {
+      publicAccessKey:
+        parsedAccessKey?.accessKeyId || parsedAccessKey?.accountName,
+      privateAccessKey:
+        parsedAccessKey?.secretAccessKey || parsedAccessKey?.accountKey,
+    };
+  }
 }
 
-export class FileProviderResponse {
+export class FileProviderPartial {
   @ApiProperty({ description: 'The unique provider name of the file provider' })
   providerName: string;
 
