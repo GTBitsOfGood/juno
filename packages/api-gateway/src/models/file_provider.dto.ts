@@ -1,7 +1,7 @@
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { FileProviderProto } from 'juno-proto';
 
 class AccessKey {
@@ -47,13 +47,12 @@ export class RegisterFileProviderModel {
   providerName: string;
 
   @IsNotEmpty()
-  @Transform(toEnum)
   @ApiProperty({
     type: 'string',
     description: 'File provider type (one of S3 or AZURE)',
     example: 'S3',
   })
-  type: FileProviderProto.ProviderType;
+  type: string;
 }
 
 export class FileProvider {
@@ -121,19 +120,6 @@ export class FileProviderPartial {
   constructor(fileProvider: FileProviderProto.FileProvider) {
     this.providerName = fileProvider.providerName;
     this.metadata = fileProvider.metadata;
-  }
-}
-
-function toEnum(params: {
-  value: string;
-}): FileProviderProto.ProviderType | undefined {
-  switch (params.value) {
-    case 'S3':
-      return FileProviderProto.ProviderType.S3;
-    case 'AZURE':
-      return FileProviderProto.ProviderType.AZURE;
-    default:
-      return undefined;
   }
 }
 

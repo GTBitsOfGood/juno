@@ -69,12 +69,21 @@ export class FileProviderController implements OnModuleInit {
   async registerFileProvider(
     @Body('') params: RegisterFileProviderModel,
   ): Promise<FileProviderPartial> {
+    let type: FileProviderProto.ProviderType;
+    switch (params.type) {
+      case 'S3':
+        type = FileProviderProto.ProviderType.S3;
+      case 'AZURE':
+        type = FileProviderProto.ProviderType.AZURE;
+      default:
+        type = FileProviderProto.ProviderType.UNRECOGNIZED;
+    }
     const fileProvider = this.fileProviderService.registerProvider({
       baseUrl: params.baseUrl,
       providerName: params.providerName,
       privateAccessKey: params.accessKey.privateAccessKey,
       publicAccessKey: params.accessKey.publicAccessKey,
-      type: params.type,
+      type: type,
     });
 
     return new FileProviderPartial(await lastValueFrom(fileProvider));
