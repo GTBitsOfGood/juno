@@ -83,17 +83,16 @@ export class FileProvider {
   providerName: string;
 
   @IsNotEmpty()
-  @Transform(toEnum)
   @ApiProperty({
     type: 'string',
     description: 'File provider type (one of S3 or AZURE)',
     example: 'S3',
   })
-  type: FileProviderProto.ProviderType;
+  type: string;
 
   constructor(fileProvider: FileProviderProto.FileProvider) {
     this.providerName = fileProvider.providerName;
-    this.type = fileProvider.providerType;
+    this.type = fromEnum(fileProvider.providerType);
 
     try {
       this.baseUrl = JSON.parse(fileProvider.metadata)?.endpoint;
@@ -135,5 +134,16 @@ function toEnum(params: {
       return FileProviderProto.ProviderType.AZURE;
     default:
       return undefined;
+  }
+}
+
+function fromEnum(value: FileProviderProto.ProviderType): string {
+  switch (value) {
+    case FileProviderProto.ProviderType.S3:
+      return 'S3';
+    case FileProviderProto.ProviderType.AZURE:
+      return 'Azure';
+    default:
+      return 'Not supported';
   }
 }
