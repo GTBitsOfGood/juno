@@ -38,8 +38,11 @@ export class FileProviderService {
       //   return { name: bucket.name, configId: idx };
       // });
 
-      const fileProvider = await this.prisma.fileProvider.create({
-        data: {
+      const fileProvider = await this.prisma.fileProvider.upsert({
+        where: {
+          name: req.providerName,
+        },
+        create: {
           accessKey: req.accessKey,
           name: req.providerName,
           metadata: req.metadata,
@@ -48,8 +51,15 @@ export class FileProviderService {
           //   create: buckets,
           // },
         },
+        update: {
+          accessKey: req.accessKey,
+          metadata: req.metadata,
+          type: this.rpcToPrismaProvider(req.type),
+          // FileServiceBucket: {
+          //   create: buckets,
+          // },
+        },
       });
-
       return {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,

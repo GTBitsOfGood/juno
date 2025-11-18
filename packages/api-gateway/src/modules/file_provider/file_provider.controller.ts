@@ -70,7 +70,7 @@ export class FileProviderController implements OnModuleInit {
     @Body('') params: RegisterFileProviderModel,
   ): Promise<FileProviderPartial> {
     let type: FileProviderProto.ProviderType;
-    switch (params.type) {
+    switch (params.type.toUpperCase()) {
       case 'S3':
         type = FileProviderProto.ProviderType.S3;
         break;
