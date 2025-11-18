@@ -105,8 +105,9 @@ export class FileProviderController implements OnModuleInit {
 
     const providersData = await lastValueFrom(grpcResponse);
 
-    return providersData.providers.map(
-      (provider) => new FileProvider(provider),
+    return (
+      providersData.providers?.map((provider) => new FileProvider(provider)) ??
+      []
     );
   }
 
