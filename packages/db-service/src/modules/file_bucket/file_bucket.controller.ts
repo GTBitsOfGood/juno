@@ -1,9 +1,9 @@
+import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
-import { FileBucketProto, IdentifierProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
+import { FileBucketProto, IdentifierProto } from 'juno-proto';
 import { BucketDbServiceController } from 'juno-proto/dist/gen/file_bucket';
 import { FileBucketService } from './file_bucket.service';
-import { status } from '@grpc/grpc-js';
 
 @Controller()
 @FileBucketProto.BucketDbServiceControllerMethods()
@@ -27,6 +27,19 @@ export class FileBucketController implements BucketDbServiceController {
     }
     return fileBucket;
   }
+
+  async getBucketsByConfigIdAndEnv(
+    request: FileBucketProto.GetBucketsByConfigIdAndEnvRequest,
+  ): Promise<FileBucketProto.Buckets> {
+    if (!request.configEnv || request.configId == undefined) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Both configEnv and configId must be provided',
+      });
+    }
+    return await this.fileBucketService.getBucketsByConfigIdAndEnv(request);
+  }
+
   async createBucket(
     request: FileBucketProto.CreateBucketRequest,
   ): Promise<FileBucketProto.Bucket> {

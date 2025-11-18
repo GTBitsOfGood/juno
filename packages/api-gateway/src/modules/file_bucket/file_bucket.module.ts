@@ -1,13 +1,8 @@
-import {
-  Module,
-  NestModule,
-  RequestMethod,
-  MiddlewareConsumer,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
-import { FileBucketController } from './file_bucket.controller';
 import { ApiKeyMiddleware } from 'src/middleware/api_key.middleware';
+import { FileBucketController } from './file_bucket.controller';
 
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
@@ -20,10 +15,13 @@ import {
   API_KEY_SERVICE_NAME,
   JUNO_API_KEY_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/api_key';
-import { BUCKET_FILE_SERVICE_NAME } from 'juno-proto/dist/gen/file_bucket';
 import {
-  JWT_SERVICE_NAME,
+  BUCKET_DB_SERVICE_NAME,
+  BUCKET_FILE_SERVICE_NAME,
+} from 'juno-proto/dist/gen/file_bucket';
+import {
   JUNO_JWT_PACKAGE_NAME,
+  JWT_SERVICE_NAME,
 } from 'juno-proto/dist/gen/jwt';
 
 @Module({
@@ -59,14 +57,21 @@ import {
           protoPath: FileBucketProtoFile,
         },
       },
+      {
+        name: BUCKET_DB_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.DB_SERVICE_ADDR,
+          package: FileBucketProto.JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
+          protoPath: FileBucketProtoFile,
+        },
+      },
     ]),
   ],
   controllers: [FileBucketController],
 })
 export class FileBucketModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(ApiKeyMiddleware)
-      .forRoutes({ path: '/file/bucket', method: RequestMethod.POST });
+    consumer.apply(ApiKeyMiddleware).forRoutes('/file/bucket', 'file/bucket/*');
   }
 }

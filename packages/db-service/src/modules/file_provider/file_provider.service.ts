@@ -1,8 +1,8 @@
+import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { FileProviderType } from '@prisma/client';
 import { FileProviderProto } from 'juno-proto';
-import { status } from '@grpc/grpc-js';
 
 // import { Bucket } from 'juno-proto/dist/gen/file_bucket';
 import { PrismaService } from 'src/prisma.service';
@@ -38,8 +38,11 @@ export class FileProviderService {
       //   return { name: bucket.name, configId: idx };
       // });
 
-      const fileProvider = await this.prisma.fileProvider.create({
-        data: {
+      const fileProvider = await this.prisma.fileProvider.upsert({
+        where: {
+          name: req.providerName,
+        },
+        create: {
           accessKey: req.accessKey,
           name: req.providerName,
           metadata: req.metadata,
@@ -48,8 +51,15 @@ export class FileProviderService {
           //   create: buckets,
           // },
         },
+        update: {
+          accessKey: req.accessKey,
+          metadata: req.metadata,
+          type: this.rpcToPrismaProvider(req.type),
+          // FileServiceBucket: {
+          //   create: buckets,
+          // },
+        },
       });
-
       return {
         metadata: fileProvider.metadata,
         providerName: fileProvider.name,
@@ -88,6 +98,19 @@ export class FileProviderService {
         message: 'File provider not found',
       });
     }
+  }
+
+  async getAllProviders(): Promise<FileProviderProto.FileProviders> {
+    const fileProviders = await this.prisma.fileProvider.findMany();
+    return {
+      providers: fileProviders.map((provider) => ({
+        metadata: provider.metadata,
+        providerName: provider.name,
+        providerType: this.prismaToRpcProvider(provider.type),
+        bucket: [],
+        accessKey: provider.accessKey,
+      })),
+    };
   }
 
   async updateProvider(

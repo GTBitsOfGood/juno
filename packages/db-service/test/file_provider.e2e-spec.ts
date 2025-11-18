@@ -1,22 +1,22 @@
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
 import { INestMicroservice } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as ProtoLoader from '@grpc/proto-loader';
-import * as GRPC from '@grpc/grpc-js';
 
 import {
-  ResetProto,
-  ResetProtoFile,
   FileProviderProto,
   FileProviderProtoFile,
+  ResetProto,
+  ResetProtoFile,
 } from 'juno-proto';
-import { AppModule } from 'src/app.module';
 import {
   CreateFileProviderRequest,
   DeleteFileProviderRequest,
   GetFileProviderRequest,
   UpdateFileProviderRequest,
 } from 'juno-proto/dist/gen/file_provider';
+import { AppModule } from 'src/app.module';
 
 let app: INestMicroservice;
 
@@ -139,7 +139,7 @@ describe('File Provider Tests', () => {
 
     const promise2 = new Promise((resolve) => {
       fileProviderClient.createProvider(createRequest, (err, resp) => {
-        expect(err).not.toBeNull();
+        expect(err).toBeNull();
         resolve(resp);
       });
     });

@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString, IsInt, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsInt, IsNotEmpty, IsString } from 'class-validator';
 import { FileBucketProto, IdentifierProto } from 'juno-proto';
 
 export class RegisterFileBucketModel {
@@ -33,6 +33,32 @@ export class RegisterFileBucketModel {
   })
   @IsArray()
   FileServiceFile: IdentifierProto.FileIdentifier[];
+}
+
+export class DeleteFileBucketModel {
+  @ApiProperty({
+    type: 'string',
+    description: 'The unique name of the bucket',
+  })
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @ApiProperty({
+    type: 'number',
+    description: 'Configuration ID for the bucket',
+  })
+  @IsNotEmpty()
+  @IsInt()
+  configId: number;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'The file provider name associated with the bucket',
+  })
+  @IsNotEmpty()
+  @IsString()
+  fileProviderName: string;
 }
 
 export class FileBucket implements FileBucketProto.Bucket {
