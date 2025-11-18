@@ -73,10 +73,13 @@ export class FileProviderController implements OnModuleInit {
     switch (params.type) {
       case 'S3':
         type = FileProviderProto.ProviderType.S3;
+        break;
       case 'AZURE':
         type = FileProviderProto.ProviderType.AZURE;
+        break;
       default:
         type = FileProviderProto.ProviderType.UNRECOGNIZED;
+        break;
     }
     const fileProvider = this.fileProviderService.registerProvider({
       baseUrl: params.baseUrl,
