@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
 import { FileBucketProto, IdentifierProto } from 'juno-proto';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class FileBucketService {
@@ -23,6 +23,22 @@ export class FileBucketService {
       }),
     );
   }
+
+  async getBucketsByConfigIdAndEnv(
+    request: FileBucketProto.GetBucketsByConfigIdAndEnvRequest,
+  ): Promise<FileBucketProto.Buckets> {
+    const buckets = await this.prisma.fileServiceBucket.findMany({
+      where: {
+        configId: request.configId,
+        configEnv: request.configEnv,
+      },
+      include: {
+        FileServiceFile: true,
+      },
+    });
+    return { buckets: buckets.map((bucket: any) => convertDbBucket(bucket)) };
+  }
+
   async createBucket(input: FileBucketProto.CreateBucketRequest) {
     const { name, fileProviderName, configId } = input;
     return await this.prisma.fileServiceBucket.create({

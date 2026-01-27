@@ -1,8 +1,8 @@
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { FileProviderProto } from 'juno-proto';
-import { Transform, Type } from 'class-transformer';
 
 class AccessKey {
   @ApiProperty({
@@ -47,16 +47,70 @@ export class RegisterFileProviderModel {
   providerName: string;
 
   @IsNotEmpty()
-  @Transform(toEnum)
   @ApiProperty({
     type: 'string',
     description: 'File provider type (one of S3 or AZURE)',
     example: 'S3',
   })
-  type: FileProviderProto.ProviderType;
+  type: string;
 }
 
-export class FileProviderResponse {
+export class FileProvider {
+  @ApiProperty({
+    type: AccessKey,
+    description: 'The access key to register with',
+  })
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => AccessKey)
+  accessKey: AccessKey;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'https://s3.us-west-004.backblazeb2.com',
+    description: 'The base url associated with file provider.',
+  })
+  @IsNotEmpty()
+  baseUrl: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'AWS S3',
+    description: 'The file provider name being registered.',
+  })
+  @IsNotEmpty()
+  providerName: string;
+
+  @IsNotEmpty()
+  @ApiProperty({
+    type: 'string',
+    description: 'File provider type (one of S3 or AZURE)',
+    example: 'S3',
+  })
+  type: string;
+
+  constructor(fileProvider: FileProviderProto.FileProvider) {
+    this.providerName = fileProvider.providerName;
+    this.type = fromEnum(fileProvider.providerType);
+
+    try {
+      this.baseUrl = JSON.parse(fileProvider.metadata)?.endpoint;
+
+      const parsedAccessKey = JSON.parse(fileProvider.accessKey);
+      this.accessKey = {
+        publicAccessKey:
+          parsedAccessKey?.accessKeyId || parsedAccessKey?.accountName,
+        privateAccessKey:
+          parsedAccessKey?.secretAccessKey || parsedAccessKey?.accountKey,
+      };
+    } catch {
+      this.baseUrl = 'N/A';
+      this.accessKey = { publicAccessKey: 'N/A', privateAccessKey: 'N/A' };
+    }
+  }
+}
+
+export class FileProviderPartial {
   @ApiProperty({ description: 'The unique provider name of the file provider' })
   providerName: string;
 
@@ -69,15 +123,13 @@ export class FileProviderResponse {
   }
 }
 
-function toEnum(params: {
-  value: string;
-}): FileProviderProto.ProviderType | undefined {
-  switch (params.value) {
-    case 'S3':
-      return FileProviderProto.ProviderType.S3;
-    case 'AZURE':
-      return FileProviderProto.ProviderType.AZURE;
+function fromEnum(value: FileProviderProto.ProviderType): string {
+  switch (value) {
+    case FileProviderProto.ProviderType.S3:
+      return 'S3';
+    case FileProviderProto.ProviderType.AZURE:
+      return 'Azure';
     default:
-      return undefined;
+      return 'Not supported';
   }
 }

@@ -1,18 +1,14 @@
 import {
-  S3Client,
   CreateBucketCommand,
   DeleteBucketCommand,
+  S3Client,
 } from '@aws-sdk/client-s3';
-import { FileBucketProto, FileProviderProto } from 'juno-proto';
-import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { lastValueFrom } from 'rxjs';
+import { RpcException } from '@nestjs/microservices';
+import { FileBucketProto, FileProviderProto } from 'juno-proto';
 
 export class S3BucketHandler {
-  constructor(
-    private fileDBService: FileBucketProto.BucketDbServiceClient,
-    private provider: FileProviderProto.FileProvider,
-  ) {}
+  constructor(private provider: FileProviderProto.FileProvider) {}
 
   async getS3Client(region: string): Promise<S3Client> {
     try {
@@ -30,20 +26,13 @@ export class S3BucketHandler {
     }
   }
 
-  async registerBucket(
-    request: FileBucketProto.RegisterBucketRequest,
-  ): Promise<FileBucketProto.Bucket> {
+  async registerBucket(request: FileBucketProto.RegisterBucketRequest) {
     try {
       const s3Client = await this.getS3Client('us-east-005');
       const createBucketCommand = new CreateBucketCommand({
         Bucket: `${request.name}-${request.configId}-${request.configEnv}`,
       });
       await s3Client.send(createBucketCommand);
-
-      const dbBucket = await lastValueFrom(
-        this.fileDBService.createBucket(request),
-      );
-      return dbBucket;
     } catch (error) {
       if (error.message.toLowerCase().includes('you already own it')) {
         throw new RpcException({
@@ -58,23 +47,13 @@ export class S3BucketHandler {
     }
   }
 
-  async removeBucket(
-    request: FileBucketProto.RemoveBucketRequest,
-  ): Promise<FileBucketProto.Bucket> {
+  async removeBucket(request: FileBucketProto.RemoveBucketRequest) {
     try {
       const s3Client = await this.getS3Client('us-east-005');
       const deleteBucketCommand = new DeleteBucketCommand({
         Bucket: `${request.name}-${request.configId}-${request.configEnv}`,
       });
       await s3Client.send(deleteBucketCommand);
-      const bucket = await lastValueFrom(
-        this.fileDBService.deleteBucket({
-          name: request.name,
-          configId: request.configId,
-          configEnv: request.configEnv,
-        }),
-      );
-      return bucket;
     } catch (error) {
       if (error.message.includes('NoSuchBucket')) {
         throw new RpcException({

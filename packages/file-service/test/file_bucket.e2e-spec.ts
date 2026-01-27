@@ -1,23 +1,23 @@
-import { INestMicroservice } from '@nestjs/common';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { Test, TestingModule } from '@nestjs/testing';
-import * as ProtoLoader from '@grpc/proto-loader';
-import * as GRPC from '@grpc/grpc-js';
-import {
-  FileBucketProtoFile,
-  ResetProtoFile,
-  FileProviderProtoFile,
-  FileBucketProto,
-  FileProviderProto,
-} from 'juno-proto';
-import { AppModule } from './../src/app.module';
-import { JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME } from 'juno-proto/dist/gen/file_provider';
-import { JUNO_RESET_DB_PACKAGE_NAME } from 'juno-proto/dist/gen/reset_db';
 import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   BlobServiceClient,
   StorageSharedKeyCredential,
 } from '@azure/storage-blob';
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
+import { INestMicroservice } from '@nestjs/common';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Test, TestingModule } from '@nestjs/testing';
+import {
+  FileBucketProto,
+  FileBucketProtoFile,
+  FileProviderProto,
+  FileProviderProtoFile,
+  ResetProtoFile,
+} from 'juno-proto';
+import { JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME } from 'juno-proto/dist/gen/file_provider';
+import { JUNO_RESET_DB_PACKAGE_NAME } from 'juno-proto/dist/gen/reset_db';
+import { AppModule } from './../src/app.module';
 
 const { JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME } = FileBucketProto;
 const TEST_SERVICE_ADDR = 'file-service:50005';
@@ -210,7 +210,7 @@ describe('File Bucket Creation Tests', () => {
     const createBucketPromise = new Promise((resolve, reject) => {
       bucketClient.registerBucket(
         {
-          name: 'successful-bucket-azure',
+          name: 'successful-azure',
           configId,
           configEnv,
           fileProviderName: providerNameAzure,
@@ -227,7 +227,7 @@ describe('File Bucket Creation Tests', () => {
     await createBucketPromise;
 
     await client
-      .getContainerClient(`successful-bucket-azure-${configId}-${configEnv}`)
+      .getContainerClient(`successful-azure-${configId}-${configEnv}`)
       .delete();
   });
 
