@@ -8,7 +8,7 @@
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
-export const protobufPackage = 'juno.common';
+export const protobufPackage = 'juno.counter';
 
 export interface IncrementCounterRequest {
   id: string;
@@ -34,7 +34,6 @@ export interface ResetCounterRequest {
 
 export interface ResetCounterResponse {
   id: string;
-  /** should always be zero */
   value: number;
 }
 
@@ -47,7 +46,7 @@ export interface GetCounterResponse {
   value: number;
 }
 
-export const JUNO_COMMON_PACKAGE_NAME = 'juno.common';
+export const JUNO_COUNTER_PACKAGE_NAME = 'juno.counter';
 
 export interface CounterServiceClient {
   incrementCounter(
