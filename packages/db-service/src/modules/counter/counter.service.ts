@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { Prisma, Counter } from '@prisma/client';
+import { Counter } from '@prisma/client';
 import { CounterProto } from 'juno-proto';
 
 @Injectable()

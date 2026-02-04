@@ -1,10 +1,8 @@
 import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { Prisma } from '@prisma/client';
 import { CounterProto } from 'juno-proto';
 import { CounterService } from './counter.service';
-import { Observable } from 'rxjs';
 
 @Controller()
 @CounterProto.CounterServiceControllerMethods()
@@ -16,21 +14,55 @@ export class CounterDbController
   async incrementCounter(
     request: CounterProto.IncrementCounterRequest,
   ): Promise<CounterProto.IncrementCounterResponse> {
-    throw new Error('Method not implemented.');
+    try {
+      const counter = await this.counterService.incrementCounter(request);
+      return counter;
+    } catch (e) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: 'Failed to increment counter',
+      });
+    }
   }
   async decrementCounter(
     request: CounterProto.DecrementCounterRequest,
   ): Promise<CounterProto.DecrementCounterResponse> {
-    throw new Error('Method not implemented.');
+    try {
+      const counter = await this.counterService.decrementCounter(request);
+      return counter;
+    } catch (e) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: 'Failed to decrement counter',
+      });
+    }
   }
   async resetCounter(
     request: CounterProto.ResetCounterRequest,
   ): Promise<CounterProto.ResetCounterResponse> {
-    throw new Error('Method not implemented.');
+    try {
+      const counter = await this.counterService.resetCounter(request);
+      return counter;
+    } catch (e) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: 'Failed to reset counter',
+      });
+    }
   }
   async getCounter(
     request: CounterProto.GetCounterRequest,
   ): Promise<CounterProto.GetCounterResponse> {
-    throw new Error('Method not implemented.');
+    // design decision: if counter with id in the request body does not exist,
+    // return a default value of 0
+    try {
+      const counter = await this.counterService.getCounter(request);
+      return counter;
+    } catch (e) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: 'Failed to get counter',
+      });
+    }
   }
 }
