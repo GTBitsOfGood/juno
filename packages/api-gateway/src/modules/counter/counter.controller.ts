@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -8,25 +7,18 @@ import {
   Inject,
   OnModuleInit,
   Param,
-  ParseIntPipe,
   Patch,
-  Post,
-  Put,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { CounterResponse } from 'src/models/counter.dto';
-import { AuthCommonProto, CommonProto, CounterProto } from 'juno-proto';
+import { CounterProto } from 'juno-proto';
 import {
   ApiBearerAuth,
-  ApiHeader,
   ApiOperation,
-  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/decorators/user.decorator';
-import { ApiKey } from 'src/decorators/api_key.decorator';
 
 const { COUNTER_SERVICE_NAME } = CounterProto;
 
@@ -73,6 +65,30 @@ export class CounterController implements OnModuleInit {
   }
 
   //Increment a counter's value
+  @Patch(':id/increment')
+  @ApiOperation({ summary: 'Increment the value of a counter. ' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'ID must be a URI-encoded string',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returned the updated counter value.',
+    type: CounterResponse,
+  })
+  async incrementCounter(@Param('id') idStr: string): Promise<CounterResponse> {
+    if (decodeURIComponent(idStr) == idStr) {
+      throw new HttpException(
+        'id must be a URI-encoded string',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const counter = this.counterService.incrementCounter({ id: idStr });
+    return new CounterResponse(await lastValueFrom(counter));
+  }
+
+  //Increment a counter's value
   @Patch(':id/decrement')
   @ApiOperation({ summary: 'Decrement the value of a counter. ' })
   @ApiResponse({
@@ -96,7 +112,6 @@ export class CounterController implements OnModuleInit {
     return new CounterResponse(await lastValueFrom(counter));
   }
 
-  //Increment a counter's value
   @Delete(':id')
   @ApiOperation({ summary: 'Reset the value of a counter. ' })
   @ApiResponse({
@@ -108,7 +123,7 @@ export class CounterController implements OnModuleInit {
     description: 'Returned the updated counter value.',
     type: CounterResponse,
   })
-  async incrementCounter(@Param('id') idStr: string): Promise<CounterResponse> {
+  async resetCounter(@Param('id') idStr: string): Promise<CounterResponse> {
     if (decodeURIComponent(idStr) == idStr) {
       throw new HttpException(
         'id must be a URI-encoded string',
