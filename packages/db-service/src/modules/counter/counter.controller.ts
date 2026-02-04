@@ -11,6 +11,11 @@ export class CounterDbController
 {
   constructor(private readonly counterService: CounterService) {}
 
+  /**
+   * Increment the value of a counter
+   * @param request
+   * @returns the counter ID and the updated value of the counter
+   */
   async incrementCounter(
     request: CounterProto.IncrementCounterRequest,
   ): Promise<CounterProto.IncrementCounterResponse> {
@@ -24,6 +29,12 @@ export class CounterDbController
       });
     }
   }
+
+  /**
+   * Decrement the value of a counter
+   * @param request
+   * @returns the counter ID and updated value
+   */
   async decrementCounter(
     request: CounterProto.DecrementCounterRequest,
   ): Promise<CounterProto.DecrementCounterResponse> {
@@ -37,6 +48,12 @@ export class CounterDbController
       });
     }
   }
+
+  /**
+   * Reset the value of a counter to zero
+   * @param request
+   * @returns the counter ID and updated value
+   */
   async resetCounter(
     request: CounterProto.ResetCounterRequest,
   ): Promise<CounterProto.ResetCounterResponse> {
@@ -50,11 +67,15 @@ export class CounterDbController
       });
     }
   }
+
+  /**
+   * Get the current value of a counter
+   * @param request
+   * @returns the counter's value or 0 if the counter does not exist
+   */
   async getCounter(
     request: CounterProto.GetCounterRequest,
   ): Promise<CounterProto.GetCounterResponse> {
-    // design decision: if counter with id in the request body does not exist,
-    // return a default value of 0
     try {
       const counter = await this.counterService.getCounter(request);
       return counter;
