@@ -7,7 +7,7 @@ export class CounterResponse {
   @Transform(({ value }) => Number(value))
   value: number;
 
-  constructor(config: any) {
+  constructor(config: { id: string; value: number }) {
     this.id = config.id;
     this.value = config.value;
   }
