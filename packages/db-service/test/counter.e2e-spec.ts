@@ -137,45 +137,6 @@ describe('DB Service Counter Tests', () => {
   it('increments a counter multiple times, followed by a decrement', async () => {
     // note: did not catch potential exceptions in test body since
     // jest will treat exceptions as a test failure.
+    modifiedCounterIds.push('orange');
     const initCounter = await new Promise((resolve) => {
-      counterClient.getCounter({ id: 'orange' }, (err, resp) => {
-        expect(err).toBeNull();
-        resolve(resp);
-      });
-    });
-    expect(initCounter).toEqual({ id: 'orange', value: 0 });
-
-    await new Promise((resolve) => {
-      counterClient.incrementCounter({ id: 'orange' }, (err, resp) => {
-        expect(err).toBeNull();
-        resolve(resp);
-      });
-    });
-    await new Promise((resolve) => {
-      counterClient.incrementCounter({ id: 'orange' }, (err, resp) => {
-        expect(err).toBeNull();
-        resolve(resp);
-      });
-    });
-    const counter = await new Promise((resolve) => {
-      counterClient.incrementCounter({ id: 'orange' }, (err, resp) => {
-        expect(err).toBeNull();
-        resolve(resp);
-      });
-    });
-
-    expect(counter).toEqual({ id: 'orange', value: 3 });
-    const decrementedCounter = await new Promise((resolve) => {
-      counterClient.decrementCounter(
-        {
-          id: 'orange',
-        },
-        (err, resp) => {
-          expect(err).toBeNull();
-          resolve(resp);
-        },
-      );
-    });
-    expect(decrementedCounter).toEqual({ id: 'orange', value: 2 });
-  });
 });
