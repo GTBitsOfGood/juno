@@ -12,7 +12,6 @@ import {
   CounterProtoFile,
   CommonProtoFile,
 } from 'juno-proto';
-import { CounterService } from 'src/modules/counter/counter.service';
 
 const { JUNO_COUNTER_PACKAGE_NAME } = CounterProto;
 
@@ -78,7 +77,7 @@ afterEach(async () => {
 });
 
 describe('DB Service Counter Tests', () => {
-  let counterClient: CounterService;
+  let counterClient: any;
   beforeEach(() => {
     const proto = ProtoLoader.loadSync([
       CounterProtoFile,
@@ -87,7 +86,6 @@ describe('DB Service Counter Tests', () => {
     ]) as any;
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-
     counterClient = new protoGRPC.juno.counter.CounterService(
       process.env.DB_SERVICE_ADDR,
       GRPC.credentials.createInsecure(),
@@ -101,13 +99,10 @@ describe('DB Service Counter Tests', () => {
       modifiedCounterIds.map(
         (id) =>
           new Promise((resolve, reject) => {
-            try {
-              counterClient.resetCounter({ id: id });
-              resolve(id);
-            } catch (e) {
-              // TODO: narrow the type of error
-              reject(e);
-            }
+            counterClient.resetCounter({ id: id }, (err, resp) => {
+              if (err) reject(err);
+              else resolve(resp);
+            });
           }),
       ),
     );
@@ -117,23 +112,69 @@ describe('DB Service Counter Tests', () => {
   it('increments a counter and gets its updated value', async () => {
     // note: did not catch potential exceptions in test body since
     // jest will treat exceptions as a test failure.
-    const initCounter = await counterClient.getCounter({ id: 'orange' });
-    expect(initCounter).toEqual({ id: 'orange', value: 0 });
-    const counter = await counterClient.incrementCounter({ id: 'orange' });
+    modifiedCounterIds.push('orange');
+    const initCounter = await new Promise((resolve) => {
+      counterClient.getCounter({ id: 'orange' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    expect(initCounter).toEqual({
+      id: 'orange',
+      value: 0,
+    });
+
+    const counter = await new Promise((resolve) => {
+      counterClient.incrementCounter({ id: 'orange' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+
     expect(counter).toEqual({ id: 'orange', value: 1 });
   });
 
   it('increments a counter multiple times, followed by a decrement', async () => {
     // note: did not catch potential exceptions in test body since
     // jest will treat exceptions as a test failure.
-    const initCounter = await counterClient.getCounter({ id: 'orange' });
+    const initCounter = await new Promise((resolve) => {
+      counterClient.getCounter({ id: 'orange' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
     expect(initCounter).toEqual({ id: 'orange', value: 0 });
-    await counterClient.incrementCounter({ id: 'orange' });
-    await counterClient.incrementCounter({ id: 'orange' });
-    const counter = await counterClient.incrementCounter({ id: 'orange' });
+
+    await new Promise((resolve) => {
+      counterClient.incrementCounter({ id: 'orange' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    await new Promise((resolve) => {
+      counterClient.incrementCounter({ id: 'orange' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+    const counter = await new Promise((resolve) => {
+      counterClient.incrementCounter({ id: 'orange' }, (err, resp) => {
+        expect(err).toBeNull();
+        resolve(resp);
+      });
+    });
+
     expect(counter).toEqual({ id: 'orange', value: 3 });
-    const decrementedCounter = await counterClient.decrementCounter({
-      id: 'orange',
+    const decrementedCounter = await new Promise((resolve) => {
+      counterClient.decrementCounter(
+        {
+          id: 'orange',
+        },
+        (err, resp) => {
+          expect(err).toBeNull();
+          resolve(resp);
+        },
+      );
     });
     expect(decrementedCounter).toEqual({ id: 'orange', value: 2 });
   });
