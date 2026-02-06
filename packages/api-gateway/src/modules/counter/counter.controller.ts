@@ -2,7 +2,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
   HttpStatus,
   Inject,
   OnModuleInit,
@@ -41,97 +40,57 @@ export class CounterController implements OnModuleInit {
   @Get(':id')
   @ApiOperation({ summary: "Retrieves a counter's value." })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'ID must be a URI-encoded string',
-  })
-  @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned the value for the counter with the given ID',
     type: CounterResponse,
   })
   async getCounter(@Param('id') idStr: string): Promise<CounterResponse> {
-    if (decodeURIComponent(idStr) == idStr) {
-      throw new HttpException(
-        'id must be a URI-encoded string',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const id = decodeURI(idStr);
 
     const counter = this.counterService.getCounter({
-      id: idStr,
+      id,
     });
 
     return new CounterResponse(await lastValueFrom(counter));
   }
 
-  //Increment a counter's value
+  // this operation is not idempotent, so PATCH was chosen
   @Patch(':id/increment')
-  @ApiOperation({ summary: 'Increment the value of a counter. ' })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'ID must be a URI-encoded string',
-  })
+  @ApiOperation({ summary: 'Increment the value of a counter.' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned the updated counter value.',
     type: CounterResponse,
   })
   async incrementCounter(@Param('id') idStr: string): Promise<CounterResponse> {
-    if (decodeURIComponent(idStr) == idStr) {
-      throw new HttpException(
-        'id must be a URI-encoded string',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const counter = this.counterService.incrementCounter({ id: idStr });
+    const id = decodeURI(idStr);
+    const counter = this.counterService.incrementCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
-  //Increment a counter's value
   @Patch(':id/decrement')
   @ApiOperation({ summary: 'Decrement the value of a counter. ' })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'ID must be a URI-encoded string',
-  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned the updated counter value.',
     type: CounterResponse,
   })
   async decrementCounter(@Param('id') idStr: string): Promise<CounterResponse> {
-    if (decodeURIComponent(idStr) == idStr) {
-      throw new HttpException(
-        'id must be a URI-encoded string',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const counter = this.counterService.decrementCounter({ id: idStr });
+    const id = decodeURI(idStr);
+    const counter = this.counterService.decrementCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Reset the value of a counter. ' })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'ID must be a URI-encoded string',
-  })
-  @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned the updated counter value.',
     type: CounterResponse,
   })
   async resetCounter(@Param('id') idStr: string): Promise<CounterResponse> {
-    if (decodeURIComponent(idStr) == idStr) {
-      throw new HttpException(
-        'id must be a URI-encoded string',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const counter = this.counterService.resetCounter({ id: idStr });
+    const id = decodeURI(idStr);
+    const counter = this.counterService.resetCounter({ id });
     return new CounterResponse(await lastValueFrom(counter));
   }
 }
