@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package juno.counter;
+
+service CounterDbService {
+    rpc incrementCounter(IncrementCounterRequest) returns (Counter);
+    rpc decrementCounter(DecrementCounterRequest) returns (Counter);
+    rpc resetCounter(ResetCounterRequest) returns (Counter);
+    rpc getCounter(GetCounterRequest) returns (Counter);
+}
+
+message IncrementCounterRequest {
+    string id = 1;
+}
+
+message DecrementCounterRequest {
+    string id = 1;
+}
+
+message ResetCounterRequest {
+    string id = 1;
+}
+
+message GetCounterRequest {
+    string id = 1;
+}
+
+message Counter {
+    string id = 1;
+    int32 value = 2;
+}

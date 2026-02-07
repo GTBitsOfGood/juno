@@ -30,6 +30,11 @@ model Project {
   analyticsService AnalyticsServiceConfig[]
 }
 
+model Counter {
+  id    String  @id
+  value Int
+}
+
 model ApiKey {
   id          Int        @id @default(autoincrement())
   hash        String     @unique
