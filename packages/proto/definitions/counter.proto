@@ -3,10 +3,11 @@ syntax = "proto3";
 package juno.counter;
 
 service CounterService {
+  rpc createCounter(CreateCounterRequest) returns (CreateCounterResponse);
+  rpc getCounter(GetCounterRequest) returns (GetCounterResponse);
   rpc incrementCounter(IncrementCounterRequest) returns (IncrementCounterResponse);
   rpc decrementCounter(DecrementCounterRequest) returns (DecrementCounterResponse);
   rpc resetCounter(ResetCounterRequest) returns (ResetCounterResponse);
-  rpc getCounter(GetCounterRequest) returns (GetCounterResponse);
 }
 
 message IncrementCounterRequest { string id = 1; }
@@ -15,5 +16,7 @@ message DecrementCounterRequest { string id = 1; }
 message DecrementCounterResponse { int32 value = 1; }
 message ResetCounterRequest { string id = 1; }
 message ResetCounterResponse { int32 value = 1; }
+message CreateCounterRequest { string id = 1; int32 initial_value = 2; }
+message CreateCounterResponse { int32 value = 1; }
 message GetCounterRequest { string id = 1; }
 message GetCounterResponse { int32 value = 1; }

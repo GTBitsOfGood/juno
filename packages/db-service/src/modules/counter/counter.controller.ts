@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { Prisma } from '@prisma/client';
 import { CounterProto } from 'juno-proto';
 import { CounterService } from './counter.service';
 
@@ -10,6 +11,33 @@ export class CounterController
   implements CounterProto.CounterServiceController
 {
   constructor(private readonly counterService: CounterService) {}
+
+  async createCounter(
+    request: CounterProto.CreateCounterRequest,
+  ): Promise<CounterProto.CreateCounterResponse> {
+    try {
+      const value =
+        request.initialValue ??
+        (request as { initial_value?: number }).initial_value ??
+        0;
+      const counter = await this.counterService.createCounter(
+        request.id,
+        value,
+      );
+      return { value: counter.value };
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        throw new RpcException({
+          code: status.ALREADY_EXISTS,
+          message: 'Counter already exists',
+        });
+      }
+      throw e;
+    }
+  }
 
   async getCounter(
     request: CounterProto.GetCounterRequest,

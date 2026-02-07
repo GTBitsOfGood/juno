@@ -34,6 +34,15 @@ export interface ResetCounterResponse {
   value: number;
 }
 
+export interface CreateCounterRequest {
+  id: string;
+  initialValue: number;
+}
+
+export interface CreateCounterResponse {
+  value: number;
+}
+
 export interface GetCounterRequest {
   id: string;
 }
@@ -45,6 +54,12 @@ export interface GetCounterResponse {
 export const JUNO_COUNTER_PACKAGE_NAME = 'juno.counter';
 
 export interface CounterServiceClient {
+  createCounter(
+    request: CreateCounterRequest,
+  ): Observable<CreateCounterResponse>;
+
+  getCounter(request: GetCounterRequest): Observable<GetCounterResponse>;
+
   incrementCounter(
     request: IncrementCounterRequest,
   ): Observable<IncrementCounterResponse>;
@@ -54,11 +69,23 @@ export interface CounterServiceClient {
   ): Observable<DecrementCounterResponse>;
 
   resetCounter(request: ResetCounterRequest): Observable<ResetCounterResponse>;
-
-  getCounter(request: GetCounterRequest): Observable<GetCounterResponse>;
 }
 
 export interface CounterServiceController {
+  createCounter(
+    request: CreateCounterRequest,
+  ):
+    | Promise<CreateCounterResponse>
+    | Observable<CreateCounterResponse>
+    | CreateCounterResponse;
+
+  getCounter(
+    request: GetCounterRequest,
+  ):
+    | Promise<GetCounterResponse>
+    | Observable<GetCounterResponse>
+    | GetCounterResponse;
+
   incrementCounter(
     request: IncrementCounterRequest,
   ):
@@ -79,22 +106,16 @@ export interface CounterServiceController {
     | Promise<ResetCounterResponse>
     | Observable<ResetCounterResponse>
     | ResetCounterResponse;
-
-  getCounter(
-    request: GetCounterRequest,
-  ):
-    | Promise<GetCounterResponse>
-    | Observable<GetCounterResponse>
-    | GetCounterResponse;
 }
 
 export function CounterServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
+      'createCounter',
+      'getCounter',
       'incrementCounter',
       'decrementCounter',
       'resetCounter',
-      'getCounter',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

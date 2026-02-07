@@ -6,6 +6,12 @@ import { PrismaService } from 'src/prisma.service';
 export class CounterService {
   constructor(private prisma: PrismaService) {}
 
+  async createCounter(id: string, initialValue: number = 0): Promise<Counter> {
+    return this.prisma.counter.create({
+      data: { id, value: initialValue },
+    });
+  }
+
   async getCounter(id: string): Promise<Counter | null> {
     return this.prisma.counter.findUnique({
       where: { id },
