@@ -20,10 +20,7 @@ import {
   JUNO_JWT_PACKAGE_NAME,
 } from 'juno-proto/dist/gen/jwt';
 
-const {
-  COUNTER_DB_SERVICE_NAME,
-  JUNO_COUNTER_PACKAGE_NAME,
-} = CounterProto;
+const { COUNTER_DB_SERVICE_NAME, JUNO_COUNTER_PACKAGE_NAME } = CounterProto;
 
 @Module({
   imports: [

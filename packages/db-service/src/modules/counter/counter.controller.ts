@@ -7,7 +7,9 @@ import { CounterService } from './counter.service';
 
 @Controller()
 @CounterProto.CounterDbServiceControllerMethods()
-export class CounterController implements CounterProto.CounterDbServiceController {
+export class CounterController
+  implements CounterProto.CounterDbServiceController
+{
   constructor(private readonly counterService: CounterService) {}
 
   async incrementCounter(

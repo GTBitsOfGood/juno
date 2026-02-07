@@ -81,16 +81,13 @@ describe('Counter Tests', () => {
   it('increments a counter that does not exist', async () => {
     const response: CounterProto.Counter = await new Promise(
       (resolve, reject) => {
-        counterClient.incrementCounter(
-          { id: 'test-counter-1' },
-          (err, res) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
-          },
-        );
+        counterClient.incrementCounter({ id: 'test-counter-1' }, (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
       },
     );
 
@@ -101,28 +98,22 @@ describe('Counter Tests', () => {
   it('increments an existing counter', async () => {
     // First increment
     await new Promise<void>((resolve, reject) => {
-      counterClient.incrementCounter(
-        { id: 'test-counter-2' },
-        (err, res) => {
-          if (err) reject(err);
-          else resolve();
-        },
-      );
+      counterClient.incrementCounter({ id: 'test-counter-2' }, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
 
     // Second increment
     const response: CounterProto.Counter = await new Promise(
       (resolve, reject) => {
-        counterClient.incrementCounter(
-          { id: 'test-counter-2' },
-          (err, res) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
-          },
-        );
+        counterClient.incrementCounter({ id: 'test-counter-2' }, (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
       },
     );
 
@@ -133,16 +124,13 @@ describe('Counter Tests', () => {
   it('decrements a counter that does not exist', async () => {
     const response: CounterProto.Counter = await new Promise(
       (resolve, reject) => {
-        counterClient.decrementCounter(
-          { id: 'test-counter-3' },
-          (err, res) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
-          },
-        );
+        counterClient.decrementCounter({ id: 'test-counter-3' }, (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
       },
     );
 
@@ -153,28 +141,22 @@ describe('Counter Tests', () => {
   it('decrements an existing counter', async () => {
     // First increment to create counter
     await new Promise<void>((resolve, reject) => {
-      counterClient.incrementCounter(
-        { id: 'test-counter-4' },
-        (err, res) => {
-          if (err) reject(err);
-          else resolve();
-        },
-      );
+      counterClient.incrementCounter({ id: 'test-counter-4' }, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
 
     // Decrement
     const response: CounterProto.Counter = await new Promise(
       (resolve, reject) => {
-        counterClient.decrementCounter(
-          { id: 'test-counter-4' },
-          (err, res) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
-          },
-        );
+        counterClient.decrementCounter({ id: 'test-counter-4' }, (err, res) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
       },
     );
 
@@ -185,24 +167,18 @@ describe('Counter Tests', () => {
   it('resets a counter to 0', async () => {
     // First increment to create counter
     await new Promise<void>((resolve, reject) => {
-      counterClient.incrementCounter(
-        { id: 'test-counter-5' },
-        (err, res) => {
-          if (err) reject(err);
-          else resolve();
-        },
-      );
+      counterClient.incrementCounter({ id: 'test-counter-5' }, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
 
     // Increment again
     await new Promise<void>((resolve, reject) => {
-      counterClient.incrementCounter(
-        { id: 'test-counter-5' },
-        (err, res) => {
-          if (err) reject(err);
-          else resolve();
-        },
-      );
+      counterClient.incrementCounter({ id: 'test-counter-5' }, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
 
     // Reset
@@ -224,27 +200,21 @@ describe('Counter Tests', () => {
 
   it('fails to reset a non-existent counter', async () => {
     await new Promise((resolve) => {
-      counterClient.resetCounter(
-        { id: 'non-existent-counter' },
-        (err) => {
-          expect(err.code).toBe(GRPC.status.NOT_FOUND);
-          expect(err.details).toBe('Counter not found');
-          resolve({});
-        },
-      );
+      counterClient.resetCounter({ id: 'non-existent-counter' }, (err) => {
+        expect(err.code).toBe(GRPC.status.NOT_FOUND);
+        expect(err.details).toBe('Counter not found');
+        resolve({});
+      });
     });
   });
 
   it('gets a counter', async () => {
     // First increment to create counter
     await new Promise<void>((resolve, reject) => {
-      counterClient.incrementCounter(
-        { id: 'test-counter-6' },
-        (err, res) => {
-          if (err) reject(err);
-          else resolve();
-        },
-      );
+      counterClient.incrementCounter({ id: 'test-counter-6' }, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
 
     // Get counter
@@ -266,14 +236,11 @@ describe('Counter Tests', () => {
 
   it('fails to get a non-existent counter', async () => {
     await new Promise((resolve) => {
-      counterClient.getCounter(
-        { id: 'non-existent-counter-2' },
-        (err) => {
-          expect(err.code).toBe(GRPC.status.NOT_FOUND);
-          expect(err.details).toBe('Counter not found');
-          resolve({});
-        },
-      );
+      counterClient.getCounter({ id: 'non-existent-counter-2' }, (err) => {
+        expect(err.code).toBe(GRPC.status.NOT_FOUND);
+        expect(err.details).toBe('Counter not found');
+        resolve({});
+      });
     });
   });
 });
