@@ -13,6 +13,7 @@ export * as FileBucketProto from './gen/file_bucket';
 export * as FileConfigProto from './gen/file_config';
 export * as FileProviderProto from './gen/file_provider';
 export * as CommonProto from './gen/common';
+export * as CounterProto from './gen/counter';
 export * as AnalyticsProto from './gen/analytics';
 export * as AnalyticsConfigProto from './gen/analytics_config';
 
@@ -37,6 +38,7 @@ export const FileBucketProtoFile = getProtoFilePath('file_bucket.proto');
 export const FileConfigProtoFile = getProtoFilePath('file_config.proto');
 export const FileProviderProtoFile = getProtoFilePath('file_provider.proto');
 export const CommonProtoFile = getProtoFilePath('common.proto');
+export const CounterProtoFile = getProtoFilePath('counter.proto');
 export const AnalyticsProtoFile = getProtoFilePath('analytics.proto');
 export const AnalyticsConfigProtoFile = getProtoFilePath(
   'analytics_config.proto',
