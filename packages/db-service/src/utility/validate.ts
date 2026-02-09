@@ -121,3 +121,18 @@ export function validateFileId(id: IdentifierProto.FileIdentifier) {
     });
   }
 }
+
+export function validateCounterIdentifier(
+  identifier: string,
+): Prisma.CounterWhereUniqueInput {
+  if (!identifier) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Missing id argument',
+    });
+  }
+
+  return {
+    id: identifier,
+  };
+}
