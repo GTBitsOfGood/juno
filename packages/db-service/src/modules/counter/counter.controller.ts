@@ -3,7 +3,10 @@ import { status } from '@grpc/grpc-js';
 import { CounterService } from './counter.service';
 import { CounterProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
-import { validateCounterIdentifier } from '../../utility/validate';
+import {
+  validateCounterIdentifier,
+  validatePositiveIntField,
+} from '../../utility/validate';
 
 @Controller()
 @CounterProto.CounterServiceControllerMethods()
@@ -26,7 +29,7 @@ export class CounterController
     }
 
     return await this.counterService.updateCounter(validatedIdentifier, {
-      increment: request.value,
+      increment: validatePositiveIntField(request.value, 'value'),
     });
   }
 
@@ -44,7 +47,7 @@ export class CounterController
     }
 
     return await this.counterService.updateCounter(validatedIdentifier, {
-      decrement: request.value,
+      decrement: validatePositiveIntField(request.value, 'value'),
     });
   }
 

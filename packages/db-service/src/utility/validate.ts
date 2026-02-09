@@ -136,3 +136,17 @@ export function validateCounterIdentifier(
     id: identifier,
   };
 }
+
+export function validatePositiveIntField(
+  value: number,
+  fieldName: string,
+): number {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: `${fieldName} must be a positive integer`,
+    });
+  }
+
+  return value;
+}
