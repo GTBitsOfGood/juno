@@ -18,7 +18,9 @@ export class CounterService {
     });
   }
 
-  async getCounter(counter: Prisma.CounterWhereUniqueInput): Promise<Counter> {
+  async getCounter(
+    counter: Prisma.CounterWhereUniqueInput,
+  ): Promise<Counter | null> {
     return this.prisma.counter.findUnique({
       where: counter,
     });
