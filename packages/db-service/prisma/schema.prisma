@@ -21,12 +21,12 @@ model User {
 }
 
 model Project {
-  id           Int                  @id @default(autoincrement())
-  name         String               @unique
-  apiKeys      ApiKey[]
-  users        User[]
-  emailService EmailServiceConfig[]
-  fileService  FileServiceConfig[]
+  id               Int                      @id @default(autoincrement())
+  name             String                   @unique
+  apiKeys          ApiKey[]
+  users            User[]
+  emailService     EmailServiceConfig[]
+  fileService      FileServiceConfig[]
   analyticsService AnalyticsServiceConfig[]
 }
 
@@ -51,18 +51,19 @@ enum Role {
 }
 
 model AnalyticsServiceConfig {
-  id Int
-  environment String @default("test")
-  serverAnalyticsKey String @default("")
-  clientAnalyticsKey String @default("")
-  Project Project @relation(fields: [id], references: [id])
+  id                 Int
+  environment        String  @default("test")
+  serverAnalyticsKey String  @default("")
+  clientAnalyticsKey String  @default("")
+  Project            Project @relation(fields: [id], references: [id])
+
   @@id([id, environment])
 }
 
 model EmailServiceConfig {
   id             Int
-  environment    String @default("test")
-  sendgridApiKey String @default("")
+  environment    String                        @default("test")
+  sendgridApiKey String                        @default("")
   emails         EmailServiceConfigAndSender[]
   domains        EmailServiceConfigAndDomain[]
   Project        Project                       @relation(fields: [id], references: [id])
@@ -110,16 +111,17 @@ model EmailDomain {
 }
 
 enum FileProviderType {
-  S3 
-  AZURE 
+  S3
+  AZURE
 }
 
 model FileServiceConfig {
-  id              Int                 
-  environment    String @default("test")
+  id              Int
+  environment     String              @default("test")
   buckets         FileServiceBucket[]
   Project         Project             @relation(fields: [id], references: [id])
   FileServiceFile FileServiceFile[]
+
   @@id([id, environment])
 }
 
@@ -153,4 +155,9 @@ model FileServiceFile {
   metadata   String
 
   @@id([path, bucketName, configId, configEnv])
+}
+
+model Counter {
+  id    String @id @default(uuid())
+  value Int    @default(0)
 }

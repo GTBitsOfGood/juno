@@ -121,3 +121,32 @@ export function validateFileId(id: IdentifierProto.FileIdentifier) {
     });
   }
 }
+
+export function validateCounterIdentifier(
+  identifier: string,
+): Prisma.CounterWhereUniqueInput {
+  if (!identifier) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Missing id argument',
+    });
+  }
+
+  return {
+    id: identifier,
+  };
+}
+
+export function validatePositiveIntField(
+  value: number,
+  fieldName: string,
+): number {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: `${fieldName} must be a positive integer`,
+    });
+  }
+
+  return value;
+}

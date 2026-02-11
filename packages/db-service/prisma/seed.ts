@@ -91,6 +91,12 @@ async function main() {
       metadata: '',
     },
   });
+
+  await prisma.counter.upsert({
+    where: { id: 'test-counter' },
+    create: { id: 'test-counter', value: 0 },
+    update: { value: 0 },
+  });
 }
 
 main()
