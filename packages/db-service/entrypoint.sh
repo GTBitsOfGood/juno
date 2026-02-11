@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ ${RUN_MODE} == *"test"* ]]; then
-    echo "Resetting database for test..."
+if [[ ${RUN_MODE} == *"test"* || ${RUN_MODE} == *"reseed"* ]]; then
+    echo "Resetting database..."
     pnpm prisma migrate reset --force
 fi
 

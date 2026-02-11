@@ -14,6 +14,7 @@
     "start:dev:live-packages": "concurrently -k \"pnpm start:dev:watch-packages\" \"pnpm start:dev:up-packages\"",
     "start:dev:live-proto": "concurrently -k \"pnpm start:dev:watch-proto\" \"pnpm start:dev:up-proto\"",
     "start:dev:live-all": "concurrently -k -P --success=\"last\" \"pnpm start:dev:watch-all\" \"pnpm start:dev:up-all {@}\" -- ",
+    "start:dev:live-all-reseed": "RUN_MODE=reseed pnpm start:dev:live-all",
     "dev": "pnpm start:dev:live-all",
     "format:check": "pnpm prettier --check .",
     "format:write": "pnpm prettier --write .",
