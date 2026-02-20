@@ -154,3 +154,13 @@ model FileServiceFile {
 
   @@id([path, bucketName, configId, configEnv])
 }
+
+model NewAccountRequest {
+  id          Int      @id @default(autoincrement())
+  email       String
+  name        String
+  password    String
+  userType    Role
+  projectName String?
+  createdAt   DateTime @default(now())
+}

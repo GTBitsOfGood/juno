@@ -18,6 +18,15 @@ service UserService {
       returns (UserPasswordHash);
 }
 
+service AccountRequestService {
+  rpc createAccountRequest(CreateNewAccountRequestMessage)
+      returns (NewAccountRequest);
+  rpc getAllAccountRequests(GetAllNewAccountRequestsMessage)
+      returns (NewAccountRequests);
+  rpc deleteAccountRequest(RemoveNewAccountRequestByIdMessage)
+      returns (NewAccountRequest);
+}
+
 service UserAuthService {
   rpc authenticate(AuthenticateUserRequest) returns (common.User);
 }
@@ -62,4 +71,32 @@ message UnlinkProjectFromUserRequest {
 message AuthenticateUserRequest {
   string email = 1;
   string password = 2;
+}
+
+message CreateNewAccountRequestMessage {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+  common.UserType userType = 4;
+  optional string projectName = 5;
+}
+
+message NewAccountRequest {
+  int32 id = 1;
+  string email = 2;
+  string name = 3;
+  string password = 4;
+  common.UserType userType = 5;
+  optional string projectName = 6;
+  string createdAt = 7;
+}
+
+message NewAccountRequests {
+  repeated NewAccountRequest requests = 1;
+}
+
+message GetAllNewAccountRequestsMessage {}
+
+message RemoveNewAccountRequestByIdMessage {
+  int32 id = 1;
 }

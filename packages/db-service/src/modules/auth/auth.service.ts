@@ -1,7 +1,7 @@
 import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { ApiKey, Prisma } from '@prisma/client';
+import { ApiKey, NewAccountRequest, Prisma } from '@prisma/client';
 import { AuthCommonProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -111,6 +111,31 @@ export class AuthService {
       where: lookup,
     });
     return convertDbApiKeyToTs(key);
+  }
+
+  async createAccountRequest(
+    input: Prisma.NewAccountRequestCreateInput,
+  ): Promise<NewAccountRequest> {
+    return this.prisma.newAccountRequest.create({ data: input });
+  }
+
+  async getAllAccountRequests(): Promise<NewAccountRequest[]> {
+    return this.prisma.newAccountRequest.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async deleteAccountRequest(id: number): Promise<NewAccountRequest> {
+    const existing = await this.prisma.newAccountRequest.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: `Account request with id ${id} not found`,
+      });
+    }
+    return this.prisma.newAccountRequest.delete({ where: { id } });
   }
 }
 const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
