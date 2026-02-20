@@ -196,27 +196,6 @@ describe('DB Service Account Request Tests', () => {
     expect(resp['createdAt']).toBeDefined();
   });
 
-  it('hashes the password when creating a request', async () => {
-    const rawPassword = 'plaintext-password';
-    const resp: any = await new Promise((resolve) => {
-      accountRequestClient.createAccountRequest(
-        {
-          email: 'hashcheck@test.com',
-          name: 'Hash Check',
-          password: rawPassword,
-          userType: 'USER',
-        },
-        (err, resp) => {
-          expect(err).toBeNull();
-          resolve(resp);
-        },
-      );
-    });
-
-    expect(resp['password']).toBeDefined();
-    expect(resp['password']).not.toBe(rawPassword);
-  });
-
   it('gets all account requests', async () => {
     await new Promise((resolve) => {
       accountRequestClient.createAccountRequest(

@@ -57,7 +57,9 @@ export class ApiKeyDbController
       projectName: request.projectName ?? null,
     });
     return {
-      ...created,
+      id: created.id,
+      email: created.email,
+      name: created.name,
       userType: mapPrismaRoleToRPC(created.userType),
       projectName: created.projectName ?? undefined,
       createdAt: created.createdAt.toISOString(),
@@ -71,7 +73,9 @@ export class ApiKeyDbController
     const requests = await this.apiKeyService.getAllAccountRequests();
     return {
       requests: requests.map((req) => ({
-        ...req,
+        id: req.id,
+        email: req.email,
+        name: req.name,
         userType: mapPrismaRoleToRPC(req.userType),
         projectName: req.projectName ?? undefined,
         createdAt: req.createdAt.toISOString(),
@@ -84,7 +88,9 @@ export class ApiKeyDbController
   ): Promise<UserProto.NewAccountRequest> {
     const removed = await this.apiKeyService.deleteAccountRequest(request.id);
     return {
-      ...removed,
+      id: removed.id,
+      email: removed.email,
+      name: removed.name,
       userType: mapPrismaRoleToRPC(removed.userType),
       projectName: removed.projectName ?? undefined,
       createdAt: removed.createdAt.toISOString(),

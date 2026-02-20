@@ -85,10 +85,9 @@ message NewAccountRequest {
   int32 id = 1;
   string email = 2;
   string name = 3;
-  string password = 4;
-  common.UserType userType = 5;
-  optional string projectName = 6;
-  string createdAt = 7;
+  common.UserType userType = 4;
+  optional string projectName = 5;
+  string createdAt = 6;
 }
 
 message NewAccountRequests {
