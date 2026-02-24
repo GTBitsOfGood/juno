@@ -157,7 +157,7 @@ model FileServiceFile {
 
 model NewAccountRequest {
   id          Int      @id @default(autoincrement())
-  email       String
+  email       String   @unique
   name        String
   password    String
   userType    Role
