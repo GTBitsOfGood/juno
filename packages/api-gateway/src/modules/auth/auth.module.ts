@@ -22,7 +22,11 @@ import { CredentialsMiddleware } from 'src/middleware/credentials.middleware';
 
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
 const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
-const { USER_AUTH_SERVICE_NAME, JUNO_USER_PACKAGE_NAME } = UserProto;
+const {
+  USER_AUTH_SERVICE_NAME,
+  ACCOUNT_REQUEST_SERVICE_NAME,
+  JUNO_USER_PACKAGE_NAME,
+} = UserProto;
 const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 
 @Module({
@@ -67,6 +71,15 @@ const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
           protoPath: ProjectProtoFile,
         },
       },
+      {
+        name: ACCOUNT_REQUEST_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.DB_SERVICE_ADDR,
+          package: JUNO_USER_PACKAGE_NAME,
+          protoPath: UserProtoFile,
+        },
+      },
     ]),
   ],
   controllers: [AuthController],
@@ -79,6 +92,8 @@ export class AuthModule implements NestModule {
         { path: 'auth/key', method: RequestMethod.POST },
         { path: 'auth/user/jwt', method: RequestMethod.POST },
         { path: 'auth/test-auth', method: RequestMethod.GET },
+        { path: 'auth/account-request', method: RequestMethod.GET },
+        { path: 'auth/account-request/:id', method: RequestMethod.DELETE },
       );
   }
 }

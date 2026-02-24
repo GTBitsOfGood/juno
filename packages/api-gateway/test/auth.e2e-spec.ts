@@ -242,3 +242,180 @@ describe('User JWT Verification Routes', () => {
     return expect(result['user']['email']).toEqual(ADMIN_EMAIL);
   });
 });
+
+describe('Account Request - POST /auth/account-request', () => {
+  it('should create a new account request with valid data', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'newuser@example.com',
+        name: 'New User',
+        password: 'securepassword',
+        userType: 'USER',
+        projectName: 'my-project',
+      })
+      .expect(201);
+
+    expect(response.body.id).toBeDefined();
+    expect(response.body.email).toBe('newuser@example.com');
+    expect(response.body.name).toBe('New User');
+    expect(response.body.userType).toBe('USER');
+    expect(response.body.projectName).toBe('my-project');
+    expect(response.body.createdAt).toBeDefined();
+  });
+
+  it('should reject request with missing email', () => {
+    return request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        name: 'No Email',
+        password: 'securepassword',
+        userType: 'USER',
+      })
+      .expect(400);
+  });
+
+  it('should reject request with invalid email', () => {
+    return request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'not-an-email',
+        name: 'Bad Email',
+        password: 'securepassword',
+        userType: 'USER',
+      })
+      .expect(400);
+  });
+
+  it('should reject request with password shorter than 6 characters', () => {
+    return request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'valid@example.com',
+        name: 'Short Password',
+        password: '12345',
+        userType: 'USER',
+      })
+      .expect(400);
+  });
+
+  it('should reject request with invalid userType', () => {
+    return request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'valid@example.com',
+        name: 'Bad Type',
+        password: 'securepassword',
+        userType: 'INVALID_ROLE',
+      })
+      .expect(400);
+  });
+});
+
+describe('Account Request - GET /auth/account-request', () => {
+  it('should return all requests for an admin user', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'getall-test@example.com',
+        name: 'Get All Test',
+        password: 'securepassword',
+        userType: 'USER',
+      })
+      .expect(201);
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/account-request')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+
+    expect(response.body.requests).toBeDefined();
+    expect(Array.isArray(response.body.requests)).toBe(true);
+    expect(response.body.requests.length).toBeGreaterThanOrEqual(1);
+
+    const emails = response.body.requests.map((r: any) => r.email);
+    expect(emails).toContain('getall-test@example.com');
+  });
+
+  it('should reject unauthenticated requests', () => {
+    return request(app.getHttpServer())
+      .get('/auth/account-request')
+      .expect(401);
+  });
+
+  it('should reject requests from a regular USER', async () => {
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        password: 'userpass',
+        name: 'Regular User',
+        email: 'regularuser-getall@example.com',
+      })
+      .expect(201);
+
+    return request(app.getHttpServer())
+      .get('/auth/account-request')
+      .set('X-User-Email', 'regularuser-getall@example.com')
+      .set('X-User-Password', 'userpass')
+      .expect(401);
+  });
+});
+
+describe('Account Request - DELETE /auth/account-request/:id', () => {
+  it('should remove a request by id for an admin user', async () => {
+    const createResp = await request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'toremove@example.com',
+        name: 'To Remove',
+        password: 'securepassword',
+        userType: 'USER',
+      })
+      .expect(201);
+
+    const id = createResp.body.id;
+
+    const deleteResp = await request(app.getHttpServer())
+      .delete(`/auth/account-request/${id}`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+
+    expect(deleteResp.body.id).toBe(id);
+    expect(deleteResp.body.email).toBe('toremove@example.com');
+
+    const allResp = await request(app.getHttpServer())
+      .get('/auth/account-request')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+
+    const ids = allResp.body.requests.map((r: any) => r.id);
+    expect(ids).not.toContain(id);
+  });
+
+  it('should reject unauthenticated requests', () => {
+    return request(app.getHttpServer())
+      .delete('/auth/account-request/1')
+      .expect(401);
+  });
+
+  it('should return 400 for non-numeric id', () => {
+    return request(app.getHttpServer())
+      .delete('/auth/account-request/abc')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(400);
+  });
+
+  it('should return error for non-existent id', () => {
+    return request(app.getHttpServer())
+      .delete('/auth/account-request/999999')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(404);
+  });
+});
