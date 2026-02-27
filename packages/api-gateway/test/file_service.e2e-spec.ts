@@ -1,20 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
 import {
   ClassSerializerInterceptor,
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
-import * as request from 'supertest';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
-  ResetProtoFile,
-  FileConfigProtoFile,
   FileConfigProto,
+  FileConfigProtoFile,
+  ResetProtoFile,
 } from 'juno-proto';
-import * as GRPC from '@grpc/grpc-js';
-import * as ProtoLoader from '@grpc/proto-loader';
-import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import * as request from 'supertest';
+import { AppModule } from './../src/app.module';
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -165,21 +165,6 @@ describe('File Upload Verification Routes', () => {
     fileName = `File-${Date.now()}`;
   });
 
-  afterEach(async () => {
-    try {
-      await deleteS3BucketPostTest(uniqueBucketName, {
-        endpoint: baseURL,
-        region: region,
-        credentials: {
-          accessKeyId: accessKeyId as string,
-          secretAccessKey: secretAccessKey as string,
-        },
-      });
-    } catch (err) {
-      console.log(err.message);
-    }
-  });
-
   it('Successful upload/download file', async () => {
     // Register file config
     const configIdLong = await registerConfig(projectId);
@@ -241,6 +226,19 @@ describe('File Upload Verification Routes', () => {
       },
       expectStatus: 201,
     });
+
+    try {
+      await deleteS3BucketPostTest(uniqueBucketName + `-${configId}-prod`, {
+        endpoint: baseURL,
+        region: region,
+        credentials: {
+          accessKeyId: accessKeyId as string,
+          secretAccessKey: secretAccessKey as string,
+        },
+      });
+    } catch (err) {
+      console.log(err.message);
+    }
   });
 
   it('Fail to register config', async () => {
