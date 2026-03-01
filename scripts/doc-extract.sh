@@ -14,6 +14,7 @@ gateway_container_id=$(docker ps -q --filter "ancestor=juno-api-gateway")
 gateway_container_port=$(docker port $gateway_container_id)
 
 gateway_public_port=$(echo "$gateway_container_port" | grep -oP "0.0.0.0:\K\d+")
+# gateway_public_port=$(echo "$gateway_container_port" | grep -o "0.0.0.0:[0-9]*" | cut -d':' -f2)    # MACOS version
 
 # grab doc yaml
 curl "localhost:$gateway_public_port/docs-yaml" > docs-yaml
