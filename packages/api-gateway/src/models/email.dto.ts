@@ -74,8 +74,8 @@ export class EmailConfigResponse {
     this.id = emailConfig.id;
     this.environment = emailConfig.environment;
     this.sendgridKey = emailConfig.sendgridKey;
-    this.domains = emailConfig.domains;
-    this.senders = emailConfig.senders;
+    this.domains = emailConfig.domains ?? [];
+    this.senders = emailConfig.senders ?? [];
   }
 }
 
