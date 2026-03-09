@@ -158,6 +158,7 @@ const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
     description: key.description,
     project: { id: key.projectId },
     environment: key.environment,
+    createdAt: key.createdAt.toString(),
   };
   return apiKey;
 };
