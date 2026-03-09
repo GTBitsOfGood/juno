@@ -39,6 +39,7 @@ message ApiKeyNoId {
   repeated auth_common.ApiScope scopes = 3;
   identifiers.ProjectIdentifier project = 4;
   string environment = 5;
+  string created_at = 6;
 }
 
 message IssueApiKeyResponse {
