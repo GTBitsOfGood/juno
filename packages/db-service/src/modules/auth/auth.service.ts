@@ -148,60 +148,97 @@ export class AuthService {
     };
     project?: { id: number; name: string };
   }> {
-    const request = await this.prisma.newAccountRequest.findUnique({
-      where: { id },
-    });
-    if (!request) {
-      throw new RpcException({
-        code: status.NOT_FOUND,
-        message: `Account request with id ${id} not found`,
-      });
-    }
-
-    return this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email: request.email,
-          name: request.name,
-          password: request.password,
-          type: request.userType,
-        },
-      });
-
-      let project: { id: number; name: string } | undefined;
-
-      if (request.userType === Role.ADMIN && request.projectName) {
-        let existingProject = await tx.project.findUnique({
-          where: { name: request.projectName },
+    let requestEmail: string | undefined;
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const request = await tx.newAccountRequest.findUnique({
+          where: { id },
         });
-
-        if (!existingProject) {
-          existingProject = await tx.project.create({
-            data: { name: request.projectName },
+        if (!request) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: `Account request with id ${id} not found`,
           });
         }
 
-        await tx.user.update({
-          where: { id: user.id },
-          data: { allowedProjects: { connect: { id: existingProject.id } } },
+        requestEmail = request.email;
+
+        let user = await tx.user.create({
+          data: {
+            email: request.email,
+            name: request.name,
+            password: request.password,
+            type: request.userType,
+          },
+          include: {
+            allowedProjects: {
+              select: {
+                id: true,
+              },
+            },
+          },
         });
 
-        project = { id: existingProject.id, name: existingProject.name };
+        let project: { id: number; name: string } | undefined;
+
+        if (request.userType === Role.ADMIN && request.projectName) {
+          let existingProject = await tx.project.findUnique({
+            where: { name: request.projectName },
+          });
+
+          if (!existingProject) {
+            existingProject = await tx.project.create({
+              data: { name: request.projectName },
+            });
+          }
+
+          user = await tx.user.update({
+            where: { id: user.id },
+            data: { allowedProjects: { connect: { id: existingProject.id } } },
+            include: {
+              allowedProjects: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          });
+
+          project = { id: existingProject.id, name: existingProject.name };
+        }
+
+        await tx.newAccountRequest.delete({ where: { id } });
+
+        return {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            type: user.type,
+            projectIds: user.allowedProjects.map((project) => project.id),
+          },
+          project,
+        };
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new RpcException({
+            code: status.ALREADY_EXISTS,
+            message: requestEmail
+              ? `A user with email ${requestEmail} already exists`
+              : 'A user with this email already exists',
+          });
+        }
+        if (error.code === 'P2025') {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: `Account request with id ${id} not found`,
+          });
+        }
       }
-
-      await tx.newAccountRequest.delete({ where: { id } });
-
-      return {
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          type: user.type,
-          projectIds: project ? [project.id] : [],
-        },
-        project,
-      };
-    });
+      throw error;
+    }
   }
 }
 const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
