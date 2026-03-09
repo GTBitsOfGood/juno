@@ -96,4 +96,22 @@ export class ApiKeyDbController
       createdAt: removed.createdAt.toISOString(),
     };
   }
+
+  async acceptAccountRequest(
+    request: UserProto.AcceptAccountRequestMessage,
+  ): Promise<UserProto.AcceptAccountRequestResponse> {
+    const result = await this.apiKeyService.acceptAccountRequest(request.id);
+    return {
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.name,
+        type: mapPrismaRoleToRPC(result.user.type),
+        projectIds: result.user.projectIds,
+      },
+      project: result.project
+        ? { id: result.project.id, name: result.project.name }
+        : undefined,
+    };
+  }
 }

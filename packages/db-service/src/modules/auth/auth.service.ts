@@ -1,7 +1,7 @@
 import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { ApiKey, NewAccountRequest, Prisma } from '@prisma/client';
+import { ApiKey, NewAccountRequest, Prisma, Role } from '@prisma/client';
 import { AuthCommonProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -136,6 +136,109 @@ export class AuthService {
       });
     }
     return this.prisma.newAccountRequest.delete({ where: { id } });
+  }
+
+  async acceptAccountRequest(id: number): Promise<{
+    user: {
+      id: number;
+      email: string;
+      name: string;
+      type: Role;
+      projectIds: number[];
+    };
+    project?: { id: number; name: string };
+  }> {
+    let requestEmail: string | undefined;
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const request = await tx.newAccountRequest.findUnique({
+          where: { id },
+        });
+        if (!request) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: `Account request with id ${id} not found`,
+          });
+        }
+
+        requestEmail = request.email;
+
+        let user = await tx.user.create({
+          data: {
+            email: request.email,
+            name: request.name,
+            password: request.password,
+            type: request.userType,
+          },
+          include: {
+            allowedProjects: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        });
+
+        let project: { id: number; name: string } | undefined;
+
+        if (request.userType === Role.ADMIN && request.projectName) {
+          let existingProject = await tx.project.findUnique({
+            where: { name: request.projectName },
+          });
+
+          if (!existingProject) {
+            existingProject = await tx.project.create({
+              data: { name: request.projectName },
+            });
+          }
+
+          user = await tx.user.update({
+            where: { id: user.id },
+            data: { allowedProjects: { connect: { id: existingProject.id } } },
+            include: {
+              allowedProjects: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          });
+
+          project = { id: existingProject.id, name: existingProject.name };
+        }
+
+        await tx.newAccountRequest.delete({ where: { id } });
+
+        return {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            type: user.type,
+            projectIds: user.allowedProjects.map((project) => project.id),
+          },
+          project,
+        };
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new RpcException({
+            code: status.ALREADY_EXISTS,
+            message: requestEmail
+              ? `A user with email ${requestEmail} already exists`
+              : 'A user with this email already exists',
+          });
+        }
+        if (error.code === 'P2025') {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: `Account request with id ${id} not found`,
+          });
+        }
+      }
+      throw error;
+    }
   }
 }
 const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {

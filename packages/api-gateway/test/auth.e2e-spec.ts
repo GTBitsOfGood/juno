@@ -419,3 +419,71 @@ describe('Account Request - DELETE /auth/account-request/:id', () => {
       .expect(404);
   });
 });
+
+describe('Account Request - POST /auth/account-request/:id/accept', () => {
+  it('should accept a USER request and return the created user', async () => {
+    const createResp = await request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'accept-gw-user@example.com',
+        name: 'Accept GW User',
+        password: 'securepassword',
+        userType: 'USER',
+      })
+      .expect(201);
+
+    const id = createResp.body.id;
+
+    const acceptResp = await request(app.getHttpServer())
+      .post(`/auth/account-request/${id}/accept`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(201);
+
+    expect(acceptResp.body.user).toBeDefined();
+    expect(acceptResp.body.user.email).toBe('accept-gw-user@example.com');
+    expect(acceptResp.body.user.name).toBe('Accept GW User');
+    expect(acceptResp.body.user.type).toBe('USER');
+  });
+
+  it('should accept an ADMIN request with projectName and return user + project', async () => {
+    const createResp = await request(app.getHttpServer())
+      .post('/auth/account-request')
+      .send({
+        email: 'accept-gw-admin@example.com',
+        name: 'Accept GW Admin',
+        password: 'securepassword',
+        userType: 'ADMIN',
+        projectName: 'gw-accept-project',
+      })
+      .expect(201);
+
+    const id = createResp.body.id;
+
+    const acceptResp = await request(app.getHttpServer())
+      .post(`/auth/account-request/${id}/accept`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(201);
+
+    expect(acceptResp.body.user).toBeDefined();
+    expect(acceptResp.body.user.email).toBe('accept-gw-admin@example.com');
+    expect(acceptResp.body.user.type).toBe('ADMIN');
+    expect(acceptResp.body.project).toBeDefined();
+    expect(acceptResp.body.project.name).toBe('gw-accept-project');
+  });
+
+  it('should reject unauthenticated accept requests', () => {
+    return request(app.getHttpServer())
+      .post('/auth/account-request/1/accept')
+      .expect(401);
+  });
+
+  it('should return 400 for non-numeric id', () => {
+    return request(app.getHttpServer())
+      .post('/auth/account-request/abc/accept')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(400);
+  });
+});

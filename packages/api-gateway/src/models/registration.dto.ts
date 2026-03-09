@@ -87,6 +87,67 @@ export class NewAccountRequestsResponse {
   }
 }
 
+export class AcceptAccountRequestResponseUser {
+  @ApiProperty({ description: 'User ID' })
+  id: number;
+
+  @ApiProperty({ description: 'Email' })
+  email: string;
+
+  @ApiProperty({ description: 'Name' })
+  name: string;
+
+  @ApiProperty({
+    description: 'User type',
+    enum: ['SUPERADMIN', 'ADMIN', 'USER'],
+  })
+  type: string;
+
+  @ApiPropertyOptional({
+    description: 'Project IDs the user is linked to',
+    type: [Number],
+  })
+  projectIds?: number[];
+}
+
+export class AcceptAccountRequestResponseProject {
+  @ApiProperty({ description: 'Project ID' })
+  id: number;
+
+  @ApiProperty({ description: 'Project name' })
+  name: string;
+}
+
+export class AcceptAccountRequestResponseModel {
+  @ApiProperty({
+    description: 'The created user',
+    type: AcceptAccountRequestResponseUser,
+  })
+  user: AcceptAccountRequestResponseUser;
+
+  @ApiPropertyOptional({
+    description: 'The created or linked project (if applicable)',
+    type: AcceptAccountRequestResponseProject,
+  })
+  project?: AcceptAccountRequestResponseProject;
+
+  constructor(res: UserProto.AcceptAccountRequestResponse) {
+    this.user = {
+      id: Number(res.user.id),
+      email: res.user.email,
+      name: res.user.name,
+      type: fromUserType(res.user.type),
+      projectIds: res.user.projectIds?.map(Number),
+    };
+    if (res.project) {
+      this.project = {
+        id: Number(res.project.id),
+        name: res.project.name,
+      };
+    }
+  }
+}
+
 export function userTypeStringToProto(value: string): CommonProto.UserType {
   switch (value) {
     case 'SUPERADMIN':
