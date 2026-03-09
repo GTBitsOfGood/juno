@@ -75,7 +75,7 @@ export class UserResponse {
     this.email = user.email;
     this.name = user.name;
     this.type = user.type;
-    this.projectIds = user.projectIds ?? [];
+    this.projectIds = user.projectIds;
   }
 }
 
