@@ -68,7 +68,7 @@ export class FileBucketController implements OnModuleInit {
     @Body() params: RegisterFileBucketModel,
   ): Promise<FileBucket> {
     const grpcResponse = this.fileBucketService.registerBucket({
-      name: params.name,
+      name: params.name.replace(/ /g, '-').toLowerCase(),
       configId: params.configId,
       fileProviderName: params.fileProviderName,
       FileServiceFile: params.FileServiceFile,
