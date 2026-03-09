@@ -16,8 +16,32 @@ export class ApiKeyDbController
 {
   constructor(private readonly apiKeyService: AuthService) {}
 
-  getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
-    return this.apiKeyService.findApiKey(validateApiKeydentifier(request));
+  async getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
+    const apiKey = this.apiKeyService.findApiKey({
+      id: request.id,
+      hash: request.hash,
+    });
+    return apiKey;
+  }
+
+  async getAllApiKeys(
+    request: ApiKeyProto.GetAllApiKeysParams,
+  ): Promise<ApiKeyProto.GetAllApiKeysResult> {
+    const keys = await this.apiKeyService.apiKeys(
+      request.offset,
+      request.limit,
+    );
+    return {
+      keys: keys.map((key) => ({
+        id: key.id,
+        hash: key.hash,
+        description: key.description,
+        scopes: key.scopes,
+        project: key.project,
+        environment: key.environment,
+        createdAt: key.createdAt,
+      })),
+    };
   }
 
   async createApiKey(

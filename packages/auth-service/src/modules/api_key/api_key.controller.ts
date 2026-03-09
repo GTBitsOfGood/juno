@@ -1,7 +1,7 @@
 import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { ApiKeyProto, AuthCommonProto, UserProto } from 'juno-proto';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { createHash, randomBytes } from 'crypto';
 import { status } from '@grpc/grpc-js';
 
@@ -17,6 +17,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     @Inject(UserProto.USER_AUTH_SERVICE_NAME)
     private userAuthClient: ClientGrpc,
   ) {}
+
   async validateApiKey(
     request: ApiKeyProto.ValidateApiKeyRequest,
   ): Promise<ApiKeyProto.ValidateApiKeyResponse> {
@@ -79,6 +80,19 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       info: await lastValueFrom(key),
     };
   }
+
+  async getAllApiKeys(
+    request: ApiKeyProto.GetAllApiKeysRequest,
+  ): Promise<ApiKeyProto.GetAllApiKeysResponse> {
+    const keys = this.apiKeyDbService.getAllApiKeys({
+      offset: request.offset,
+      limit: request.limit,
+    });
+    return {
+      keys: (await lastValueFrom(keys)).keys,
+    };
+  }
+
   async revokeApiKey(
     request: ApiKeyProto.RevokeApiKeyRequest,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
