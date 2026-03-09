@@ -90,6 +90,8 @@ export class AuthModule implements NestModule {
       .apply(CredentialsMiddleware)
       .forRoutes(
         { path: 'auth/key', method: RequestMethod.POST },
+        { path: 'auth/key', method: RequestMethod.GET },
+        { path: 'auth/key/:id', method: RequestMethod.DELETE },
         { path: 'auth/user/jwt', method: RequestMethod.POST },
         { path: 'auth/test-auth', method: RequestMethod.GET },
         { path: 'auth/account-request', method: RequestMethod.GET },

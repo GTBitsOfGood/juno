@@ -242,6 +242,44 @@ export class AuthController implements OnModuleInit {
     return;
   }
 
+  @ApiOperation({
+    summary: 'Deletes an API key, detaching it from its project.',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid API Key',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successful API Key deletion',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the API key to delete',
+    type: String,
+  })
+  @Delete('/key/:id')
+  async deleteApiKeyById(@Param('idStr') idStr: string) {
+    // search for API key by ID
+  }
+
   @Get('/test-auth')
   @ApiOperation({
     summary: 'Validates user JWT and returns user data',
