@@ -1,7 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { CommonProto } from 'juno-proto';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserModel {
   @IsNotEmpty()
