@@ -7,15 +7,15 @@ import "auth_common.proto";
 
 service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
-
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
-
   rpc validateApiKey(ValidateApiKeyRequest) returns (ValidateApiKeyResponse);
+  rpc getAllApiKeys(GetAllApiKeysRequest) returns (GetAllApiKeysResponse);
 }
 
 service ApiKeyDbService {
   rpc createApiKey(CreateApiKeyParams) returns (auth_common.ApiKey);
   rpc getApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
+  rpc getAllApiKeys(GetAllApiKeysParams) returns (GetAllApiKeysResult);
   rpc deleteApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
 }
 
@@ -29,6 +29,24 @@ message ValidateApiKeyRequest { string apiKey = 1; }
 message ValidateApiKeyResponse {
   bool valid = 1;
   auth_common.ApiKey key = 2;
+}
+
+message GetAllApiKeysRequest {
+  optional int32 offset = 1;
+  optional int32 limit = 2;
+}
+
+message GetAllApiKeysParams {
+  int32 offset = 1;
+  int32 limit = 2;
+}
+
+message GetAllApiKeysResult {
+  repeated auth_common.ApiKey keys = 1;
+}
+
+message GetAllApiKeysResponse {
+  repeated auth_common.ApiKey keys = 1;
 }
 
 message CreateApiKeyParams { ApiKeyNoId apiKey = 1; }
