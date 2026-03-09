@@ -41,6 +41,7 @@ import {
   RequestNewAccountModel,
   NewAccountRequestResponse,
   NewAccountRequestsResponse,
+  AcceptAccountRequestResponseModel,
   userTypeStringToProto,
 } from 'src/models/registration.dto';
 import { userLinkedToProject } from 'src/user_project_validator';
@@ -326,13 +327,13 @@ export class AuthController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: { type: 'string' },
   })
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: { type: 'string' },
   })
   @ApiBearerAuth('API_Key')
@@ -376,13 +377,13 @@ export class AuthController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
-    required: true,
+    required: false,
     schema: { type: 'string' },
   })
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the admin or superadmin user',
-    required: true,
+    required: false,
     schema: { type: 'string' },
   })
   @ApiBearerAuth('API_Key')
@@ -401,5 +402,60 @@ export class AuthController implements OnModuleInit {
       this.accountRequestService.deleteAccountRequest({ id }),
     );
     return new NewAccountRequestResponse(removed);
+  }
+
+  @Post('/account-request/:id/accept')
+  @ApiOperation({
+    summary: 'Accept an account request',
+    description:
+      'Accepts a pending account request: creates the user, optionally creates/links a project (for ADMIN requests with a projectName), and deletes the pending request. Requires admin or superadmin credentials.',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the account request to accept',
+    type: String,
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Account request accepted and user created',
+    type: AcceptAccountRequestResponseModel,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Account request not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized',
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: false,
+    schema: { type: 'string' },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: false,
+    schema: { type: 'string' },
+  })
+  @ApiBearerAuth('API_Key')
+  async acceptAccountRequest(
+    @User() user: CommonProto.User,
+    @Param('id') idStr: string,
+  ): Promise<AcceptAccountRequestResponseModel> {
+    if (!user || user.type === CommonProto.UserType.USER) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    const id = parseInt(idStr);
+    if (Number.isNaN(id)) {
+      throw new HttpException('id must be a number', HttpStatus.BAD_REQUEST);
+    }
+    const result = await lastValueFrom(
+      this.accountRequestService.acceptAccountRequest({ id }),
+    );
+    return new AcceptAccountRequestResponseModel(result);
   }
 }

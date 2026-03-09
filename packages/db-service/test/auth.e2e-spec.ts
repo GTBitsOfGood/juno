@@ -277,3 +277,150 @@ describe('DB Service Account Request Tests', () => {
     });
   });
 });
+
+describe('DB Service Accept Account Request Tests', () => {
+  let accountRequestClient: any;
+  let userClient: any;
+
+  beforeEach(() => {
+    const proto = ProtoLoader.loadSync([
+      UserProtoFile,
+      IdentifiersProtoFile,
+    ]) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    accountRequestClient = new protoGRPC.juno.user.AccountRequestService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+    userClient = new protoGRPC.juno.user.UserService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('accepts a USER account request and creates the user', async () => {
+    const created: any = await new Promise((resolve, reject) => {
+      accountRequestClient.createAccountRequest(
+        {
+          email: 'accept-user@test.com',
+          name: 'Accept User',
+          password: 'securepassword',
+          userType: 'USER',
+        },
+        (err, resp) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    const result: any = await new Promise((resolve, reject) => {
+      accountRequestClient.acceptAccountRequest(
+        { id: created.id },
+        (err, resp) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    expect(result.user).toBeDefined();
+    expect(result.user.email).toBe('accept-user@test.com');
+    expect(result.user.name).toBe('Accept User');
+    expect(result.user.type).toBe(CommonProto.UserType.USER);
+    expect(result.project).toBeUndefined();
+
+    const user: any = await new Promise((resolve, reject) => {
+      userClient.getUser({ userEmail: 'accept-user@test.com' }, (err, resp) => {
+        if (err) reject(err);
+        else resolve(resp);
+      });
+    });
+    expect(user.email).toBe('accept-user@test.com');
+  });
+
+  it('accepts an ADMIN request with projectName, creates project and links user', async () => {
+    const created: any = await new Promise((resolve, reject) => {
+      accountRequestClient.createAccountRequest(
+        {
+          email: 'accept-admin@test.com',
+          name: 'Accept Admin',
+          password: 'securepassword',
+          userType: 'ADMIN',
+          projectName: 'accept-test-project',
+        },
+        (err, resp) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    const result: any = await new Promise((resolve, reject) => {
+      accountRequestClient.acceptAccountRequest(
+        { id: created.id },
+        (err, resp) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    expect(result.user).toBeDefined();
+    expect(result.user.email).toBe('accept-admin@test.com');
+    expect(result.user.type).toBe(CommonProto.UserType.ADMIN);
+    expect(result.project).toBeDefined();
+    expect(result.project.name).toBe('accept-test-project');
+    expect(result.user.projectIds).toContain(result.project.id);
+  });
+
+  it('deletes the pending request after acceptance', async () => {
+    const created: any = await new Promise((resolve, reject) => {
+      accountRequestClient.createAccountRequest(
+        {
+          email: 'accept-delete@test.com',
+          name: 'Accept Delete',
+          password: 'securepassword',
+          userType: 'USER',
+        },
+        (err, resp) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    await new Promise((resolve, reject) => {
+      accountRequestClient.acceptAccountRequest(
+        { id: created.id },
+        (err, resp) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    const allAfter: any = await new Promise((resolve, reject) => {
+      accountRequestClient.getAllAccountRequests({}, (err, resp) => {
+        if (err) reject(err);
+        else resolve(resp);
+      });
+    });
+
+    const ids = (allAfter.requests || []).map((r: any) => r.id);
+    expect(ids).not.toContain(created.id);
+  });
+
+  it('fails to accept a non-existent request', async () => {
+    await new Promise((resolve) => {
+      accountRequestClient.acceptAccountRequest({ id: 999999 }, (err) => {
+        expect(err).toBeDefined();
+        expect(err.code).toBe(GRPC.status.NOT_FOUND);
+        resolve({});
+      });
+    });
+  });
+});
