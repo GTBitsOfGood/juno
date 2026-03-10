@@ -276,15 +276,32 @@ export class AuthController implements OnModuleInit {
     type: String,
   })
   @Delete('/key/:id')
-  async deleteApiKeyById(@Param('id') idStr: string) {
+  async deleteApiKeyById(
+    @User() user: CommonProto.User,
+    @Param('id') idStr: string,
+  ) {
     // search for API key by ID
     const id = +idStr;
     if (Number.isNaN(id)) {
       throw new HttpException('Invalid API Key ID', HttpStatus.BAD_REQUEST);
     }
+
     const response = await lastValueFrom(
       this.apiKeyService.getApiKey({ id: +idStr }),
     );
+
+    const projectId = response.key.project.id;
+    const linked = await userLinkedToProject({
+      project: { id: projectId },
+      user,
+      projectClient: this.projectService,
+    });
+
+    if (!linked || user.type == CommonProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can delete API Keys',
+      );
+    }
     const revokeResponse = await lastValueFrom(
       this.apiKeyService.revokeApiKey({ apiKey: response.key.hash }),
     );
