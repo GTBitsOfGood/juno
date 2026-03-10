@@ -243,6 +243,261 @@ describe('User JWT Verification Routes', () => {
   });
 });
 
+describe('List API Keys - GET /auth/key/:projectId', () => {
+  it('should list API keys for a project as a superadmin', async () => {
+    // First create an API key for the project
+    const createResp = await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        environment: 'prod',
+        project: { name: 'test-seed-project' },
+        description: 'list-test-key',
+      })
+      .expect(201);
+
+    expect(createResp.body.apiKey).toBeDefined();
+
+    // Get the project ID (seed project has id 0)
+    const response = await request(app.getHttpServer())
+      .get('/auth/key/0')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+
+    expect(response.body.keys).toBeDefined();
+    expect(Array.isArray(response.body.keys)).toBe(true);
+    expect(response.body.keys.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should return an empty list for a project with no API keys', async () => {
+    // Create a new project via the project endpoint
+    const projectResp = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({ name: 'empty-key-project' })
+      .expect(201);
+
+    const projectId = projectResp.body.id;
+
+    const response = await request(app.getHttpServer())
+      .get(`/auth/key/${projectId}`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+
+    expect(response.body.keys).toBeDefined();
+    expect(response.body.keys).toEqual([]);
+  });
+
+  it('should reject unauthenticated requests', () => {
+    return request(app.getHttpServer()).get('/auth/key/0').expect(401);
+  });
+
+  it('should reject a regular USER who is not linked to the project', async () => {
+    // Create a regular user
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        email: 'regularuser-listkeys@example.com',
+        password: 'userpass',
+        name: 'Regular User',
+      })
+      .expect(201);
+
+    return request(app.getHttpServer())
+      .get('/auth/key/0')
+      .set('X-User-Email', 'regularuser-listkeys@example.com')
+      .set('X-User-Password', 'userpass')
+      .expect(401);
+  });
+
+  it('should allow a linked ADMIN to list API keys for their project', async () => {
+    // Create a project
+    const projectResp = await request(app.getHttpServer())
+      .post('/project')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({ name: 'admin-linked-project' })
+      .expect(201);
+
+    const projectId = projectResp.body.id;
+
+    // Create a user (defaults to USER type)
+    const userResp = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        email: 'linked-admin@example.com',
+        password: 'adminpass',
+        name: 'Linked Admin',
+      })
+      .expect(201);
+
+    const userId = userResp.body.id;
+
+    // Promote user to ADMIN
+    await request(app.getHttpServer())
+      .post('/user/type')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: userId,
+        type: 'ADMIN',
+      })
+      .expect(201);
+
+    // Link the admin to the project
+    await request(app.getHttpServer())
+      .put(`/user/id/${userId}/project`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({ name: 'admin-linked-project' })
+      .expect(200);
+
+    // Create an API key for the project
+    await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        environment: 'prod',
+        project: { id: projectId },
+        description: 'admin-linked-key',
+      })
+      .expect(201);
+
+    // The linked admin should be able to list keys
+    const response = await request(app.getHttpServer())
+      .get(`/auth/key/${projectId}`)
+      .set('X-User-Email', 'linked-admin@example.com')
+      .set('X-User-Password', 'adminpass')
+      .expect(200);
+
+    expect(response.body.keys).toBeDefined();
+    expect(Array.isArray(response.body.keys)).toBe(true);
+    expect(response.body.keys.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should reject an ADMIN who is not linked to the project', async () => {
+    // Create a user and promote to ADMIN but do NOT link to the seed project
+    const userResp = await request(app.getHttpServer())
+      .post('/user')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        email: 'unlinked-admin@example.com',
+        password: 'adminpass',
+        name: 'Unlinked Admin',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/user/type')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        id: userResp.body.id,
+        type: 'ADMIN',
+      })
+      .expect(201);
+
+    return request(app.getHttpServer())
+      .get('/auth/key/0')
+      .set('X-User-Email', 'unlinked-admin@example.com')
+      .set('X-User-Password', 'adminpass')
+      .expect(401);
+  });
+
+  it('should support offset and limit query parameters', async () => {
+    // Create multiple API keys
+    for (let i = 0; i < 3; i++) {
+      await request(app.getHttpServer())
+        .post('/auth/key')
+        .set('X-User-Email', ADMIN_EMAIL)
+        .set('X-User-Password', ADMIN_PASSWORD)
+        .send({
+          environment: 'prod',
+          project: { name: 'test-seed-project' },
+          description: `pagination-key-${i}`,
+        })
+        .expect(201);
+    }
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/key/0?offset=0&limit=2')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+
+    expect(response.body.keys).toBeDefined();
+    expect(response.body.keys.length).toBeLessThanOrEqual(2);
+  });
+});
+
+describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
+  it('should delete an existing API key by its ID', async () => {
+    // Create an API key
+    const createResp = await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .send({
+        environment: 'prod',
+        project: { name: 'test-seed-project' },
+        description: 'delete-by-id-test',
+      })
+      .expect(201);
+
+    expect(createResp.body.apiKey).toBeDefined();
+
+    // List keys to find the created key's ID
+    const listResp = await request(app.getHttpServer())
+      .get('/auth/key/0')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+
+    const createdKey = listResp.body.keys.find(
+      (k: any) => k.description === 'delete-by-id-test',
+    );
+    expect(createdKey).toBeDefined();
+    const keyId = createdKey.id;
+
+    // Delete the key by ID
+    await request(app.getHttpServer())
+      .delete(`/auth/key/${keyId}`)
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(200);
+  });
+
+  it('should return 400 for a non-numeric ID', () => {
+    return request(app.getHttpServer())
+      .delete('/auth/key/abc')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(400);
+  });
+
+  it('should return an error for a non-existent API key ID', () => {
+    return request(app.getHttpServer())
+      .delete('/auth/key/999999')
+      .set('X-User-Email', ADMIN_EMAIL)
+      .set('X-User-Password', ADMIN_PASSWORD)
+      .expect(500);
+  });
+
+  it('should not be accessible without authentication', () => {
+    return request(app.getHttpServer()).delete('/auth/key/1').expect(401);
+  });
+});
+
 describe('Account Request - POST /auth/account-request', () => {
   it('should create a new account request with valid data', async () => {
     const response = await request(app.getHttpServer())
