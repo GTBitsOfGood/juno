@@ -51,6 +51,11 @@ export class GetAllApiKeysResponse {
   keys: AuthCommonProto.ApiKey[];
 
   constructor(res: ApiKeyProto.GetAllApiKeysResponse) {
-    this.keys = res.keys;
+    this.keys = res.keys.map((key) => ({
+      ...key,
+      project: key.project
+        ? { id: Number(key.project.id), name: key.project.name }
+        : undefined,
+    }));
   }
 }

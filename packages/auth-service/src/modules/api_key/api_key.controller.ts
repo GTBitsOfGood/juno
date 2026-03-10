@@ -103,12 +103,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     ).keys;
 
     return {
-      keys: keys.map((key) => ({
-        ...key,
-        project: key.project
-          ? { ...key.project, id: Number(key.project.id) }
-          : undefined,
-      })),
+      keys,
     };
   }
 
