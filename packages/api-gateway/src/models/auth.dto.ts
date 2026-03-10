@@ -1,11 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import {
-  ApiKeyProto,
-  AuthCommonProto,
-  IdentifierProto,
-  JwtProto,
-} from 'juno-proto';
+import { ApiKeyProto, IdentifierProto, JwtProto } from 'juno-proto';
 
 export class IssueApiKeyRequest {
   @ApiProperty({ description: 'Optional description for key' })
@@ -35,17 +30,5 @@ export class IssueJWTResponse {
 
   constructor(res: JwtProto.CreateJwtResponse) {
     this.token = res.jwt;
-  }
-}
-
-export class GetAllApiKeysResponse {
-  @ApiProperty({
-    isArray: true,
-    description: 'List of API keys belonging to a project',
-  })
-  keys: AuthCommonProto.ApiKey[];
-
-  constructor(res: ApiKeyProto.GetAllApiKeysResponse) {
-    this.keys = res.keys;
   }
 }

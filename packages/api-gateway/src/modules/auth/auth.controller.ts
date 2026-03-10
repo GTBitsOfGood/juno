@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Headers,
-  Query,
   HttpException,
   HttpStatus,
   Inject,
@@ -34,7 +33,6 @@ import {
 import { lastValueFrom } from 'rxjs';
 import { User } from 'src/decorators/user.decorator';
 import {
-  GetAllApiKeysResponse,
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   IssueJWTResponse,
@@ -203,57 +201,6 @@ export class AuthController implements OnModuleInit {
     });
 
     return new IssueApiKeyResponse(await lastValueFrom(obs));
-  }
-
-  @ApiOperation({
-    summary: 'Lists all API keys by project',
-  })
-  @ApiCreatedResponse({
-    description: 'Paginated list of all API keys successfully returned',
-    type: GetAllApiKeysResponse,
-  })
-  @ApiHeader({
-    name: 'X-User-Email',
-    description: 'Email of an admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiHeader({
-    name: 'X-User-Password',
-    description: 'Password of the admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiBody({ type: IssueApiKeyRequest })
-  @Get('/key/:projectId')
-  async getAllApiKeys(
-    @User() user: CommonProto.User,
-    @Query('offset') offset,
-    @Query('limit') limit,
-    @Param('projectId') projectIdStr: string,
-  ) {
-    const linked = await userLinkedToProject({
-      project: { id: +projectIdStr },
-      user,
-      projectClient: this.projectService,
-    });
-
-    if (!linked || user.type == CommonProto.UserType.USER) {
-      throw new UnauthorizedException(
-        'Only Superadmins & Linked Admins can list API Keys',
-      );
-    }
-    const obs = this.apiKeyService.getAllApiKeys({
-      offset,
-      limit,
-      projectId: { id: +projectIdStr },
-    });
-
-    return new GetAllApiKeysResponse(await lastValueFrom(obs));
   }
 
   @ApiOperation({

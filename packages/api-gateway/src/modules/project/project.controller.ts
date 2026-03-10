@@ -6,14 +6,18 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  Query,
   OnModuleInit,
   Param,
   ParseIntPipe,
   Post,
   Put,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { GetAllApiKeysResponse } from 'src/models/project.dto';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { userLinkedToProject } from 'src/user_project_validator';
 import {
   CreateProjectModel,
   LinkUserModel,
@@ -27,27 +31,36 @@ import {
   ApiOperation,
   ApiParam,
   ApiResponse,
+  ApiCreatedResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 import { UserResponses } from 'src/models/user.dto';
-
+import { ApiKeyProto } from 'juno-proto';
 const { PROJECT_SERVICE_NAME } = ProjectProto;
+const { API_KEY_SERVICE_NAME } = ApiKeyProto;
 
 @ApiBearerAuth('API_Key')
 @ApiTags('project')
 @Controller('project')
 export class ProjectController implements OnModuleInit {
   private projectService: ProjectProto.ProjectServiceClient;
+  private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
+
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
+    @Inject(API_KEY_SERVICE_NAME) private apiClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.projectService =
       this.projectClient.getService<ProjectProto.ProjectServiceClient>(
         PROJECT_SERVICE_NAME,
+      );
+    this.apiKeyService =
+      this.apiClient.getService<ApiKeyProto.ApiKeyServiceClient>(
+        API_KEY_SERVICE_NAME,
       );
   }
 
@@ -121,6 +134,57 @@ export class ProjectController implements OnModuleInit {
 
     const projects = this.projectService.getAllProjects({ projectIds });
     return new ProjectResponses(await lastValueFrom(projects));
+  }
+
+  @ApiOperation({
+    summary: 'Lists all API keys by project',
+  })
+  @ApiCreatedResponse({
+    description: 'Paginated list of all API keys successfully returned',
+    type: GetAllApiKeysResponse,
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @Get(':id/keys')
+  async getAllApiKeys(
+    @Query('offset') offset,
+    @Query('limit') limit,
+    @Param('id') projectIdStr: string,
+    @User() user: CommonProto.User,
+  ) {
+    console.debug('Auth user ', user);
+    const linked = await userLinkedToProject({
+      project: { id: +projectIdStr },
+      user,
+      projectClient: this.projectService,
+    });
+
+    if (!linked || user.type == CommonProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can list API Keys',
+      );
+    }
+    const obs = this.apiKeyService.getAllApiKeys({
+      offset,
+      limit,
+      projectId: { id: +projectIdStr },
+    });
+
+    return new GetAllApiKeysResponse(await lastValueFrom(obs));
   }
 
   //Get all users associated with a project
