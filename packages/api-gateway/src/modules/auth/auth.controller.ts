@@ -329,7 +329,7 @@ export class AuthController implements OnModuleInit {
     type: String,
   })
   @Delete('/key/:id')
-  async deleteApiKeyById(@Param('idStr') idStr: string) {
+  async deleteApiKeyById(@Param('id') idStr: string) {
     // search for API key by ID
     const id = +idStr;
     if (Number.isNaN(id)) {

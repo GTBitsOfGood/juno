@@ -1,7 +1,7 @@
 import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { ApiKeyProto, AuthCommonProto, UserProto } from 'juno-proto';
-import { lastValueFrom, Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { createHash, randomBytes } from 'crypto';
 import { status } from '@grpc/grpc-js';
 

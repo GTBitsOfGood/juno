@@ -44,8 +44,10 @@ export class ApiKeyDbController
         }))
         .filter(
           (key) =>
-            key.project.id == request.projectId.id ||
-            key.project.name == request.projectId.name,
+            (request.projectId.id != null &&
+              key.project.id == request.projectId.id) ||
+            (request.projectId.name != null &&
+              key.project.name == request.projectId.name),
         ),
     };
   }
