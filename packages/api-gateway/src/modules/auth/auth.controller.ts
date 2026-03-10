@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Headers,
+  Query,
   HttpException,
   HttpStatus,
   Inject,
@@ -33,6 +34,7 @@ import {
 import { lastValueFrom } from 'rxjs';
 import { User } from 'src/decorators/user.decorator';
 import {
+  GetAllApiKeysResponse,
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   IssueJWTResponse,
@@ -204,6 +206,57 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
+    summary: 'Lists all API keys by project',
+  })
+  @ApiCreatedResponse({
+    description: 'Paginated list of all API keys successfully returned',
+    type: GetAllApiKeysResponse,
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiBody({ type: IssueApiKeyRequest })
+  @Get('/key/:projectId')
+  async getAllApiKeys(
+    @User() user: CommonProto.User,
+    @Query('offset') offset,
+    @Query('limit') limit,
+    @Param('projectId') projectIdStr: string,
+  ) {
+    const linked = await userLinkedToProject({
+      project: { id: +projectIdStr },
+      user,
+      projectClient: this.projectService,
+    });
+
+    if (!linked || user.type == CommonProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can list API Keys',
+      );
+    }
+    const obs = this.apiKeyService.getAllApiKeys({
+      offset,
+      limit,
+      projectId: { id: +projectIdStr },
+    });
+
+    return new GetAllApiKeysResponse(await lastValueFrom(obs));
+  }
+
+  @ApiOperation({
     summary: 'Deletes an API key, detaching it from its project.',
   })
   @ApiResponse({
@@ -243,7 +296,7 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Deletes an API key, detaching it from its project.',
+    summary: 'Deletes an API key by ID.',
   })
   @ApiHeader({
     name: 'X-User-Email',
@@ -262,8 +315,8 @@ export class AuthController implements OnModuleInit {
     },
   })
   @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid API Key',
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid API Key ID',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -278,6 +331,20 @@ export class AuthController implements OnModuleInit {
   @Delete('/key/:id')
   async deleteApiKeyById(@Param('idStr') idStr: string) {
     // search for API key by ID
+    const id = +idStr;
+    if (Number.isNaN(id)) {
+      throw new HttpException('Invalid API Key ID', HttpStatus.BAD_REQUEST);
+    }
+    const response = await lastValueFrom(
+      this.apiKeyService.getApiKey({ id: +idStr }),
+    );
+    const revokeResponse = await lastValueFrom(
+      this.apiKeyService.revokeApiKey({ apiKey: response.key.hash }),
+    );
+    if (!revokeResponse.success) {
+      throw new HttpException('API Key revoke failed', 500);
+    }
+    return;
   }
 
   @Get('/test-auth')

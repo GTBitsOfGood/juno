@@ -43,6 +43,13 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     };
   }
 
+  async getApiKey(
+    request: ApiKeyProto.GetApiKeyRequest,
+  ): Promise<ApiKeyProto.GetApiKeyResponse> {
+    const apiKey = await lastValueFrom(this.apiKeyDbService.getApiKey(request));
+    return { key: apiKey };
+  }
+
   onModuleInit() {
     this.apiKeyDbService =
       this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
@@ -87,6 +94,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     const keys = this.apiKeyDbService.getAllApiKeys({
       offset: request.offset,
       limit: request.limit,
+      projectId: request.projectId,
     });
     return {
       keys: (await lastValueFrom(keys)).keys,

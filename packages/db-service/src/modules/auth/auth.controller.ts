@@ -32,15 +32,21 @@ export class ApiKeyDbController
       request.limit,
     );
     return {
-      keys: keys.map((key) => ({
-        id: key.id,
-        hash: key.hash,
-        description: key.description,
-        scopes: key.scopes,
-        project: key.project,
-        environment: key.environment,
-        createdAt: key.createdAt,
-      })),
+      keys: keys
+        .map((key) => ({
+          id: key.id,
+          hash: key.hash,
+          description: key.description,
+          scopes: key.scopes,
+          project: key.project,
+          environment: key.environment,
+          createdAt: key.createdAt,
+        }))
+        .filter(
+          (key) =>
+            key.project.id == request.projectId.id ||
+            key.project.name == request.projectId.name,
+        ),
     };
   }
 

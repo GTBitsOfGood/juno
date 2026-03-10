@@ -9,6 +9,7 @@ service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
   rpc validateApiKey(ValidateApiKeyRequest) returns (ValidateApiKeyResponse);
+  rpc getApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
   rpc getAllApiKeys(GetAllApiKeysRequest) returns (GetAllApiKeysResponse);
 }
 
@@ -17,6 +18,14 @@ service ApiKeyDbService {
   rpc getApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
   rpc getAllApiKeys(GetAllApiKeysParams) returns (GetAllApiKeysResult);
   rpc deleteApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
+}
+
+message GetApiKeyRequest {
+  int32 id = 1;
+}
+
+message GetApiKeyResponse {
+  auth_common.ApiKey key = 1;
 }
 
 message IssueApiKeyRequest {
@@ -32,13 +41,15 @@ message ValidateApiKeyResponse {
 }
 
 message GetAllApiKeysRequest {
-  optional int32 offset = 1;
-  optional int32 limit = 2;
-}
+  identifiers.ProjectIdentifier projectId = 1;
+  optional int32 offset = 2;
+  optional int32 limit = 3;
+} 
 
 message GetAllApiKeysParams {
-  int32 offset = 1;
-  int32 limit = 2;
+  identifiers.ProjectIdentifier projectId = 1;
+  int32 offset = 2;
+  int32 limit = 3;
 }
 
 message GetAllApiKeysResult {
