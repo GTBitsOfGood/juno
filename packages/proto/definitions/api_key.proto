@@ -41,13 +41,13 @@ message ValidateApiKeyResponse {
 }
 
 message GetAllApiKeysRequest {
-  identifiers.ProjectIdentifier projectId = 1;
+  identifiers.ProjectIdentifier project = 1;
   optional int32 offset = 2;
   optional int32 limit = 3;
 } 
 
 message GetAllApiKeysParams {
-  identifiers.ProjectIdentifier projectId = 1;
+  identifiers.ProjectIdentifier project = 1;
   int32 offset = 2;
   int32 limit = 3;
 }

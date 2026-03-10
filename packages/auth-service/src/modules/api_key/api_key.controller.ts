@@ -18,6 +18,17 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     private userAuthClient: ClientGrpc,
   ) {}
 
+  onModuleInit() {
+    this.apiKeyDbService =
+      this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
+        ApiKeyProto.API_KEY_DB_SERVICE_NAME,
+      );
+    this.userAuthService =
+      this.userAuthClient.getService<UserProto.UserAuthServiceClient>(
+        UserProto.USER_AUTH_SERVICE_NAME,
+      );
+  }
+
   async validateApiKey(
     request: ApiKeyProto.ValidateApiKeyRequest,
   ): Promise<ApiKeyProto.ValidateApiKeyResponse> {
@@ -50,17 +61,6 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     return { key: apiKey };
   }
 
-  onModuleInit() {
-    this.apiKeyDbService =
-      this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
-        ApiKeyProto.API_KEY_DB_SERVICE_NAME,
-      );
-    this.userAuthService =
-      this.userAuthClient.getService<UserProto.UserAuthServiceClient>(
-        UserProto.USER_AUTH_SERVICE_NAME,
-      );
-  }
-
   async issueApiKey(
     request: ApiKeyProto.IssueApiKeyRequest,
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
@@ -73,7 +73,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
         scopes: [AuthCommonProto.ApiScope.FULL],
         project: request.project,
         environment: request.environment,
-        createdAt: new Date().toString(),
+        createdAt: new Date().toISOString(),
       },
     });
     if (!key) {
@@ -91,13 +91,24 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async getAllApiKeys(
     request: ApiKeyProto.GetAllApiKeysRequest,
   ): Promise<ApiKeyProto.GetAllApiKeysResponse> {
-    const keys = this.apiKeyDbService.getAllApiKeys({
-      offset: request.offset,
-      limit: request.limit,
-      projectId: request.projectId,
-    });
+    console.log('Request ', request);
+    const keys = (
+      await lastValueFrom(
+        this.apiKeyDbService.getAllApiKeys({
+          offset: request.offset,
+          limit: request.limit,
+          project: request.project,
+        }),
+      )
+    ).keys;
+
     return {
-      keys: (await lastValueFrom(keys)).keys,
+      keys: keys.map((key) => ({
+        ...key,
+        project: key.project
+          ? { ...key.project, id: Number(key.project.id) }
+          : undefined,
+      })),
     };
   }
 

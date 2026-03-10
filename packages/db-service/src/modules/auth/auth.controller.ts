@@ -31,24 +31,16 @@ export class ApiKeyDbController
       request.offset,
       request.limit,
     );
+
+    console.log('Keys from DB ', keys);
     return {
-      keys: keys
-        .map((key) => ({
-          id: key.id,
-          hash: key.hash,
-          description: key.description,
-          scopes: key.scopes,
-          project: key.project,
-          environment: key.environment,
-          createdAt: key.createdAt,
-        }))
-        .filter(
-          (key) =>
-            (request.projectId.id != null &&
-              key.project.id == request.projectId.id) ||
-            (request.projectId.name != null &&
-              key.project.name == request.projectId.name),
-        ),
+      keys: keys.filter(
+        (key) =>
+          (request.project.id != null &&
+            key.project.id == request.project.id) ||
+          (request.project.name != null &&
+            key.project.name == request.project.name),
+      ),
     };
   }
 

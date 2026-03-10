@@ -166,9 +166,9 @@ export class ProjectController implements OnModuleInit {
     @Param('id') projectIdStr: string,
     @User() user: CommonProto.User,
   ) {
-    console.debug('Auth user ', user);
+    const id = parseInt(projectIdStr);
     const linked = await userLinkedToProject({
-      project: { id: +projectIdStr },
+      project: { id },
       user,
       projectClient: this.projectService,
     });
@@ -178,12 +178,14 @@ export class ProjectController implements OnModuleInit {
         'Only Superadmins & Linked Admins can list API Keys',
       );
     }
+
     const obs = this.apiKeyService.getAllApiKeys({
       offset,
       limit,
-      projectId: { id: +projectIdStr },
+      project: { id },
     });
 
+    console.log('Result of getAllApiKeys ', obs);
     return new GetAllApiKeysResponse(await lastValueFrom(obs));
   }
 

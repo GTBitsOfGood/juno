@@ -22,6 +22,7 @@ export class AuthService {
       cursor,
       where,
       orderBy,
+      include: { project: true },
     });
     return apiKeys.map((key) => convertDbApiKeyToTs(key));
   }
@@ -138,7 +139,10 @@ export class AuthService {
     return this.prisma.newAccountRequest.delete({ where: { id } });
   }
 }
-const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
+
+const convertDbApiKeyToTs = (
+  key: ApiKey & { project?: { id: number; name: string } },
+): AuthCommonProto.ApiKey => {
   const mappedScopes = key.scopes.map((scope) => {
     switch (scope) {
       case 'FULL':
@@ -156,9 +160,12 @@ const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
     hash: key.hash,
     scopes: mappedScopes,
     description: key.description,
-    project: { id: key.projectId },
+    project: key.project
+      ? { id: key.project.id, name: key.project.name }
+      : { id: key.projectId },
     environment: key.environment,
-    createdAt: key.createdAt.toString(),
+    createdAt: key.createdAt.toISOString(),
   };
+
   return apiKey;
 };
