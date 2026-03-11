@@ -91,19 +91,21 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async getAllApiKeys(
     request: ApiKeyProto.GetAllApiKeysRequest,
   ): Promise<ApiKeyProto.GetAllApiKeysResponse> {
-    console.log('Request ', request);
     const keys = (
       await lastValueFrom(
         this.apiKeyDbService.getAllApiKeys({
           offset: request.offset,
           limit: request.limit,
-          project: request.project,
+          projects: request.projects,
         }),
       )
     ).keys;
 
     return {
-      keys,
+      keys: keys.map((key) => ({
+        ...key,
+        scopes: key.scopes ?? [],
+      })),
     };
   }
 

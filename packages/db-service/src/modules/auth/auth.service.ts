@@ -16,15 +16,20 @@ export class AuthService {
     where?: Prisma.ApiKeyWhereInput,
     orderBy?: Prisma.ApiKeyOrderByWithRelationInput,
   ): Promise<AuthCommonProto.ApiKey[]> {
-    const apiKeys = await this.prisma.apiKey.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-      include: { project: true },
-    });
-    return apiKeys.map((key) => convertDbApiKeyToTs(key));
+    try {
+      const apiKeys = await this.prisma.apiKey.findMany({
+        skip,
+        take,
+        cursor,
+        where,
+        orderBy,
+        include: { project: true },
+      });
+      return apiKeys.map((key) => convertDbApiKeyToTs(key));
+    } catch (e) {
+      console.debug(e);
+      return [];
+    }
   }
 
   async apiKey(

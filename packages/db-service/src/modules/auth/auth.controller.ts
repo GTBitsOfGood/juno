@@ -5,6 +5,7 @@ import { ApiKeyIdentifier } from 'juno-proto/dist/gen/identifiers';
 import { validateApiKeydentifier } from 'src/utility/validate';
 import * as bcrypt from 'bcrypt';
 import { mapPrismaRoleToRPC, mapRPCRoleToPrisma } from 'src/utility/convert';
+import { Prisma } from '@prisma/client';
 
 @Controller()
 @ApiKeyProto.ApiKeyDbServiceControllerMethods()
@@ -17,30 +18,33 @@ export class ApiKeyDbController
   constructor(private readonly apiKeyService: AuthService) {}
 
   async getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
-    const apiKey = this.apiKeyService.findApiKey({
-      id: request.id,
-      hash: request.hash,
-    });
+    const apiKey = await this.apiKeyService.findApiKey(
+      validateApiKeydentifier(request),
+    );
     return apiKey;
   }
 
   async getAllApiKeys(
     request: ApiKeyProto.GetAllApiKeysParams,
   ): Promise<ApiKeyProto.GetAllApiKeysResult> {
+    const whereClause: Prisma.ApiKeyWhereInput = {
+      OR: request.projects.map((proj) =>
+        proj.id != null
+          ? { projectId: Number(proj.id) }
+          : { project: { name: proj.name } },
+      ),
+    };
+
     const keys = await this.apiKeyService.apiKeys(
       request.offset,
       request.limit,
+      undefined,
+      whereClause,
     );
 
-    console.log('Keys from DB ', keys);
+    console.debug('Keys from DB ', keys);
     return {
-      keys: keys.filter(
-        (key) =>
-          (request.project.id != null &&
-            key.project.id == request.project.id) ||
-          (request.project.name != null &&
-            key.project.name == request.project.name),
-      ),
+      keys: keys,
     };
   }
 

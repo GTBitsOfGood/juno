@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Get,
+  Query,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -22,6 +23,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import {
   ApiKeyProto,
@@ -30,9 +32,10 @@ import {
   ProjectProto,
   UserProto,
 } from 'juno-proto';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { User } from 'src/decorators/user.decorator';
 import {
+  GetAllApiKeysResponse,
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   IssueJWTResponse,
@@ -236,7 +239,10 @@ export class AuthController implements OnModuleInit {
     );
 
     if (!response.success) {
-      throw new HttpException('API Key revoke failed', 500);
+      throw new HttpException(
+        'API Key revoke failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return;
@@ -309,6 +315,68 @@ export class AuthController implements OnModuleInit {
       throw new HttpException('API Key revoke failed', 500);
     }
     return;
+  }
+
+  @ApiOperation({
+    summary: 'Lists all API keys by project',
+  })
+  @ApiOkResponse({
+    description: 'Paginated list of all API keys successfully returned',
+    type: GetAllApiKeysResponse,
+  })
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of an admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the admin or superadmin user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @Get('key/all')
+  async getAllApiKeys(
+    @Query('offset') offsetStr,
+    @Query('limit') limitStr,
+    @User() user: CommonProto.User,
+  ) {
+    const offset = offsetStr !== undefined ? parseInt(offsetStr) : undefined;
+    const limit = limitStr !== undefined ? parseInt(limitStr) : undefined;
+
+    console.debug('User project IDs ', user.projectIds);
+    let obs: Observable<GetAllApiKeysResponse>;
+    if (user.type == CommonProto.UserType.SUPERADMIN) {
+      // superadmins can list all projects
+      const projects = (
+        await lastValueFrom(
+          this.projectService.getAllProjects({ projectIds: [] }),
+        )
+      ).projects;
+      obs = this.apiKeyService.getAllApiKeys({
+        offset,
+        limit,
+        projects: projects.map((proj) =>
+          proj.id ? { id: proj.id } : { name: proj.name },
+        ),
+      });
+    } else {
+      // regular users can only list keys for projects which they are an admin for
+      obs = this.apiKeyService.getAllApiKeys({
+        offset,
+        limit,
+        projects: user.projectIds.map((projId) => ({
+          id: projId,
+        })),
+      });
+    }
+
+    return new GetAllApiKeysResponse(await lastValueFrom(obs));
   }
 
   @Get('/test-auth')

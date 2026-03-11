@@ -261,7 +261,7 @@ describe('List API Keys - GET /auth/key/:projectId', () => {
 
     // Get the project ID (seed project has id 0)
     const response = await request(app.getHttpServer())
-      .get('/auth/key/0')
+      .get('/auth/key/all?projectId=0')
       .set('X-User-Email', ADMIN_EMAIL)
       .set('X-User-Password', ADMIN_PASSWORD)
       .expect(200);
@@ -283,7 +283,7 @@ describe('List API Keys - GET /auth/key/:projectId', () => {
     const projectId = projectResp.body.id;
 
     const response = await request(app.getHttpServer())
-      .get(`/auth/key/${projectId}`)
+      .get(`/auth/key/all?projectId=${projectId}`)
       .set('X-User-Email', ADMIN_EMAIL)
       .set('X-User-Password', ADMIN_PASSWORD)
       .expect(200);
@@ -310,7 +310,7 @@ describe('List API Keys - GET /auth/key/:projectId', () => {
       .expect(201);
 
     return request(app.getHttpServer())
-      .get('/auth/key/0')
+      .get('/auth/key/all?projectId=0')
       .set('X-User-Email', 'regularuser-listkeys@example.com')
       .set('X-User-Password', 'userpass')
       .expect(401);
@@ -374,7 +374,7 @@ describe('List API Keys - GET /auth/key/:projectId', () => {
 
     // The linked admin should be able to list keys
     const response = await request(app.getHttpServer())
-      .get(`/auth/key/${projectId}`)
+      .get(`/auth/key/all?projectId=${projectId}`)
       .set('X-User-Email', 'linked-admin@example.com')
       .set('X-User-Password', 'adminpass')
       .expect(200);
@@ -408,7 +408,7 @@ describe('List API Keys - GET /auth/key/:projectId', () => {
       .expect(201);
 
     return request(app.getHttpServer())
-      .get('/auth/key/0')
+      .get('/auth/key/all?projectId=0')
       .set('X-User-Email', 'unlinked-admin@example.com')
       .set('X-User-Password', 'adminpass')
       .expect(401);
@@ -430,7 +430,7 @@ describe('List API Keys - GET /auth/key/:projectId', () => {
     }
 
     const response = await request(app.getHttpServer())
-      .get('/auth/key/0?offset=0&limit=2')
+      .get('/auth/key/all?offset=0&limit=2&projectId=0')
       .set('X-User-Email', ADMIN_EMAIL)
       .set('X-User-Password', ADMIN_PASSWORD)
       .expect(200);
@@ -458,7 +458,7 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
 
     // List keys to find the created key's ID
     const listResp = await request(app.getHttpServer())
-      .get('/auth/key/0')
+      .get('/auth/key/all?projectId=0')
       .set('X-User-Email', ADMIN_EMAIL)
       .set('X-User-Password', ADMIN_PASSWORD)
       .expect(200);

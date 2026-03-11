@@ -6,18 +6,14 @@ import {
   HttpException,
   HttpStatus,
   Inject,
-  Query,
   OnModuleInit,
   Param,
   ParseIntPipe,
   Post,
   Put,
-  UnauthorizedException,
 } from '@nestjs/common';
-import { GetAllApiKeysResponse } from 'src/models/project.dto';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { userLinkedToProject } from 'src/user_project_validator';
 import {
   CreateProjectModel,
   LinkUserModel,
@@ -31,7 +27,6 @@ import {
   ApiOperation,
   ApiParam,
   ApiResponse,
-  ApiCreatedResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
@@ -134,59 +129,6 @@ export class ProjectController implements OnModuleInit {
 
     const projects = this.projectService.getAllProjects({ projectIds });
     return new ProjectResponses(await lastValueFrom(projects));
-  }
-
-  @ApiOperation({
-    summary: 'Lists all API keys by project',
-  })
-  @ApiCreatedResponse({
-    description: 'Paginated list of all API keys successfully returned',
-    type: GetAllApiKeysResponse,
-  })
-  @ApiHeader({
-    name: 'X-User-Email',
-    description: 'Email of an admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiHeader({
-    name: 'X-User-Password',
-    description: 'Password of the admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @Get(':id/keys')
-  async getAllApiKeys(
-    @Query('offset') offset,
-    @Query('limit') limit,
-    @Param('id') projectIdStr: string,
-    @User() user: CommonProto.User,
-  ) {
-    const id = parseInt(projectIdStr);
-    const linked = await userLinkedToProject({
-      project: { id },
-      user,
-      projectClient: this.projectService,
-    });
-
-    if (!linked || user.type == CommonProto.UserType.USER) {
-      throw new UnauthorizedException(
-        'Only Superadmins & Linked Admins can list API Keys',
-      );
-    }
-
-    const obs = this.apiKeyService.getAllApiKeys({
-      offset,
-      limit,
-      project: { id },
-    });
-
-    console.log('Result of getAllApiKeys ', obs);
-    return new GetAllApiKeysResponse(await lastValueFrom(obs));
   }
 
   //Get all users associated with a project
