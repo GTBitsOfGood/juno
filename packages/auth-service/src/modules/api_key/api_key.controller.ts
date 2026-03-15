@@ -17,6 +17,18 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     @Inject(UserProto.USER_AUTH_SERVICE_NAME)
     private userAuthClient: ClientGrpc,
   ) {}
+
+  onModuleInit() {
+    this.apiKeyDbService =
+      this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
+        ApiKeyProto.API_KEY_DB_SERVICE_NAME,
+      );
+    this.userAuthService =
+      this.userAuthClient.getService<UserProto.UserAuthServiceClient>(
+        UserProto.USER_AUTH_SERVICE_NAME,
+      );
+  }
+
   async validateApiKey(
     request: ApiKeyProto.ValidateApiKeyRequest,
   ): Promise<ApiKeyProto.ValidateApiKeyResponse> {
@@ -42,15 +54,11 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     };
   }
 
-  onModuleInit() {
-    this.apiKeyDbService =
-      this.apiKeyClient.getService<ApiKeyProto.ApiKeyDbServiceClient>(
-        ApiKeyProto.API_KEY_DB_SERVICE_NAME,
-      );
-    this.userAuthService =
-      this.userAuthClient.getService<UserProto.UserAuthServiceClient>(
-        UserProto.USER_AUTH_SERVICE_NAME,
-      );
+  async getApiKey(
+    request: ApiKeyProto.GetApiKeyRequest,
+  ): Promise<ApiKeyProto.GetApiKeyResponse> {
+    const apiKey = await lastValueFrom(this.apiKeyDbService.getApiKey(request));
+    return { key: apiKey };
   }
 
   async issueApiKey(
@@ -65,6 +73,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
         scopes: [AuthCommonProto.ApiScope.FULL],
         project: request.project,
         environment: request.environment,
+        createdAt: new Date().toISOString(),
       },
     });
     if (!key) {
@@ -78,6 +87,28 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
       info: await lastValueFrom(key),
     };
   }
+
+  async getAllApiKeys(
+    request: ApiKeyProto.GetAllApiKeysRequest,
+  ): Promise<ApiKeyProto.GetAllApiKeysResponse> {
+    const keys = (
+      await lastValueFrom(
+        this.apiKeyDbService.getAllApiKeys({
+          offset: request.offset,
+          limit: request.limit,
+          projects: request.projects,
+        }),
+      )
+    ).keys;
+
+    return {
+      keys: keys.map((key) => ({
+        ...key,
+        scopes: key.scopes ?? [],
+      })),
+    };
+  }
+
   async revokeApiKey(
     request: ApiKeyProto.RevokeApiKeyRequest,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {

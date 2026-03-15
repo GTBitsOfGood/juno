@@ -16,14 +16,20 @@ export class AuthService {
     where?: Prisma.ApiKeyWhereInput,
     orderBy?: Prisma.ApiKeyOrderByWithRelationInput,
   ): Promise<AuthCommonProto.ApiKey[]> {
-    const apiKeys = await this.prisma.apiKey.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-    });
-    return apiKeys.map((key) => convertDbApiKeyToTs(key));
+    try {
+      const apiKeys = await this.prisma.apiKey.findMany({
+        skip,
+        take,
+        cursor,
+        where,
+        orderBy,
+        include: { project: true },
+      });
+      return apiKeys.map((key) => convertDbApiKeyToTs(key));
+    } catch (e) {
+      console.debug(e);
+      return [];
+    }
   }
 
   async apiKey(
@@ -58,8 +64,9 @@ export class AuthService {
     try {
       let projectId: number | undefined = undefined;
       if (input.project.connect.id) {
-        if (Number.isInteger(input.project.connect.id)) {
-          projectId = Number(input.project.connect.id);
+        const numId = Number(input.project.connect.id);
+        if (Number.isInteger(numId)) {
+          projectId = numId;
         }
       } else if (input.project.connect.name) {
         const name = input.project.connect.name.toString();
@@ -138,7 +145,10 @@ export class AuthService {
     return this.prisma.newAccountRequest.delete({ where: { id } });
   }
 }
-const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
+
+const convertDbApiKeyToTs = (
+  key: ApiKey & { project?: { id: number; name: string } },
+): AuthCommonProto.ApiKey => {
   const mappedScopes = key.scopes.map((scope) => {
     switch (scope) {
       case 'FULL':
@@ -156,8 +166,12 @@ const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
     hash: key.hash,
     scopes: mappedScopes,
     description: key.description,
-    project: { id: key.projectId },
+    project: key.project
+      ? { id: key.project.id, name: key.project.name }
+      : { id: key.projectId },
     environment: key.environment,
+    createdAt: key.createdAt.toISOString(),
   };
+
   return apiKey;
 };
