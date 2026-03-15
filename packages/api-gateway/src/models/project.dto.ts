@@ -28,9 +28,10 @@ export class ProjectResponses {
   projects: ProjectResponse[];
 
   constructor(projectsResponse: CommonProto.Projects) {
-    this.projects = projectsResponse.projects.map(
-      (project) => new ProjectResponse(project),
-    );
+    this.projects =
+      projectsResponse?.projects?.map(
+        (project) => new ProjectResponse(project),
+      ) ?? [];
   }
 }
 

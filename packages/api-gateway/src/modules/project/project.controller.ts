@@ -91,6 +91,7 @@ export class ProjectController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned all projects',
+    type: ProjectResponses,
   })
   @ApiHeader({
     name: 'X-User-Email',

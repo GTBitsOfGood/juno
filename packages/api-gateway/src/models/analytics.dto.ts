@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
-  IsString,
-  IsOptional,
   IsNumber,
   IsObject,
+  IsOptional,
+  IsString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { AnalyticsProto } from 'juno-proto';
 
 // Request DTOs for logging events
@@ -449,7 +449,7 @@ export class CustomEventTypeResponse {
     this.id = response.id;
     this.category = response.category;
     this.subcategory = response.subcategory;
-    this.properties = response.properties;
+    this.properties = response.properties ?? [];
     this.projectId = response.projectId;
   }
 }
@@ -462,13 +462,10 @@ export class GetAllCustomEventTypeResponse {
   eventTypes: CustomEventTypeResponse[];
 
   constructor(response: AnalyticsProto.GetAllCustomEventTypeResponse) {
-    if (!response || !response.eventTypes) {
-      return;
-    }
-
-    this.eventTypes = response.eventTypes.map(
-      (eventType) => new CustomEventTypeResponse(eventType),
-    );
+    this.eventTypes =
+      response?.eventTypes?.map(
+        (eventType) => new CustomEventTypeResponse(eventType),
+      ) ?? [];
   }
 }
 
@@ -503,7 +500,7 @@ export class CustomGraphTypeResponse {
   graphs: CustomGraphType[];
 
   constructor(response: AnalyticsProto.CustomGraphTypeResponse) {
-    this.graphs = response.graphs;
+    this.graphs = response?.graphs ?? [];
   }
 }
 
@@ -515,7 +512,8 @@ export class GetClickEventsResponse {
   afterId: string;
 
   constructor(response: AnalyticsProto.GetClickEventsResponse) {
-    this.events = response.events.map((event) => new ClickEventResponse(event));
+    this.events =
+      response?.events?.map((event) => new ClickEventResponse(event)) ?? [];
     this.afterId = response.afterId;
   }
 }
@@ -528,7 +526,8 @@ export class GetVisitEventsResponse {
   afterId: string;
 
   constructor(response: AnalyticsProto.GetVisitEventsResponse) {
-    this.events = response.events.map((event) => new VisitEventResponse(event));
+    this.events =
+      response?.events?.map((event) => new VisitEventResponse(event)) ?? [];
     this.afterId = response.afterId;
   }
 }
@@ -541,7 +540,8 @@ export class GetInputEventsResponse {
   afterId: string;
 
   constructor(response: AnalyticsProto.GetInputEventsResponse) {
-    this.events = response.events.map((event) => new InputEventResponse(event));
+    this.events =
+      response?.events?.map((event) => new InputEventResponse(event)) ?? [];
     this.afterId = response.afterId;
   }
 }
@@ -554,9 +554,8 @@ export class GetCustomEventsResponse {
   afterId: string;
 
   constructor(response: AnalyticsProto.GetCustomEventsResponse) {
-    this.events = response.events.map(
-      (event) => new CustomEventResponse(event),
-    );
+    this.events =
+      response?.events?.map((event) => new CustomEventResponse(event)) ?? [];
     this.afterId = response.afterId;
   }
 }
@@ -566,11 +565,8 @@ export class GetAllClickEventsResponse {
   events: ClickEventResponse[];
 
   constructor(response: AnalyticsProto.GetAllClickEventsResponse) {
-    if (!response || !response.events) {
-      return;
-    }
-
-    this.events = response.events.map((event) => new ClickEventResponse(event));
+    this.events =
+      response?.events?.map((event) => new ClickEventResponse(event)) ?? [];
   }
 }
 
@@ -579,7 +575,8 @@ export class GetAllVisitEventsResponse {
   events: VisitEventResponse[];
 
   constructor(response: AnalyticsProto.GetAllVisitEventsResponse) {
-    this.events = response.events.map((event) => new VisitEventResponse(event));
+    this.events =
+      response?.events?.map((event) => new VisitEventResponse(event)) ?? [];
   }
 }
 
@@ -588,7 +585,8 @@ export class GetAllInputEventsResponse {
   events: InputEventResponse[];
 
   constructor(response: AnalyticsProto.GetAllInputEventsResponse) {
-    this.events = response.events.map((event) => new InputEventResponse(event));
+    this.events =
+      response?.events?.map((event) => new InputEventResponse(event)) ?? [];
   }
 }
 
@@ -600,8 +598,7 @@ export class GetAllCustomEventsResponse {
   events: CustomEventResponse[];
 
   constructor(response: AnalyticsProto.GetAllCustomEventsResponse) {
-    this.events = response.events.map(
-      (event) => new CustomEventResponse(event),
-    );
+    this.events =
+      response?.events?.map((event) => new CustomEventResponse(event)) ?? [];
   }
 }
