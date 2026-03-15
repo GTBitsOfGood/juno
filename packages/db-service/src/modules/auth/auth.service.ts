@@ -27,8 +27,10 @@ export class AuthService {
       });
       return apiKeys.map((key) => convertDbApiKeyToTs(key));
     } catch (e) {
-      console.debug(e);
-      return [];
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Failed to retrieve API keys: ${e.message}`,
+      });
     }
   }
 
