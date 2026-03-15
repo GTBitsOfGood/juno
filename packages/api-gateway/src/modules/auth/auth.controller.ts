@@ -371,7 +371,7 @@ export class AuthController implements OnModuleInit {
           proj.id ? { id: proj.id } : { name: proj.name },
         ),
       });
-    } else if (user.projectIds) {
+    } else if (user.type == CommonProto.UserType.ADMIN && user.projectIds) {
       // regular users can only list keys for projects which they are an admin for
       obs = this.apiKeyService.getAllApiKeys({
         offset,
