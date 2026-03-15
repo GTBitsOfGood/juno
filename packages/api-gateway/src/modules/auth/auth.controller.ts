@@ -341,13 +341,20 @@ export class AuthController implements OnModuleInit {
     },
   })
   @Get('key/all')
+  @Get('key/all')
   async getAllApiKeys(
-    @Query('offset') offsetStr,
-    @Query('limit') limitStr,
+    @Query('offset') offsetStr: string,
+    @Query('limit') limitStr: string,
     @User() user: CommonProto.User,
   ) {
-    const offset = offsetStr !== undefined ? parseInt(offsetStr) : undefined;
-    const limit = limitStr !== undefined ? parseInt(limitStr) : undefined;
+    const offset = offsetStr !== undefined ? parseInt(offsetStr, 10) : undefined;
+    const limit = limitStr !== undefined ? parseInt(limitStr, 10) : undefined;
+    if (offset !== undefined && Number.isNaN(offset)) {
+      throw new HttpException('offset must be a number', HttpStatus.BAD_REQUEST);
+    }
+    if (limit !== undefined && Number.isNaN(limit)) {
+      throw new HttpException('limit must be a number', HttpStatus.BAD_REQUEST);
+    }
 
     let obs: Observable<GetAllApiKeysResponse>;
     if (user.type == CommonProto.UserType.SUPERADMIN) {
