@@ -64,8 +64,9 @@ export class AuthService {
     try {
       let projectId: number | undefined = undefined;
       if (input.project.connect.id) {
-        if (Number.isInteger(input.project.connect.id)) {
-          projectId = Number(input.project.connect.id);
+        const numId = Number(input.project.connect.id);
+        if (Number.isInteger(numId)) {
+          projectId = numId;
         }
       } else if (input.project.connect.name) {
         const name = input.project.connect.name.toString();

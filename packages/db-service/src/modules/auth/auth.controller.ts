@@ -42,7 +42,6 @@ export class ApiKeyDbController
       whereClause,
     );
 
-    console.debug('Keys from DB ', keys);
     return {
       keys: keys,
     };

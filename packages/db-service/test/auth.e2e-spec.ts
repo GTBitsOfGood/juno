@@ -257,7 +257,7 @@ describe('DB Service getAllApiKeys filtering by projectId', () => {
     // Query getAllApiKeys for project A by ID
     const resultA: any = await new Promise((resolve, reject) => {
       apiKeyClient.getAllApiKeys(
-        { projectId: { id: Number(projectA.id) }, offset: 0, limit: 100 },
+        { projects: [{ id: Number(projectA.id) }], offset: 0, limit: 100 },
         (err, res) => {
           if (err) reject(err);
           else resolve(res);
@@ -274,7 +274,7 @@ describe('DB Service getAllApiKeys filtering by projectId', () => {
     // Query getAllApiKeys for project B by ID
     const resultB: any = await new Promise((resolve, reject) => {
       apiKeyClient.getAllApiKeys(
-        { projectId: { id: Number(projectB.id) }, offset: 0, limit: 100 },
+        { projects: [{ id: Number(projectB.id) }], offset: 0, limit: 100 },
         (err, res) => {
           if (err) reject(err);
           else resolve(res);
@@ -301,7 +301,7 @@ describe('DB Service getAllApiKeys filtering by projectId', () => {
 
     const result: any = await new Promise((resolve, reject) => {
       apiKeyClient.getAllApiKeys(
-        { projectId: { id: Number(project.id) }, offset: 0, limit: 100 },
+        { projects: [{ id: Number(project.id) }], offset: 0, limit: 100 },
         (err, res) => {
           if (err) reject(err);
           else resolve(res);

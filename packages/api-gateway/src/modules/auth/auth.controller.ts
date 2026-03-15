@@ -318,7 +318,7 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Lists all API keys by project',
+    summary: 'Lists all API keys',
   })
   @ApiOkResponse({
     description: 'Paginated list of all API keys successfully returned',
@@ -349,7 +349,6 @@ export class AuthController implements OnModuleInit {
     const offset = offsetStr !== undefined ? parseInt(offsetStr) : undefined;
     const limit = limitStr !== undefined ? parseInt(limitStr) : undefined;
 
-    console.debug('User project IDs ', user.projectIds);
     let obs: Observable<GetAllApiKeysResponse>;
     if (user.type == CommonProto.UserType.SUPERADMIN) {
       // superadmins can list all projects
@@ -365,7 +364,7 @@ export class AuthController implements OnModuleInit {
           proj.id ? { id: proj.id } : { name: proj.name },
         ),
       });
-    } else {
+    } else if (user.projectIds) {
       // regular users can only list keys for projects which they are an admin for
       obs = this.apiKeyService.getAllApiKeys({
         offset,
@@ -374,6 +373,8 @@ export class AuthController implements OnModuleInit {
           id: projId,
         })),
       });
+    } else {
+      return new GetAllApiKeysResponse({ keys: [] });
     }
 
     return new GetAllApiKeysResponse(await lastValueFrom(obs));
