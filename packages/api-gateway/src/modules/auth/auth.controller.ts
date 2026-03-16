@@ -308,11 +308,11 @@ export class AuthController implements OnModuleInit {
         'Only Superadmins & Linked Admins can delete API Keys',
       );
     }
-    const revokeResponse = await lastValueFrom(
-      this.apiKeyService.revokeApiKey({ apiKey: response.key.hash }),
+    const deleteResponse = await lastValueFrom(
+      this.apiKeyService.deleteApiKey({ id }),
     );
-    if (!revokeResponse.success) {
-      throw new HttpException('API Key revoke failed', 500);
+    if (!deleteResponse.success) {
+      throw new HttpException('API Key deletion failed', 500);
     }
     return;
   }
@@ -340,7 +340,6 @@ export class AuthController implements OnModuleInit {
       type: 'string',
     },
   })
-  @Get('key/all')
   @Get('key/all')
   async getAllApiKeys(
     @Query('offset') offsetStr: string,

@@ -47,7 +47,7 @@ export class GetAllApiKeysResponse {
   keys: AuthCommonProto.ApiKey[];
 
   constructor(res: ApiKeyProto.GetAllApiKeysResponse) {
-    this.keys = res.keys.map((key) => ({
+    this.keys = (res.keys ?? []).map((key) => ({
       ...key,
       scopes: key.scopes ?? [],
       project: key.project

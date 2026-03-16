@@ -27,6 +27,10 @@ export class ApiKeyDbController
   async getAllApiKeys(
     request: ApiKeyProto.GetAllApiKeysParams,
   ): Promise<ApiKeyProto.GetAllApiKeysResult> {
+    if (!request.projects || request.projects.length === 0) {
+      return { keys: [] };
+    }
+
     const whereClause: Prisma.ApiKeyWhereInput = {
       OR: request.projects.map((proj) =>
         proj.id != null
@@ -36,8 +40,8 @@ export class ApiKeyDbController
     };
 
     const keys = await this.apiKeyService.apiKeys(
-      request.offset,
-      request.limit,
+      request.offset || undefined,
+      request.limit || undefined,
       undefined,
       whereClause,
     );

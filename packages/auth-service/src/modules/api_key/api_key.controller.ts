@@ -91,15 +91,14 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async getAllApiKeys(
     request: ApiKeyProto.GetAllApiKeysRequest,
   ): Promise<ApiKeyProto.GetAllApiKeysResponse> {
-    const keys = (
-      await lastValueFrom(
-        this.apiKeyDbService.getAllApiKeys({
-          offset: request.offset,
-          limit: request.limit,
-          projects: request.projects,
-        }),
-      )
-    ).keys;
+    const result = await lastValueFrom(
+      this.apiKeyDbService.getAllApiKeys({
+        offset: request.offset ?? 0,
+        limit: request.limit ?? 0,
+        projects: request.projects ?? [],
+      }),
+    );
+    const keys = result.keys ?? [];
 
     return {
       keys: keys.map((key) => ({
@@ -107,6 +106,18 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
         scopes: key.scopes ?? [],
       })),
     };
+  }
+
+  async deleteApiKey(
+    request: ApiKeyProto.DeleteApiKeyRequest,
+  ): Promise<ApiKeyProto.DeleteApiKeyResponse> {
+    const key = await lastValueFrom(
+      this.apiKeyDbService.deleteApiKey({ id: request.id }),
+    );
+    if (!key) {
+      return { success: false };
+    }
+    return { success: true };
   }
 
   async revokeApiKey(

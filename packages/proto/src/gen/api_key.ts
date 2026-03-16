@@ -81,6 +81,14 @@ export interface RevokeApiKeyResponse {
   success: boolean;
 }
 
+export interface DeleteApiKeyRequest {
+  id: number;
+}
+
+export interface DeleteApiKeyResponse {
+  success: boolean;
+}
+
 export const JUNO_API_KEY_PACKAGE_NAME = 'juno.api_key';
 
 export interface ApiKeyServiceClient {
@@ -97,6 +105,8 @@ export interface ApiKeyServiceClient {
   getAllApiKeys(
     request: GetAllApiKeysRequest,
   ): Observable<GetAllApiKeysResponse>;
+
+  deleteApiKey(request: DeleteApiKeyRequest): Observable<DeleteApiKeyResponse>;
 }
 
 export interface ApiKeyServiceController {
@@ -134,6 +144,13 @@ export interface ApiKeyServiceController {
     | Promise<GetAllApiKeysResponse>
     | Observable<GetAllApiKeysResponse>
     | GetAllApiKeysResponse;
+
+  deleteApiKey(
+    request: DeleteApiKeyRequest,
+  ):
+    | Promise<DeleteApiKeyResponse>
+    | Observable<DeleteApiKeyResponse>
+    | DeleteApiKeyResponse;
 }
 
 export function ApiKeyServiceControllerMethods() {
@@ -144,6 +161,7 @@ export function ApiKeyServiceControllerMethods() {
       'validateApiKey',
       'getApiKey',
       'getAllApiKeys',
+      'deleteApiKey',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
