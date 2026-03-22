@@ -346,9 +346,8 @@ export class AuthController implements OnModuleInit {
     @Query('limit') limitStr: string,
     @User() user: CommonProto.User,
   ) {
-    const offset =
-      offsetStr !== undefined ? parseInt(offsetStr, 10) : undefined;
-    const limit = limitStr !== undefined ? parseInt(limitStr, 10) : undefined;
+    const offset = offsetStr !== undefined ? parseInt(offsetStr, 10) : 0;
+    const limit = limitStr !== undefined ? parseInt(limitStr, 10) : 10;
     if (offset !== undefined && Number.isNaN(offset)) {
       throw new HttpException(
         'offset must be a number',

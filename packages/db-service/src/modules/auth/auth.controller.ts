@@ -40,8 +40,8 @@ export class ApiKeyDbController
     };
 
     const keys = await this.apiKeyService.apiKeys(
-      request.offset || undefined,
-      request.limit || undefined,
+      request.offset,
+      request.limit,
       undefined,
       whereClause,
     );
