@@ -15,4 +15,5 @@ message ApiKey {
   repeated ApiScope scopes = 4;
   identifiers.ProjectIdentifier project = 5;
   string environment = 6;
+  string created_at = 7;
 }

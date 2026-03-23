@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Get,
+  Query,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -22,6 +23,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import {
   ApiKeyProto,
@@ -30,9 +32,10 @@ import {
   ProjectProto,
   UserProto,
 } from 'juno-proto';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { User } from 'src/decorators/user.decorator';
 import {
+  GetAllApiKeysResponse,
   IssueApiKeyRequest,
   IssueApiKeyResponse,
   IssueJWTResponse,
@@ -162,22 +165,7 @@ export class AuthController implements OnModuleInit {
     description: 'The API Key has been successfully created',
     type: IssueApiKeyResponse,
   })
-  @ApiHeader({
-    name: 'X-User-Email',
-    description: 'Email of an admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiHeader({
-    name: 'X-User-Password',
-    description: 'Password of the admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
+  @ApiBearerAuth('API_Key')
   @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
   async createApiKey(
@@ -236,10 +224,132 @@ export class AuthController implements OnModuleInit {
     );
 
     if (!response.success) {
-      throw new HttpException('API Key revoke failed', 500);
+      throw new HttpException(
+        'API Key revoke failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return;
+  }
+
+  @ApiOperation({
+    summary: 'Deletes an API key by ID.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid API Key ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successful API Key deletion',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the API key to delete',
+    type: String,
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'A valid API key',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiBearerAuth('API_Key')
+  @Delete('/key/:id')
+  async deleteApiKeyById(
+    @User() user: CommonProto.User,
+    @Param('id') idStr: string,
+  ) {
+    // search for API key by ID
+    const id = +idStr;
+    if (Number.isNaN(id)) {
+      throw new HttpException('Invalid API Key ID', HttpStatus.BAD_REQUEST);
+    }
+
+    const response = await lastValueFrom(
+      this.apiKeyService.getApiKey({ id: +idStr }),
+    );
+
+    const projectId = response.key.project.id;
+    const linked = await userLinkedToProject({
+      project: { id: projectId },
+      user,
+      projectClient: this.projectService,
+    });
+
+    if (!linked || user.type == CommonProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can delete API Keys',
+      );
+    }
+    const deleteResponse = await lastValueFrom(
+      this.apiKeyService.deleteApiKey({ id }),
+    );
+    if (!deleteResponse.success) {
+      throw new HttpException('API Key deletion failed', 500);
+    }
+    return;
+  }
+
+  @ApiOperation({
+    summary: 'Lists all API keys',
+  })
+  @ApiOkResponse({
+    description: 'Paginated list of all API keys successfully returned',
+    type: GetAllApiKeysResponse,
+  })
+  @ApiBearerAuth('API_Key')
+  @Get('key/all')
+  async getAllApiKeys(
+    @Query('offset') offsetStr: string,
+    @Query('limit') limitStr: string,
+    @User() user: CommonProto.User,
+  ) {
+    const offset = offsetStr !== undefined ? parseInt(offsetStr, 10) : 0;
+    const limit = limitStr !== undefined ? parseInt(limitStr, 10) : 10;
+    if (offset !== undefined && Number.isNaN(offset)) {
+      throw new HttpException(
+        'offset must be a number',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (limit !== undefined && Number.isNaN(limit)) {
+      throw new HttpException('limit must be a number', HttpStatus.BAD_REQUEST);
+    }
+
+    let obs: Observable<GetAllApiKeysResponse>;
+    if (user.type == CommonProto.UserType.SUPERADMIN) {
+      // superadmins can list all projects
+      const projects = (
+        await lastValueFrom(
+          this.projectService.getAllProjects({ projectIds: [] }),
+        )
+      ).projects;
+      obs = this.apiKeyService.getAllApiKeys({
+        offset,
+        limit,
+        projects: projects.map((proj) =>
+          proj.id ? { id: proj.id } : { name: proj.name },
+        ),
+      });
+    } else if (user.type == CommonProto.UserType.ADMIN && user.projectIds) {
+      // regular users can only list keys for projects which they are an admin for
+      obs = this.apiKeyService.getAllApiKeys({
+        offset,
+        limit,
+        projects: user.projectIds.map((projId) => ({
+          id: projId,
+        })),
+      });
+    } else {
+      return new GetAllApiKeysResponse({ keys: [] });
+    }
+
+    return new GetAllApiKeysResponse(await lastValueFrom(obs));
   }
 
   @Get('/test-auth')

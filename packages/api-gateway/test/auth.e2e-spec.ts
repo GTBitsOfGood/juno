@@ -7,7 +7,7 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import { ResetProtoFile } from 'juno-proto';
+import { ApiKeyProtoFile, ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { sign } from 'jsonwebtoken';
@@ -17,6 +17,24 @@ import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
+
+// Seed API key created via gRPC for bootstrapping ApiKeyMiddleware routes
+let seedApiKey: string;
+
+/**
+ * Obtain a user JWT by authenticating with email/password at the login endpoint.
+ */
+async function getJwtForUser(
+  userEmail: string,
+  userPassword: string,
+): Promise<string> {
+  const resp = await request(app.getHttpServer())
+    .post('/auth/user/jwt')
+    .set('X-User-Email', userEmail)
+    .set('X-User-Password', userPassword)
+    .send();
+  return resp.body['token'];
+}
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -30,6 +48,27 @@ beforeAll(async () => {
     resetClient.resetDb({}, () => {
       resolve(0);
     });
+  });
+
+  // Create a seed API key via gRPC so we can bootstrap ApiKeyMiddleware routes
+  const apiKeyProto = ProtoLoader.loadSync([ApiKeyProtoFile]) as any;
+  const apiKeyGRPC = GRPC.loadPackageDefinition(apiKeyProto) as any;
+  const apiKeyClient = new apiKeyGRPC.juno.api_key.ApiKeyService(
+    process.env.AUTH_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+  seedApiKey = await new Promise<string>((resolve, reject) => {
+    apiKeyClient.issueApiKey(
+      {
+        project: { name: 'test-seed-project' },
+        environment: 'prod',
+        description: 'seed-api-key',
+      },
+      (err: any, response: any) => {
+        if (err) return reject(err);
+        resolve(response.apiKey);
+      },
+    );
   });
 });
 
@@ -56,11 +95,11 @@ beforeEach(async () => {
 });
 
 describe('Auth Key Verification Routes', () => {
-  it('Invalid email parameter when getting auth key', () => {
+  it('Invalid user JWT when creating auth key', async () => {
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('X-User-Email', 'invalid-email@gmail.com')
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', 'invalid.jwt.token')
       .send({
         environment: 'prod',
         project: {
@@ -70,11 +109,10 @@ describe('Auth Key Verification Routes', () => {
       .expect(401);
   });
 
-  it('Invalid password parameter when generating auth key', () => {
+  it('Missing user JWT when creating auth key', async () => {
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', 'invalid-password')
+      .set('Authorization', `Bearer ${seedApiKey}`)
       .send({
         environment: 'prod',
         project: {
@@ -84,11 +122,12 @@ describe('Auth Key Verification Routes', () => {
       .expect(401);
   });
 
-  it('Different environment parameter to /auth/key', () => {
+  it('Different environment parameter to /auth/key', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
       .send({
         environment: 'staging',
         project: {
@@ -98,11 +137,12 @@ describe('Auth Key Verification Routes', () => {
       .expect(201);
   });
 
-  it('Invalid project name when generating auth key', () => {
+  it('Invalid project name when generating auth key', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
       .send({
         environment: 'prod',
         project: {
@@ -138,10 +178,11 @@ describe('API Key JWT Verification Routes', () => {
   });
 
   it('Expired JWT api key', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     const key = await request(app.getHttpServer())
       .post('/auth/key')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
       .send({
         environment: 'prod',
         project: {
@@ -166,10 +207,11 @@ describe('API Key JWT Verification Routes', () => {
   });
 
   it('Expected valid request for auth key and jwt generation', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     const key = await request(app.getHttpServer())
       .post('/auth/key')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
       .send({
         environment: 'prod',
         project: {
@@ -240,6 +282,229 @@ describe('User JWT Verification Routes', () => {
       process.env.JWT_SECRET ?? 'secret',
     );
     return expect(result['user']['email']).toEqual(ADMIN_EMAIL);
+  });
+});
+
+describe('List API Keys - GET /auth/key/all', () => {
+  it('should list API keys for a project as a superadmin', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    // First create an API key for the project
+    const createResp = await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .send({
+        environment: 'prod',
+        project: { name: 'test-seed-project' },
+        description: 'list-test-key',
+      })
+      .expect(201);
+
+    expect(createResp.body.apiKey).toBeDefined();
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/key/all')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .expect(200);
+
+    expect(response.body.keys).toBeDefined();
+    expect(Array.isArray(response.body.keys)).toBe(true);
+    expect(response.body.keys.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should reject unauthenticated requests', () => {
+    return request(app.getHttpServer()).get('/auth/key/all').expect(401);
+  });
+
+  it('should not list any API keys for a regular USER not linked to any projects', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    // Create a regular user
+    await request(app.getHttpServer())
+      .post('/user')
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .send({
+        email: 'regularuser-listkeys@example.com',
+        password: 'userpass',
+        name: 'Regular User',
+      })
+      .expect(201);
+
+    const regularUserJwt = await getJwtForUser(
+      'regularuser-listkeys@example.com',
+      'userpass',
+    );
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/key/all')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', regularUserJwt)
+      .expect(200);
+    expect(response.body.keys).toBeDefined();
+    expect(Array.isArray(response.body.keys)).toBe(true);
+    expect(response.body.keys.length).toEqual(0);
+  });
+
+  it('should allow a linked ADMIN to list API keys for their project', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    // Create a project
+    const projectResp = await request(app.getHttpServer())
+      .post('/project')
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .send({ name: 'admin-linked-project' })
+      .expect(201);
+
+    const projectId = projectResp.body.id;
+
+    // Create a user (defaults to USER type)
+    const userResp = await request(app.getHttpServer())
+      .post('/user')
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .send({
+        email: 'linked-admin@example.com',
+        password: 'adminpass',
+        name: 'Linked Admin',
+      })
+      .expect(201);
+
+    const userId = userResp.body.id;
+
+    // Promote user to ADMIN
+    await request(app.getHttpServer())
+      .post('/user/type')
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .send({
+        id: userId,
+        type: 'ADMIN',
+      })
+      .expect(201);
+
+    // Link the admin to the project
+    await request(app.getHttpServer())
+      .put(`/user/id/${userId}/project`)
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .send({ name: 'admin-linked-project' })
+      .expect(200);
+
+    // Create an API key for the project
+    await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .send({
+        environment: 'prod',
+        project: { id: projectId },
+        description: 'admin-linked-key',
+      })
+      .expect(201);
+
+    // The linked admin should be able to list keys
+    const linkedAdminJwt = await getJwtForUser(
+      'linked-admin@example.com',
+      'adminpass',
+    );
+
+    const response = await request(app.getHttpServer())
+      .get(`/auth/key/all`)
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', linkedAdminJwt)
+      .expect(200);
+
+    expect(response.body.keys).toBeDefined();
+    expect(Array.isArray(response.body.keys)).toBe(true);
+    expect(response.body.keys.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should support offset and limit query parameters', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    // Create multiple API keys
+    for (let i = 0; i < 3; i++) {
+      await request(app.getHttpServer())
+        .post('/auth/key')
+        .set('Authorization', `Bearer ${seedApiKey}`)
+        .set('x-user-jwt', adminJwt)
+        .send({
+          environment: 'prod',
+          project: { name: 'test-seed-project' },
+          description: `pagination-key-${i}`,
+        })
+        .expect(201);
+    }
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/key/all?offset=0&limit=2')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .expect(200);
+
+    expect(response.body.keys).toBeDefined();
+    expect(response.body.keys.length).toBeLessThanOrEqual(2);
+  });
+});
+
+describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
+  it('should delete an existing API key by its ID', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    // Create an API key
+    const createResp = await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .send({
+        environment: 'prod',
+        project: { name: 'test-seed-project' },
+        description: 'delete-by-id-test',
+      })
+      .expect(201);
+
+    expect(createResp.body.apiKey).toBeDefined();
+
+    // List keys to find the created key's ID
+    const listResp = await request(app.getHttpServer())
+      .get('/auth/key/all?projectId=0')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .expect(200);
+
+    const createdKey = listResp.body.keys.find(
+      (k: any) => k.description === 'delete-by-id-test',
+    );
+    expect(createdKey).toBeDefined();
+    const keyId = createdKey.id;
+
+    // Delete the key by ID
+    await request(app.getHttpServer())
+      .delete(`/auth/key/${keyId}`)
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .expect(200);
+  });
+
+  it('should return 400 for a non-numeric ID', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+    return request(app.getHttpServer())
+      .delete('/auth/key/abc')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .expect(400);
+  });
+
+  it('should return an error for a non-existent API key ID', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+    return request(app.getHttpServer())
+      .delete('/auth/key/999999')
+      .set('Authorization', `Bearer ${seedApiKey}`)
+      .set('x-user-jwt', adminJwt)
+      .expect(404);
+  });
+
+  it('should not be accessible without authentication', () => {
+    return request(app.getHttpServer()).delete('/auth/key/1').expect(401);
   });
 });
 
@@ -324,10 +589,10 @@ describe('Account Request - GET /auth/account-request', () => {
       })
       .expect(201);
 
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     const response = await request(app.getHttpServer())
       .get('/auth/account-request')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     expect(response.body.requests).toBeDefined();
@@ -345,10 +610,11 @@ describe('Account Request - GET /auth/account-request', () => {
   });
 
   it('should reject requests from a regular USER', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+
     await request(app.getHttpServer())
       .post('/user')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         password: 'userpass',
         name: 'Regular User',
@@ -356,10 +622,14 @@ describe('Account Request - GET /auth/account-request', () => {
       })
       .expect(201);
 
+    const regularUserJwt = await getJwtForUser(
+      'regularuser-getall@example.com',
+      'userpass',
+    );
+
     return request(app.getHttpServer())
       .get('/auth/account-request')
-      .set('X-User-Email', 'regularuser-getall@example.com')
-      .set('X-User-Password', 'userpass')
+      .set('Authorization', `Bearer ${regularUserJwt}`)
       .expect(401);
   });
 });
@@ -377,11 +647,11 @@ describe('Account Request - DELETE /auth/account-request/:id', () => {
       .expect(201);
 
     const id = createResp.body.id;
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
 
     const deleteResp = await request(app.getHttpServer())
       .delete(`/auth/account-request/${id}`)
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     expect(deleteResp.body.id).toBe(id);
@@ -389,8 +659,7 @@ describe('Account Request - DELETE /auth/account-request/:id', () => {
 
     const allResp = await request(app.getHttpServer())
       .get('/auth/account-request')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     const ids = allResp.body.requests.map((r: any) => r.id);
@@ -403,19 +672,19 @@ describe('Account Request - DELETE /auth/account-request/:id', () => {
       .expect(401);
   });
 
-  it('should return 400 for non-numeric id', () => {
+  it('should return 400 for non-numeric id', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .delete('/auth/account-request/abc')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(400);
   });
 
-  it('should return error for non-existent id', () => {
+  it('should return error for non-existent id', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .delete('/auth/account-request/999999')
-      .set('X-User-Email', ADMIN_EMAIL)
-      .set('X-User-Password', ADMIN_PASSWORD)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(404);
   });
 });

@@ -154,6 +154,166 @@ describe('DB Service API Key Tests', () => {
   });
 });
 
+describe('DB Service getAllApiKeys filtering by projectId', () => {
+  let apiKeyClient: any;
+  let projectClient: any;
+
+  beforeEach(() => {
+    const proto = ProtoLoader.loadSync([
+      ApiKeyProtoFile,
+      ProjectProtoFile,
+      IdentifiersProtoFile,
+    ]) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+    apiKeyClient = new protoGRPC.juno.api_key.ApiKeyDbService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+    projectClient = new protoGRPC.juno.project.ProjectService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('only returns API keys belonging to the requested project when filtering by ID', async () => {
+    // Create two projects
+    const projectA: any = await new Promise((resolve, reject) => {
+      projectClient.createProject(
+        { name: 'filter-project-a' },
+        (err: any, resp: any) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    const projectB: any = await new Promise((resolve, reject) => {
+      projectClient.createProject(
+        { name: 'filter-project-b' },
+        (err: any, resp: any) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    // Create API keys for project A
+    await new Promise((resolve, reject) => {
+      apiKeyClient.createApiKey(
+        {
+          apiKey: {
+            hash: 'projecta-key-1-hash',
+            description: 'project-a-key-1',
+            scopes: [0],
+            project: { name: 'filter-project-a' },
+            environment: 'dev',
+          },
+        },
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        },
+      );
+    });
+
+    await new Promise((resolve, reject) => {
+      apiKeyClient.createApiKey(
+        {
+          apiKey: {
+            hash: 'projecta-key-2-hash',
+            description: 'project-a-key-2',
+            scopes: [0],
+            project: { name: 'filter-project-a' },
+            environment: 'prod',
+          },
+        },
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        },
+      );
+    });
+
+    // Create an API key for project B
+    await new Promise((resolve, reject) => {
+      apiKeyClient.createApiKey(
+        {
+          apiKey: {
+            hash: 'projectb-key-1-hash',
+            description: 'project-b-key-1',
+            scopes: [0],
+            project: { name: 'filter-project-b' },
+            environment: 'dev',
+          },
+        },
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        },
+      );
+    });
+
+    // Query getAllApiKeys for project A by ID
+    const resultA: any = await new Promise((resolve, reject) => {
+      apiKeyClient.getAllApiKeys(
+        { projects: [{ id: Number(projectA.id) }], offset: 0, limit: 100 },
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        },
+      );
+    });
+
+    const keysA = resultA.keys || [];
+    expect(keysA.length).toBe(2);
+    for (const key of keysA) {
+      expect(Number(key.project.id)).toBe(Number(projectA.id));
+    }
+
+    // Query getAllApiKeys for project B by ID
+    const resultB: any = await new Promise((resolve, reject) => {
+      apiKeyClient.getAllApiKeys(
+        { projects: [{ id: Number(projectB.id) }], offset: 0, limit: 100 },
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        },
+      );
+    });
+
+    const keysB = resultB.keys || [];
+    expect(keysB.length).toBe(1);
+    expect(Number(keysB[0].project.id)).toBe(Number(projectB.id));
+    expect(keysB[0].description).toBe('project-b-key-1');
+  });
+
+  it('returns an empty list when project has no API keys', async () => {
+    const project: any = await new Promise((resolve, reject) => {
+      projectClient.createProject(
+        { name: 'empty-project' },
+        (err: any, resp: any) => {
+          if (err) reject(err);
+          else resolve(resp);
+        },
+      );
+    });
+
+    const result: any = await new Promise((resolve, reject) => {
+      apiKeyClient.getAllApiKeys(
+        { projects: [{ id: Number(project.id) }], offset: 0, limit: 100 },
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        },
+      );
+    });
+
+    const keys = result.keys || [];
+    expect(keys.length).toBe(0);
+  });
+});
+
 describe('DB Service Account Request Tests', () => {
   let accountRequestClient: any;
 

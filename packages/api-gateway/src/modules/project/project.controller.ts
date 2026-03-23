@@ -32,22 +32,30 @@ import {
 import { User } from 'src/decorators/user.decorator';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 import { UserResponses } from 'src/models/user.dto';
-
+import { ApiKeyProto } from 'juno-proto';
 const { PROJECT_SERVICE_NAME } = ProjectProto;
+const { API_KEY_SERVICE_NAME } = ApiKeyProto;
 
 @ApiBearerAuth('API_Key')
 @ApiTags('project')
 @Controller('project')
 export class ProjectController implements OnModuleInit {
   private projectService: ProjectProto.ProjectServiceClient;
+  private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
+
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
+    @Inject(API_KEY_SERVICE_NAME) private apiClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.projectService =
       this.projectClient.getService<ProjectProto.ProjectServiceClient>(
         PROJECT_SERVICE_NAME,
+      );
+    this.apiKeyService =
+      this.apiClient.getService<ApiKeyProto.ApiKeyServiceClient>(
+        API_KEY_SERVICE_NAME,
       );
   }
 

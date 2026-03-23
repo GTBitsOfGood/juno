@@ -5,6 +5,7 @@ import { ApiKeyIdentifier } from 'juno-proto/dist/gen/identifiers';
 import { validateApiKeydentifier } from 'src/utility/validate';
 import * as bcrypt from 'bcrypt';
 import { mapPrismaRoleToRPC, mapRPCRoleToPrisma } from 'src/utility/convert';
+import { Prisma } from '@prisma/client';
 
 @Controller()
 @ApiKeyProto.ApiKeyDbServiceControllerMethods()
@@ -16,8 +17,38 @@ export class ApiKeyDbController
 {
   constructor(private readonly apiKeyService: AuthService) {}
 
-  getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
-    return this.apiKeyService.findApiKey(validateApiKeydentifier(request));
+  async getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
+    const apiKey = await this.apiKeyService.findApiKey(
+      validateApiKeydentifier(request),
+    );
+    return apiKey;
+  }
+
+  async getAllApiKeys(
+    request: ApiKeyProto.GetAllApiKeysParams,
+  ): Promise<ApiKeyProto.GetAllApiKeysResult> {
+    if (!request.projects || request.projects.length === 0) {
+      return { keys: [] };
+    }
+
+    const whereClause: Prisma.ApiKeyWhereInput = {
+      OR: request.projects.map((proj) =>
+        proj.id != null
+          ? { projectId: Number(proj.id) }
+          : { project: { name: proj.name } },
+      ),
+    };
+
+    const keys = await this.apiKeyService.apiKeys(
+      request.offset,
+      request.limit,
+      undefined,
+      whereClause,
+    );
+
+    return {
+      keys: keys,
+    };
   }
 
   async createApiKey(

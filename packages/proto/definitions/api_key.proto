@@ -7,16 +7,26 @@ import "auth_common.proto";
 
 service ApiKeyService {
   rpc issueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse);
-
   rpc revokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse);
-
   rpc validateApiKey(ValidateApiKeyRequest) returns (ValidateApiKeyResponse);
+  rpc getApiKey(GetApiKeyRequest) returns (GetApiKeyResponse);
+  rpc getAllApiKeys(GetAllApiKeysRequest) returns (GetAllApiKeysResponse);
+  rpc deleteApiKey(DeleteApiKeyRequest) returns (DeleteApiKeyResponse);
 }
 
 service ApiKeyDbService {
   rpc createApiKey(CreateApiKeyParams) returns (auth_common.ApiKey);
   rpc getApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
+  rpc getAllApiKeys(GetAllApiKeysParams) returns (GetAllApiKeysResult);
   rpc deleteApiKey(identifiers.ApiKeyIdentifier) returns (auth_common.ApiKey);
+}
+
+message GetApiKeyRequest {
+  int32 id = 1;
+}
+
+message GetApiKeyResponse {
+  auth_common.ApiKey key = 1;
 }
 
 message IssueApiKeyRequest {
@@ -31,6 +41,26 @@ message ValidateApiKeyResponse {
   auth_common.ApiKey key = 2;
 }
 
+message GetAllApiKeysRequest {
+  repeated identifiers.ProjectIdentifier projects = 1;
+  optional int32 offset = 2;
+  optional int32 limit = 3;
+} 
+
+message GetAllApiKeysParams {
+  repeated identifiers.ProjectIdentifier projects = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+
+message GetAllApiKeysResult {
+  repeated auth_common.ApiKey keys = 1;
+}
+
+message GetAllApiKeysResponse {
+  repeated auth_common.ApiKey keys = 1;
+}
+
 message CreateApiKeyParams { ApiKeyNoId apiKey = 1; }
 
 message ApiKeyNoId {
@@ -39,6 +69,7 @@ message ApiKeyNoId {
   repeated auth_common.ApiScope scopes = 3;
   identifiers.ProjectIdentifier project = 4;
   string environment = 5;
+  string created_at = 6;
 }
 
 message IssueApiKeyResponse {
@@ -48,3 +79,6 @@ message IssueApiKeyResponse {
 
 message RevokeApiKeyRequest { string apiKey = 1; }
 message RevokeApiKeyResponse { bool success = 1; }
+
+message DeleteApiKeyRequest { int32 id = 1; }
+message DeleteApiKeyResponse { bool success = 1; }
