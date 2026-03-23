@@ -165,22 +165,7 @@ export class AuthController implements OnModuleInit {
     description: 'The API Key has been successfully created',
     type: IssueApiKeyResponse,
   })
-  @ApiHeader({
-    name: 'X-User-Email',
-    description: 'Email of an admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiHeader({
-    name: 'X-User-Password',
-    description: 'Password of the admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
+  @ApiBearerAuth('API_Key')
   @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
   async createApiKey(
@@ -251,22 +236,6 @@ export class AuthController implements OnModuleInit {
   @ApiOperation({
     summary: 'Deletes an API key by ID.',
   })
-  @ApiHeader({
-    name: 'X-User-Email',
-    description: 'Email of an admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiHeader({
-    name: 'X-User-Password',
-    description: 'Password of the admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid API Key ID',
@@ -281,6 +250,15 @@ export class AuthController implements OnModuleInit {
     description: 'ID of the API key to delete',
     type: String,
   })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'A valid API key',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiBearerAuth('API_Key')
   @Delete('/key/:id')
   async deleteApiKeyById(
     @User() user: CommonProto.User,
@@ -324,22 +302,7 @@ export class AuthController implements OnModuleInit {
     description: 'Paginated list of all API keys successfully returned',
     type: GetAllApiKeysResponse,
   })
-  @ApiHeader({
-    name: 'X-User-Email',
-    description: 'Email of an admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiHeader({
-    name: 'X-User-Password',
-    description: 'Password of the admin or superadmin user',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
+  @ApiBearerAuth('API_Key')
   @Get('key/all')
   async getAllApiKeys(
     @Query('offset') offsetStr: string,
