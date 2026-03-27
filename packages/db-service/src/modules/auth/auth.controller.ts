@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiKeyProto, AuthCommonProto, UserProto } from 'juno-proto';
 import { ApiKeyIdentifier } from 'juno-proto/dist/gen/identifiers';
-import { validateApiKeydentifier } from 'src/utility/validate';
+import { validateApiKeyIdentifier } from 'src/utility/validate';
 import * as bcrypt from 'bcrypt';
 import { mapPrismaRoleToRPC, mapRPCRoleToPrisma } from 'src/utility/convert';
 import { Prisma } from '@prisma/client';
@@ -19,7 +19,7 @@ export class ApiKeyDbController
 
   async getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
     const apiKey = await this.apiKeyService.findApiKey(
-      validateApiKeydentifier(request),
+      validateApiKeyIdentifier(request),
     );
     return apiKey;
   }
@@ -74,7 +74,7 @@ export class ApiKeyDbController
   async deleteApiKey(
     request: ApiKeyIdentifier,
   ): Promise<AuthCommonProto.ApiKey> {
-    return this.apiKeyService.deleteApiKey(validateApiKeydentifier(request));
+    return this.apiKeyService.deleteApiKey(validateApiKeyIdentifier(request));
   }
 
   async createAccountRequest(

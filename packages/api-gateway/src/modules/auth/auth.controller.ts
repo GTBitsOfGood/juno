@@ -1,13 +1,16 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Headers,
+  HttpCode,
   HttpException,
   HttpStatus,
   Inject,
   OnModuleInit,
   Param,
+  ParseIntPipe,
   Post,
   Get,
   Query,
@@ -24,6 +27,7 @@ import {
   ApiBody,
   ApiParam,
   ApiOkResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import {
   ApiKeyProto,
@@ -200,15 +204,15 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Deletes an API key, detaching it from its project.',
+    summary: 'Revokes an API key, detaching it from its project.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid API Key',
+    description: 'Invalid API Key or insufficient permissions',
   })
   @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Successful API Key deletion',
+    status: HttpStatus.NO_CONTENT,
+    description: 'Successful API Key revocation',
   })
   @ApiHeader({
     name: 'Authorization',
@@ -219,12 +223,40 @@ export class AuthController implements OnModuleInit {
     },
   })
   @ApiBearerAuth('API_Key')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/key')
-  async deleteApiKey(@Headers('Authorization') apiKey?: string) {
+  async deleteApiKey(
+    @User() user: CommonProto.User,
+    @Headers('Authorization') apiKey?: string,
+  ) {
     const key = apiKey?.replace('Bearer ', '');
     if (key === undefined) {
       throw new UnauthorizedException('API Key is required');
     }
+
+    const validated = await lastValueFrom(
+      this.apiKeyService.validateApiKey({ apiKey: key }),
+    );
+
+    if (!validated.key?.project) {
+      throw new HttpException(
+        'API Key has no associated project',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const linked = await userLinkedToProject({
+      project: { id: validated.key.project.id },
+      user,
+      projectClient: this.projectService,
+    });
+
+    if (!linked || user.type == CommonProto.UserType.USER) {
+      throw new UnauthorizedException(
+        'Only Superadmins & Linked Admins can revoke API Keys',
+      );
+    }
+
     const response = await lastValueFrom(
       this.apiKeyService.revokeApiKey({
         apiKey: key,
@@ -249,7 +281,11 @@ export class AuthController implements OnModuleInit {
     description: 'Invalid API Key ID',
   })
   @ApiResponse({
-    status: HttpStatus.OK,
+    status: HttpStatus.NOT_FOUND,
+    description: 'API Key not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
     description: 'Successful API Key deletion',
   })
   @ApiParam({
@@ -259,20 +295,29 @@ export class AuthController implements OnModuleInit {
     type: String,
   })
   @ApiBearerAuth('API_Key')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/key/:id')
   async deleteApiKeyById(
     @User() user: CommonProto.User,
     @Param('id') idStr: string,
   ) {
-    // search for API key by ID
     const id = +idStr;
     if (Number.isNaN(id)) {
       throw new HttpException('Invalid API Key ID', HttpStatus.BAD_REQUEST);
     }
 
-    const response = await lastValueFrom(
-      this.apiKeyService.getApiKey({ id: +idStr }),
-    );
+    const response = await lastValueFrom(this.apiKeyService.getApiKey({ id }));
+
+    if (!response.key) {
+      throw new HttpException('API Key not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (!response.key.project) {
+      throw new HttpException(
+        'API Key has no associated project',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
 
     const projectId = response.key.project.id;
     const linked = await userLinkedToProject({
@@ -302,6 +347,20 @@ export class AuthController implements OnModuleInit {
     description: 'Paginated list of all API keys successfully returned',
     type: GetAllApiKeysResponse,
   })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    type: Number,
+    description: 'Number of records to skip',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Maximum records to return (default 10)',
+    example: 10,
+  })
   @ApiHeader({
     name: 'Authorization',
     description: "The user's access token",
@@ -313,22 +372,10 @@ export class AuthController implements OnModuleInit {
   @ApiBearerAuth('API_Key')
   @Get('key/all')
   async getAllApiKeys(
-    @Query('offset') offsetStr: string,
-    @Query('limit') limitStr: string,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @User() user: CommonProto.User,
   ) {
-    const offset = offsetStr !== undefined ? parseInt(offsetStr, 10) : 0;
-    const limit = limitStr !== undefined ? parseInt(limitStr, 10) : 10;
-    if (offset !== undefined && Number.isNaN(offset)) {
-      throw new HttpException(
-        'offset must be a number',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (limit !== undefined && Number.isNaN(limit)) {
-      throw new HttpException('limit must be a number', HttpStatus.BAD_REQUEST);
-    }
-
     let obs: Observable<GetAllApiKeysResponse>;
     if (user.type == CommonProto.UserType.SUPERADMIN) {
       // superadmins can list all projects

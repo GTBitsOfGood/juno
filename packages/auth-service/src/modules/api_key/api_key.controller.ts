@@ -2,8 +2,9 @@ import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { ApiKeyProto, AuthCommonProto, UserProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { status } from '@grpc/grpc-js';
+import { hashApiKey } from './api_key.utils';
 
 @Controller('API_Key')
 @ApiKeyProto.ApiKeyServiceControllerMethods()
@@ -32,9 +33,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async validateApiKey(
     request: ApiKeyProto.ValidateApiKeyRequest,
   ): Promise<ApiKeyProto.ValidateApiKeyResponse> {
-    const apiKeyHash = createHash('sha256')
-      .update(request.apiKey)
-      .digest('hex');
+    const apiKeyHash = hashApiKey(request.apiKey);
     const apiKey = await lastValueFrom(
       this.apiKeyDbService.getApiKey({
         hash: apiKeyHash,
@@ -65,36 +64,31 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     request: ApiKeyProto.IssueApiKeyRequest,
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
     const rawApiKey = randomBytes(32).toString('hex');
-    const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
-    console.debug('Create API key parameters ', {
-      apiKey: {
-        hash: apiKeyHash,
-        description: request.description,
-        scopes: [AuthCommonProto.ApiScope.FULL],
-        project: request.project,
-        environment: request.environment,
-        createdAt: new Date().toISOString(),
-      },
-    });
-    const key = this.apiKeyDbService.createApiKey({
-      apiKey: {
-        hash: apiKeyHash,
-        description: request.description,
-        scopes: [AuthCommonProto.ApiScope.FULL],
-        project: request.project,
-        environment: request.environment,
-        createdAt: new Date().toISOString(),
-      },
-    });
-    if (!key) {
+    const apiKeyHash = hashApiKey(rawApiKey);
+
+    const info = await lastValueFrom(
+      this.apiKeyDbService.createApiKey({
+        apiKey: {
+          hash: apiKeyHash,
+          description: request.description,
+          scopes: [AuthCommonProto.ApiScope.FULL],
+          project: request.project,
+          environment: request.environment,
+          createdAt: new Date().toISOString(),
+        },
+      }),
+    );
+
+    if (!info) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
         message: 'Failed to create API Key',
       });
     }
+
     return {
       apiKey: rawApiKey,
-      info: await lastValueFrom(key),
+      info,
     };
   }
 
@@ -104,7 +98,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
     const result = await lastValueFrom(
       this.apiKeyDbService.getAllApiKeys({
         offset: request.offset ?? 0,
-        limit: request.limit ?? 0,
+        limit: request.limit ?? undefined,
         projects: request.projects ?? [],
       }),
     );
@@ -121,25 +115,15 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   async deleteApiKey(
     request: ApiKeyProto.DeleteApiKeyRequest,
   ): Promise<ApiKeyProto.DeleteApiKeyResponse> {
-    const key = await lastValueFrom(
-      this.apiKeyDbService.deleteApiKey({ id: request.id }),
-    );
-    if (!key) {
-      return { success: false };
-    }
+    await lastValueFrom(this.apiKeyDbService.deleteApiKey({ id: request.id }));
     return { success: true };
   }
 
   async revokeApiKey(
     request: ApiKeyProto.RevokeApiKeyRequest,
   ): Promise<ApiKeyProto.RevokeApiKeyResponse> {
-    const hash = createHash('sha256').update(request.apiKey).digest('hex');
-    const key = this.apiKeyDbService.deleteApiKey({
-      hash,
-    });
-    if (!key) {
-      return { success: false };
-    }
+    const hash = hashApiKey(request.apiKey);
+    await lastValueFrom(this.apiKeyDbService.deleteApiKey({ hash }));
     return { success: true };
   }
 }

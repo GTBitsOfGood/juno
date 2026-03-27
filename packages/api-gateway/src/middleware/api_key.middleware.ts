@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NestMiddleware,
   Inject,
   OnModuleInit,
@@ -20,6 +21,7 @@ const { JWT_SERVICE_NAME } = JwtProto;
 
 @Injectable()
 export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
+  private readonly logger = new Logger(ApiKeyMiddleware.name);
   private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
   private jwtService: JwtProto.JwtServiceClient;
 
@@ -59,18 +61,7 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
       const res = await lastValueFrom(apiKeyValidation);
       req.apiKey = res.key;
 
-      const userJwt = req.headers['x-user-jwt'] as string | undefined;
-      if (userJwt) {
-        try {
-          const userJwtValidation = this.jwtService.validateUserJwt({
-            jwt: userJwt,
-          });
-          const userJwtRes = await lastValueFrom(userJwtValidation);
-          if (userJwtRes.valid && userJwtRes.user) {
-            req.user = userJwtRes.user;
-          }
-        } catch (error) {}
-      }
+      await this.resolveUserFromJwt(req);
 
       next();
     } catch (error) {
@@ -85,23 +76,30 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
 
         req.apiKey = jwtRes.apiKey;
 
-        const userJwt = req.headers['x-user-jwt'] as string | undefined;
-        if (userJwt) {
-          try {
-            const userJwtValidation = this.jwtService.validateUserJwt({
-              jwt: userJwt,
-            });
-            const userJwtRes = await lastValueFrom(userJwtValidation);
-            if (userJwtRes.valid && userJwtRes.user) {
-              req.user = userJwtRes.user;
-            }
-          } catch (error) {}
-        }
+        await this.resolveUserFromJwt(req);
 
         next();
       } catch (error) {
         throw new UnauthorizedException('Invalid authentication token');
       }
+    }
+  }
+
+  private async resolveUserFromJwt(req: ApiKeyReq): Promise<void> {
+    const userJwt = req.headers['x-user-jwt'] as string | undefined;
+    if (!userJwt) return;
+
+    try {
+      const result = await lastValueFrom(
+        this.jwtService.validateUserJwt({ jwt: userJwt }),
+      );
+      if (result.valid && result.user) {
+        req.user = result.user;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `x-user-jwt validation failed: ${(error as Error).message}`,
+      );
     }
   }
 

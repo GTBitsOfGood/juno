@@ -118,6 +118,7 @@ export class AuthService {
   ): Promise<AuthCommonProto.ApiKey> {
     const key = await this.prisma.apiKey.delete({
       where: lookup,
+      include: { project: true },
     });
     return convertDbApiKeyToTs(key);
   }
