@@ -165,6 +165,14 @@ export class AuthController implements OnModuleInit {
     description: 'The API Key has been successfully created',
     type: IssueApiKeyResponse,
   })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Invalid User Credentials',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad request',
+  })
   @ApiBearerAuth('API_Key')
   @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
@@ -250,14 +258,6 @@ export class AuthController implements OnModuleInit {
     description: 'ID of the API key to delete',
     type: String,
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'A valid API key',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
   @ApiBearerAuth('API_Key')
   @Delete('/key/:id')
   async deleteApiKeyById(
@@ -301,6 +301,14 @@ export class AuthController implements OnModuleInit {
   @ApiOkResponse({
     description: 'Paginated list of all API keys successfully returned',
     type: GetAllApiKeysResponse,
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: "The user's access token",
+    required: true,
+    schema: {
+      type: 'string',
+    },
   })
   @ApiBearerAuth('API_Key')
   @Get('key/all')

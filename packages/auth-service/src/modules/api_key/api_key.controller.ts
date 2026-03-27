@@ -66,6 +66,16 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
   ): Promise<ApiKeyProto.IssueApiKeyResponse> {
     const rawApiKey = randomBytes(32).toString('hex');
     const apiKeyHash = createHash('sha256').update(rawApiKey).digest('hex');
+    console.debug('Create API key parameters ', {
+      apiKey: {
+        hash: apiKeyHash,
+        description: request.description,
+        scopes: [AuthCommonProto.ApiScope.FULL],
+        project: request.project,
+        environment: request.environment,
+        createdAt: new Date().toISOString(),
+      },
+    });
     const key = this.apiKeyDbService.createApiKey({
       apiKey: {
         hash: apiKeyHash,

@@ -7,7 +7,7 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import { ApiKeyProtoFile, ResetProtoFile } from 'juno-proto';
+import { ResetProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { sign } from 'jsonwebtoken';
@@ -17,9 +17,6 @@ import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
-
-// Seed API key created via gRPC for bootstrapping ApiKeyMiddleware routes
-let seedApiKey: string;
 
 /**
  * Obtain a user JWT by authenticating with email/password at the login endpoint.
@@ -49,27 +46,6 @@ beforeAll(async () => {
       resolve(0);
     });
   });
-
-  // Create a seed API key via gRPC so we can bootstrap ApiKeyMiddleware routes
-  const apiKeyProto = ProtoLoader.loadSync([ApiKeyProtoFile]) as any;
-  const apiKeyGRPC = GRPC.loadPackageDefinition(apiKeyProto) as any;
-  const apiKeyClient = new apiKeyGRPC.juno.api_key.ApiKeyService(
-    process.env.AUTH_SERVICE_ADDR,
-    GRPC.credentials.createInsecure(),
-  );
-  seedApiKey = await new Promise<string>((resolve, reject) => {
-    apiKeyClient.issueApiKey(
-      {
-        project: { name: 'test-seed-project' },
-        environment: 'prod',
-        description: 'seed-api-key',
-      },
-      (err: any, response: any) => {
-        if (err) return reject(err);
-        resolve(response.apiKey);
-      },
-    );
-  });
 });
 
 afterAll((done) => {
@@ -98,8 +74,7 @@ describe('Auth Key Verification Routes', () => {
   it('Invalid user JWT when creating auth key', async () => {
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', 'invalid.jwt.token')
+      .set('Authorization', 'Bearer invalid.jwt.token')
       .send({
         environment: 'prod',
         project: {
@@ -112,7 +87,6 @@ describe('Auth Key Verification Routes', () => {
   it('Missing user JWT when creating auth key', async () => {
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
       .send({
         environment: 'prod',
         project: {
@@ -126,8 +100,7 @@ describe('Auth Key Verification Routes', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         environment: 'staging',
         project: {
@@ -141,8 +114,7 @@ describe('Auth Key Verification Routes', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         environment: 'prod',
         project: {
@@ -181,8 +153,7 @@ describe('API Key JWT Verification Routes', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     const key = await request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         environment: 'prod',
         project: {
@@ -210,8 +181,7 @@ describe('API Key JWT Verification Routes', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     const key = await request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         environment: 'prod',
         project: {
@@ -292,8 +262,7 @@ describe('List API Keys - GET /auth/key/all', () => {
     // First create an API key for the project
     const createResp = await request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         environment: 'prod',
         project: { name: 'test-seed-project' },
@@ -305,8 +274,7 @@ describe('List API Keys - GET /auth/key/all', () => {
 
     const response = await request(app.getHttpServer())
       .get('/auth/key/all')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -339,8 +307,7 @@ describe('List API Keys - GET /auth/key/all', () => {
 
     const response = await request(app.getHttpServer())
       .get('/auth/key/all')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', regularUserJwt)
+      .set('Authorization', `Bearer ${regularUserJwt}`)
       .expect(200);
     expect(response.body.keys).toBeDefined();
     expect(Array.isArray(response.body.keys)).toBe(true);
@@ -392,8 +359,7 @@ describe('List API Keys - GET /auth/key/all', () => {
     // Create an API key for the project
     await request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         environment: 'prod',
         project: { id: projectId },
@@ -409,8 +375,7 @@ describe('List API Keys - GET /auth/key/all', () => {
 
     const response = await request(app.getHttpServer())
       .get(`/auth/key/all`)
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', linkedAdminJwt)
+      .set('Authorization', `Bearer ${linkedAdminJwt}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -425,8 +390,7 @@ describe('List API Keys - GET /auth/key/all', () => {
     for (let i = 0; i < 3; i++) {
       await request(app.getHttpServer())
         .post('/auth/key')
-        .set('Authorization', `Bearer ${seedApiKey}`)
-        .set('x-user-jwt', adminJwt)
+        .set('Authorization', `Bearer ${adminJwt}`)
         .send({
           environment: 'prod',
           project: { name: 'test-seed-project' },
@@ -437,8 +401,7 @@ describe('List API Keys - GET /auth/key/all', () => {
 
     const response = await request(app.getHttpServer())
       .get('/auth/key/all?offset=0&limit=2')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -453,8 +416,7 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
     // Create an API key
     const createResp = await request(app.getHttpServer())
       .post('/auth/key')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .send({
         environment: 'prod',
         project: { name: 'test-seed-project' },
@@ -467,8 +429,7 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
     // List keys to find the created key's ID
     const listResp = await request(app.getHttpServer())
       .get('/auth/key/all?projectId=0')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     const createdKey = listResp.body.keys.find(
@@ -480,8 +441,7 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
     // Delete the key by ID
     await request(app.getHttpServer())
       .delete(`/auth/key/${keyId}`)
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
   });
 
@@ -489,8 +449,7 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .delete('/auth/key/abc')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(400);
   });
 
@@ -498,8 +457,7 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
     return request(app.getHttpServer())
       .delete('/auth/key/999999')
-      .set('Authorization', `Bearer ${seedApiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(404);
   });
 
