@@ -72,6 +72,8 @@ import {
 })
 export class FileBucketModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ApiKeyMiddleware).forRoutes('/file/bucket', 'file/bucket/*');
+    consumer
+      .apply(ApiKeyMiddleware)
+      .forRoutes('/file/bucket', 'file/bucket/*', '/file/all/*');
   }
 }
