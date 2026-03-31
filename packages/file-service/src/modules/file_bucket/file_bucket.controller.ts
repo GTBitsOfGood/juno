@@ -20,4 +20,10 @@ export class FileBucketController
   ): Promise<FileBucketProto.Bucket> {
     return await this.fileBucketService.removeBucket(request);
   }
+
+  async getAllFiles(
+    request: FileBucketProto.GetAllFilesRequest,
+  ): Promise<FileBucketProto.GetAllFilesResponse> {
+    return await this.fileBucketService.getAllFiles(request);
+  }
 }

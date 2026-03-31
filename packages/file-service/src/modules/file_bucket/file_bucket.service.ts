@@ -134,4 +134,70 @@ export class FileBucketService implements OnModuleInit {
       });
     }
   }
+
+  async getAllFiles(
+    request: FileBucketProto.GetAllFilesRequest,
+  ): Promise<FileBucketProto.GetAllFilesResponse> {
+    try {
+      const buckets = await lastValueFrom(
+        this.fileBucketDBService.getBucketsByConfigIdAndEnv({
+          configId: request.configId,
+          configEnv: request.configEnv,
+        }),
+      );
+
+      const results = await Promise.all(
+        (buckets.buckets ?? []).map(async (bucket) => {
+          try {
+            const provider = await this.getProvider(bucket.fileProviderName);
+            const bucketRequest: FileBucketProto.GetBucketRequest = {
+              name: bucket.name,
+              configId: bucket.configId,
+              configEnv: bucket.configEnv,
+            };
+
+            let fileList: string[];
+            switch (provider.providerType) {
+              case FileProviderProto.ProviderType.S3: {
+                const handler = new S3BucketHandler(provider);
+                fileList = await handler.listFiles(bucketRequest);
+                break;
+              }
+              case FileProviderProto.ProviderType.AZURE: {
+                const handler = new AzureBucketHandler(provider);
+                fileList = await handler.listFiles(bucketRequest);
+                break;
+              }
+              default:
+                throw new RpcException({
+                  code: status.FAILED_PRECONDITION,
+                  message: `Unsupported provider type: ${provider.providerType} `,
+                });
+            }
+
+            return {
+              bucketName: bucket.name,
+              files: fileList,
+            };
+          } catch {
+            return null;
+          }
+        }),
+      );
+
+      const files = results.filter(
+        (result): result is FileBucketProto.Files => result !== null,
+      );
+
+      return { files };
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: `Failed to get all files: ${error.message} `,
+      });
+    }
+  }
 }
