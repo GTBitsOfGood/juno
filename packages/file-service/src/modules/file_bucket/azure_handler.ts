@@ -68,4 +68,25 @@ export class AzureBucketHandler {
       });
     }
   }
+
+  async listFiles(
+    request: FileBucketProto.GetBucketRequest,
+  ): Promise<string[]> {
+    try {
+      const blobClient = await this.getBlobServiceClient();
+      const containerClient = blobClient.getContainerClient(
+        `${request.name}-${request.configId}-${request.configEnv}`,
+      );
+      const files: string[] = [];
+      for await (const blob of containerClient.listBlobsFlat()) {
+        files.push(blob.name);
+      }
+      return files;
+    } catch (error) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: `Failed to list files: ${error.message} `,
+      });
+    }
+  }
 }
