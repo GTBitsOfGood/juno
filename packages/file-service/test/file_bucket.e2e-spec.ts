@@ -267,3 +267,78 @@ describe('File Bucket Creation Tests', () => {
     await createBucketPromise2;
   });
 });
+
+describe('Get All Files Tests', () => {
+  it('Successfully gets all files for a config', async () => {
+    const metadata = {
+      endpoint: baseURL,
+      region: region,
+      credentials: {
+        accessKeyId: accessKeyId as string,
+        secretAccessKey: secretAccessKey as string,
+      },
+    };
+
+    const client = new S3Client(metadata);
+    const command = new DeleteBucketCommand({
+      Bucket: `get-all-files-bucket-${configId}-${configEnv}`,
+    });
+
+    try {
+      await client.send(command);
+    } catch {}
+
+    await new Promise((resolve, reject) => {
+      bucketClient.registerBucket(
+        {
+          name: 'get-all-files-bucket',
+          configId,
+          configEnv,
+          fileProviderName: providerName,
+        },
+        (err: any) => {
+          if (err) return reject(err);
+          resolve(0);
+        },
+      );
+    });
+
+    const getAllFilesPromise = new Promise((resolve, reject) => {
+      bucketClient.getAllFiles(
+        {
+          configId,
+          configEnv,
+        },
+        (err: any, response: any) => {
+          if (err) return reject(err);
+          expect(err).toBeNull();
+          expect(response).toBeDefined();
+          expect(response.files).toBeDefined();
+          resolve(response);
+        },
+      );
+    });
+    await getAllFilesPromise;
+
+    await client.send(command);
+  });
+
+  it('Returns empty files for nonexistent config', async () => {
+    const getAllFilesPromise = new Promise((resolve, reject) => {
+      bucketClient.getAllFiles(
+        {
+          configId: 9999,
+          configEnv: 'nonexistent',
+        },
+        (err: any, response: any) => {
+          if (err) return reject(err);
+          expect(err).toBeNull();
+          expect(response).toBeDefined();
+          expect(response.files).toBeUndefined();
+          resolve(response);
+        },
+      );
+    });
+    await getAllFilesPromise;
+  });
+});

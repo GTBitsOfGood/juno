@@ -230,4 +230,22 @@ describe('File Bucket Routes', () => {
 
     await client.send(command);
   });
+
+  it('Gets all files successfully', async () => {
+    await request(app.getHttpServer())
+      .get('/file/all/0')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+  });
+
+  it('Unsuccessfully gets all files due to invalid configId', async () => {
+    await request(app.getHttpServer())
+      .get('/file/all/invalid')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(400);
+  });
+
+  it('Unsuccessfully gets all files due to missing authorization', async () => {
+    await request(app.getHttpServer()).get('/file/all/0').expect(401);
+  });
 });
