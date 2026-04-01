@@ -125,7 +125,7 @@ export class AuthController implements OnModuleInit {
   @ApiOperation({
     summary: 'Generates a temporary JWT tied to a specified user.',
     description:
-      'JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given valid user credentials.',
+      'Generates a user identity token that can be used to authenticate admin and management endpoints in place of email/password credentials.',
   })
   @ApiCreatedResponse({
     description: 'Successfully created a JWT.',
