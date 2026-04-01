@@ -177,7 +177,22 @@ export class AuthController implements OnModuleInit {
     status: HttpStatus.BAD_REQUEST,
     description: 'Bad request',
   })
-  @ApiBearerAuth('API_Key')
+  @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of a user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the user',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBody({ type: IssueApiKeyRequest })
   @Post('/key')
   async createApiKey(
@@ -285,6 +300,10 @@ export class AuthController implements OnModuleInit {
     description: 'API Key not found',
   })
   @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid API Key or insufficient permissions',
+  })
+  @ApiResponse({
     status: HttpStatus.NO_CONTENT,
     description: 'Successful API Key deletion',
   })
@@ -347,6 +366,10 @@ export class AuthController implements OnModuleInit {
     description: 'Paginated list of all API keys successfully returned',
     type: GetAllApiKeysResponse,
   })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid API Key or insufficient permissions',
+  })
   @ApiQuery({
     name: 'offset',
     required: false,
@@ -360,14 +383,6 @@ export class AuthController implements OnModuleInit {
     type: Number,
     description: 'Maximum records to return (default 10)',
     example: 10,
-  })
-  @ApiHeader({
-    name: 'Authorization',
-    description: "The user's access token",
-    required: true,
-    schema: {
-      type: 'string',
-    },
   })
   @ApiBearerAuth('API_Key')
   @Get('key/all')
