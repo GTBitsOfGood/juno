@@ -1,5 +1,5 @@
 import { status } from '@grpc/grpc-js';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { FileBucketProto, FileProviderProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
@@ -8,6 +8,7 @@ import { S3BucketHandler } from './s3_handler';
 
 @Injectable()
 export class FileBucketService implements OnModuleInit {
+  private readonly logger = new Logger(FileBucketService.name);
   private fileBucketDBService: FileBucketProto.BucketDbServiceClient;
   private fileProviderDBService: FileProviderProto.FileProviderDbServiceClient;
 
@@ -179,7 +180,10 @@ export class FileBucketService implements OnModuleInit {
               bucketName: bucket.name,
               files: fileList,
             };
-          } catch {
+          } catch (error) {
+            this.logger.error(
+              `Failed to list files for bucket "${bucket.name}": ${error?.message}`,
+            );
             return null;
           }
         }),
