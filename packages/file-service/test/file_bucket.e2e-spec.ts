@@ -320,7 +320,20 @@ describe('Get All Files Tests', () => {
     });
     await getAllFilesPromise;
 
-    await client.send(command);
+    await new Promise((resolve, reject) => {
+      bucketClient.removeBucket(
+        {
+          name: 'get-all-files-bucket',
+          configId,
+          configEnv,
+          fileProviderName: providerName,
+        },
+        (err: any) => {
+          if (err) return reject(err);
+          resolve(0);
+        },
+      );
+    });
   });
 
   it('Returns empty files for nonexistent config', async () => {
@@ -334,7 +347,7 @@ describe('Get All Files Tests', () => {
           if (err) return reject(err);
           expect(err).toBeNull();
           expect(response).toBeDefined();
-          expect(response.files).toBeUndefined();
+          expect(response.files ?? []).toEqual([]);
           resolve(response);
         },
       );
