@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestMicroservice } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
-import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
+import * as ProtoLoader from '@grpc/proto-loader';
+import { INestMicroservice } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ApiKey } from '@prisma/client';
 import {
   ApiKeyProto,
   ApiKeyProtoFile,
@@ -18,7 +18,7 @@ import {
   UserProto,
   UserProtoFile,
 } from 'juno-proto';
-import { ApiKey } from '@prisma/client';
+import { AppModule } from './../src/app.module';
 
 const { JUNO_USER_PACKAGE_NAME } = UserProto;
 const { JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
@@ -334,7 +334,7 @@ describe('DB Service Accept Account Request Tests', () => {
     expect(result.project).toBeUndefined();
 
     const user: any = await new Promise((resolve, reject) => {
-      userClient.getUser({ userEmail: 'accept-user@test.com' }, (err, resp) => {
+      userClient.getUser({ email: 'accept-user@test.com' }, (err, resp) => {
         if (err) reject(err);
         else resolve(resp);
       });
@@ -374,7 +374,7 @@ describe('DB Service Accept Account Request Tests', () => {
     expect(result.user.type).toBe(CommonProto.UserType.ADMIN);
     expect(result.project).toBeDefined();
     expect(result.project.name).toBe('accept-test-project');
-    expect(result.user.projectIds).toContain(result.project.id);
+    expect(result.user.projectIds).toContainEqual(result.project.id);
   });
 
   it('deletes the pending request after acceptance', async () => {
