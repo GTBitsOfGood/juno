@@ -558,7 +558,9 @@ describe('User authentication tests', () => {
     });
     try {
       await promise;
+      fail('Should have thrown an error');
     } catch (e) {
+      expect(e.code).toBe(GRPC.status.NOT_FOUND);
       expect(e.toString()).toContain('No user found for email');
     }
   });
@@ -574,7 +576,9 @@ describe('User authentication tests', () => {
     });
     try {
       await promise;
+      fail('Should have thrown an error');
     } catch (e) {
+      expect(e.code).toBe(GRPC.status.NOT_FOUND);
       expect(e.toString()).toContain('No user found for email');
     }
   });
@@ -628,5 +632,66 @@ describe('User authentication tests', () => {
     const res = await promise;
     res['id'] = Number(res['id']);
     expect(res).toStrictEqual(correctUserResponse);
+  });
+
+  it('User auth with deleted user returns NOT_FOUND error', async () => {
+    // Create db client to manage user lifecycle
+    const proto = ProtoLoader.loadSync([
+      UserProtoFile,
+      IdentifiersProtoFile,
+    ]) as any;
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+    const userClient = new protoGRPC.juno.user.UserService(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+
+    // Create a user to delete
+    const createPromise = new Promise((resolve, reject) => {
+      userClient.createUser(
+        {
+          email: 'todelete@example.com',
+          password: 'password123',
+          name: 'To Delete',
+          type: 'USER',
+        },
+        (err, resp) => {
+          if (err) reject(err);
+          resolve(resp);
+        },
+      );
+    });
+
+    const createdUser = await createPromise;
+    const userId = Number(createdUser['id']);
+
+    // Delete the user
+    const deletePromise = new Promise((resolve, reject) => {
+      userClient.deleteUser({ id: userId }, (err, resp) => {
+        if (err) reject(err);
+        resolve(resp);
+      });
+    });
+
+    await deletePromise;
+
+    // Try to authenticate with deleted user - should throw NOT_FOUND error
+    const authPromise = new Promise((resolve, reject) => {
+      client.authenticate(
+        { email: 'todelete@example.com', password: 'password123' },
+        (err, resp) => {
+          if (err) reject(err);
+          resolve(resp);
+        },
+      );
+    });
+
+    try {
+      await authPromise;
+      fail('Should have thrown an error');
+    } catch (e) {
+      expect(e.code).toBe(GRPC.status.NOT_FOUND);
+      expect(e.toString()).toContain('No user found for email');
+    }
   });
 });
