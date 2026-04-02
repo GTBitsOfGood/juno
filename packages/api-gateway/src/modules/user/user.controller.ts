@@ -268,6 +268,7 @@ export class UserController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'User linked to project successfully.',
+    type: UserResponse,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -344,6 +345,7 @@ export class UserController implements OnModuleInit {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'User unlinked from project successfully.',
+    type: UserResponse,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,

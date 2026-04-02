@@ -106,6 +106,6 @@ export class FileBucket implements FileBucketProto.Bucket {
     this.configId = fileBucket.configId;
     this.configEnv = fileBucket.configEnv;
     this.fileProviderName = fileBucket.fileProviderName;
-    this.FileServiceFile = fileBucket.FileServiceFile;
+    this.FileServiceFile = fileBucket.FileServiceFile ?? [];
   }
 }

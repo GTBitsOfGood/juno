@@ -160,7 +160,7 @@ describe('File Upload Verification Routes', () => {
     projectId = await createProject(projectName);
     apiKey = await createAPIKeyForProjectName(projectName);
 
-    uniqueBucketName = `Bucket-${Date.now()}`;
+    uniqueBucketName = `bucket-${Date.now()}`;
     providerName = `Provider-${Date.now()}`;
     fileName = `File-${Date.now()}`;
   });

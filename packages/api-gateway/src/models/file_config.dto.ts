@@ -49,8 +49,8 @@ export class FileConfigResponse {
   constructor(fileConfig: FileConfigProto.FileServiceConfig) {
     this.id = fileConfig.id;
     this.environment = fileConfig.environment;
-    this.files = fileConfig.files;
-    this.buckets = fileConfig.buckets;
+    this.files = fileConfig.files ?? [];
+    this.buckets = fileConfig.buckets ?? [];
   }
 }
 
