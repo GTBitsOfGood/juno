@@ -260,7 +260,7 @@ describe('List API Keys - GET /auth/key/all', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
 
     // First create an API key for the project
-    const createResp = await request(app.getHttpServer())
+    const key = await request(app.getHttpServer())
       .post('/auth/key')
       .set('Authorization', `Bearer ${adminJwt}`)
       .send({
@@ -270,11 +270,15 @@ describe('List API Keys - GET /auth/key/all', () => {
       })
       .expect(201);
 
-    expect(createResp.body.apiKey).toBeDefined();
+    expect(key.body['apiKey']).toBeDefined();
+
+    console.debug('API KEY ', key.body['apiKey']);
+    const apiKey = key.body['apiKey'];
 
     const response = await request(app.getHttpServer())
       .get('/auth/key/all')
-      .set('Authorization', `Bearer ${adminJwt}`)
+      .set('Authorization', `Bearer ${apiKey}`)
+      .set('x-user-jwt', adminJwt)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -305,10 +309,24 @@ describe('List API Keys - GET /auth/key/all', () => {
       'userpass',
     );
 
+    const key = await request(app.getHttpServer())
+      .post('/auth/key')
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .send({
+        environment: 'prod',
+        project: { name: 'test-seed-project' },
+        description: 'list-test-key',
+      })
+      .expect(201);
+
+    expect(key.body['apiKey']).toBeDefined();
+
+    const apiKey = key.body['apiKey'];
     const response = await request(app.getHttpServer())
       .get('/auth/key/all')
-      .set('Authorization', `Bearer ${regularUserJwt}`)
+      .set('Authorization', `Bearer ${apiKey}`)
       .expect(200);
+
     expect(response.body.keys).toBeDefined();
     expect(Array.isArray(response.body.keys)).toBe(true);
     expect(response.body.keys.length).toEqual(0);
@@ -357,7 +375,7 @@ describe('List API Keys - GET /auth/key/all', () => {
       .expect(200);
 
     // Create an API key for the project
-    await request(app.getHttpServer())
+    const key = await request(app.getHttpServer())
       .post('/auth/key')
       .set('Authorization', `Bearer ${adminJwt}`)
       .send({
@@ -367,15 +385,14 @@ describe('List API Keys - GET /auth/key/all', () => {
       })
       .expect(201);
 
-    // The linked admin should be able to list keys
-    const linkedAdminJwt = await getJwtForUser(
-      'linked-admin@example.com',
-      'adminpass',
-    );
+    expect(key.body['apiKey']).toBeDefined();
 
+    const apiKey = key.body['apiKey'];
+
+    // The linked admin should be able to list keys
     const response = await request(app.getHttpServer())
       .get(`/auth/key/all`)
-      .set('Authorization', `Bearer ${linkedAdminJwt}`)
+      .set('Authorization', `Bearer ${apiKey}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();

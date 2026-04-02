@@ -313,6 +313,14 @@ export class AuthController implements OnModuleInit {
     description: 'ID of the API key to delete',
     type: String,
   })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'A valid API key',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBearerAuth('API_Key')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/key/:id')
@@ -384,13 +392,22 @@ export class AuthController implements OnModuleInit {
     description: 'Maximum records to return (default 10)',
     example: 10,
   })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'A valid API key',
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBearerAuth('API_Key')
   @Get('key/all')
   async getAllApiKeys(
+    @User() user: CommonProto.User,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @User() user: CommonProto.User,
   ) {
+    console.debug('User ', user);
     let obs: Observable<GetAllApiKeysResponse>;
     if (user.type == CommonProto.UserType.SUPERADMIN) {
       // superadmins can list all projects

@@ -60,7 +60,7 @@ export class ApiKeyMiddleware implements NestMiddleware, OnModuleInit {
       });
       const res = await lastValueFrom(apiKeyValidation);
       req.apiKey = res.key;
-
+      console.log('Validate API Key result ', res);
       await this.resolveUserFromJwt(req);
 
       next();
