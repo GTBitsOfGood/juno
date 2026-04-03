@@ -95,11 +95,9 @@ export class AuthModule implements NestModule {
         { path: 'auth/account-request', method: RequestMethod.GET },
         { path: 'auth/account-request/:id', method: RequestMethod.DELETE },
         { path: 'auth/key', method: RequestMethod.POST },
+        { path: 'auth/key/all', method: RequestMethod.GET },
       )
       .apply(ApiKeyMiddleware)
-      .forRoutes(
-        { path: 'auth/key/all', method: RequestMethod.GET },
-        { path: 'auth/key', method: RequestMethod.DELETE },
-      );
+      .forRoutes({ path: 'auth/key', method: RequestMethod.DELETE });
   }
 }

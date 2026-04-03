@@ -67,6 +67,66 @@ export class IssueApiKeyResponse {
   }
 }
 
+// string id = 1;
+// string hash = 2;
+// string description = 3;
+// repeated ApiScope scopes = 4;
+// identifiers.ProjectIdentifier project = 5;
+// string environment = 6;
+// string created_at = 7;
+
+export class ApiKey {
+  @ApiProperty({
+    description: "The API key's ID in the databse",
+    example: '5',
+  })
+  id: string;
+
+  @ApiProperty({
+    description:
+      'The generated API key value (store immediately, not retrievable again)',
+    example: 'a1b2c3d4e5f6...',
+  })
+  hash: string;
+
+  @ApiProperty({
+    description: 'Description provided at creation',
+    example: 'Production API key for mobile app',
+  })
+  description: string;
+
+  @ApiProperty({
+    description: 'Scopes tied to this API key',
+    example: '["read:projects", "write:analytics"]',
+    isArray: true,
+  })
+  scopes: string;
+
+  @ApiProperty({ description: 'project identifier for the API key' })
+  project: string;
+
+  @ApiProperty({
+    description: 'Environment this key was issued for',
+    example: 'production',
+  })
+  environment: string;
+
+  @ApiProperty({
+    description: 'ISO timestamp of key creation',
+    example: '2026-01-01T00:00:00.000Z',
+  })
+  createdAt: string;
+
+  constructor(res: AuthCommonProto.ApiKey) {
+    this.id = res.id;
+    this.hash = res.hash;
+    this.description = res.description;
+    this.environment = res.environment;
+    this.project = res.project.id.toString();
+    this.createdAt = res.createdAt;
+  }
+}
+
 export class IssueJWTResponse {
   @ApiProperty({ type: 'string', description: 'Created JWT token' })
   token: string;
@@ -78,7 +138,7 @@ export class IssueJWTResponse {
 
 export class GetAllApiKeysResponse {
   @ApiProperty({
-    type: IssueApiKeyResponse,
+    type: ApiKey,
     isArray: true,
     description: 'List of API keys belonging to a project',
   })

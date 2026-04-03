@@ -179,8 +179,8 @@ export class AuthController implements OnModuleInit {
   })
   @ApiHeader({
     name: 'X-User-Email',
-    description: 'Email of a user',
-    required: true,
+    description: 'Email of the user',
+    required: false,
     schema: {
       type: 'string',
     },
@@ -188,7 +188,7 @@ export class AuthController implements OnModuleInit {
   @ApiHeader({
     name: 'X-User-Password',
     description: 'Password of the user',
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -199,6 +199,11 @@ export class AuthController implements OnModuleInit {
     @User() user: CommonProto.User,
     @Body() issueApiKeyRequest: IssueApiKeyRequest,
   ) {
+    if (!user) {
+      throw new UnauthorizedException(
+        "You must provide the user's email/password or use an ID token",
+      );
+    }
     const linked = await userLinkedToProject({
       project: issueApiKeyRequest.project,
       user,
@@ -238,9 +243,25 @@ export class AuthController implements OnModuleInit {
     },
   })
   @ApiHeader({
+    name: 'X-User-Email',
+    description: 'Email of the user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
     name: 'x-user-jwt',
     description: "The user's ID token",
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
@@ -253,7 +274,9 @@ export class AuthController implements OnModuleInit {
     @Headers('Authorization') apiKey?: string,
   ) {
     if (!user) {
-      throw new UnauthorizedException('User ID token is required');
+      throw new UnauthorizedException(
+        'Please provide email/password or the user ID token',
+      );
     }
     const key = apiKey?.replace('Bearer ', '');
     if (key === undefined) {
@@ -325,9 +348,17 @@ export class AuthController implements OnModuleInit {
     example: 10,
   })
   @ApiHeader({
-    name: 'Authorization',
-    description: 'A valid API key',
-    required: true,
+    name: 'X-User-Email',
+    description: 'Email of the user',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  })
+  @ApiHeader({
+    name: 'X-User-Password',
+    description: 'Password of the user',
+    required: false,
     schema: {
       type: 'string',
     },
@@ -335,12 +366,11 @@ export class AuthController implements OnModuleInit {
   @ApiHeader({
     name: 'x-user-jwt',
     description: "The user's ID token",
-    required: true,
+    required: false,
     schema: {
       type: 'string',
     },
   })
-  @ApiBearerAuth('API_Key')
   @Get('key/all')
   async getAllApiKeys(
     @User() user: CommonProto.User,
