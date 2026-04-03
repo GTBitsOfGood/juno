@@ -49,10 +49,12 @@ export interface GetAllApiKeysParams {
 
 export interface GetAllApiKeysResult {
   keys: ApiKey[];
+  count: number;
 }
 
 export interface GetAllApiKeysResponse {
   keys: ApiKey[];
+  count: number;
 }
 
 export interface CreateApiKeyParams {

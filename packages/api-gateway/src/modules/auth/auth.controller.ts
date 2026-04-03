@@ -31,6 +31,7 @@ import {
 } from '@nestjs/swagger';
 import {
   ApiKeyProto,
+  AuthCommonProto,
   CommonProto,
   JwtProto,
   ProjectProto,
@@ -357,14 +358,6 @@ export class AuthController implements OnModuleInit {
       type: 'string',
     },
   })
-  @ApiHeader({
-    name: 'x-user-jwt',
-    description: "The user's ID token",
-    required: false,
-    schema: {
-      type: 'string',
-    },
-  })
   @Get('key/all')
   async getAllApiKeys(
     @User() user: CommonProto.User,
@@ -375,7 +368,7 @@ export class AuthController implements OnModuleInit {
       throw new UnauthorizedException('User ID token is required');
     }
 
-    let obs: Observable<GetAllApiKeysResponse>;
+    let obs: Observable<ApiKeyProto.GetAllApiKeysResponse>;
     if (user.type == CommonProto.UserType.SUPERADMIN) {
       // superadmins can list all projects
       const projects = (
@@ -400,10 +393,42 @@ export class AuthController implements OnModuleInit {
         })),
       });
     } else {
-      return new GetAllApiKeysResponse({ keys: [] });
+      return new GetAllApiKeysResponse({
+        keys: [],
+        links: {
+          first: encodeURI(`/auth/key/all?offset=0&limit=0`),
+          prev: encodeURI(`/auth/key/all?offset=0&limit=0`),
+          next: encodeURI(`/auth/key/all?offset=0&limit=0`),
+          last: encodeURI(`/auth/key/all?offset=0&limit=0`),
+        },
+      });
     }
 
-    return new GetAllApiKeysResponse(await lastValueFrom(obs));
+    const data: { keys: AuthCommonProto.ApiKey[]; count: number } =
+      await lastValueFrom(obs);
+
+    console.debug('offset and limit', offset, limit);
+
+    try {
+      const links = {
+        first: encodeURI(`/auth/key/all?offset=${0}&limit=${limit}`),
+        prev: encodeURI(
+          `/auth/key/all?offset=${Math.max(offset - 1, 0)}&limit=${limit}`,
+        ),
+        next: encodeURI(
+          `/auth/key/all?offset=${Math.min(offset + 1, Math.floor(data.count / limit))}&limit=${limit}`,
+        ),
+        last: encodeURI(
+          `/auth/key/all?offset=${Math.floor(data.count / limit)}&limit=${limit}`,
+        ),
+      };
+      return new GetAllApiKeysResponse({
+        keys: data.keys,
+        links,
+      });
+    } catch (e) {
+      console.debug(e);
+    }
   }
 
   @Get('/test-auth')

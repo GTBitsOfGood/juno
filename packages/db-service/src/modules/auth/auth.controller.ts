@@ -28,7 +28,7 @@ export class ApiKeyDbController
     request: ApiKeyProto.GetAllApiKeysParams,
   ): Promise<ApiKeyProto.GetAllApiKeysResult> {
     if (!request.projects || request.projects.length === 0) {
-      return { keys: [] };
+      return { keys: [], count: 0 };
     }
 
     const whereClause: Prisma.ApiKeyWhereInput = {
@@ -46,9 +46,7 @@ export class ApiKeyDbController
       whereClause,
     );
 
-    return {
-      keys: keys,
-    };
+    return keys;
   }
 
   async createApiKey(

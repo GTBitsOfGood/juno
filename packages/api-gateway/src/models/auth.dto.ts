@@ -67,14 +67,6 @@ export class IssueApiKeyResponse {
   }
 }
 
-// string id = 1;
-// string hash = 2;
-// string description = 3;
-// repeated ApiScope scopes = 4;
-// identifiers.ProjectIdentifier project = 5;
-// string environment = 6;
-// string created_at = 7;
-
 export class ApiKey {
   @ApiProperty({
     description: "The API key's ID in the databse",
@@ -97,10 +89,10 @@ export class ApiKey {
 
   @ApiProperty({
     description: 'Scopes tied to this API key',
-    example: '["read:projects", "write:analytics"]',
-    isArray: true,
+    example: ['read:projects', 'write:analytics'],
+    type: [String],
   })
-  scopes: string;
+  scopes: string[];
 
   @ApiProperty({ description: 'project identifier for the API key' })
   project: string;
@@ -121,6 +113,9 @@ export class ApiKey {
     this.id = res.id;
     this.hash = res.hash;
     this.description = res.description;
+    this.scopes = res.scopes
+      ? res.scopes.map((scope) => scope.toString())
+      : [''];
     this.environment = res.environment;
     this.project = res.project.id.toString();
     this.createdAt = res.createdAt;
@@ -136,21 +131,59 @@ export class IssueJWTResponse {
   }
 }
 
+export class PaginationParams {
+  @ApiProperty({
+    description: 'first page of results',
+    example: '/auth/key/?offset=0&limit=5',
+  })
+  first: string;
+  @ApiProperty({
+    description: 'previous page of results',
+    example: '/auth/key/?offset=15&limit=5',
+  })
+  prev: string;
+  @ApiProperty({
+    description: 'next page of results',
+    example: '/auth/key/?offset=20&limit=5',
+  })
+  next: string;
+  @ApiProperty({
+    description: 'last page of results',
+    example: '/auth/key/?offset=25&limit=5',
+  })
+  last: string;
+
+  constructor(res: {
+    first: string;
+    prev: string;
+    next: string;
+    last: string;
+  }) {
+    this.first = res.first;
+    this.prev = res.prev;
+    this.next = res.next;
+    this.last = res.last;
+  }
+}
 export class GetAllApiKeysResponse {
   @ApiProperty({
     type: ApiKey,
     isArray: true,
     description: 'List of API keys belonging to a project',
   })
-  keys: AuthCommonProto.ApiKey[];
+  keys: ApiKey[];
 
-  constructor(res: ApiKeyProto.GetAllApiKeysResponse) {
-    this.keys = (res.keys ?? []).map((key) => ({
-      ...key,
-      scopes: key.scopes ?? [],
-      project: key.project
-        ? { id: Number(key.project.id), name: key.project.name }
-        : undefined,
-    }));
+  @ApiProperty({
+    type: PaginationParams,
+    description: 'Pagination parameters',
+  })
+  links: PaginationParams;
+
+  constructor(res: {
+    keys: AuthCommonProto.ApiKey[];
+    links: PaginationParams;
+  }) {
+    this.keys = (res.keys ?? []).map((key) => new ApiKey(key));
+    this.links = res.links;
   }
 }

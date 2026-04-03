@@ -109,6 +109,7 @@ export class ApiKeyController implements ApiKeyProto.ApiKeyServiceController {
         ...key,
         scopes: key.scopes ?? [],
       })),
+      count: result.count,
     };
   }
 

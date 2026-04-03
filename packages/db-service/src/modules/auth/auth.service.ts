@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { ApiKey, NewAccountRequest, Prisma } from '@prisma/client';
 import { AuthCommonProto } from 'juno-proto';
+import { ApiKeyProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -15,17 +16,26 @@ export class AuthService {
     cursor?: Prisma.ApiKeyWhereUniqueInput,
     where?: Prisma.ApiKeyWhereInput,
     orderBy?: Prisma.ApiKeyOrderByWithRelationInput,
-  ): Promise<AuthCommonProto.ApiKey[]> {
+  ): Promise<ApiKeyProto.GetAllApiKeysResult> {
     try {
-      const apiKeys = await this.prisma.apiKey.findMany({
-        skip,
-        take,
-        cursor,
-        where,
-        orderBy,
-        include: { project: true },
-      });
-      return apiKeys.map((key) => convertDbApiKeyToTs(key));
+      const [apiKeys, count] = await this.prisma.$transaction([
+        this.prisma.apiKey.findMany({
+          skip,
+          take,
+          cursor,
+          where,
+          orderBy,
+          include: { project: true },
+        }),
+        this.prisma.apiKey.count({ where }),
+      ]);
+
+      const apiKeyObjs = apiKeys.map((key) => convertDbApiKeyToTs(key));
+
+      return {
+        keys: apiKeyObjs,
+        count: count,
+      };
     } catch (e) {
       throw new RpcException({
         code: status.INTERNAL,

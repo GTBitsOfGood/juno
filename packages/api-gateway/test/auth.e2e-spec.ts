@@ -260,7 +260,7 @@ describe('List API Keys - GET /auth/key/all', () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
 
     // First create an API key for the project
-    const key = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/auth/key')
       .set('Authorization', `Bearer ${adminJwt}`)
       .send({
@@ -270,15 +270,9 @@ describe('List API Keys - GET /auth/key/all', () => {
       })
       .expect(201);
 
-    expect(key.body['apiKey']).toBeDefined();
-
-    console.debug('API KEY ', key.body['apiKey']);
-    const apiKey = key.body['apiKey'];
-
     const response = await request(app.getHttpServer())
       .get('/auth/key/all')
-      .set('Authorization', `Bearer ${apiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -309,7 +303,7 @@ describe('List API Keys - GET /auth/key/all', () => {
       'userpass',
     );
 
-    const key = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/auth/key')
       .set('Authorization', `Bearer ${adminJwt}`)
       .send({
@@ -319,13 +313,9 @@ describe('List API Keys - GET /auth/key/all', () => {
       })
       .expect(201);
 
-    expect(key.body['apiKey']).toBeDefined();
-
-    const apiKey = key.body['apiKey'];
     const response = await request(app.getHttpServer())
       .get('/auth/key/all')
-      .set('Authorization', `Bearer ${apiKey}`)
-      .set('x-user-jwt', regularUserJwt)
+      .set('Authorization', `Bearer ${regularUserJwt}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -393,8 +383,7 @@ describe('List API Keys - GET /auth/key/all', () => {
     // The linked admin should be able to list keys
     const response = await request(app.getHttpServer())
       .get(`/auth/key/all`)
-      .set('Authorization', `Bearer ${apiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -404,10 +393,9 @@ describe('List API Keys - GET /auth/key/all', () => {
 
   it('should support offset and limit query parameters', async () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
-    const keys = [];
     // Create multiple API keys
     for (let i = 0; i < 3; i++) {
-      const key = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post('/auth/key')
         .set('Authorization', `Bearer ${adminJwt}`)
         .send({
@@ -416,14 +404,11 @@ describe('List API Keys - GET /auth/key/all', () => {
           description: `pagination-key-${i}`,
         })
         .expect(201);
-      keys.push(key);
     }
 
-    const apiKey = keys.at(0).body['apiKey'];
     const response = await request(app.getHttpServer())
       .get('/auth/key/all?offset=0&limit=2')
-      .set('Authorization', `Bearer ${apiKey}`)
-      .set('x-user-jwt', adminJwt)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
     expect(response.body.keys).toBeDefined();
@@ -432,11 +417,11 @@ describe('List API Keys - GET /auth/key/all', () => {
 });
 
 describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
-  it('should delete an existing API key', async () => {
+  it('should delete an existing API key by its ID', async () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
 
     // Create an API key
-    const key = await request(app.getHttpServer())
+    const createResp = await request(app.getHttpServer())
       .post('/auth/key')
       .set('Authorization', `Bearer ${adminJwt}`)
       .send({
@@ -445,18 +430,38 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
         description: 'delete-by-id-test',
       })
       .expect(201);
-    const apiKey = key.body['apiKey'];
-    expect(apiKey).toBeDefined();
+    expect(createResp.body.apiKey).toBeDefined();
+
+    // List keys to find the created key's ID
+    const listResp = await request(app.getHttpServer())
+      .get('/auth/key/all?projectId=0')
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .expect(200);
+
+    const createdKey = listResp.body.keys.find(
+      (k: any) => k.description === 'delete-by-id-test',
+    );
+    expect(createdKey).toBeDefined();
+    const keyId = createdKey.id;
 
     // Delete the key
     await request(app.getHttpServer())
-      .delete(`/auth/key/${key.body['id']}`)
-      .set('x-user-jwt', adminJwt)
+      .delete(`/auth/key/${keyId}`)
+      .set('Authorization', `Bearer ${adminJwt}`)
       .expect(204);
   });
 
+  it('should fail for non-existent API key IDs', async () => {
+    const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    await request(app.getHttpServer())
+      .delete(`/auth/key/999`)
+      .set('Authorization', `Bearer ${adminJwt}`)
+      .expect(404);
+  });
+
   it('should not be accessible without authentication', () => {
-    return request(app.getHttpServer()).delete('/auth/key').expect(401);
+    return request(app.getHttpServer()).delete('/auth/key/0').expect(401);
   });
 });
 

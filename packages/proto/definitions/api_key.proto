@@ -55,10 +55,12 @@ message GetAllApiKeysParams {
 
 message GetAllApiKeysResult {
   repeated auth_common.ApiKey keys = 1;
+  int32 count = 2;
 }
 
 message GetAllApiKeysResponse {
   repeated auth_common.ApiKey keys = 1;
+  int32 count = 2;
 }
 
 message CreateApiKeyParams { ApiKeyNoId apiKey = 1; }
