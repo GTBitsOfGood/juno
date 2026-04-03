@@ -378,8 +378,6 @@ describe('List API Keys - GET /auth/key/all', () => {
 
     expect(key.body['apiKey']).toBeDefined();
 
-    const apiKey = key.body['apiKey'];
-
     // The linked admin should be able to list keys
     const response = await request(app.getHttpServer())
       .get(`/auth/key/all`)
