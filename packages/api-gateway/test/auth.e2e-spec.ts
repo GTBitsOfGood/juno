@@ -432,7 +432,7 @@ describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
 
     // List keys to find the created key's ID
     const listResp = await request(app.getHttpServer())
-      .get('/auth/key/all?projectId=0')
+      .get('/auth/key/all')
       .set('Authorization', `Bearer ${adminJwt}`)
       .expect(200);
 
