@@ -364,6 +364,10 @@ export class AuthController implements OnModuleInit {
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
+    if (limit <= 0) {
+      throw new HttpException('limit must be a positive integer', HttpStatus.BAD_REQUEST);
+    }
+  ) {
     if (!user) {
       throw new UnauthorizedException('User ID token is required');
     }
