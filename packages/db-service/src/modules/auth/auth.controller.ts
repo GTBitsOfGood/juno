@@ -27,17 +27,16 @@ export class ApiKeyDbController
   async getAllApiKeys(
     request: ApiKeyProto.GetAllApiKeysParams,
   ): Promise<ApiKeyProto.GetAllApiKeysResult> {
-    if (!request.projects || request.projects.length === 0) {
-      return { keys: [], count: 0 };
-    }
-
-    const whereClause: Prisma.ApiKeyWhereInput = {
-      OR: request.projects.map((proj) =>
-        proj.id != null
-          ? { projectId: Number(proj.id) }
-          : { project: { name: proj.name } },
-      ),
-    };
+    const whereClause: Prisma.ApiKeyWhereInput | undefined =
+      request.projects && request.projects.length > 0
+        ? {
+            OR: request.projects.map((proj) =>
+              proj.id != null
+                ? { projectId: Number(proj.id) }
+                : { project: { name: proj.name } },
+            ),
+          }
+        : undefined;
 
     const keys = await this.apiKeyService.apiKeys(
       request.offset,

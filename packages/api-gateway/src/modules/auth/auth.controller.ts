@@ -312,7 +312,10 @@ export class AuthController implements OnModuleInit {
       this.apiKeyService.deleteApiKey({ id }),
     );
     if (!deleteResponse.success) {
-      throw new HttpException('API Key deletion failed', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'API Key deletion failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
     return;
   }
@@ -365,27 +368,23 @@ export class AuthController implements OnModuleInit {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
     if (limit <= 0) {
-      throw new HttpException('limit must be a positive integer', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'limit must be a positive integer',
+        HttpStatus.BAD_REQUEST,
+      );
     }
-  ) {
+
     if (!user) {
       throw new UnauthorizedException('User ID token is required');
     }
 
     let obs: Observable<ApiKeyProto.GetAllApiKeysResponse>;
     if (user.type == CommonProto.UserType.SUPERADMIN) {
-      // superadmins can list all projects
-      const projects = (
-        await lastValueFrom(
-          this.projectService.getAllProjects({ projectIds: [] }),
-        )
-      ).projects;
+      // superadmins can list all keys — pass empty projects to skip filtering
       obs = this.apiKeyService.getAllApiKeys({
         offset,
         limit,
-        projects: projects.map((proj) =>
-          proj.id ? { id: proj.id } : { name: proj.name },
-        ),
+        projects: [],
       });
     } else if (user.type == CommonProto.UserType.ADMIN && user.projectIds) {
       // regular users can only list keys for projects which they are an admin for
