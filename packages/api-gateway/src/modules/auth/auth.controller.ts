@@ -312,7 +312,7 @@ export class AuthController implements OnModuleInit {
       this.apiKeyService.deleteApiKey({ id }),
     );
     if (!deleteResponse.success) {
-      throw new HttpException('API Key deletion failed', 500);
+      throw new HttpException('API Key deletion failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
     return;
   }
