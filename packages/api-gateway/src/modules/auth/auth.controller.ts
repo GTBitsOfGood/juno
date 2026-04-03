@@ -411,10 +411,7 @@ export class AuthController implements OnModuleInit {
     const data: { keys: AuthCommonProto.ApiKey[]; count: number } =
       await lastValueFrom(obs);
 
-    console.debug('offset and limit', offset, limit);
-
-    try {
-      const links = {
+    const links = {
       first: encodeURI(`/auth/key/all?offset=${0}&limit=${limit}`),
       prev: encodeURI(
         `/auth/key/all?offset=${Math.max(offset - limit, 0)}&limit=${limit}`,
@@ -425,14 +422,11 @@ export class AuthController implements OnModuleInit {
       last: encodeURI(
         `/auth/key/all?offset=${Math.max(0, data.count - limit)}&limit=${limit}`,
       ),
-      };
-      return new GetAllApiKeysResponse({
-        keys: data.keys,
-        links,
-      });
-    } catch (e) {
-      console.debug(e);
-    }
+    };
+    return new GetAllApiKeysResponse({
+      keys: data.keys,
+      links,
+    });
   }
 
   @Get('/test-auth')
