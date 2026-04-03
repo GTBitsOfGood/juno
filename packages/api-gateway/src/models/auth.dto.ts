@@ -73,20 +73,28 @@ export class IssueJWTResponse {
 }
 
 export class ApiKeyResponseDto {
-  @ApiProperty({ example: '42' })
+  @ApiProperty({ example: '42', required: true })
   id: string;
 
   @ApiPropertyOptional({ example: 'my-key-description' })
   description?: string;
 
-  @ApiProperty({ example: 'production' })
+  @ApiProperty({ example: 'production', required: true })
   environment: string;
 
-  @ApiPropertyOptional({ example: '2026-01-01T00:00:00.000Z' })
+  @ApiProperty({ example: '2026-01-01T00:00:00.000Z', required: true })
   createdAt?: string;
 
   @ApiPropertyOptional()
-  project?: { id: number; name?: string };
+  project?: { id?: number; name?: string };
+
+  constructor(res: AuthCommonProto.ApiKey) {
+    this.createdAt = res.createdAt;
+    this.description = res.description;
+    this.environment = res.environment;
+    this.id = res.id;
+    this.project = res.project;
+  }
 }
 
 export class GetAllApiKeysResponse {
