@@ -237,6 +237,14 @@ export class AuthController implements OnModuleInit {
       type: 'string',
     },
   })
+  @ApiHeader({
+    name: 'x-user-jwt',
+    description: "The user's ID token",
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBearerAuth('API_Key')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/key')
@@ -244,6 +252,9 @@ export class AuthController implements OnModuleInit {
     @User() user: CommonProto.User,
     @Headers('Authorization') apiKey?: string,
   ) {
+    if (!user) {
+      throw new UnauthorizedException('User ID token is required');
+    }
     const key = apiKey?.replace('Bearer ', '');
     if (key === undefined) {
       throw new UnauthorizedException('API Key is required');
@@ -289,85 +300,6 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Deletes an API key by ID.',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid API Key ID',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'API Key not found',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid API Key or insufficient permissions',
-  })
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: 'Successful API Key deletion',
-  })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'ID of the API key to delete',
-    type: String,
-  })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'A valid API key',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiBearerAuth('API_Key')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('/key/:id')
-  async deleteApiKeyById(
-    @User() user: CommonProto.User,
-    @Param('id') idStr: string,
-  ) {
-    const id = +idStr;
-    if (Number.isNaN(id)) {
-      throw new HttpException('Invalid API Key ID', HttpStatus.BAD_REQUEST);
-    }
-
-    const response = await lastValueFrom(this.apiKeyService.getApiKey({ id }));
-
-    if (!response.key) {
-      throw new HttpException('API Key not found', HttpStatus.NOT_FOUND);
-    }
-
-    if (!response.key.project) {
-      throw new HttpException(
-        'API Key has no associated project',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-
-    const projectId = response.key.project.id;
-    const linked = await userLinkedToProject({
-      project: { id: projectId },
-      user,
-      projectClient: this.projectService,
-    });
-
-    if (!linked || user.type == CommonProto.UserType.USER) {
-      throw new UnauthorizedException(
-        'Only Superadmins & Linked Admins can delete API Keys',
-      );
-    }
-    const deleteResponse = await lastValueFrom(
-      this.apiKeyService.deleteApiKey({ id }),
-    );
-    if (!deleteResponse.success) {
-      throw new HttpException('API Key deletion failed', 500);
-    }
-    return;
-  }
-
-  @ApiOperation({
     summary: 'Lists all API keys',
   })
   @ApiOkResponse({
@@ -400,6 +332,14 @@ export class AuthController implements OnModuleInit {
       type: 'string',
     },
   })
+  @ApiHeader({
+    name: 'x-user-jwt',
+    description: "The user's ID token",
+    required: true,
+    schema: {
+      type: 'string',
+    },
+  })
   @ApiBearerAuth('API_Key')
   @Get('key/all')
   async getAllApiKeys(
@@ -407,7 +347,10 @@ export class AuthController implements OnModuleInit {
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
-    console.debug('User ', user);
+    if (!user) {
+      throw new UnauthorizedException('User ID token is required');
+    }
+
     let obs: Observable<GetAllApiKeysResponse>;
     if (user.type == CommonProto.UserType.SUPERADMIN) {
       // superadmins can list all projects
