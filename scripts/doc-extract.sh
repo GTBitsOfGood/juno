@@ -9,12 +9,8 @@
 # Make sure you have Juno running before running this script, preferably with start:dev:up-all.
 #
 
-# extract gateway information from running juno instance
-gateway_container_id=$(docker ps -q --filter "ancestor=juno-api-gateway")
-gateway_container_port=$(docker port $gateway_container_id)
-
-gateway_public_port=$(echo "$gateway_container_port" | grep -oP "0.0.0.0:\K\d+")
-# gateway_public_port=$(echo "$gateway_container_port" | grep -o "0.0.0.0:[0-9]*" | cut -d':' -f2)    # MACOS version
+# The api-gateway is exposed on port 8888 in docker-compose-dev.yml
+gateway_public_port=8888
 
 # grab doc yaml
 curl -f "localhost:$gateway_public_port/docs-yaml" > docs-yaml

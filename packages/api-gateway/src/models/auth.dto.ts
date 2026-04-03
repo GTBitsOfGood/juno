@@ -37,29 +37,33 @@ export class IssueApiKeyResponse {
   })
   apiKey: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Environment this key was issued for',
     example: 'production',
   })
-  environment?: string;
+  environment: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Description provided at creation',
     example: 'Production API key for mobile app',
   })
-  description?: string;
+  description: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'ISO timestamp of key creation',
     example: '2026-01-01T00:00:00.000Z',
   })
-  createdAt?: string;
+  createdAt: string;
+
+  @ApiProperty({ description: 'project identifier for the API key' })
+  project: string;
 
   constructor(res: ApiKeyProto.IssueApiKeyResponse) {
     this.apiKey = res.apiKey;
     this.environment = res.info?.environment;
     this.description = res.info?.description;
     this.createdAt = res.info?.createdAt;
+    this.project = res.info.project.id.toString();
   }
 }
 
@@ -72,34 +76,9 @@ export class IssueJWTResponse {
   }
 }
 
-export class ApiKeyResponseDto {
-  @ApiProperty({ example: '42', required: true })
-  id: string;
-
-  @ApiPropertyOptional({ example: 'my-key-description' })
-  description?: string;
-
-  @ApiProperty({ example: 'production', required: true })
-  environment: string;
-
-  @ApiProperty({ example: '2026-01-01T00:00:00.000Z', required: true })
-  createdAt?: string;
-
-  @ApiPropertyOptional()
-  project?: { id?: number; name?: string };
-
-  constructor(res: AuthCommonProto.ApiKey) {
-    this.createdAt = res.createdAt;
-    this.description = res.description;
-    this.environment = res.environment;
-    this.id = res.id;
-    this.project = res.project;
-  }
-}
-
 export class GetAllApiKeysResponse {
   @ApiProperty({
-    type: ApiKeyResponseDto,
+    type: IssueApiKeyResponse,
     isArray: true,
     description: 'List of API keys belonging to a project',
   })
