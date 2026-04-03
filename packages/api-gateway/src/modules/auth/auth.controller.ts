@@ -411,16 +411,16 @@ export class AuthController implements OnModuleInit {
 
     try {
       const links = {
-        first: encodeURI(`/auth/key/all?offset=${0}&limit=${limit}`),
-        prev: encodeURI(
-          `/auth/key/all?offset=${Math.max(offset - 1, 0)}&limit=${limit}`,
-        ),
-        next: encodeURI(
-          `/auth/key/all?offset=${Math.min(offset + 1, Math.floor(data.count / limit))}&limit=${limit}`,
-        ),
-        last: encodeURI(
-          `/auth/key/all?offset=${Math.floor(data.count / limit)}&limit=${limit}`,
-        ),
+      first: encodeURI(`/auth/key/all?offset=${0}&limit=${limit}`),
+      prev: encodeURI(
+        `/auth/key/all?offset=${Math.max(offset - limit, 0)}&limit=${limit}`,
+      ),
+      next: encodeURI(
+        `/auth/key/all?offset=${Math.min(offset + limit, Math.max(0, data.count - limit))}&limit=${limit}`,
+      ),
+      last: encodeURI(
+        `/auth/key/all?offset=${Math.max(0, data.count - limit)}&limit=${limit}`,
+      ),
       };
       return new GetAllApiKeysResponse({
         keys: data.keys,
