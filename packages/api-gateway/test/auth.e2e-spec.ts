@@ -431,7 +431,7 @@ describe('List API Keys - GET /auth/key/all', () => {
   });
 });
 
-describe('Delete API Key - DELETE /auth/key', () => {
+describe('Delete API Key by ID - DELETE /auth/key/:id', () => {
   it('should delete an existing API key', async () => {
     const adminJwt = await getJwtForUser(ADMIN_EMAIL, ADMIN_PASSWORD);
 
@@ -450,8 +450,7 @@ describe('Delete API Key - DELETE /auth/key', () => {
 
     // Delete the key
     await request(app.getHttpServer())
-      .delete(`/auth/key`)
-      .set('Authorization', `Bearer ${apiKey}`)
+      .delete(`/auth/key/${key.body['id']}`)
       .set('x-user-jwt', adminJwt)
       .expect(204);
   });

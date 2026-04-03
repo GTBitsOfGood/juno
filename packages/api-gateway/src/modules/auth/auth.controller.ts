@@ -235,14 +235,6 @@ export class AuthController implements OnModuleInit {
     description: 'Successful API Key revocation',
   })
   @ApiHeader({
-    name: 'Authorization',
-    description: 'A valid API key',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
-  @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of the user',
     required: false,
@@ -266,59 +258,61 @@ export class AuthController implements OnModuleInit {
       type: 'string',
     },
   })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the API key to delete',
+    type: String,
+  })
   @ApiBearerAuth('API_Key')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('/key')
-  async deleteApiKey(
+  @Delete('/key/:id')
+  async deleteApiKeyById(
     @User() user: CommonProto.User,
-    @Headers('Authorization') apiKey?: string,
+    @Param('id') idStr: string,
   ) {
+    const id = +idStr;
+    if (Number.isNaN(id)) {
+      throw new HttpException('Invalid API Key ID', HttpStatus.BAD_REQUEST);
+    }
+
     if (!user) {
       throw new UnauthorizedException(
-        'Please provide email/password or the user ID token',
+        "You must provide the user's email/password or use an ID token",
       );
     }
-    const key = apiKey?.replace('Bearer ', '');
-    if (key === undefined) {
-      throw new UnauthorizedException('API Key is required');
+
+    const response = await lastValueFrom(this.apiKeyService.getApiKey({ id }));
+
+    if (!response.key) {
+      throw new HttpException('API Key not found', HttpStatus.NOT_FOUND);
     }
 
-    const validated = await lastValueFrom(
-      this.apiKeyService.validateApiKey({ apiKey: key }),
-    );
-
-    if (!validated.key?.project) {
+    if (!response.key.project) {
       throw new HttpException(
         'API Key has no associated project',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
+    const projectId = response.key.project.id;
     const linked = await userLinkedToProject({
-      project: { id: validated.key.project.id },
+      project: { id: projectId },
       user,
       projectClient: this.projectService,
     });
 
     if (!linked || user.type == CommonProto.UserType.USER) {
       throw new UnauthorizedException(
-        'Only Superadmins & Linked Admins can revoke API Keys',
+        'Only Superadmins & Linked Admins can delete API Keys',
       );
     }
-
-    const response = await lastValueFrom(
-      this.apiKeyService.revokeApiKey({
-        apiKey: key,
-      }),
+    const deleteResponse = await lastValueFrom(
+      this.apiKeyService.deleteApiKey({ id }),
     );
-
-    if (!response.success) {
-      throw new HttpException(
-        'API Key revoke failed',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (!deleteResponse.success) {
+      throw new HttpException('API Key deletion failed', 500);
     }
-
     return;
   }
 
