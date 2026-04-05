@@ -536,6 +536,102 @@ export class SendGridDNSResponse {
   }
 }
 
+export class VerifiedSenderResponse {
+  @ApiProperty({ type: 'number' })
+  id: number;
+
+  @ApiProperty({ type: 'string' })
+  nickname: string;
+
+  @ApiProperty({ type: 'string' })
+  fromEmail: string;
+
+  @ApiProperty({ type: 'string' })
+  fromName: string;
+
+  @ApiProperty({ type: 'string' })
+  replyTo: string;
+
+  @ApiProperty({ type: 'string' })
+  address: string;
+
+  @ApiProperty({ type: 'string' })
+  city: string;
+
+  @ApiProperty({ type: 'string' })
+  state: string;
+
+  @ApiProperty({ type: 'string' })
+  country: string;
+
+  @ApiProperty({ type: 'string' })
+  zip: string;
+
+  @ApiProperty({ type: 'boolean' })
+  verified: boolean;
+
+  @ApiProperty({ type: 'boolean' })
+  locked: boolean;
+
+  constructor(sender: EmailProto.VerifiedSender) {
+    this.id = Number(sender.id);
+    this.nickname = sender.nickname;
+    this.fromEmail = sender.fromEmail;
+    this.fromName = sender.fromName;
+    this.replyTo = sender.replyTo;
+    this.address = sender.address;
+    this.city = sender.city;
+    this.state = sender.state;
+    this.country = sender.country;
+    this.zip = sender.zip;
+    this.verified = sender.verified;
+    this.locked = sender.locked;
+  }
+}
+
+export class GetSendersResponse {
+  @ApiProperty({ type: [VerifiedSenderResponse] })
+  senders: VerifiedSenderResponse[];
+
+  constructor(res: EmailProto.GetSendersResponse) {
+    this.senders = (res.senders ?? []).map(
+      (s) => new VerifiedSenderResponse(s),
+    );
+  }
+}
+
+export class AuthenticatedDomainResponse {
+  @ApiProperty({ type: 'number' })
+  id: number;
+
+  @ApiProperty({ type: 'string' })
+  domain: string;
+
+  @ApiPropertyOptional({ type: 'string' })
+  subdomain?: string;
+
+  @ApiProperty({ type: 'boolean' })
+  valid: boolean;
+
+  constructor(domain: EmailProto.AuthenticatedDomain) {
+    this.id = Number(domain.id);
+    this.domain = domain.domain;
+    this.subdomain = domain.subdomain;
+    this.valid = domain.valid;
+  }
+}
+
+export class GetDomainsResponse {
+  @ApiProperty({ type: [AuthenticatedDomainResponse] })
+  domains: AuthenticatedDomainResponse[];
+
+  constructor(res: EmailProto.GetDomainsResponse) {
+    this.domains = (res.domains ?? []).map(
+      (d) => new AuthenticatedDomainResponse(d),
+    );
+  }
+}
+
 export class RegisterDomainResponse {
   @ApiProperty({ type: 'number' })
   id: number;

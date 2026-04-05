@@ -108,4 +108,16 @@ export class EmailController implements EmailProto.EmailServiceController {
   ): Promise<EmailProto.StatisticResponses> {
     return await this.emailService.getStatistics(request);
   }
+
+  async getSenders(
+    request: EmailProto.GetSendersRequest,
+  ): Promise<EmailProto.GetSendersResponse> {
+    return await this.emailService.getSenders(request);
+  }
+
+  async getDomains(
+    request: EmailProto.GetDomainsRequest,
+  ): Promise<EmailProto.GetDomainsResponse> {
+    return await this.emailService.getDomains(request);
+  }
 }

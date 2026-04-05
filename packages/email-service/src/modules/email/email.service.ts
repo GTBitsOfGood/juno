@@ -312,6 +312,114 @@ export class EmailService implements OnModuleInit {
       });
     }
   }
+  async getSenders(
+    req: EmailProto.GetSendersRequest,
+  ): Promise<EmailProto.GetSendersResponse> {
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: Number(req.configId),
+        environment: req.configEnvironment,
+      }),
+    );
+
+    const sendgridApiKey = config.sendgridKey;
+
+    if (!sendgridApiKey) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Cannot get senders (SendGrid API key is missing)',
+      });
+    }
+
+    if (process.env['NODE_ENV'] == 'test') {
+      return { senders: [] };
+    }
+
+    try {
+      const response = await axios.get(
+        'https://api.sendgrid.com/v3/verified_senders',
+        {
+          headers: {
+            Authorization: `Bearer ${sendgridApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const senders = (response.data.results ?? []).map((sender: any) => ({
+        id: sender.id,
+        nickname: sender.nickname ?? '',
+        fromEmail: sender.from_email ?? '',
+        fromName: sender.from_name ?? '',
+        replyTo: sender.reply_to ?? '',
+        address: sender.address ?? '',
+        city: sender.city ?? '',
+        state: sender.state ?? '',
+        country: sender.country ?? '',
+        zip: sender.zip ?? '',
+        verified: sender.verified ?? false,
+        locked: sender.locked ?? false,
+      }));
+
+      return { senders };
+    } catch (error) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Failed to fetch senders from SendGrid: ${JSON.stringify(error)}`,
+      });
+    }
+  }
+
+  async getDomains(
+    req: EmailProto.GetDomainsRequest,
+  ): Promise<EmailProto.GetDomainsResponse> {
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: Number(req.configId),
+        environment: req.configEnvironment,
+      }),
+    );
+
+    const sendgridApiKey = config.sendgridKey;
+
+    if (!sendgridApiKey) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Cannot get domains (SendGrid API key is missing)',
+      });
+    }
+
+    if (process.env['NODE_ENV'] == 'test') {
+      return { domains: [] };
+    }
+
+    try {
+      const response = await axios.get(
+        'https://api.sendgrid.com/v3/whitelabel/domains',
+        {
+          headers: {
+            Authorization: `Bearer ${sendgridApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const domains = (response.data ?? []).map((domain: any) => ({
+        id: domain.id,
+        domain: domain.domain ?? '',
+        subdomain: domain.subdomain ?? undefined,
+        valid: domain.valid ?? false,
+      }));
+
+      return { domains };
+    } catch (error) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Failed to fetch domains from SendGrid: ${JSON.stringify(error)}`,
+      });
+    }
+  }
+
   async getStatistics(
     req: EmailProto.GetStatisticsRequest,
   ): Promise<EmailProto.StatisticResponses> {

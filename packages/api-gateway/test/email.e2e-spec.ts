@@ -617,6 +617,58 @@ describe('Domain Registration Routes', () => {
   });
 });
 
+describe('Email Senders Routes', () => {
+  it('Successfully gets senders', async () => {
+    return request(app.getHttpServer())
+      .get('/email/senders')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toHaveProperty('senders');
+        expect(Array.isArray(response.body.senders)).toBe(true);
+      });
+  });
+
+  it('Fails without an Authorization header', async () => {
+    return request(app.getHttpServer())
+      .get('/email/senders')
+      .expect(401);
+  });
+
+  it('Fails with an invalid API Key', async () => {
+    return request(app.getHttpServer())
+      .get('/email/senders')
+      .set('Authorization', 'Bearer invalid.api.key')
+      .expect(401);
+  });
+});
+
+describe('Email Domains Routes', () => {
+  it('Successfully gets domains', async () => {
+    return request(app.getHttpServer())
+      .get('/email/domains')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toHaveProperty('domains');
+        expect(Array.isArray(response.body.domains)).toBe(true);
+      });
+  });
+
+  it('Fails without an Authorization header', async () => {
+    return request(app.getHttpServer())
+      .get('/email/domains')
+      .expect(401);
+  });
+
+  it('Fails with an invalid API Key', async () => {
+    return request(app.getHttpServer())
+      .get('/email/domains')
+      .set('Authorization', 'Bearer invalid.api.key')
+      .expect(401);
+  });
+});
+
 describe('Domain Verification Routes', () => {
   it('Verifies a domain without a domain parameter', () => {
     return request(app.getHttpServer())

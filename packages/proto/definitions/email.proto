@@ -12,6 +12,8 @@ service EmailService {
       returns (AuthenticateDomainResponse);
   rpc verifyDomain(VerifyDomainRequest) returns (VerifyDomainResponse);
   rpc getStatistics(GetStatisticsRequest) returns (StatisticResponses);
+  rpc getSenders(GetSendersRequest) returns (GetSendersResponse);
+  rpc getDomains(GetDomainsRequest) returns (GetDomainsResponse);
 }
 
 service EmailDbService {
@@ -230,4 +232,44 @@ message SetupResponse {
 message GetEmailServiceConfigRequest {
   int64 id = 1;
   string environment = 2;
+}
+
+message GetSendersRequest {
+  int64 configId = 1;
+  string configEnvironment = 2;
+}
+
+message VerifiedSender {
+  int64 id = 1;
+  string nickname = 2;
+  string from_email = 3;
+  string from_name = 4;
+  string reply_to = 5;
+  string address = 6;
+  string city = 7;
+  string state = 8;
+  string country = 9;
+  string zip = 10;
+  bool verified = 11;
+  bool locked = 12;
+}
+
+message GetSendersResponse {
+  repeated VerifiedSender senders = 1;
+}
+
+message GetDomainsRequest {
+  int64 configId = 1;
+  string configEnvironment = 2;
+}
+
+message AuthenticatedDomain {
+  int64 id = 1;
+  string domain = 2;
+  optional string subdomain = 3;
+  bool valid = 4;
+}
+
+message GetDomainsResponse {
+  repeated AuthenticatedDomain domains = 1;
 }

@@ -28,6 +28,8 @@ import {
   VerifyDomainModel,
   AggregationInterval,
   SendEmailStatisticsResponses,
+  GetSendersResponse,
+  GetDomainsResponse,
 } from 'src/models/email.dto';
 
 import {
@@ -346,6 +348,52 @@ export class EmailController implements OnModuleInit {
           startDate: startDate,
           endDate: endDate,
           aggregatedBy: intervalMap[aggregatedBy], //TODO: Validate that this works
+          configId: projectId,
+          configEnvironment: apiKey.environment,
+        }),
+      ),
+    );
+  }
+
+  @ApiOperation({ summary: 'Gets all verified senders from SendGrid' })
+  @ApiOkResponse({
+    description: 'Returned verified senders',
+    type: GetSendersResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @Get('/senders')
+  async getSenders(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
+  ): Promise<GetSendersResponse> {
+    return new GetSendersResponse(
+      await lastValueFrom(
+        this.emailService.getSenders({
+          configId: projectId,
+          configEnvironment: apiKey.environment,
+        }),
+      ),
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Gets all authenticated domains from SendGrid',
+  })
+  @ApiOkResponse({
+    description: 'Returned authenticated domains',
+    type: GetDomainsResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @Get('/domains')
+  async getDomains(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @ProjectId() projectId: number,
+  ): Promise<GetDomainsResponse> {
+    return new GetDomainsResponse(
+      await lastValueFrom(
+        this.emailService.getDomains({
           configId: projectId,
           configEnvironment: apiKey.environment,
         }),
