@@ -417,3 +417,127 @@ describe('Email Service Send Email Tests', () => {
     });
   });
 });
+
+describe('Email Service Get Senders Tests', () => {
+  let emailClient: any;
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    emailClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('should successfully get senders', async () => {
+    const response: EmailProto.GetSendersResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.getSenders(
+          {
+            configId: 0,
+            configEnvironment: 'prod',
+          },
+          (err: any, response: EmailProto.GetSendersResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.senders).toBeDefined();
+    expect(Array.isArray(response.senders)).toBe(true);
+  });
+
+  it('should fail to get senders with invalid config', async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        emailClient.getSenders(
+          {
+            configId: 9999,
+            configEnvironment: 'nonexistent',
+          },
+          (err: any, response: EmailProto.GetSendersResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+
+      fail('Expected an error to be thrown');
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+});
+
+describe('Email Service Get Domains Tests', () => {
+  let emailClient: any;
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    emailClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('should successfully get domains', async () => {
+    const response: EmailProto.GetDomainsResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.getDomains(
+          {
+            configId: 0,
+            configEnvironment: 'prod',
+          },
+          (err: any, response: EmailProto.GetDomainsResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.domains).toBeDefined();
+    expect(Array.isArray(response.domains)).toBe(true);
+  });
+
+  it('should fail to get domains with invalid config', async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        emailClient.getDomains(
+          {
+            configId: 9999,
+            configEnvironment: 'nonexistent',
+          },
+          (err: any, response: EmailProto.GetDomainsResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+
+      fail('Expected an error to be thrown');
+    } catch (err) {
+      expect(err).toBeDefined();
+    }
+  });
+});
