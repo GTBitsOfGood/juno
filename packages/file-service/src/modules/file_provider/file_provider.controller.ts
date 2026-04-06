@@ -7,9 +7,7 @@ import { status } from '@grpc/grpc-js';
 
 @Controller()
 @FileProviderProto.FileProviderFileServiceControllerMethods()
-export class FileProviderController
-  implements FileProviderFileServiceController
-{
+export class FileProviderController implements FileProviderFileServiceController {
   private fileProviderDbService: FileProviderProto.FileProviderDbServiceClient;
   constructor(
     @Inject(FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME)
