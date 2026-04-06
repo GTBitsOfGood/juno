@@ -630,9 +630,7 @@ describe('Email Senders Routes', () => {
   });
 
   it('Fails without an Authorization header', async () => {
-    return request(app.getHttpServer())
-      .get('/email/senders')
-      .expect(401);
+    return request(app.getHttpServer()).get('/email/senders').expect(401);
   });
 
   it('Fails with an invalid API Key', async () => {
@@ -656,9 +654,7 @@ describe('Email Domains Routes', () => {
   });
 
   it('Fails without an Authorization header', async () => {
-    return request(app.getHttpServer())
-      .get('/email/domains')
-      .expect(401);
+    return request(app.getHttpServer()).get('/email/domains').expect(401);
   });
 
   it('Fails with an invalid API Key', async () => {

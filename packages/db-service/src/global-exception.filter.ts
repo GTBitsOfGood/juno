@@ -35,12 +35,9 @@ function mapPrismaErrorToRpcException(
 }
 
 @Catch(RpcException, Prisma.PrismaClientKnownRequestError, Error)
-export class CustomRpcExceptionFilter
-  implements
-    RpcExceptionFilter<
-      RpcException | Prisma.PrismaClientKnownRequestError | Error
-    >
-{
+export class CustomRpcExceptionFilter implements RpcExceptionFilter<
+  RpcException | Prisma.PrismaClientKnownRequestError | Error
+> {
   catch(
     exception: RpcException | Prisma.PrismaClientKnownRequestError | Error,
   ): Observable<any> {
