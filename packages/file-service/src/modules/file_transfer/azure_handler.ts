@@ -55,6 +55,8 @@ export class AzureFileHandler {
       const containerClient = blobServiceClient.getContainerClient(
         `${request.bucketName}-${request.configId}-${request.configEnv}`,
       );
+      const containerExists = await containerClient.exists();
+      if (!containerExists) return;
       await Promise.all(
         request.fileNames.map((name) =>
           containerClient.getBlobClient(name).deleteIfExists(),

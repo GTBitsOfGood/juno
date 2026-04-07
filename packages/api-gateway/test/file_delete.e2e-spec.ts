@@ -1,3 +1,4 @@
+import { CreateBucketCommand, DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   ClassSerializerInterceptor,
@@ -17,6 +18,8 @@ import {
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
+
+jest.setTimeout(15000);
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -38,13 +41,16 @@ async function APIKeyForProjectName(projectName: string): Promise<string> {
   return key.body['apiKey'];
 }
 
-const bucketName = 'test-delete-gw-juno';
+const bucketName = 'test-delete-bog-juno';
 const configId = 0;
 const providerName = 'backblazeb2-delete-gw';
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
 const baseURL = process.env.baseURL;
+
+const s3BucketName = `${bucketName}-${configId}-prod`;
+let s3Client: S3Client;
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -98,11 +104,32 @@ beforeAll(async () => {
       () => resolve(0),
     );
   });
+
+  s3Client = new S3Client({
+    endpoint: baseURL as string,
+    region: 'us-east-005',
+    credentials: {
+      accessKeyId: accessKeyId as string,
+      secretAccessKey: secretAccessKey as string,
+    },
+    forcePathStyle: true,
+  });
+  try {
+    await s3Client.send(new CreateBucketCommand({ Bucket: s3BucketName }));
+  } catch {
+    // Bucket may already exist from a previous run
+  }
 });
 
-afterAll((done) => {
-  app.close();
-  done();
+afterAll(async () => {
+  if (app) await app.close();
+  if (s3Client) {
+    try {
+      await s3Client.send(new DeleteBucketCommand({ Bucket: s3BucketName }));
+    } catch {
+      // Ignore cleanup errors
+    }
+  }
 });
 
 beforeEach(async () => {
@@ -198,14 +225,15 @@ describe('File Delete Routes', () => {
       );
     });
 
-    return request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .delete('/file/delete')
       .set('Authorization', 'Bearer ' + apiKey)
       .send({
         bucketName,
         configId,
         fileNames: ['FileToDeleteGW'],
-      })
-      .expect(200);
+      });
+
+    expect(res.status).toBe(200);
   });
 });
