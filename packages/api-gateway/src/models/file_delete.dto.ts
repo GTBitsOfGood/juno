@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Min,
+} from 'class-validator';
 import { FileProto } from 'juno-proto';
 
 export class DeleteFilesModel {
@@ -26,6 +32,8 @@ export class DeleteFilesModel {
   })
   @IsArray()
   @IsNotEmpty()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
   fileNames: string[];
 }
 

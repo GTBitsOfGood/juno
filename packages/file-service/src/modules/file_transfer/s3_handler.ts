@@ -111,7 +111,14 @@ export class S3FileHandler {
           Bucket: bucket,
           Delete: { Objects: objectsToDelete },
         });
-        await s3Client.send(deleteCommand);
+        const result = await s3Client.send(deleteCommand);
+        if (result.Errors && result.Errors.length > 0) {
+          const failedKeys = result.Errors.map((e) => e.Key).join(', ');
+          throw new RpcException({
+            code: status.FAILED_PRECONDITION,
+            message: `Failed to delete some objects from S3: ${failedKeys}`,
+          });
+        }
       }
     } catch (err) {
       throw new RpcException({
