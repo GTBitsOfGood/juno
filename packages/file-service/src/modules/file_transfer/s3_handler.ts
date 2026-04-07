@@ -93,10 +93,16 @@ export class S3FileHandler {
         const versions = await s3Client.send(listCommand);
 
         for (const version of versions.Versions ?? []) {
-          objectsToDelete.push({ Key: version.Key!, VersionId: version.VersionId });
+          objectsToDelete.push({
+            Key: version.Key!,
+            VersionId: version.VersionId,
+          });
         }
         for (const marker of versions.DeleteMarkers ?? []) {
-          objectsToDelete.push({ Key: marker.Key!, VersionId: marker.VersionId });
+          objectsToDelete.push({
+            Key: marker.Key!,
+            VersionId: marker.VersionId,
+          });
         }
       }
 
