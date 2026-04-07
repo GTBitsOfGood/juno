@@ -2,6 +2,8 @@ import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectsCommand,
+  ListObjectVersionsCommand,
 } from '@aws-sdk/client-s3';
 import { FileProto, FileProviderProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
@@ -72,6 +74,43 @@ export class S3FileHandler {
       throw new RpcException({
         code: status.NOT_FOUND,
         message: `Signed URL Not Found: ${err}`,
+      });
+    }
+  }
+
+  async deleteFiles(request: FileProto.DeleteFilesRequest): Promise<void> {
+    try {
+      const s3Client = await this.getS3Client('us-east-005');
+      const bucket = `${request.bucketName}-${request.configId}-${request.configEnv}`;
+
+      const objectsToDelete: { Key: string; VersionId?: string }[] = [];
+
+      for (const name of request.fileNames) {
+        const listCommand = new ListObjectVersionsCommand({
+          Bucket: bucket,
+          Prefix: name,
+        });
+        const versions = await s3Client.send(listCommand);
+
+        for (const version of versions.Versions ?? []) {
+          objectsToDelete.push({ Key: version.Key!, VersionId: version.VersionId });
+        }
+        for (const marker of versions.DeleteMarkers ?? []) {
+          objectsToDelete.push({ Key: marker.Key!, VersionId: marker.VersionId });
+        }
+      }
+
+      if (objectsToDelete.length > 0) {
+        const deleteCommand = new DeleteObjectsCommand({
+          Bucket: bucket,
+          Delete: { Objects: objectsToDelete },
+        });
+        await s3Client.send(deleteCommand);
+      }
+    } catch (err) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: `Failed to delete files from S3: ${err}`,
       });
     }
   }

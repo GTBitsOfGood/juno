@@ -60,6 +60,18 @@ export interface DownloadFileResponse {
   url: string;
 }
 
+export interface DeleteFilesRequest {
+  bucketName: string;
+  configId: number;
+  configEnv: string;
+  fileNames: string[];
+}
+
+export interface DeleteFilesResponse {
+  bucketName: string;
+  fileNames: string[];
+}
+
 export const JUNO_FILE_SERVICE_FILE_PACKAGE_NAME = 'juno.file_service.file';
 
 export interface FileDbServiceClient {
@@ -128,6 +140,8 @@ export interface FileServiceClient {
   uploadFile(request: UploadFileRequest): Observable<UploadFileResponse>;
 
   downloadFile(request: DownloadFileRequest): Observable<DownloadFileResponse>;
+
+  deleteFiles(request: DeleteFilesRequest): Observable<DeleteFilesResponse>;
 }
 
 export interface FileServiceController {
@@ -144,11 +158,18 @@ export interface FileServiceController {
     | Promise<DownloadFileResponse>
     | Observable<DownloadFileResponse>
     | DownloadFileResponse;
+
+  deleteFiles(
+    request: DeleteFilesRequest,
+  ):
+    | Promise<DeleteFilesResponse>
+    | Observable<DeleteFilesResponse>
+    | DeleteFilesResponse;
 }
 
 export function FileServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['uploadFile', 'downloadFile'];
+    const grpcMethods: string[] = ['uploadFile', 'downloadFile', 'deleteFiles'];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

@@ -1,7 +1,7 @@
 import { status } from '@grpc/grpc-js';
 import { Controller, Inject } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
-import { FileProto, FileProviderProto } from 'juno-proto';
+import { FileBucketProto, FileProto, FileProviderProto } from 'juno-proto';
 import { FileServiceController } from 'juno-proto/dist/gen/file';
 import { lastValueFrom } from 'rxjs';
 import { AzureFileHandler } from './azure_handler';
@@ -9,17 +9,21 @@ import { S3FileHandler } from './s3_handler';
 
 const { FILE_DB_SERVICE_NAME } = FileProto;
 const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
+const { BUCKET_DB_SERVICE_NAME } = FileBucketProto;
 
 @Controller()
 @FileProto.FileServiceControllerMethods()
 export class FileTransferController implements FileServiceController {
   private fileDBService: FileProto.FileDbServiceClient;
   private fileProviderDbService: FileProviderProto.FileProviderDbServiceClient;
+  private fileBucketDBService: FileBucketProto.BucketDbServiceClient;
 
   constructor(
     @Inject(FILE_DB_SERVICE_NAME) private fileDBClient: ClientGrpc,
     @Inject(FILE_PROVIDER_DB_SERVICE_NAME)
     private fileProviderClient: ClientGrpc,
+    @Inject(BUCKET_DB_SERVICE_NAME)
+    private fileBucketClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
@@ -31,6 +35,91 @@ export class FileTransferController implements FileServiceController {
       this.fileProviderClient.getService<FileProviderProto.FileProviderDbServiceClient>(
         FileProviderProto.FILE_PROVIDER_DB_SERVICE_NAME,
       );
+    this.fileBucketDBService =
+      this.fileBucketClient.getService<FileBucketProto.BucketDbServiceClient>(
+        BUCKET_DB_SERVICE_NAME,
+      );
+  }
+
+  async deleteFiles(
+    request: FileProto.DeleteFilesRequest,
+  ): Promise<FileProto.DeleteFilesResponse> {
+    if (
+      !request ||
+      !request.bucketName ||
+      request.configId == undefined ||
+      !request.configEnv ||
+      !request.fileNames?.length
+    ) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message:
+          'bucketName, configId, configEnv, and fileNames must all be provided',
+      });
+    }
+
+    try {
+      const bucket = await lastValueFrom(
+        this.fileBucketDBService.getBucket({
+          name: request.bucketName,
+          configId: request.configId,
+          configEnv: request.configEnv,
+        }),
+      );
+
+      const provider = await lastValueFrom(
+        this.fileProviderDbService.getProvider({
+          providerName: bucket.fileProviderName,
+        }),
+      );
+
+      switch (provider.providerType) {
+        case FileProviderProto.ProviderType.S3: {
+          const handler = new S3FileHandler(this.fileDBService, provider);
+          await handler.deleteFiles(request);
+          break;
+        }
+        case FileProviderProto.ProviderType.AZURE: {
+          const handler = new AzureFileHandler(this.fileDBService, provider);
+          await handler.deleteFiles(request);
+          break;
+        }
+        default: {
+          throw new RpcException({
+            code: status.FAILED_PRECONDITION,
+            message: 'Provider type not supported',
+          });
+        }
+      }
+
+      await Promise.all(
+        request.fileNames.map((fileName) =>
+          lastValueFrom(
+            this.fileDBService.deleteFile({
+              fileId: {
+                bucketName: request.bucketName,
+                configId: request.configId,
+                path: fileName,
+                configEnv: request.configEnv,
+              },
+            }),
+          ),
+        ),
+      );
+
+      return {
+        bucketName: request.bucketName,
+        fileNames: request.fileNames,
+      };
+    } catch (err) {
+      if (err instanceof RpcException) {
+        throw err;
+      }
+      throw new RpcException({
+        code: err.code ?? status.INTERNAL,
+        message: `Unknown error occurred: ${err}`,
+      });
+    }
   }
 
   async downloadFile(
