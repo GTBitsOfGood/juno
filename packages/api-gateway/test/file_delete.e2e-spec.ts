@@ -45,9 +45,10 @@ async function APIKeyForProjectName(projectName: string): Promise<string> {
   return key.body['apiKey'];
 }
 
-const bucketName = 'test-delete-bog-juno';
+const runSuffix = Math.random().toString(36).slice(2, 8);
+const bucketName = `test-delete-bog-juno-${runSuffix}`;
 const configId = 0;
-const providerName = 'backblazeb2-delete-gw';
+const providerName = `backblazeb2-delete-gw-${runSuffix}`;
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
