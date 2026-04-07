@@ -1,4 +1,8 @@
-import { CreateBucketCommand, DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  CreateBucketCommand,
+  DeleteBucketCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   ClassSerializerInterceptor,
