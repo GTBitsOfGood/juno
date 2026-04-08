@@ -421,7 +421,9 @@ describe('Email Service Send Email Tests', () => {
 describe('Email Service Get Senders Tests', () => {
   let emailClient: any;
   beforeEach(async () => {
-    const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+    const proto = ProtoLoader.loadSync([EmailProtoFile], {
+      arrays: true,
+    }) as any;
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
@@ -483,7 +485,9 @@ describe('Email Service Get Senders Tests', () => {
 describe('Email Service Get Domains Tests', () => {
   let emailClient: any;
   beforeEach(async () => {
-    const proto = ProtoLoader.loadSync([EmailProtoFile]) as any;
+    const proto = ProtoLoader.loadSync([EmailProtoFile], {
+      arrays: true,
+    }) as any;
 
     const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
