@@ -56,12 +56,7 @@ export class EmailController implements EmailDbServiceController {
       environment: config.environment,
       sendgridKey: config.sendgridApiKey,
       senders: [],
-      domains: (config.domains ?? []).map((d) => ({
-        domain: d.domain.domain,
-        subdomain: d.domain.subdomain,
-        sendgridId: d.domain.sendgridId,
-        projects: [],
-      })),
+      domains: [],
     };
   }
 
