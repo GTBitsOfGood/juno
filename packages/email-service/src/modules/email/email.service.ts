@@ -15,14 +15,9 @@ const { EMAIL_DB_SERVICE_NAME } = EmailProto;
 @Injectable()
 export class EmailService implements OnModuleInit {
   private emailService: EmailProto.EmailDbServiceClient;
-  private testDomains: Map<
-    string,
-    EmailProto.AuthenticatedDomain[]
-  > = new Map();
-  private testSenders: Map<
-    string,
-    EmailProto.VerifiedSender[]
-  > = new Map();
+  private testDomains: Map<string, EmailProto.AuthenticatedDomain[]> =
+    new Map();
+  private testSenders: Map<string, EmailProto.VerifiedSender[]> = new Map();
   constructor(@Inject(EMAIL_DB_SERVICE_NAME) private emailClient: ClientGrpc) {}
 
   onModuleInit() {
