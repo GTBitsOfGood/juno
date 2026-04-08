@@ -19,6 +19,10 @@ export class EmailService implements OnModuleInit {
     string,
     EmailProto.AuthenticatedDomain[]
   > = new Map();
+  private testSenders: Map<
+    string,
+    EmailProto.VerifiedSender[]
+  > = new Map();
   constructor(@Inject(EMAIL_DB_SERVICE_NAME) private emailClient: ClientGrpc) {}
 
   onModuleInit() {
@@ -228,6 +232,24 @@ export class EmailService implements OnModuleInit {
     }
 
     if (process.env['NODE_ENV'] == 'test') {
+      const configKey = `${req.configId}:${req.configEnvironment}`;
+      const senders = this.testSenders.get(configKey) ?? [];
+      senders.push({
+        id: senders.length,
+        nickname: req.nickname ?? req.fromName,
+        fromEmail: req.fromEmail,
+        fromName: req.fromName,
+        replyTo: req.replyTo,
+        address: req.address,
+        city: req.city,
+        state: req.state,
+        country: req.country,
+        zip: req.zip,
+        verified: false,
+        locked: false,
+      });
+      this.testSenders.set(configKey, senders);
+
       return {
         statusCode: 201,
         message: 'test register success',
@@ -349,7 +371,8 @@ export class EmailService implements OnModuleInit {
     }
 
     if (process.env['NODE_ENV'] == 'test') {
-      return { senders: [] };
+      const configKey = `${req.configId}:${req.configEnvironment}`;
+      return { senders: this.testSenders.get(configKey) ?? [] };
     }
 
     try {
