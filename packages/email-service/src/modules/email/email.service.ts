@@ -71,13 +71,13 @@ export class EmailService implements OnModuleInit {
     const sendGridUrl = 'https://api.sendgrid.com/v3/whitelabel/domains';
 
     if (process.env['NODE_ENV'] == 'test') {
-      this.emailService.createEmailDomain({
+      await lastValueFrom(this.emailService.createEmailDomain({
         domain: req.domain,
         subdomain: req.subdomain,
         sendgridId: 0,
         configId: req.configId,
         configEnvironment: req.configEnvironment,
-      });
+      }));
       return {
         statusCode: 201,
         id: 0,
@@ -107,15 +107,15 @@ export class EmailService implements OnModuleInit {
         mailCname: response.data.dns.mail_cname,
       };
 
-      // await lastValueFrom(
-      //   this.emailService.createEmailDomain({
-      //     domain: req.domain,
-      //     subdomain: req.subdomain,
-      //     sendgridId: response.data.id,
-      //     configId: req.configId,
-      //     configEnvironment: req.configEnvironment,
-      //   }),
-      // );
+      await lastValueFrom(
+        this.emailService.createEmailDomain({
+          domain: req.domain,
+          subdomain: req.subdomain,
+          sendgridId: response.data.id,
+          configId: req.configId,
+          configEnvironment: req.configEnvironment,
+        }),
+      );
 
       return {
         statusCode: response.status,
@@ -390,7 +390,14 @@ export class EmailService implements OnModuleInit {
     }
 
     if (process.env['NODE_ENV'] == 'test') {
-      return { domains: [] };
+      return {
+        domains: (config.domains ?? []).map((d) => ({
+          id: d.sendgridId,
+          domain: d.domain,
+          subdomain: d.subdomain ?? undefined,
+          valid: false,
+        })),
+      };
     }
 
     try {

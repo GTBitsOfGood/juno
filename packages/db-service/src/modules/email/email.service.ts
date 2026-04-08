@@ -158,9 +158,16 @@ export class EmailService {
 
   async getEmailServiceConfig(
     input: Prisma.EmailServiceConfigWhereUniqueInput,
-  ): Promise<EmailServiceConfig> {
+  ) {
     return this.prisma.emailServiceConfig.findUnique({
       where: input,
+      include: {
+        domains: {
+          include: {
+            domain: true,
+          },
+        },
+      },
     });
   }
 
