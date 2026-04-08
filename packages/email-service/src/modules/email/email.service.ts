@@ -381,20 +381,22 @@ export class EmailService implements OnModuleInit {
         },
       );
 
-      const senders = (response.data.results ?? []).map((sender: any) => ({
-        id: sender.id,
-        nickname: sender.nickname ?? '',
-        fromEmail: sender.from_email ?? '',
-        fromName: sender.from_name ?? '',
-        replyTo: sender.reply_to ?? '',
-        address: sender.address ?? '',
-        city: sender.city ?? '',
-        state: sender.state ?? '',
-        country: sender.country ?? '',
-        zip: sender.zip ?? '',
-        verified: sender.verified ?? false,
-        locked: sender.locked ?? false,
-      }));
+      const senders = (response.data.results ?? []).map(
+        (sender: SendGridVerifiedSender) => ({
+          id: sender.id,
+          nickname: sender.nickname ?? '',
+          fromEmail: sender.from_email ?? '',
+          fromName: sender.from_name ?? '',
+          replyTo: sender.reply_to ?? '',
+          address: sender.address ?? '',
+          city: sender.city ?? '',
+          state: sender.state ?? '',
+          country: sender.country ?? '',
+          zip: sender.zip ?? '',
+          verified: sender.verified ?? false,
+          locked: sender.locked ?? false,
+        }),
+      );
 
       return { senders };
     } catch (error) {
@@ -442,12 +444,14 @@ export class EmailService implements OnModuleInit {
         },
       );
 
-      const domains = (response.data ?? []).map((domain: any) => ({
-        id: domain.id,
-        domain: domain.domain ?? '',
-        subdomain: domain.subdomain ?? undefined,
-        valid: domain.valid ?? false,
-      }));
+      const domains = (response.data ?? []).map(
+        (domain: SendGridAuthenticatedDomain) => ({
+          id: domain.id,
+          domain: domain.domain ?? '',
+          subdomain: domain.subdomain ?? undefined,
+          valid: domain.valid ?? false,
+        }),
+      );
 
       return { domains };
     } catch (error) {
@@ -554,6 +558,29 @@ const TEST_SENDGRID_RECORDS = {
     data: 's2.domainkey.u1234.wl.sendgrid.net',
   },
 };
+
+// SendGrid API response types
+interface SendGridVerifiedSender {
+  id: number;
+  nickname: string;
+  from_email: string;
+  from_name: string;
+  reply_to: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  verified: boolean;
+  locked: boolean;
+}
+
+interface SendGridAuthenticatedDomain {
+  id: number;
+  domain: string;
+  subdomain?: string;
+  valid: boolean;
+}
 
 // Email Metrics Interface
 interface EmailMetrics {
