@@ -13,14 +13,6 @@ import {
   Put,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
-import {
-  CreateProjectModel,
-  LinkUserModel,
-  ProjectResponse,
-  ProjectResponses,
-} from 'src/models/project.dto';
-import { AuthCommonProto, CommonProto, ProjectProto } from 'juno-proto';
 import {
   ApiBearerAuth,
   ApiHeader,
@@ -29,10 +21,17 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/decorators/user.decorator';
+import { AuthCommonProto, CommonProto, ProjectProto } from 'juno-proto';
+import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import { User } from 'src/decorators/user.decorator';
+import {
+  CreateProjectModel,
+  LinkUserModel,
+  ProjectResponse,
+  ProjectResponses,
+} from 'src/models/project.dto';
 import { UserResponses } from 'src/models/user.dto';
-
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 
 @ApiBearerAuth('API_Key')
@@ -40,6 +39,7 @@ const { PROJECT_SERVICE_NAME } = ProjectProto;
 @Controller('project')
 export class ProjectController implements OnModuleInit {
   private projectService: ProjectProto.ProjectServiceClient;
+
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
   ) {}

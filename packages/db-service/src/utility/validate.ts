@@ -87,7 +87,7 @@ export function validateEmailSenderIdentifier(
   };
 }
 
-export function validateApiKeydentifier(
+export function validateApiKeyIdentifier(
   identifier: IdentifierProto.ApiKeyIdentifier,
 ): Prisma.ApiKeyWhereUniqueInput {
   if (identifier.id && identifier.hash) {
