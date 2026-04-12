@@ -21,12 +21,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  ApiKeyProto,
-  AuthCommonProto,
-  CommonProto,
-  ProjectProto,
-} from 'juno-proto';
+import { AuthCommonProto, CommonProto, ProjectProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 import { User } from 'src/decorators/user.decorator';
@@ -38,7 +33,6 @@ import {
 } from 'src/models/project.dto';
 import { UserResponses } from 'src/models/user.dto';
 const { PROJECT_SERVICE_NAME } = ProjectProto;
-const { API_KEY_SERVICE_NAME } = ApiKeyProto;
 
 @ApiBearerAuth('API_Key')
 @ApiTags('project')
