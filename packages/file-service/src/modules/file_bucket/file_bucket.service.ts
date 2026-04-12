@@ -1,5 +1,5 @@
 import { status } from '@grpc/grpc-js';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { FileBucketProto, FileProviderProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
@@ -8,6 +8,7 @@ import { S3BucketHandler } from './s3_handler';
 
 @Injectable()
 export class FileBucketService implements OnModuleInit {
+  private readonly logger = new Logger(FileBucketService.name);
   private fileBucketDBService: FileBucketProto.BucketDbServiceClient;
   private fileProviderDBService: FileProviderProto.FileProviderDbServiceClient;
 
@@ -131,6 +132,75 @@ export class FileBucketService implements OnModuleInit {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
         message: `Failed to delete bucket: ${error.message} `,
+      });
+    }
+  }
+
+  async getAllFiles(
+    request: FileBucketProto.GetAllFilesRequest,
+  ): Promise<FileBucketProto.GetAllFilesResponse> {
+    try {
+      const buckets = await lastValueFrom(
+        this.fileBucketDBService.getBucketsByConfigIdAndEnv({
+          configId: request.configId,
+          configEnv: request.configEnv,
+        }),
+      );
+
+      const results = await Promise.all(
+        (buckets.buckets ?? []).map(async (bucket) => {
+          try {
+            const provider = await this.getProvider(bucket.fileProviderName);
+            const bucketRequest: FileBucketProto.GetBucketRequest = {
+              name: bucket.name,
+              configId: bucket.configId,
+              configEnv: bucket.configEnv,
+            };
+
+            let fileList: string[];
+            switch (provider.providerType) {
+              case FileProviderProto.ProviderType.S3: {
+                const handler = new S3BucketHandler(provider);
+                fileList = await handler.listFiles(bucketRequest);
+                break;
+              }
+              case FileProviderProto.ProviderType.AZURE: {
+                const handler = new AzureBucketHandler(provider);
+                fileList = await handler.listFiles(bucketRequest);
+                break;
+              }
+              default:
+                throw new RpcException({
+                  code: status.FAILED_PRECONDITION,
+                  message: `Unsupported provider type: ${provider.providerType} `,
+                });
+            }
+
+            return {
+              bucketName: bucket.name,
+              files: fileList,
+            };
+          } catch (error) {
+            this.logger.error(
+              `Failed to list files for bucket "${bucket.name}": ${error?.message}`,
+            );
+            return null;
+          }
+        }),
+      );
+
+      const files = results.filter(
+        (result): result is FileBucketProto.Files => result !== null,
+      );
+
+      return { files };
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: `Failed to get all files: ${error.message} `,
       });
     }
   }
