@@ -10,14 +10,14 @@
 #
 
 # The api-gateway is exposed on port 8888 in docker-compose-dev.yml
-gateway_public_port=8888
+# extract gateway information from running juno instance
+gateway_container_id=$(docker ps -q --filter "ancestor=juno-api-gateway")
+gateway_container_port=$(docker port $gateway_container_id)
+
+gateway_public_port=$(echo "$gateway_container_port" | grep -o "0.0.0.0:[0-9]*" | cut -d':' -f2)    # MACOS version
 
 # grab doc yaml
-curl -f "localhost:$gateway_public_port/docs-yaml" > docs-yaml
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to fetch docs-yaml. Is Juno running? (pnpm dev)"
-  exit 1
-fi
+curl "localhost:$gateway_public_port/docs-yaml" > docs-yaml
 
 # run gen client sdk script
 pnpm gen-client-sdk
