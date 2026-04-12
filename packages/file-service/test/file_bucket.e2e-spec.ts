@@ -51,6 +51,16 @@ async function initApp() {
 
 beforeAll(async () => {
   app = await initApp();
+  const resetProto = ProtoLoader.loadSync([ResetProtoFile]);
+  const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
+  const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
+    process.env.DB_SERVICE_ADDR,
+    GRPC.credentials.createInsecure(),
+  );
+
+  await new Promise((resolve) => {
+    resetClient.resetDb({}, () => resolve(0));
+  });
 
   const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]);
   const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
@@ -109,19 +119,6 @@ beforeAll(async () => {
       },
       () => resolve(0),
     );
-  });
-});
-
-beforeEach(async () => {
-  const resetProto = ProtoLoader.loadSync([ResetProtoFile]);
-  const resetProtoGRPC = GRPC.loadPackageDefinition(resetProto) as any;
-  const resetClient = new resetProtoGRPC.juno.reset_db.DatabaseReset(
-    process.env.DB_SERVICE_ADDR,
-    GRPC.credentials.createInsecure(),
-  );
-
-  await new Promise((resolve) => {
-    resetClient.resetDb({}, () => resolve(0));
   });
 });
 
