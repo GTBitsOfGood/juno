@@ -97,12 +97,10 @@ export class FileBucketService {
 const convertDbBucket = (bucket: any): FileBucketProto.Bucket => {
   const mappedFiles: IdentifierProto.FileIdentifier[] =
     bucket.FileServiceFile.map((file) => ({
-      fileId: {
-        path: file.path,
-        configId: file.configId,
-        bucketName: file.bucketName,
-        configEnv: file.configEnv,
-      } as IdentifierProto.FileIdentifier,
+      path: file.path,
+      configId: file.configId,
+      bucketName: file.bucketName,
+      configEnv: file.configEnv,
     }));
 
   const res: FileBucketProto.Bucket = {
