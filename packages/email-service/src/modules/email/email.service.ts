@@ -15,6 +15,9 @@ const { EMAIL_DB_SERVICE_NAME } = EmailProto;
 @Injectable()
 export class EmailService implements OnModuleInit {
   private emailService: EmailProto.EmailDbServiceClient;
+  private testDomains: Map<string, EmailProto.AuthenticatedDomain[]> =
+    new Map();
+  private testSenders: Map<string, EmailProto.VerifiedSender[]> = new Map();
   constructor(@Inject(EMAIL_DB_SERVICE_NAME) private emailClient: ClientGrpc) {}
 
   onModuleInit() {
@@ -71,13 +74,26 @@ export class EmailService implements OnModuleInit {
     const sendGridUrl = 'https://api.sendgrid.com/v3/whitelabel/domains';
 
     if (process.env['NODE_ENV'] == 'test') {
-      this.emailService.createEmailDomain({
+      const configKey = `${req.configId}:${req.configEnvironment}`;
+      const domains = this.testDomains.get(configKey) ?? [];
+      domains.push({
+        id: 0,
         domain: req.domain,
-        subdomain: req.subdomain,
-        sendgridId: 0,
-        configId: req.configId,
-        configEnvironment: req.configEnvironment,
+        subdomain: req.subdomain ?? undefined,
+        valid: false,
       });
+      this.testDomains.set(configKey, domains);
+
+      lastValueFrom(
+        this.emailService.createEmailDomain({
+          domain: req.domain,
+          subdomain: req.subdomain,
+          sendgridId: 0,
+          configId: req.configId,
+          configEnvironment: req.configEnvironment,
+        }),
+      ).catch(() => {});
+
       return {
         statusCode: 201,
         id: 0,
@@ -107,15 +123,15 @@ export class EmailService implements OnModuleInit {
         mailCname: response.data.dns.mail_cname,
       };
 
-      // await lastValueFrom(
-      //   this.emailService.createEmailDomain({
-      //     domain: req.domain,
-      //     subdomain: req.subdomain,
-      //     sendgridId: response.data.id,
-      //     configId: req.configId,
-      //     configEnvironment: req.configEnvironment,
-      //   }),
-      // );
+      await lastValueFrom(
+        this.emailService.createEmailDomain({
+          domain: req.domain,
+          subdomain: req.subdomain,
+          sendgridId: response.data.id,
+          configId: req.configId,
+          configEnvironment: req.configEnvironment,
+        }),
+      );
 
       return {
         statusCode: response.status,
@@ -211,6 +227,24 @@ export class EmailService implements OnModuleInit {
     }
 
     if (process.env['NODE_ENV'] == 'test') {
+      const configKey = `${req.configId}:${req.configEnvironment}`;
+      const senders = this.testSenders.get(configKey) ?? [];
+      senders.push({
+        id: senders.length,
+        nickname: req.nickname ?? req.fromName,
+        fromEmail: req.fromEmail,
+        fromName: req.fromName,
+        replyTo: req.replyTo,
+        address: req.address,
+        city: req.city,
+        state: req.state,
+        country: req.country,
+        zip: req.zip,
+        verified: false,
+        locked: false,
+      });
+      this.testSenders.set(configKey, senders);
+
       return {
         statusCode: 201,
         message: 'test register success',
@@ -312,6 +346,122 @@ export class EmailService implements OnModuleInit {
       });
     }
   }
+  async getSenders(
+    req: EmailProto.GetSendersRequest,
+  ): Promise<EmailProto.GetSendersResponse> {
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: Number(req.configId),
+        environment: req.configEnvironment,
+      }),
+    );
+
+    const sendgridApiKey = config.sendgridKey;
+
+    if (!sendgridApiKey) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Cannot get senders (SendGrid API key is missing)',
+      });
+    }
+
+    if (process.env['NODE_ENV'] == 'test') {
+      const configKey = `${req.configId}:${req.configEnvironment}`;
+      return { senders: this.testSenders.get(configKey) ?? [] };
+    }
+
+    try {
+      const response = await axios.get(
+        'https://api.sendgrid.com/v3/verified_senders',
+        {
+          headers: {
+            Authorization: `Bearer ${sendgridApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const senders = (response.data.results ?? []).map(
+        (sender: SendGridVerifiedSender) => ({
+          id: sender.id,
+          nickname: sender.nickname ?? '',
+          fromEmail: sender.from_email ?? '',
+          fromName: sender.from_name ?? '',
+          replyTo: sender.reply_to ?? '',
+          address: sender.address ?? '',
+          city: sender.city ?? '',
+          state: sender.state ?? '',
+          country: sender.country ?? '',
+          zip: sender.zip ?? '',
+          verified: sender.verified ?? false,
+          locked: sender.locked ?? false,
+        }),
+      );
+
+      return { senders };
+    } catch (error) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Failed to fetch senders from SendGrid: ${JSON.stringify(error)}`,
+      });
+    }
+  }
+
+  async getDomains(
+    req: EmailProto.GetDomainsRequest,
+  ): Promise<EmailProto.GetDomainsResponse> {
+    const config = await lastValueFrom(
+      this.emailService.getEmailServiceConfig({
+        id: Number(req.configId),
+        environment: req.configEnvironment,
+      }),
+    );
+
+    const sendgridApiKey = config.sendgridKey;
+
+    if (!sendgridApiKey) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Cannot get domains (SendGrid API key is missing)',
+      });
+    }
+
+    if (process.env['NODE_ENV'] == 'test') {
+      const configKey = `${req.configId}:${req.configEnvironment}`;
+      return {
+        domains: this.testDomains.get(configKey) ?? [],
+      };
+    }
+
+    try {
+      const response = await axios.get(
+        'https://api.sendgrid.com/v3/whitelabel/domains',
+        {
+          headers: {
+            Authorization: `Bearer ${sendgridApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const domains = (response.data ?? []).map(
+        (domain: SendGridAuthenticatedDomain) => ({
+          id: domain.id,
+          domain: domain.domain ?? '',
+          subdomain: domain.subdomain ?? undefined,
+          valid: domain.valid ?? false,
+        }),
+      );
+
+      return { domains };
+    } catch (error) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Failed to fetch domains from SendGrid: ${JSON.stringify(error)}`,
+      });
+    }
+  }
+
   async getStatistics(
     req: EmailProto.GetStatisticsRequest,
   ): Promise<EmailProto.StatisticResponses> {
@@ -408,6 +558,29 @@ const TEST_SENDGRID_RECORDS = {
     data: 's2.domainkey.u1234.wl.sendgrid.net',
   },
 };
+
+// SendGrid API response types
+interface SendGridVerifiedSender {
+  id: number;
+  nickname: string;
+  from_email: string;
+  from_name: string;
+  reply_to: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  verified: boolean;
+  locked: boolean;
+}
+
+interface SendGridAuthenticatedDomain {
+  id: number;
+  domain: string;
+  subdomain?: string;
+  valid: boolean;
+}
 
 // Email Metrics Interface
 interface EmailMetrics {

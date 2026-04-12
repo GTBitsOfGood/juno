@@ -230,7 +230,7 @@ export class EmailController implements EmailDbServiceController {
     const emailDomain = await this.emailService.createEmailDomain({
       domain: request.domain,
       subdomain: request.subdomain,
-      sendgridId: request.sendgridId,
+      sendgridId: Number(request.sendgridId),
       attachedConfigs: {
         connectOrCreate: {
           create: {
