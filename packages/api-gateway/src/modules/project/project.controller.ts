@@ -13,14 +13,6 @@ import {
   Put,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
-import {
-  CreateProjectModel,
-  LinkUserModel,
-  ProjectResponse,
-  ProjectResponses,
-} from 'src/models/project.dto';
-import { AuthCommonProto, CommonProto, ProjectProto } from 'juno-proto';
 import {
   ApiBearerAuth,
   ApiHeader,
@@ -29,10 +21,22 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/decorators/user.decorator';
+import {
+  ApiKeyProto,
+  AuthCommonProto,
+  CommonProto,
+  ProjectProto,
+} from 'juno-proto';
+import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
+import { User } from 'src/decorators/user.decorator';
+import {
+  CreateProjectModel,
+  LinkUserModel,
+  ProjectResponse,
+  ProjectResponses,
+} from 'src/models/project.dto';
 import { UserResponses } from 'src/models/user.dto';
-import { ApiKeyProto } from 'juno-proto';
 const { PROJECT_SERVICE_NAME } = ProjectProto;
 const { API_KEY_SERVICE_NAME } = ApiKeyProto;
 
@@ -41,21 +45,15 @@ const { API_KEY_SERVICE_NAME } = ApiKeyProto;
 @Controller('project')
 export class ProjectController implements OnModuleInit {
   private projectService: ProjectProto.ProjectServiceClient;
-  private apiKeyService: ApiKeyProto.ApiKeyServiceClient;
 
   constructor(
     @Inject(PROJECT_SERVICE_NAME) private projectClient: ClientGrpc,
-    @Inject(API_KEY_SERVICE_NAME) private apiClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.projectService =
       this.projectClient.getService<ProjectProto.ProjectServiceClient>(
         PROJECT_SERVICE_NAME,
-      );
-    this.apiKeyService =
-      this.apiClient.getService<ApiKeyProto.ApiKeyServiceClient>(
-        API_KEY_SERVICE_NAME,
       );
   }
 
