@@ -410,17 +410,16 @@ export class AuthController implements OnModuleInit {
     const data: { keys: AuthCommonProto.ApiKey[]; count: number } =
       await lastValueFrom(obs);
 
+    const lastOffset =
+      data.count > 0 ? Math.floor((data.count - 1) / limit) * limit : 0;
+    const nextOffset = Math.min(lastOffset, offset + limit);
     const links = {
       first: encodeURI(`/auth/key/all?offset=${0}&limit=${limit}`),
       prev: encodeURI(
         `/auth/key/all?offset=${Math.max(offset - limit, 0)}&limit=${limit}`,
       ),
-      next: encodeURI(
-        `/auth/key/all?offset=${Math.min(offset + limit, Math.max(0, data.count - limit))}&limit=${limit}`,
-      ),
-      last: encodeURI(
-        `/auth/key/all?offset=${Math.max(0, data.count - limit)}&limit=${limit}`,
-      ),
+      next: encodeURI(`/auth/key/all?offset=${nextOffset}&limit=${limit}`),
+      last: encodeURI(`/auth/key/all?offset=${lastOffset}&limit=${limit}`),
     };
     return new GetAllApiKeysResponse({
       keys: data.keys,

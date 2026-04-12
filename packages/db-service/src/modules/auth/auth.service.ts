@@ -24,7 +24,7 @@ export class AuthService {
           take,
           cursor,
           where,
-          orderBy,
+          orderBy: orderBy ?? { id: 'asc' },
           include: { project: true },
         }),
         this.prisma.apiKey.count({ where }),
