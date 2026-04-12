@@ -70,6 +70,20 @@ export interface RemoveBucketRequest {
   fileProviderName: string;
 }
 
+export interface GetAllFilesRequest {
+  configId: number;
+  configEnv: string;
+}
+
+export interface Files {
+  bucketName: string;
+  files: string[];
+}
+
+export interface GetAllFilesResponse {
+  files: Files[];
+}
+
 export const JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME = 'juno.file_service.bucket';
 
 export interface BucketDbServiceClient {
@@ -149,6 +163,8 @@ export interface BucketFileServiceClient {
   registerBucket(request: RegisterBucketRequest): Observable<Bucket>;
 
   removeBucket(request: RemoveBucketRequest): Observable<Bucket>;
+
+  getAllFiles(request: GetAllFilesRequest): Observable<GetAllFilesResponse>;
 }
 
 export interface BucketFileServiceController {
@@ -159,11 +175,22 @@ export interface BucketFileServiceController {
   removeBucket(
     request: RemoveBucketRequest,
   ): Promise<Bucket> | Observable<Bucket> | Bucket;
+
+  getAllFiles(
+    request: GetAllFilesRequest,
+  ):
+    | Promise<GetAllFilesResponse>
+    | Observable<GetAllFilesResponse>
+    | GetAllFilesResponse;
 }
 
 export function BucketFileServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['registerBucket', 'removeBucket'];
+    const grpcMethods: string[] = [
+      'registerBucket',
+      'removeBucket',
+      'getAllFiles',
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
