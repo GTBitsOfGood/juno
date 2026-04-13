@@ -109,3 +109,11 @@ export class FileBucket implements FileBucketProto.Bucket {
     this.FileServiceFile = fileBucket.FileServiceFile ?? [];
   }
 }
+
+export class BucketWithFiles {
+  [bucketName: string]: string[];
+
+  constructor(entry: FileBucketProto.Files) {
+    this[entry.bucketName] = entry.files;
+  }
+}

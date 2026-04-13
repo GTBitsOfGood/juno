@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { ApiKey, NewAccountRequest, Prisma, Role } from '@prisma/client';
 import { AuthCommonProto } from 'juno-proto';
+import { ApiKeyProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -15,15 +16,32 @@ export class AuthService {
     cursor?: Prisma.ApiKeyWhereUniqueInput,
     where?: Prisma.ApiKeyWhereInput,
     orderBy?: Prisma.ApiKeyOrderByWithRelationInput,
-  ): Promise<AuthCommonProto.ApiKey[]> {
-    const apiKeys = await this.prisma.apiKey.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-    });
-    return apiKeys.map((key) => convertDbApiKeyToTs(key));
+  ): Promise<ApiKeyProto.GetAllApiKeysResult> {
+    try {
+      const [apiKeys, count] = await this.prisma.$transaction([
+        this.prisma.apiKey.findMany({
+          skip,
+          take,
+          cursor,
+          where,
+          orderBy: orderBy ?? { id: 'asc' },
+          include: { project: true },
+        }),
+        this.prisma.apiKey.count({ where }),
+      ]);
+
+      const apiKeyObjs = apiKeys.map((key) => convertDbApiKeyToTs(key));
+
+      return {
+        keys: apiKeyObjs,
+        count: count,
+      };
+    } catch (e) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Failed to retrieve API keys: ${e.message}`,
+      });
+    }
   }
 
   async apiKey(
@@ -58,8 +76,9 @@ export class AuthService {
     try {
       let projectId: number | undefined = undefined;
       if (input.project.connect.id) {
-        if (Number.isInteger(input.project.connect.id)) {
-          projectId = Number(input.project.connect.id);
+        const numId = Number(input.project.connect.id);
+        if (Number.isInteger(numId)) {
+          projectId = numId;
         }
       } else if (input.project.connect.name) {
         const name = input.project.connect.name.toString();
@@ -109,6 +128,7 @@ export class AuthService {
   ): Promise<AuthCommonProto.ApiKey> {
     const key = await this.prisma.apiKey.delete({
       where: lookup,
+      include: { project: true },
     });
     return convertDbApiKeyToTs(key);
   }
@@ -241,7 +261,10 @@ export class AuthService {
     }
   }
 }
-const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
+
+const convertDbApiKeyToTs = (
+  key: ApiKey & { project?: { id: number; name: string } },
+): AuthCommonProto.ApiKey => {
   const mappedScopes = key.scopes.map((scope) => {
     switch (scope) {
       case 'FULL':
@@ -259,8 +282,12 @@ const convertDbApiKeyToTs = (key: ApiKey): AuthCommonProto.ApiKey => {
     hash: key.hash,
     scopes: mappedScopes,
     description: key.description,
-    project: { id: key.projectId },
+    project: key.project
+      ? { id: key.project.id, name: key.project.name }
+      : { id: key.projectId },
     environment: key.environment,
+    createdAt: key.createdAt.toISOString(),
   };
+
   return apiKey;
 };

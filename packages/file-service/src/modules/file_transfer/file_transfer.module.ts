@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
+  FileBucketProto,
+  FileBucketProtoFile,
   FileProto,
   FileProtoFile,
   FileProviderProto,
@@ -12,6 +14,7 @@ import { FileTransferController } from './file_transfer.controller';
 
 const { FILE_DB_SERVICE_NAME, JUNO_FILE_SERVICE_FILE_PACKAGE_NAME } = FileProto;
 const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
+const { BUCKET_DB_SERVICE_NAME } = FileBucketProto;
 
 @Module({
   imports: [
@@ -35,6 +38,15 @@ const { FILE_PROVIDER_DB_SERVICE_NAME } = FileProviderProto;
           url: process.env.DB_SERVICE_ADDR,
           package: FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
           protoPath: FileProviderProtoFile,
+        },
+      },
+      {
+        name: BUCKET_DB_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: process.env.DB_SERVICE_ADDR,
+          package: FileBucketProto.JUNO_FILE_SERVICE_BUCKET_PACKAGE_NAME,
+          protoPath: FileBucketProtoFile,
         },
       },
     ]),

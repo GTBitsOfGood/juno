@@ -2,9 +2,10 @@ import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiKeyProto, AuthCommonProto, UserProto } from 'juno-proto';
 import { ApiKeyIdentifier } from 'juno-proto/dist/gen/identifiers';
-import { validateApiKeydentifier } from 'src/utility/validate';
+import { validateApiKeyIdentifier } from 'src/utility/validate';
 import * as bcrypt from 'bcrypt';
 import { mapPrismaRoleToRPC, mapRPCRoleToPrisma } from 'src/utility/convert';
+import { Prisma } from '@prisma/client';
 
 @Controller()
 @ApiKeyProto.ApiKeyDbServiceControllerMethods()
@@ -16,8 +17,35 @@ export class ApiKeyDbController
 {
   constructor(private readonly apiKeyService: AuthService) {}
 
-  getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
-    return this.apiKeyService.findApiKey(validateApiKeydentifier(request));
+  async getApiKey(request: ApiKeyIdentifier): Promise<AuthCommonProto.ApiKey> {
+    const apiKey = await this.apiKeyService.findApiKey(
+      validateApiKeyIdentifier(request),
+    );
+    return apiKey;
+  }
+
+  async getAllApiKeys(
+    request: ApiKeyProto.GetAllApiKeysParams,
+  ): Promise<ApiKeyProto.GetAllApiKeysResult> {
+    const whereClause: Prisma.ApiKeyWhereInput | undefined =
+      request.projects && request.projects.length > 0
+        ? {
+            OR: request.projects.map((proj) =>
+              proj.id != null
+                ? { projectId: Number(proj.id) }
+                : { project: { name: proj.name } },
+            ),
+          }
+        : undefined;
+
+    const keys = await this.apiKeyService.apiKeys(
+      request.offset,
+      request.limit,
+      undefined,
+      whereClause,
+    );
+
+    return keys;
   }
 
   async createApiKey(
@@ -43,7 +71,7 @@ export class ApiKeyDbController
   async deleteApiKey(
     request: ApiKeyIdentifier,
   ): Promise<AuthCommonProto.ApiKey> {
-    return this.apiKeyService.deleteApiKey(validateApiKeydentifier(request));
+    return this.apiKeyService.deleteApiKey(validateApiKeyIdentifier(request));
   }
 
   async createAccountRequest(

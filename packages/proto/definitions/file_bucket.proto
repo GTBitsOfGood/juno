@@ -16,6 +16,7 @@ service BucketDbService {
 service BucketFileService {
   rpc registerBucket(RegisterBucketRequest) returns (Bucket);
   rpc removeBucket(RemoveBucketRequest) returns (Bucket);
+  rpc getAllFiles(GetAllFilesRequest) returns (GetAllFilesResponse);
 }
 
 message Bucket {
@@ -75,4 +76,18 @@ message RemoveBucketRequest {
   int32 configId = 2;
   string configEnv = 3;
   string fileProviderName = 4;
+}
+
+message GetAllFilesRequest {
+  int32 configId = 1;
+  string configEnv = 2;
+}
+
+message Files {
+  string bucketName = 1;
+  repeated string files = 2;
+}
+
+message GetAllFilesResponse {
+  repeated Files files = 1;
 }

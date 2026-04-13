@@ -4,6 +4,7 @@ import { status } from '@grpc/grpc-js';
 import { lastValueFrom } from 'rxjs';
 import {
   BlobSASPermissions,
+  BlobServiceClient,
   generateBlobSASQueryParameters,
   StorageSharedKeyCredential,
 } from '@azure/storage-blob';
@@ -13,6 +14,26 @@ export class AzureFileHandler {
     private fileDBService: FileProto.FileDbServiceClient,
     private provider: FileProviderProto.FileProvider,
   ) {}
+
+  async getBlobServiceClient(): Promise<BlobServiceClient> {
+    const accessKeyPayload = JSON.parse(this.provider.accessKey);
+    if (!accessKeyPayload.accountName || !accessKeyPayload.accountKey) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: 'Invalid access key payload',
+      });
+    }
+    const account = accessKeyPayload.accountName;
+    const accountKey = accessKeyPayload.accountKey;
+    const sharedKeyCredential = new StorageSharedKeyCredential(
+      account,
+      accountKey,
+    );
+    return new BlobServiceClient(
+      `https://${account}.blob.core.windows.net`,
+      sharedKeyCredential,
+    );
+  }
 
   async getSharedKeyCredential(): Promise<StorageSharedKeyCredential> {
     const accessKeyPayload = JSON.parse(this.provider.accessKey);
@@ -26,6 +47,27 @@ export class AzureFileHandler {
     const accountKey = accessKeyPayload.accountKey;
 
     return new StorageSharedKeyCredential(account, accountKey);
+  }
+
+  async deleteFiles(request: FileProto.DeleteFilesRequest): Promise<void> {
+    try {
+      const blobServiceClient = await this.getBlobServiceClient();
+      const containerClient = blobServiceClient.getContainerClient(
+        `${request.bucketName}-${request.configId}-${request.configEnv}`,
+      );
+      const containerExists = await containerClient.exists();
+      if (!containerExists) return;
+      await Promise.all(
+        request.fileNames.map((name) =>
+          containerClient.getBlobClient(name).deleteIfExists(),
+        ),
+      );
+    } catch (err) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: `Failed to delete files from Azure: ${err}`,
+      });
+    }
   }
 
   async downloadFile(

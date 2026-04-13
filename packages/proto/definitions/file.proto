@@ -14,6 +14,7 @@ service FileDbService {
 service FileService {
   rpc uploadFile(UploadFileRequest) returns (UploadFileResponse);
   rpc downloadFile(DownloadFileRequest) returns (DownloadFileResponse);
+  rpc deleteFiles(DeleteFilesRequest) returns (DeleteFilesResponse);
 }
 
 message File {
@@ -56,3 +57,15 @@ message DownloadFileRequest {
 }
 
 message DownloadFileResponse { string url = 1; }
+
+message DeleteFilesRequest {
+  string bucketName = 1;
+  int32 configId = 2;
+  string configEnv = 3;
+  repeated string fileNames = 4;
+}
+
+message DeleteFilesResponse {
+  string bucketName = 1;
+  repeated string fileNames = 2;
+}

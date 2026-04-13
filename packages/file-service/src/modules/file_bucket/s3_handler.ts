@@ -1,6 +1,7 @@
 import {
   CreateBucketCommand,
   DeleteBucketCommand,
+  ListObjectsV2Command,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { status } from '@grpc/grpc-js';
@@ -64,6 +65,39 @@ export class S3BucketHandler {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
         message: `Failed to delete bucket: ${error.message} `,
+      });
+    }
+  }
+
+  async listFiles(
+    request: FileBucketProto.GetBucketRequest,
+  ): Promise<string[]> {
+    try {
+      const s3Client = await this.getS3Client('us-east-005');
+      const files: string[] = [];
+      let continuationToken: string | undefined;
+
+      do {
+        const listObjectsV2Command = new ListObjectsV2Command({
+          Bucket: `${request.name}-${request.configId}-${request.configEnv}`,
+          ContinuationToken: continuationToken,
+        });
+        const response = await s3Client.send(listObjectsV2Command);
+        if (response.Contents) {
+          for (const object of response.Contents) {
+            if (object.Key) {
+              files.push(object.Key);
+            }
+          }
+        }
+        continuationToken = response.NextContinuationToken;
+      } while (continuationToken);
+
+      return files;
+    } catch (error) {
+      throw new RpcException({
+        code: status.FAILED_PRECONDITION,
+        message: `Failed to list files: ${error.message} `,
       });
     }
   }

@@ -23,6 +23,7 @@ import { AuthCommonProto, FileBucketProto } from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 import { ApiKey } from 'src/decorators/api_key.decorator';
 import {
+  BucketWithFiles,
   DeleteFileBucketModel,
   FileBucket,
   RegisterFileBucketModel,
@@ -131,5 +132,34 @@ export class FileBucketController implements OnModuleInit {
     const bucketsData = await lastValueFrom(grpcResponse);
 
     return bucketsData.buckets?.map((bucket) => new FileBucket(bucket)) ?? [];
+  }
+
+  @Get('all/:configId')
+  @ApiOperation({ summary: 'Get all files from all buckets for a config.' })
+  @ApiBadRequestResponse({ description: 'Parameters are invalid' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiOkResponse({
+    description: 'Returned all files grouped by bucket name',
+    type: [BucketWithFiles],
+  })
+  async getAllFiles(
+    @ApiKey() apiKey: AuthCommonProto.ApiKey,
+    @Param('configId') configId: string,
+  ): Promise<BucketWithFiles[]> {
+    const id = parseInt(configId);
+    if (Number.isNaN(id) || id < 0) {
+      throw new BadRequestException(
+        'Id must be an int greater than or equal to 0',
+      );
+    }
+
+    const grpcResponse = this.fileBucketService.getAllFiles({
+      configId: id,
+      configEnv: apiKey.environment,
+    });
+
+    const data = await lastValueFrom(grpcResponse);
+
+    return (data.files ?? []).map((entry) => new BucketWithFiles(entry));
   }
 }
