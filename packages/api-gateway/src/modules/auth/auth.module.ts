@@ -86,20 +86,18 @@ const { PROJECT_SERVICE_NAME, JUNO_PROJECT_PACKAGE_NAME } = ProjectProto;
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CredentialsMiddleware)
-      .forRoutes(
-        { path: 'auth/user/jwt', method: RequestMethod.POST },
-        { path: 'auth/test-auth', method: RequestMethod.GET },
-        { path: 'auth/account-request', method: RequestMethod.GET },
-        { path: 'auth/account-request/:id', method: RequestMethod.DELETE },
-        { path: 'auth/key', method: RequestMethod.POST },
-        { path: 'auth/key/all', method: RequestMethod.GET },
-        { path: 'auth/key/:id', method: RequestMethod.DELETE },
-        {
-          path: 'auth/account-request/:id/accept',
-          method: RequestMethod.POST,
-        },
-      );
+    consumer.apply(CredentialsMiddleware).forRoutes(
+      { path: 'auth/user/jwt', method: RequestMethod.POST },
+      { path: 'auth/test-auth', method: RequestMethod.GET },
+      { path: 'auth/account-request', method: RequestMethod.GET },
+      { path: 'auth/account-request/:id', method: RequestMethod.DELETE },
+      { path: 'auth/key', method: RequestMethod.POST },
+      { path: 'auth/key/all', method: RequestMethod.GET },
+      { path: 'auth/key/:id', method: RequestMethod.DELETE },
+      {
+        path: 'auth/account-request/:id/accept',
+        method: RequestMethod.POST,
+      },
+    );
   }
 }
