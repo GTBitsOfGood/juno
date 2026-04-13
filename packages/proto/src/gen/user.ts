@@ -7,7 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
-import { User, Users, UserType } from './common';
+import { Project, User, Users, UserType } from './common';
 import { ProjectIdentifier, UserIdentifier } from './identifiers';
 
 export const protobufPackage = 'juno.user';
@@ -81,6 +81,15 @@ export interface GetAllNewAccountRequestsMessage {}
 
 export interface RemoveNewAccountRequestByIdMessage {
   id: number;
+}
+
+export interface AcceptAccountRequestMessage {
+  id: number;
+}
+
+export interface AcceptAccountRequestResponse {
+  user: User | undefined;
+  project?: Project | undefined;
 }
 
 export const JUNO_USER_PACKAGE_NAME = 'juno.user';
@@ -188,6 +197,10 @@ export interface AccountRequestServiceClient {
   deleteAccountRequest(
     request: RemoveNewAccountRequestByIdMessage,
   ): Observable<NewAccountRequest>;
+
+  acceptAccountRequest(
+    request: AcceptAccountRequestMessage,
+  ): Observable<AcceptAccountRequestResponse>;
 }
 
 export interface AccountRequestServiceController {
@@ -211,6 +224,13 @@ export interface AccountRequestServiceController {
     | Promise<NewAccountRequest>
     | Observable<NewAccountRequest>
     | NewAccountRequest;
+
+  acceptAccountRequest(
+    request: AcceptAccountRequestMessage,
+  ):
+    | Promise<AcceptAccountRequestResponse>
+    | Observable<AcceptAccountRequestResponse>
+    | AcceptAccountRequestResponse;
 }
 
 export function AccountRequestServiceControllerMethods() {
@@ -219,6 +239,7 @@ export function AccountRequestServiceControllerMethods() {
       'createAccountRequest',
       'getAllAccountRequests',
       'deleteAccountRequest',
+      'acceptAccountRequest',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

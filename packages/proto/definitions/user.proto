@@ -25,6 +25,8 @@ service AccountRequestService {
       returns (NewAccountRequests);
   rpc deleteAccountRequest(RemoveNewAccountRequestByIdMessage)
       returns (NewAccountRequest);
+  rpc acceptAccountRequest(AcceptAccountRequestMessage)
+      returns (AcceptAccountRequestResponse);
 }
 
 service UserAuthService {
@@ -98,4 +100,13 @@ message GetAllNewAccountRequestsMessage {}
 
 message RemoveNewAccountRequestByIdMessage {
   int32 id = 1;
+}
+
+message AcceptAccountRequestMessage {
+  int32 id = 1;
+}
+
+message AcceptAccountRequestResponse {
+  common.User user = 1;
+  optional common.Project project = 2;
 }
