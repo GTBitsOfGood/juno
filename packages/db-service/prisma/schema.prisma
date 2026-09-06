@@ -111,7 +111,7 @@ model EmailDomain {
 }
 
 model FeatureFlag {
-  id              String                        @id() 
+  id              String                        @id 
   enabled         Boolean @default(false)
   description     String?
 }
