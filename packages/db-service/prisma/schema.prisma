@@ -110,6 +110,12 @@ model EmailDomain {
   EmailSender     EmailSender[]
 }
 
+model FeatureFlag {
+  id              String                        @id() 
+  enabled         Boolean @default(false)
+  description     String?
+}
+
 enum FileProviderType {
   S3 
   AZURE 
