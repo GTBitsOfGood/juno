@@ -1,20 +1,20 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
+import { Prisma } from '@prisma/client';
 import { FeatureFlagService } from './service';
-import { FeatureFlag, CreateFlagRequest, GetFlagRequest,
-         DeleteFlagRequest, DeleteFlagResponse } from '../../../../proto/src/gen/feature_flag';
+import { FeatureFlagProto } from 'juno-proto';
+import { FeatureFlagServiceController } from 'juno-proto/dist/gen/feature-flag';
 
 @Controller()
-export class FeatureFlagController {
+@FeatureFlagProto.FeatureFlagMethods()
+export class FeatureFlagController implements FeatureFlagProto.FeatureFlagController {
   constructor(private readonly featureFlagService: FeatureFlagService) {}
-
-  @GrpcMethod('FeatureFlagService')
-  createFlag(data: CreateFlagRequest): Promise<FeatureFlag> {
-    return this.featureFlagService.createFlag(data);
-  }
-
-  @GrpcMethod('FeatureFlagService')
-  getFlag(data: GetFlagRequest): Promise<FeatureFlag> {
-    return
+  
+  async createFeatureFlag(
+    request: FeatureFlagProto.CreateFeatureFlag,): Promise<FeatureFlagProto.FeatureFlag> {
+      // todo
+    }
+}
     
 
