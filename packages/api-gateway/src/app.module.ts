@@ -4,6 +4,7 @@ import { ProjectModule } from './modules/project/project.module';
 import { UserModule } from './modules/user/user.module';
 import { EmailModule } from './modules/email/email.module';
 import { SentryModule } from '@sentry/nestjs/setup';
+import { FeatureFlagModule } from './modules/feature_flag/feature_flag.module';
 import { FileProviderModule } from './modules/file_provider/file_provider.module';
 import { FileDownloadModule } from './modules/file_download/file_download.module';
 import { FileUploadModule } from './modules/file_upload/file_upload.module';
