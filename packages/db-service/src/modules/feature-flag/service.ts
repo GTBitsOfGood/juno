@@ -8,9 +8,9 @@ export class FeatureFlagService {
   constructor(private prisma: PrismaService) {}
 
   async createFlag(
-    request: FeatureFlagProto.FeatureFlag,
+    request: FeatureFlagProto.CreateFlagRequest,
   ): Promise<FeatureFlag> {
-    return this.prisma.FeatureFlag.create({
+    return this.prisma.featureFlag.create({
       data: {
         id: request.id,
         enabled: request.enabled,
@@ -20,26 +20,26 @@ export class FeatureFlagService {
   }
 
   async getFlag(
-    request: FeatureFlagProto.FeatureFlag,
+    request: FeatureFlagProto.GetFlagRequest,
   ): Promise<FeatureFlag> {
-    return this.prisma.FeatureFlag.findUnique({
+    return this.prisma.featureFlag.findUnique({
       where: {
         id: request.id,
       },
     });
   }
 
-  // might need checks if description was not included in request (since optional field)
+  // only updates description if it was provided in the request (leave unchanged if request.description is undefined)
   async setFlag(
-    request: FeatureFlagProto.FeatureFlag,
+    request: FeatureFlagProto.SetFlagRequest,
   ): Promise<FeatureFlag> {
-    return this.prisma.FeatureFlag.update({
+    return this.prisma.featureFlag.update({
       where: {
         id: request.id,
       },
       data: {
         enabled: request.enabled,
-        description: request.description,
+        ...(request.description !== undefined && { description: request.description }),
       },
     });
   }
