@@ -21,10 +21,7 @@ export class FeatureFlagService {
     return this.prisma.featureFlag.findUnique({ where: { id } });
   }
 
-  async setFlag(
-    id: string,
-    data: FeatureFlagUpdateData,
-  ): Promise<FeatureFlag> {
+  async setFlag(id: string, data: FeatureFlagUpdateData): Promise<FeatureFlag> {
     return this.prisma.featureFlag.update({
       where: { id },
       data,
