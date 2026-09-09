@@ -23,6 +23,7 @@ import { AnalyticsConfigModule } from './modules/analytics_config/analytics_conf
     ResetModule,
     AuthModule,
     EmailModule,
+    FeatureFlagModule,
     FileModule,
     FileBucketModule,
     FileConfigModule,
