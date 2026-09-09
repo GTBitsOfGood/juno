@@ -1,13 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { Prisma } from '@prisma/client';
 import { FeatureFlagService } from './service';
 import { FeatureFlagProto } from 'juno-proto';
 import { FeatureFlagServiceController } from 'juno-proto/dist/gen/feature_flag';
+// import { Prisma } from '@prisma/client';
 
 @Controller()
-@FeatureFlagProto.FeatureFlagControllerMethods()
+@FeatureFlagProto.FeatureFlagServiceControllerMethods()
 export class FeatureFlagController implements FeatureFlagServiceController {
   constructor(private readonly featureFlagService: FeatureFlagService) {}
   
@@ -35,13 +35,13 @@ export class FeatureFlagController implements FeatureFlagServiceController {
       }
 
       const featureFlag = await this.featureFlagService.getFlag(request);
-      return featureFlag;
+      return featureFlag; // error handling would go here, but not adding based on other modules
     }
 
     async setFlag(
       request: FeatureFlagProto.SetFlagRequest,
     ): Promise<FeatureFlagProto.FeatureFlag> {
-      if (!request.id || request.id.trim === '') {
+      if (!request.id || request.id.trim() === '') {
         throw new RpcException({
           code: status.INVALID_ARGUMENT,
           message: 'Provided Flag ID is invalid',
@@ -55,7 +55,7 @@ export class FeatureFlagController implements FeatureFlagServiceController {
     async deleteFlag(
       request: FeatureFlagProto.DeleteFlagRequest,
     ): Promise<FeatureFlagProto.DeleteFlagResponse> {
-      if (!request.id || request.id.trim === '') {
+      if (!request.id || request.id.trim() === '') {
         throw new RpcException({
           code: status.INVALID_ARGUMENT,
           message: 'Provided Flag ID is invalid',
