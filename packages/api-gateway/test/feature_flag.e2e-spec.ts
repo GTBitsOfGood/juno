@@ -4,13 +4,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import request from 'supertest';
+import * as request from 'supertest';
 import { Reflector } from '@nestjs/core';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
-import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { ResetProtoFile } from 'juno-proto';
 import { AppModule } from '../src/app.module';
+import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
 let app: INestApplication;
 let apiKey: string;
@@ -39,8 +39,14 @@ beforeAll(async () => {
   }).compile();
 
   app = moduleFixture.createNestApplication();
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalFilters(new RpcExceptionFilter());
+
   await app.init();
 
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
@@ -59,8 +65,12 @@ beforeAll(async () => {
       }
     });
   });
+});
 
-  apiKey = await createApiKey();
+beforeEach(async () => {
+  if (!apiKey) {
+    apiKey = await createApiKey();
+  }
 });
 
 afterAll(async () => {
@@ -73,26 +83,26 @@ describe('Feature Flag Routes (e2e)', () => {
       .post('/feature_flag')
       .set('Authorization', `Bearer ${apiKey}`)
       .send({
-        id: 'flag1',
+        id: 'new-flag',
         enabled: false,
         description: 'temp',
       })
       .expect(201)
       .expect((response) => {
         expect(response.body).toEqual({
-          id: 'flag1',
+          id: 'new-flag',
           enabled: false,
           description: 'temp',
         });
       });
 
     await request(app.getHttpServer())
-      .get('/feature_flag/flag1')
+      .get('/feature_flag/new-flag')
       .set('Authorization', `Bearer ${apiKey}`)
       .expect(200)
       .expect((response) => {
         expect(response.body).toEqual({
-          id: 'flag1',
+          id: 'new-flag',
           enabled: false,
           description: 'temp',
         });
@@ -112,20 +122,20 @@ describe('Feature Flag Routes (e2e)', () => {
       .post('/feature_flag')
       .set('Authorization', `Bearer ${apiKey}`)
       .send({
-        id: 'flag1',
+        id: 'updated-flag',
         enabled: false,
         description: 'original',
       })
       .expect(201);
 
     await request(app.getHttpServer())
-      .put('/feature_flag/flag1')
+      .put('/feature_flag/updated-flag')
       .set('Authorization', `Bearer ${apiKey}`)
       .send({ enabled: true })
       .expect(200)
       .expect((response) => {
         expect(response.body).toEqual({
-          id: 'flag1',
+          id: 'updated-flag',
           enabled: true,
           description: 'original',
         });
@@ -137,19 +147,19 @@ describe('Feature Flag Routes (e2e)', () => {
       .post('/feature_flag')
       .set('Authorization', `Bearer ${apiKey}`)
       .send({
-        id: 'flag1',
+        id: 'deleted-flag',
         enabled: true,
         description: 'temp',
       })
       .expect(201);
 
     await request(app.getHttpServer())
-      .delete('/feature_flag/flag1')
+      .delete('/feature_flag/deleted-flag')
       .set('Authorization', `Bearer ${apiKey}`)
       .expect(200);
 
     await request(app.getHttpServer())
-      .get('/feature_flag/flag1')
+      .get('/feature_flag/deleted-flag')
       .set('Authorization', `Bearer ${apiKey}`)
       .expect(404);
   });

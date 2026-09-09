@@ -3,6 +3,7 @@ import { FeatureFlagProto } from 'juno-proto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { FeatureFlagService } from './feature_flag.service';
+import { Prisma } from '@prisma/client';
 
 @Controller()
 @FeatureFlagProto.FeatureFlagServiceControllerMethods()
@@ -14,12 +15,25 @@ export class FeatureFlagController
   async createFlag(
     request: FeatureFlagProto.CreateFlagRequest,
   ): Promise<FeatureFlagProto.FeatureFlag> {
-    const flag = await this.featureFlagService.createFlag({
-      id: request.id,
-      enabled: request.enabled,
-      description: request.description,
-    });
-    return flag;
+    try {
+      const flag = await this.featureFlagService.createFlag({
+        id: request.id,
+        enabled: request.enabled,
+        description: request.description,
+      });
+      return flag;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new RpcException({
+          code: status.ALREADY_EXISTS,
+          message: 'Feature flag with this id already exists',
+        });
+      }
+      throw error;
+    }
   }
 
   async getFlag(
