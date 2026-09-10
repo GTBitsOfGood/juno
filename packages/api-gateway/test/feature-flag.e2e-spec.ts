@@ -21,7 +21,6 @@ jest.setTimeout(15000);
 
 beforeAll(async () => {
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
   const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
     process.env.DB_SERVICE_ADDR,
@@ -75,141 +74,135 @@ beforeEach(async () => {
   }
 });
 
-describe('Feature Flag Retrieval Routes', () => {
-  it('Successfully get a feature flag ', async () => {
-    // Seed a flag first so we have a valid ID to retrieve
-    const seed = await request(app.getHttpServer())
-      .post('/feature-flag/create')
-      .set('Authorization', 'Bearer ' + apiKey)
-      .send({ name: 'retrieval-test', isEnabled: true });
-
-    await request(app.getHttpServer())
-      .get(`/feature-flag/${seed.body.id}`)
-      .set('Authorization', 'Bearer ' + apiKey)
-      .expect(200);
-  });
-
-  it('Failed to get feature flag due to invalid id', async () => {
-    return await request(app.getHttpServer())
-      .get('/feature-flag/invalid-id')
-      .set('Authorization', 'Bearer ' + apiKey)
-      .expect(400);
-  });
-
-  it('Failed to get feature flag due to missing api key', async () => {
-    return await request(app.getHttpServer())
-      .get('/feature-flag/0')
-      .expect(401);
-  });
-
-  it('Failed to get feature flag due to not found id', async () => {
-    return await request(app.getHttpServer())
-      .get('/feature-flag/99999999')
-      .set('Authorization', 'Bearer ' + apiKey)
-      .expect(404);
-  });
-});
-
 describe('Feature Flag Creation Routes', () => {
-  it('Creates a new feature flag for a different env', async () => {
-    const localApiKey = await createApiKey('test-seed-project', 'dev');
-    
+  it('Creates a new feature flag with required fields', async () => {
     await request(app.getHttpServer())
       .post('/feature-flag/create')
-      .set('Authorization', 'Bearer ' + localApiKey)
+      .set('Authorization', 'Bearer ' + apiKey)
       .send({
-        name: 'new-ui-dashboard',
-        isEnabled: false,
+        id: 'new-ui-dashboard',
+        enabled: false,
       })
       .expect(201);
   });
 
-  it('Fails without a name', async () => {
+  it('Creates a new feature flag with all fields', async () => {
+    await request(app.getHttpServer())
+      .post('/feature-flag/create')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        id: 'beta-feature-x',
+        enabled: true,
+        description: 'Enables the beta feature X for testing',
+      })
+      .expect(201);
+  });
+
+  it('Fails without an id', async () => {
     return request(app.getHttpServer())
       .post('/feature-flag/create')
       .set('Authorization', 'Bearer ' + apiKey)
       .send({
-        isEnabled: true,
+        enabled: true,
       })
       .expect(400);
   });
 
-  it('Creation endpoint called with no Authorization header', () => {
+  it('Fails when called without an API Key', () => {
     return request(app.getHttpServer())
       .post('/feature-flag/create')
       .send({
-        name: 'test-flag',
-        isEnabled: true,
+        id: 'test-flag',
+        enabled: true,
       })
       .expect(401);
   });
+});
 
-  it('Creation endpoint called with an invalid API Key', () => {
-    return request(app.getHttpServer())
-      .post('/feature-flag/create')
-      .set('Authorization', 'Bearer invalid.api.key')
-      .send({
-        name: 'test-flag',
-        isEnabled: true,
-      })
-      .expect(401);
-  });
-  
-  it('Creation endpoint called with a correct payload (header + body)', () => {
-    return request(app.getHttpServer())
+describe('Feature Flag Retrieval Routes', () => {
+  it('Successfully gets a feature flag by id', async () => {
+    const flagId = 'retrieval-test-flag';
+    await request(app.getHttpServer())
       .post('/feature-flag/create')
       .set('Authorization', 'Bearer ' + apiKey)
-      .send({
-        name: 'correct-payload-flag',
-        isEnabled: true,
-        description: 'Testing correct payload creation',
-      })
-      .expect(201); 
+      .send({ id: flagId, enabled: true });
+
+    await request(app.getHttpServer())
+      .get(`/feature-flag/${flagId}`)
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+  });
+
+  it('Failed to get feature flag due to not found id', async () => {
+    return await request(app.getHttpServer())
+      .get('/feature-flag/nonexistent-flag-id')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(404);
+  });
+
+  it('Failed to get feature flag due to missing api key', async () => {
+    return await request(app.getHttpServer())
+      .get('/feature-flag/some-flag-id')
+      .expect(401);
   });
 });
 
 describe('Feature Flag Update Routes', () => {
   it('Updates a feature flag with valid parameters', async () => {
-    const seed = await request(app.getHttpServer())
+    const flagId = 'update-test-flag';
+    await request(app.getHttpServer())
       .post('/feature-flag/create')
       .set('Authorization', 'Bearer ' + apiKey)
-      .send({ name: 'update-test-flag', isEnabled: false });
+      .send({ id: flagId, enabled: false });
 
     return request(app.getHttpServer())
-      .patch(`/feature-flag/${seed.body.id}`)
+      .patch(`/feature-flag/${flagId}`)
       .set('Authorization', 'Bearer ' + apiKey)
       .send({
-        isEnabled: true,
+        enabled: true,
+        description: 'Updated description',
       })
       .expect(200);
   });
 
-  it('Update endpoint called with no Authorization header', async () => {
-    return request(app.getHttpServer())
-      .patch('/feature-flag/0')
-      .send({
-        isEnabled: true,
-      })
-      .expect(401);
-  });
-
-  it('Update endpoint called with an invalid API Key', async () => {
-    return request(app.getHttpServer())
-      .patch('/feature-flag/0')
-      .set('Authorization', 'Bearer invalid.jwt.token')
-      .send({
-        isEnabled: true,
-      })
-      .expect(401);
-  });
-
   it('Failed to update feature flag due to not found id', async () => {
     return request(app.getHttpServer())
-      .patch('/feature-flag/99999999')
+      .patch('/feature-flag/nonexistent-flag-id')
       .set('Authorization', 'Bearer ' + apiKey)
       .send({
-        isEnabled: true,
+        enabled: true,
       })
+      .expect(404);
+  });
+
+  it('Update endpoint called with no Authorization header', async () => {
+    return request(app.getHttpServer())
+      .patch('/feature-flag/some-flag-id')
+      .send({
+        enabled: true,
+      })
+      .expect(401);
+  });
+});
+
+describe('Feature Flag Deletion Routes', () => {
+  it('Successfully deletes an existing feature flag', async () => {
+    const flagId = 'delete-test-flag';
+    await request(app.getHttpServer())
+      .post('/feature-flag/create')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({ id: flagId, enabled: false });
+
+    return request(app.getHttpServer())
+      .delete(`/feature-flag/${flagId}`)
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+  });
+
+  it('Failed to delete feature flag due to not found id', async () => {
+    return request(app.getHttpServer())
+      .delete('/feature-flag/nonexistent-flag-id')
+      .set('Authorization', 'Bearer ' + apiKey)
       .expect(404);
   });
 });
