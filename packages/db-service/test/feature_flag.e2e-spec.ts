@@ -31,10 +31,7 @@ async function initApp() {
         JUNO_FEATURE_FLAG_PACKAGE_NAME,
         ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
       ],
-      protoPath: [
-        FeatureFlagProtoFile,
-        ResetProtoFile,
-      ],
+      protoPath: [FeatureFlagProtoFile, ResetProtoFile],
       url: process.env.DB_SERVICE_ADDR,
     },
   });
@@ -79,12 +76,15 @@ describe('DB Service Feature Flag Tests', () => {
       FeatureFlagProtoFile,
     ]) as any;
 
-    const featureFlagProtoGRPC = GRPC.loadPackageDefinition(featureFlagProto) as any;
+    const featureFlagProtoGRPC = GRPC.loadPackageDefinition(
+      featureFlagProto,
+    ) as any;
 
-    featureFlagClient = new featureFlagProtoGRPC.juno.feature_flag.FeatureFlagDbService(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
+    featureFlagClient =
+      new featureFlagProtoGRPC.juno.feature_flag.FeatureFlagDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
   });
 
   it('creates a feature flag record correctly with all fields', async () => {
@@ -158,7 +158,7 @@ describe('DB Service Feature Flag Tests', () => {
 
   it('can retrieve an existing feature flag record', async () => {
     const flagId = 'retrieve-test-flag';
-    
+
     const createPromise = new Promise((resolve) => {
       featureFlagClient.createFlag(
         {
@@ -212,7 +212,7 @@ describe('DB Service Feature Flag Tests', () => {
 
   it("can set a feature flag's state for an existing record", async () => {
     const flagId = 'set-test-flag';
-    
+
     const createPromise = new Promise((resolve) => {
       featureFlagClient.createFlag(
         {

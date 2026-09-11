@@ -53,10 +53,13 @@ export class FeatureFlagController implements OnModuleInit {
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiCreatedResponse({
-    description: 'Returned the created feature flag associated with the given data',
+    description:
+      'Returned the created feature flag associated with the given data',
     type: FeatureFlagResponse,
   })
-  async createFlag(@Body() body: CreateFlagModel): Promise<FeatureFlagResponse> {
+  async createFlag(
+    @Body() body: CreateFlagModel,
+  ): Promise<FeatureFlagResponse> {
     const response = this.featureFlagService.createFlag({
       id: body.id,
       enabled: body.enabled,

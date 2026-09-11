@@ -39,7 +39,9 @@ export class FeatureFlagService {
       },
       data: {
         ...(request.enabled !== undefined && { enabled: request.enabled }),
-        ...(request.description !== undefined && { description: request.description }),
+        ...(request.description !== undefined && {
+          description: request.description,
+        }),
       },
     });
   }
