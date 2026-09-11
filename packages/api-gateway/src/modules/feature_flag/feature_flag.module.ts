@@ -14,7 +14,8 @@ import {
 } from 'juno-proto';
 
 const { JWT_SERVICE_NAME, JUNO_JWT_PACKAGE_NAME } = JwtProto;
-const { FEATURE_FLAG_SERVICE_NAME, JUNO_FEATURE_FLAG_PACKAGE_NAME } = FeatureFlagProto;
+const { FEATURE_FLAG_DB_SERVICE_NAME, JUNO_FEATURE_FLAG_PACKAGE_NAME } =
+  FeatureFlagProto;
 const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 
 @Module({
@@ -42,7 +43,7 @@ const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
         },
       },
       {
-        name: FEATURE_FLAG_SERVICE_NAME,
+        name: FEATURE_FLAG_DB_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
           url: process.env.DB_SERVICE_ADDR,
@@ -56,6 +57,6 @@ const { API_KEY_SERVICE_NAME, JUNO_API_KEY_PACKAGE_NAME } = ApiKeyProto;
 })
 export class FeatureFlagModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ApiKeyMiddleware).forRoutes('feature-flags/*');
+    consumer.apply(ApiKeyMiddleware).forRoutes('feature-flag/*');
   }
 }

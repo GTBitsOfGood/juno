@@ -4,7 +4,7 @@ import {
   Get,
   Param,
   Post,
-  Put,
+  Patch,
   Delete,
   Inject,
   OnModuleInit,
@@ -29,26 +29,26 @@ import {
   DeleteFlagResponse,
 } from 'src/models/feature_flag.dto';
 
-const { FEATURE_FLAG_SERVICE_NAME } = FeatureFlagProto;
+const { FEATURE_FLAG_DB_SERVICE_NAME } = FeatureFlagProto;
 
 @ApiBearerAuth('API_Key')
-@ApiTags('feature-flags')
-@Controller('feature-flags')
+@ApiTags('feature-flag')
+@Controller('feature-flag')
 export class FeatureFlagController implements OnModuleInit {
-  private featureFlagService: FeatureFlagProto.FeatureFlagServiceClient;
+  private featureFlagService: FeatureFlagProto.FeatureFlagDbServiceClient;
 
   constructor(
-    @Inject(FEATURE_FLAG_SERVICE_NAME) private client: ClientGrpc,
+    @Inject(FEATURE_FLAG_DB_SERVICE_NAME) private client: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.featureFlagService =
-      this.client.getService<FeatureFlagProto.FeatureFlagServiceClient>(
-        FEATURE_FLAG_SERVICE_NAME,
+      this.client.getService<FeatureFlagProto.FeatureFlagDbServiceClient>(
+        FEATURE_FLAG_DB_SERVICE_NAME,
       );
   }
 
-  @Post()
+  @Post('create')
   @ApiOperation({ summary: 'Creates a Feature Flag.' })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -85,7 +85,7 @@ export class FeatureFlagController implements OnModuleInit {
     return new FeatureFlagResponse(flagData);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Updates an existing Feature Flag.' })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -103,8 +103,10 @@ export class FeatureFlagController implements OnModuleInit {
 
     const response = this.featureFlagService.setFlag({
       id,
-      enabled: body.enabled,
-      description: body.description,
+      updateParams: {
+        enabled: body.enabled,
+        description: body.description,
+      },
     });
 
     const flagData = await lastValueFrom(response);
