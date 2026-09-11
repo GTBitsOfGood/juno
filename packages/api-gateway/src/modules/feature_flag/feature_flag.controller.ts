@@ -22,6 +22,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import {
+  CreateFlagModel,
+  SetFlagModel,
+  FeatureFlagResponse,
+  DeleteFlagResponse,
+} from 'src/models/feature_flag.dto';
 
 const { FEATURE_FLAG_SERVICE_NAME } = FeatureFlagProto;
 
@@ -29,7 +35,7 @@ const { FEATURE_FLAG_SERVICE_NAME } = FeatureFlagProto;
 @ApiTags('feature-flags')
 @Controller('feature-flags')
 export class FeatureFlagController implements OnModuleInit {
-  private featureFlagService: FeatureFlagProto.FeatureFlagServiceController;
+  private featureFlagService: FeatureFlagProto.FeatureFlagServiceClient;
 
   constructor(
     @Inject(FEATURE_FLAG_SERVICE_NAME) private client: ClientGrpc,
@@ -37,7 +43,7 @@ export class FeatureFlagController implements OnModuleInit {
 
   onModuleInit() {
     this.featureFlagService =
-      this.client.getService<FeatureFlagProto.FeatureFlagServiceController>(
+      this.client.getService<FeatureFlagProto.FeatureFlagServiceClient>(
         FEATURE_FLAG_SERVICE_NAME,
       );
   }
@@ -48,27 +54,17 @@ export class FeatureFlagController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiCreatedResponse({
     description: 'Returned the created feature flag associated with the given data',
+    type: FeatureFlagResponse,
   })
-  async createFlag(
-    @Body('id') id: string,
-    @Body('enabled') enabled: boolean,
-    @Body('description') description?: string,
-  ) {
-    if (!id || id.trim() === '') {
-      throw new BadRequestException('id must exist and be non-empty');
-    }
-    if (enabled === undefined) {
-      throw new BadRequestException('enabled must be included');
-    }
-
+  async createFlag(@Body() body: CreateFlagModel): Promise<FeatureFlagResponse> {
     const response = this.featureFlagService.createFlag({
-      id,
-      enabled,
-      description,
+      id: body.id,
+      enabled: body.enabled,
+      description: body.description,
     });
 
     const flagData = await lastValueFrom(response);
-    return flagData;
+    return new FeatureFlagResponse(flagData);
   }
 
   @Get(':id')
@@ -77,15 +73,16 @@ export class FeatureFlagController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
     description: 'Returned the requested feature flag',
+    type: FeatureFlagResponse,
   })
-  async getFlag(@Param('id') id: string) {
+  async getFlag(@Param('id') id: string): Promise<FeatureFlagResponse> {
     if (!id || id.trim() === '') {
       throw new BadRequestException('id must exist and be non-empty');
     }
 
     const response = this.featureFlagService.getFlag({ id });
     const flagData = await lastValueFrom(response);
-    return flagData;
+    return new FeatureFlagResponse(flagData);
   }
 
   @Put(':id')
@@ -94,27 +91,24 @@ export class FeatureFlagController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
     description: 'Returned the updated feature flag',
+    type: FeatureFlagResponse,
   })
   async setFlag(
     @Param('id') id: string,
-    @Body('enabled') enabled: boolean,
-    @Body('description') description?: string,
-  ) {
+    @Body() body: SetFlagModel,
+  ): Promise<FeatureFlagResponse> {
     if (!id || id.trim() === '') {
       throw new BadRequestException('id must exist and be non-empty');
-    }
-    if (enabled === undefined) {
-      throw new BadRequestException('enabled must be included');
     }
 
     const response = this.featureFlagService.setFlag({
       id,
-      enabled,
-      description,
+      enabled: body.enabled,
+      description: body.description,
     });
 
     const flagData = await lastValueFrom(response);
-    return flagData;
+    return new FeatureFlagResponse(flagData);
   }
 
   @Delete(':id')
@@ -123,14 +117,15 @@ export class FeatureFlagController implements OnModuleInit {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
     description: 'Returned the delete confirmation',
+    type: DeleteFlagResponse,
   })
-  async deleteFlag(@Param('id') id: string) {
+  async deleteFlag(@Param('id') id: string): Promise<DeleteFlagResponse> {
     if (!id || id.trim() === '') {
       throw new BadRequestException('id must exist and be non-empty');
     }
 
     const response = this.featureFlagService.deleteFlag({ id });
     const flagData = await lastValueFrom(response);
-    return flagData;
+    return new DeleteFlagResponse(flagData);
   }
 }
