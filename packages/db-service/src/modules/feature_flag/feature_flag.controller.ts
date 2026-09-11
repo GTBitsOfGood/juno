@@ -3,11 +3,11 @@ import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { FeatureFlagService } from './feature_flag.service';
 import { FeatureFlagProto } from 'juno-proto';
-import { FeatureFlagServiceController } from 'juno-proto/dist/gen/feature_flag';
+import { FeatureFlagDbServiceController } from 'juno-proto/dist/gen/feature_flag';
 
 @Controller()
-@FeatureFlagProto.FeatureFlagServiceControllerMethods()
-export class FeatureFlagController implements FeatureFlagServiceController {
+@FeatureFlagProto.FeatureFlagDbServiceControllerMethods()
+export class FeatureFlagController implements FeatureFlagDbServiceController {
   constructor(private readonly featureFlagService: FeatureFlagService) {}
 
   async createFlag(
@@ -41,7 +41,7 @@ export class FeatureFlagController implements FeatureFlagServiceController {
     }
 
     const featureFlag = await this.featureFlagService.getFlag(request);
-    return featureFlag; // error handling would go here, but not adding based on other modules
+    return featureFlag;
   }
 
   async setFlag(

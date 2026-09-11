@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { FeatureFlag } from '@prisma/client';
+import { FeatureFlag, Prisma } from '@prisma/client';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 import { FeatureFlagProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -10,48 +12,99 @@ export class FeatureFlagService {
   async createFlag(
     request: FeatureFlagProto.CreateFlagRequest,
   ): Promise<FeatureFlag> {
-    return this.prisma.featureFlag.create({
-      data: {
-        id: request.id,
-        enabled: request.enabled,
-        description: request.description,
-      },
-    });
+    try {
+      return await this.prisma.featureFlag.create({
+        data: {
+          id: request.id,
+          enabled: request.enabled,
+          description: request.description,
+        },
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        throw new RpcException({
+          code: status.ALREADY_EXISTS,
+          message: `Feature flag with id '${request.id}' already exists`,
+        });
+      }
+      throw e;
+    }
   }
 
   async getFlag(
     request: FeatureFlagProto.GetFlagRequest,
   ): Promise<FeatureFlag> {
-    return this.prisma.featureFlag.findUnique({
+    const flag = await this.prisma.featureFlag.findUnique({
       where: {
         id: request.id,
       },
     });
+
+    if (!flag) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: `Feature flag with id '${request.id}' not found`,
+      });
+    }
+
+    return flag;
   }
 
-  // only updates enabled/description if provided in the request (leave unchanged if undefined)
   async setFlag(
     request: FeatureFlagProto.SetFlagRequest,
   ): Promise<FeatureFlag> {
-    return this.prisma.featureFlag.update({
-      where: {
-        id: request.id,
-      },
-      data: {
-        ...(request.enabled !== undefined && { enabled: request.enabled }),
-        ...(request.description !== undefined && { description: request.description }),
-      },
-    });
+    try {
+      return await this.prisma.featureFlag.update({
+        where: {
+          id: request.id,
+        },
+        data: {
+          ...(request.updateParams?.enabled !== undefined && {
+            enabled: request.updateParams.enabled,
+          }),
+          ...(request.updateParams?.description !== undefined && {
+            description: request.updateParams.description,
+          }),
+        },
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2025'
+      ) {
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: `Feature flag with id '${request.id}' not found`,
+        });
+      }
+      throw e;
+    }
   }
 
   async deleteFlag(
     request: FeatureFlagProto.DeleteFlagRequest,
   ): Promise<FeatureFlagProto.DeleteFlagResponse> {
-    await this.prisma.featureFlag.delete({
-      where: {
-        id: request.id,
-      },
-    });
+    try {
+      await this.prisma.featureFlag.delete({
+        where: {
+          id: request.id,
+        },
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2025'
+      ) {
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: `Feature flag with id '${request.id}' not found`,
+        });
+      }
+      throw e;
+    }
 
     return {
       success: true,
