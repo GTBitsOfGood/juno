@@ -1,108 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { FileServiceConfig } from '@prisma/client';
+import { FeatureFlag } from '@prisma/client';
+import { FeatureFlagProto } from 'juno-proto';
 import { PrismaService } from 'src/prisma.service';
-import { FileConfigProto } from 'juno-proto';
 
 @Injectable()
-export class FileServiceConfigService {
+export class FeatureFlagService {
   constructor(private prisma: PrismaService) {}
 
-  async createConfig(
-    configData: FileConfigProto.CreateFileServiceConfigRequest,
-  ): Promise<FileServiceConfig> {
-    return this.prisma.fileServiceConfig.create({
+  async createFlag(
+    request: FeatureFlagProto.CreateFlagRequest,
+  ): Promise<FeatureFlag> {
+    return this.prisma.featureFlag.create({
       data: {
-        Project: {
-          connect: {
-            id: Number(configData.projectId),
-          },
-        },
-        environment: configData.environment,
-      },
-      include: {
-        Project: true,
-        buckets: true,
-        FileServiceFile: true,
+        id: request.id,
+        enabled: request.enabled,
+        description: request.description,
       },
     });
   }
 
-  async getConfig(
-    req: FileConfigProto.GetFileServiceConfigRequest,
-  ): Promise<FileServiceConfig | null> {
-    return this.prisma.fileServiceConfig.findUnique({
+  async getFlag(
+    request: FeatureFlagProto.GetFlagRequest,
+  ): Promise<FeatureFlag> {
+    return this.prisma.featureFlag.findUnique({
       where: {
-        id_environment: {
-          id: Number(req.id),
-          environment: req.environment,
-        },
-      },
-      include: {
-        Project: true,
-        buckets: true,
-        FileServiceFile: true,
+        id: request.id,
       },
     });
   }
 
-  async updateConfig(
-    req: FileConfigProto.UpdateFileServiceConfigRequest,
-  ): Promise<FileServiceConfig> {
-    return this.prisma.fileServiceConfig.update({
+  // only updates enabled/description if provided in the request (leave unchanged if undefined)
+  async setFlag(
+    request: FeatureFlagProto.SetFlagRequest,
+  ): Promise<FeatureFlag> {
+    return this.prisma.featureFlag.update({
       where: {
-        id_environment: {
-          id: Number(req.id),
-          environment: req.environment,
-        },
+        id: request.id,
       },
       data: {
-        buckets: {
-          deleteMany: {},
-          // create: configData.buckets.map((bucket) => ({
-          //   bucketName: bucket.bucketName,
-          // })),
-        },
-        Project: {
-          connect: {
-            id: Number(req.id),
-          },
-        },
-        FileServiceFile: {
-          deleteMany: {},
-          // create:
-          //   configData.files?.map((file) => ({
-          //     fileId: {
-          //       path: file.fileId.path,
-          //       bucketName: file.fileId.bucketName,
-          //       configId: file.fileId.configId,
-          //     },
-          //     metadata: file.metadata,
-          //   })) || [],
-        },
-      },
-      include: {
-        Project: true,
-        buckets: true,
-        FileServiceFile: true,
+        ...(request.enabled !== undefined && { enabled: request.enabled }),
+        ...(request.description !== undefined && { description: request.description }),
       },
     });
   }
 
-  async deleteConfig(
-    request: FileConfigProto.DeleteFileServiceConfigRequest,
-  ): Promise<FileServiceConfig> {
-    return this.prisma.fileServiceConfig.delete({
+  async deleteFlag(
+    request: FeatureFlagProto.DeleteFlagRequest,
+  ): Promise<FeatureFlagProto.DeleteFlagResponse> {
+    await this.prisma.featureFlag.delete({
       where: {
-        id_environment: {
-          id: Number(request.id),
-          environment: request.environment,
-        },
-      },
-      include: {
-        Project: true,
-        buckets: true,
-        FileServiceFile: true,
+        id: request.id,
       },
     });
+
+    return {
+      success: true,
+    };
   }
 }

@@ -53,12 +53,6 @@ export class FeatureFlagController implements FeatureFlagServiceController {
         message: 'Provided Flag ID is invalid',
       });
     }
-    if (request.enabled === undefined) {
-      throw new RpcException({
-        code: status.INVALID_ARGUMENT,
-        message: 'Provided Flag enabled value is invalid',
-      });
-    }
 
     const featureFlag = await this.featureFlagService.setFlag(request);
     return featureFlag;

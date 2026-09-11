@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { FeatureFlagController } from './feature_flag.controller';
-import { FeatureFlagService } from './feature_flag.service.ts';
+import { FeatureFlagService } from './feature_flag.service';
 
 
 @Module({
-  imports: [ ],
+  imports: [],
   controllers: [ FeatureFlagController ],
   providers: [ FeatureFlagService, PrismaService ],
 })

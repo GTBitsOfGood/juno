@@ -29,7 +29,7 @@ export class FeatureFlagService {
     });
   }
 
-  // only updates description if it was provided in the request (leave unchanged if request.description is undefined)
+  // only updates enabled/description if provided in the request (leave unchanged if undefined)
   async setFlag(
     request: FeatureFlagProto.SetFlagRequest,
   ): Promise<FeatureFlag> {
@@ -38,7 +38,7 @@ export class FeatureFlagService {
         id: request.id,
       },
       data: {
-        enabled: request.enabled,
+        ...(request.enabled !== undefined && { enabled: request.enabled }),
         ...(request.description !== undefined && { description: request.description }),
       },
     });
@@ -52,11 +52,9 @@ export class FeatureFlagService {
         id: request.id,
       },
     });
-  
 
     return {
       success: true,
     };
   }
 }
-
