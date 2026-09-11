@@ -21,6 +21,7 @@ import { FileDeleteModule } from './modules/file_delete/file_delete.module';
     ProjectModule,
     UserModule,
     EmailModule,
+    FeatureFlagModule,
     FileProviderModule,
     FileDownloadModule,
     FileUploadModule,
