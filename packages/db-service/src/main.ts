@@ -28,6 +28,8 @@ import {
   FileProviderProtoFile,
   AnalyticsConfigProto,
   AnalyticsConfigProtoFile,
+  FeatureFlagProto,
+  FeatureFlagProtoFile,
 } from 'juno-proto';
 import { CustomRpcExceptionFilter } from './global-exception.filter';
 
@@ -52,6 +54,7 @@ async function bootstrap() {
           FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
           FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
           AnalyticsConfigProto.JUNO_ANALYTICS_SERVICE_ANALYTICS_CONFIG_PACKAGE_NAME,
+          FeatureFlagProto.JUNO_FEATURE_FLAG_PACKAGE_NAME,
         ],
         protoPath: [
           UserProtoFile,
@@ -66,6 +69,7 @@ async function bootstrap() {
           FileConfigProtoFile,
           FileProviderProtoFile,
           AnalyticsConfigProtoFile,
+          FeatureFlagProtoFile,
         ],
         url: process.env.DB_SERVICE_ADDR,
       },

@@ -12,6 +12,7 @@ import { FileConfigModule } from './modules/file_config/file_config.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AnalyticsConfigModule } from './modules/analytics_config/analytics_config.module';
 import { FileDeleteModule } from './modules/file_delete/file_delete.module';
+import { FeatureFlagModule } from './modules/feature_flag/feature_flag.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FileDeleteModule } from './modules/file_delete/file_delete.module';
     FileDeleteModule,
     AnalyticsModule,
     AnalyticsConfigModule,
+    FeatureFlagModule,
   ],
 })
 export class AppModule {}
