@@ -8,11 +8,11 @@ message FeatureFlag {
   optional string description = 3;
 }
 
-service FeatureFlagService {
-  rpc CreateFlag(CreateFlagRequest) returns (FeatureFlag);
-  rpc GetFlag(GetFlagRequest)       returns (FeatureFlag);
-  rpc SetFlag(SetFlagRequest)       returns (FeatureFlag);
-  rpc DeleteFlag(DeleteFlagRequest) returns (DeleteFlagResponse);
+service FeatureFlagDbService {
+  rpc createFlag(CreateFlagRequest) returns (FeatureFlag);
+  rpc getFlag(GetFlagRequest)       returns (FeatureFlag);
+  rpc setFlag(SetFlagRequest)       returns (FeatureFlag);
+  rpc deleteFlag(DeleteFlagRequest) returns (DeleteFlagResponse);
 }
 
 message CreateFlagRequest {
@@ -25,10 +25,14 @@ message GetFlagRequest {
   string id = 1;
 }
 
+message UpdateFeatureFlagParams {
+  optional bool enabled = 1;
+  optional string description = 2;
+}
+
 message SetFlagRequest {
   string id = 1;
-  optional bool enabled = 2;
-  optional string description = 3;
+  UpdateFeatureFlagParams updateParams = 2;
 }
 
 message DeleteFlagRequest {

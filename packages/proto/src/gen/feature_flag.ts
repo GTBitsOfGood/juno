@@ -18,7 +18,7 @@ export interface FeatureFlag {
 
 export interface CreateFlagRequest {
   id: string;
-  enabled: boolean;
+  enabled?: boolean | undefined;
   description?: string | undefined;
 }
 
@@ -26,9 +26,14 @@ export interface GetFlagRequest {
   id: string;
 }
 
+export interface UpdateFeatureFlagParams {
+  enabled?: boolean | undefined;
+  description?: string | undefined;
+}
+
 export interface SetFlagRequest {
   id: string;
-  enabled: boolean;
+  updateParams: UpdateFeatureFlagParams | undefined;
 }
 
 export interface DeleteFlagRequest {
@@ -41,7 +46,7 @@ export interface DeleteFlagResponse {
 
 export const JUNO_FEATURE_FLAG_PACKAGE_NAME = 'juno.feature_flag';
 
-export interface FeatureFlagServiceClient {
+export interface FeatureFlagDbServiceClient {
   createFlag(request: CreateFlagRequest): Observable<FeatureFlag>;
 
   getFlag(request: GetFlagRequest): Observable<FeatureFlag>;
@@ -51,7 +56,7 @@ export interface FeatureFlagServiceClient {
   deleteFlag(request: DeleteFlagRequest): Observable<DeleteFlagResponse>;
 }
 
-export interface FeatureFlagServiceController {
+export interface FeatureFlagDbServiceController {
   createFlag(
     request: CreateFlagRequest,
   ): Promise<FeatureFlag> | Observable<FeatureFlag> | FeatureFlag;
@@ -72,7 +77,7 @@ export interface FeatureFlagServiceController {
     | DeleteFlagResponse;
 }
 
-export function FeatureFlagServiceControllerMethods() {
+export function FeatureFlagDbServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       'createFlag',
@@ -85,7 +90,7 @@ export function FeatureFlagServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcMethod('FeatureFlagService', method)(
+      GrpcMethod('FeatureFlagDbService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -97,7 +102,7 @@ export function FeatureFlagServiceControllerMethods() {
         constructor.prototype,
         method,
       );
-      GrpcStreamMethod('FeatureFlagService', method)(
+      GrpcStreamMethod('FeatureFlagDbService', method)(
         constructor.prototype[method],
         method,
         descriptor,
@@ -106,4 +111,4 @@ export function FeatureFlagServiceControllerMethods() {
   };
 }
 
-export const FEATURE_FLAG_SERVICE_NAME = 'FeatureFlagService';
+export const FEATURE_FLAG_DB_SERVICE_NAME = 'FeatureFlagDbService';
