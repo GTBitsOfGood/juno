@@ -549,8 +549,7 @@ export class RegisterDomainResponse {
 
   constructor(
     res:
-      | EmailProto.AuthenticateDomainResponse
-      | EmailProto.VerifyDomainResponse,
+      EmailProto.AuthenticateDomainResponse | EmailProto.VerifyDomainResponse,
   ) {
     this.id = Number(res.id);
     this.valid = `${res.valid}`;

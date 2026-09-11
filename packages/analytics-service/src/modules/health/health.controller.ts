@@ -15,8 +15,7 @@ export class HealthController implements HealthProto.HealthController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _request: HealthProto.HealthCheckRequest,
   ):
-    | HealthProto.HealthCheckResponse
-    | Promise<HealthProto.HealthCheckResponse> {
+    HealthProto.HealthCheckResponse | Promise<HealthProto.HealthCheckResponse> {
     return {
       status: HealthProto.HealthCheckResponse_ServingStatus.SERVING,
     };
