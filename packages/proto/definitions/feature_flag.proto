@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package juno.feature_flag;
+
+message FeatureFlag {
+  string id = 1;
+  bool enabled = 2;
+  optional string description = 3;
+}
+
+service FeatureFlagDbService {
+  rpc createFlag(CreateFlagRequest) returns (FeatureFlag);
+  rpc getFlag(GetFlagRequest)       returns (FeatureFlag);
+  rpc setFlag(SetFlagRequest)       returns (FeatureFlag);
+  rpc deleteFlag(DeleteFlagRequest) returns (DeleteFlagResponse);
+}
+
+message CreateFlagRequest {
+  string id = 1;
+  bool enabled = 2;
+  optional string description = 3;
+}
+
+message GetFlagRequest {
+  string id = 1;
+}
+
+message SetFlagRequest {
+  string id = 1;
+  bool enabled = 2;
+  optional string description = 3;
+}
+
+message DeleteFlagRequest {
+  string id = 1;
+}
+
+message DeleteFlagResponse {
+  bool success = 1;
+}
