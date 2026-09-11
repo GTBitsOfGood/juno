@@ -42,9 +42,7 @@ export interface LoggingServiceController {
   recordError(
     request: ErrorLogRequest,
   ):
-    | Promise<ErrorLogResponse>
-    | Observable<ErrorLogResponse>
-    | ErrorLogResponse;
+    Promise<ErrorLogResponse> | Observable<ErrorLogResponse> | ErrorLogResponse;
 }
 
 export function LoggingServiceControllerMethods() {

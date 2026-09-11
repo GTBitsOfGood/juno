@@ -140,9 +140,7 @@ export interface UserServiceController {
   getUserPasswordHash(
     request: UserIdentifier,
   ):
-    | Promise<UserPasswordHash>
-    | Observable<UserPasswordHash>
-    | UserPasswordHash;
+    Promise<UserPasswordHash> | Observable<UserPasswordHash> | UserPasswordHash;
 }
 
 export function UserServiceControllerMethods() {
