@@ -11,7 +11,6 @@ import {
   FeatureFlagProto,
 } from 'juno-proto';
 import { AppModule } from 'src/app.module';
-import { FeatureFlag } from '@prisma/client';
 
 const { JUNO_FEATURE_FLAG_PACKAGE_NAME } = FeatureFlagProto;
 
