@@ -83,4 +83,3 @@ export class DeleteFlagResponse {
     this.success = res.success;
   }
 }
-
