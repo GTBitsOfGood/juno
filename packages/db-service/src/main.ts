@@ -18,6 +18,8 @@ import {
   ApiKeyProtoFile,
   EmailProto,
   EmailProtoFile,
+  FeatureFlagProto,
+  FeatureFlagProtoFile,
   FileProto,
   FileProtoFile,
   FileBucketProto,
