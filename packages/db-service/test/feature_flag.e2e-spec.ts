@@ -149,9 +149,9 @@ describe('DB Service Feature Flag Tests', () => {
           enabled: false,
           description: 'original',
         },
-        (err, resp: FeatureFlag) => {
+        (err) => {
           expect(err).toBeNull();
-          resolve(resp);
+          resolve({});
         },
       );
     });
@@ -165,7 +165,7 @@ describe('DB Service Feature Flag Tests', () => {
           enabled: true,
           description: 'State has been updated',
         },
-        (err, resp: FeatureFlag) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },
@@ -184,9 +184,9 @@ describe('DB Service Feature Flag Tests', () => {
           id: flagId,
           enabled: false,
         },
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
-          resolve(resp);
+          resolve({});
         },
       );
     });
@@ -198,7 +198,7 @@ describe('DB Service Feature Flag Tests', () => {
         {
           id: flagId,
         },
-        (err, resp) => {
+        (err) => {
           expect(err).toBeNull();
           resolve({});
         },
