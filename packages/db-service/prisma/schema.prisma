@@ -165,3 +165,9 @@ model NewAccountRequest {
   projectName String?
   createdAt   DateTime @default(now())
 }
+
+model FeatureFlag {
+  id          String  @id
+  enabled     Boolean @default(false)
+  description String?
+}
