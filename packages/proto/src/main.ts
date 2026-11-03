@@ -15,6 +15,7 @@ export * as FileProviderProto from './gen/file_provider';
 export * as CommonProto from './gen/common';
 export * as AnalyticsProto from './gen/analytics';
 export * as AnalyticsConfigProto from './gen/analytics_config';
+export * as AnalyticsEventProto from './gen/analytics_event';
 
 import { join } from 'path';
 
@@ -40,4 +41,7 @@ export const CommonProtoFile = getProtoFilePath('common.proto');
 export const AnalyticsProtoFile = getProtoFilePath('analytics.proto');
 export const AnalyticsConfigProtoFile = getProtoFilePath(
   'analytics_config.proto',
+);
+export const AnalyticsEventProtoFile = getProtoFilePath(
+  'analytics_event.proto',
 );
