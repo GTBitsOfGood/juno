@@ -54,6 +54,103 @@ async function createApiKey(proj: string, env: string): Promise<string> {
   return key.body['apiKey'];
 }
 
+async function createProject(name: string): Promise<number> {
+  const res = await request(app.getHttpServer())
+    .post('/project')
+    .set('X-User-Email', ADMIN_EMAIL)
+    .set('X-User-Password', ADMIN_PASSWORD)
+    .send({ name })
+    .expect(201);
+
+  return res.body['id'];
+}
+
+async function createUser(email: string, password: string): Promise<number> {
+  const res = await request(app.getHttpServer())
+    .post('/user')
+    .set('X-User-Email', ADMIN_EMAIL)
+    .set('X-User-Password', ADMIN_PASSWORD)
+    .send({ name: 'Email Scope Test User', email, password })
+    .expect(201);
+
+  return res.body['id'];
+}
+
+async function JWTforUser(email: string, password: string): Promise<string> {
+  const res = await request(app.getHttpServer())
+    .post('/auth/user/jwt')
+    .set('X-User-Email', email)
+    .set('X-User-Password', password)
+    .send();
+
+  return res.body['token'];
+}
+
+interface ScopingFixtures {
+  projectAId: number;
+  projectBId: number;
+  apiKeyA: string;
+  apiKeyB: string;
+  scopedAdminJwt: string; // ADMIN linked to project A only
+  unlinkedUserJwt: string; // regular user linked to no project
+}
+
+let scopingFixtures: ScopingFixtures | undefined;
+
+// Two projects, each with its own API key and its own SendGrid key, plus two
+// users: an admin linked to project A only, and a user linked to nothing.
+// Created lazily (and once) so the tests don't depend on hook ordering.
+async function getScopingFixtures(): Promise<ScopingFixtures> {
+  if (scopingFixtures) {
+    return scopingFixtures;
+  }
+
+  const projectAId = await createProject('email-scope-a');
+  const projectBId = await createProject('email-scope-b');
+  const apiKeyA = await createApiKey('email-scope-a', 'prod');
+  const apiKeyB = await createApiKey('email-scope-b', 'prod');
+
+  await request(app.getHttpServer())
+    .post('/email/setup')
+    .set('Authorization', 'Bearer ' + apiKeyA)
+    .send({ sendgridKey: 'scoping-key-a' })
+    .expect(201);
+  await request(app.getHttpServer())
+    .post('/email/setup')
+    .set('Authorization', 'Bearer ' + apiKeyB)
+    .send({ sendgridKey: 'scoping-key-b' })
+    .expect(201);
+
+  const adminEmail = 'email-scope-admin@example.com';
+  const adminId = await createUser(adminEmail, 'password');
+  await request(app.getHttpServer())
+    .post('/user/type')
+    .set('X-User-Email', ADMIN_EMAIL)
+    .set('X-User-Password', ADMIN_PASSWORD)
+    .send({ email: adminEmail, type: 'ADMIN' })
+    .expect(201);
+  await request(app.getHttpServer())
+    .put(`/user/id/${adminId}/project`)
+    .set('X-User-Email', ADMIN_EMAIL)
+    .set('X-User-Password', ADMIN_PASSWORD)
+    .send({ name: 'email-scope-a' })
+    .expect(200);
+
+  const unlinkedEmail = 'email-scope-unlinked@example.com';
+  await createUser(unlinkedEmail, 'password');
+
+  // JWTs are issued after the user is set up, so they reflect the linkage.
+  scopingFixtures = {
+    projectAId,
+    projectBId,
+    apiKeyA,
+    apiKeyB,
+    scopedAdminJwt: await JWTforUser(adminEmail, 'password'),
+    unlinkedUserJwt: await JWTforUser(unlinkedEmail, 'password'),
+  };
+  return scopingFixtures;
+}
+
 beforeEach(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -618,15 +715,39 @@ describe('Domain Registration Routes', () => {
 });
 
 describe('Email Senders Routes', () => {
-  it('Successfully gets senders', async () => {
+  it('Lists a sender registered earlier in this suite', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/email/senders')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+
+    expect(response.body.senders).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fromEmail: 'validemail@example.com',
+          fromName: 'name',
+          verified: false,
+        }),
+      ]),
+    );
+  });
+
+  it("Accepts an explicit x-project-id for the key's own project", async () => {
+    const response = await request(app.getHttpServer())
+      .get('/email/senders')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .set('x-project-id', '0')
+      .expect(200);
+
+    expect(Array.isArray(response.body.senders)).toBe(true);
+  });
+
+  it('Fails with a malformed x-project-id', async () => {
     return request(app.getHttpServer())
       .get('/email/senders')
       .set('Authorization', 'Bearer ' + apiKey)
-      .expect(200)
-      .then((response) => {
-        expect(response.body).toHaveProperty('senders');
-        expect(Array.isArray(response.body.senders)).toBe(true);
-      });
+      .set('x-project-id', 'abc')
+      .expect(400);
   });
 
   it('Fails without an Authorization header', async () => {
@@ -642,15 +763,39 @@ describe('Email Senders Routes', () => {
 });
 
 describe('Email Domains Routes', () => {
-  it('Successfully gets domains', async () => {
+  it('Lists a domain registered earlier in this suite', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/email/domains')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .expect(200);
+
+    expect(response.body.domains).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          domain: 'example.com',
+          subdomain: 'sub',
+          valid: false,
+        }),
+      ]),
+    );
+  });
+
+  it("Accepts an explicit x-project-id for the key's own project", async () => {
+    const response = await request(app.getHttpServer())
+      .get('/email/domains')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .set('x-project-id', '0')
+      .expect(200);
+
+    expect(Array.isArray(response.body.domains)).toBe(true);
+  });
+
+  it('Fails with a malformed x-project-id', async () => {
     return request(app.getHttpServer())
       .get('/email/domains')
       .set('Authorization', 'Bearer ' + apiKey)
-      .expect(200)
-      .then((response) => {
-        expect(response.body).toHaveProperty('domains');
-        expect(Array.isArray(response.body.domains)).toBe(true);
-      });
+      .set('x-project-id', 'abc')
+      .expect(400);
   });
 
   it('Fails without an Authorization header', async () => {
@@ -673,14 +818,33 @@ describe('Domain Verification Routes', () => {
       .expect(400);
   });
 
-  it('Verifies a domain with valid parameters', () => {
+  it('Verifies a domain with valid parameters', async () => {
+    // Register first so the test doesn't depend on seeded data.
+    await request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        domain: 'verify-me.example.com',
+      })
+      .expect(201);
+
     return request(app.getHttpServer())
       .post('/email/verify-domain')
       .set('Authorization', 'Bearer ' + apiKey)
       .send({
-        domain: 'testdomain',
+        domain: 'verify-me.example.com',
       })
       .expect(201);
+  });
+
+  it('Fails to verify a domain that was never registered', () => {
+    return request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer ' + apiKey)
+      .send({
+        domain: 'never-registered.example.com',
+      })
+      .expect(404);
   });
 
   it('Verification endpoint called with no Authorization header', () => {
@@ -700,5 +864,109 @@ describe('Domain Verification Routes', () => {
         domain: 'testdomain',
       })
       .expect(401);
+  });
+});
+
+describe('Email Project Scoping', () => {
+  describe.each(['/email/senders', '/email/domains'])('GET %s', (route) => {
+    it('Succeeds for a user linked to the project (x-user-jwt + x-project-id)', async () => {
+      const f = await getScopingFixtures();
+      await request(app.getHttpServer())
+        .get(route)
+        .set('Authorization', 'Bearer ' + apiKey)
+        .set('x-user-jwt', f.scopedAdminJwt)
+        .set('x-project-id', String(f.projectAId))
+        .expect(200);
+    });
+
+    it('Fails with 401 for a user linked to a different project', async () => {
+      const f = await getScopingFixtures();
+      await request(app.getHttpServer())
+        .get(route)
+        .set('Authorization', 'Bearer ' + apiKey)
+        .set('x-user-jwt', f.scopedAdminJwt)
+        .set('x-project-id', String(f.projectBId))
+        .expect(401);
+    });
+
+    it('Fails with 401 for a user linked to no project', async () => {
+      const f = await getScopingFixtures();
+      await request(app.getHttpServer())
+        .get(route)
+        .set('Authorization', 'Bearer ' + apiKey)
+        .set('x-user-jwt', f.unlinkedUserJwt)
+        .set('x-project-id', String(f.projectAId))
+        .expect(401);
+    });
+  });
+
+  it("Does not list one project's registered domain under another project", async () => {
+    const f = await getScopingFixtures();
+    await request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + f.apiKeyA)
+      .send({ domain: 'listed-on-a.example.com' })
+      .expect(201);
+
+    const listA = await request(app.getHttpServer())
+      .get('/email/domains')
+      .set('Authorization', 'Bearer ' + f.apiKeyA)
+      .expect(200);
+    const listB = await request(app.getHttpServer())
+      .get('/email/domains')
+      .set('Authorization', 'Bearer ' + f.apiKeyB)
+      .expect(200);
+
+    expect(listA.body.domains).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ domain: 'listed-on-a.example.com' }),
+      ]),
+    );
+    expect(listB.body.domains).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ domain: 'listed-on-a.example.com' }),
+      ]),
+    );
+  });
+
+  it("Does not let a project verify another project's domain", async () => {
+    const f = await getScopingFixtures();
+    await request(app.getHttpServer())
+      .post('/email/register-domain')
+      .set('Authorization', 'Bearer ' + f.apiKeyA)
+      .send({ domain: 'owned-by-a.example.com' })
+      .expect(201);
+
+    const asB = await request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer ' + f.apiKeyB)
+      .send({ domain: 'owned-by-a.example.com' })
+      .expect(404);
+    expect(asB.text).toContain('Domain not found');
+
+    await request(app.getHttpServer())
+      .post('/email/verify-domain')
+      .set('Authorization', 'Bearer ' + f.apiKeyA)
+      .send({ domain: 'owned-by-a.example.com' })
+      .expect(201);
+  });
+
+  it('Rejects a SendGrid key that another project already uses', async () => {
+    const f = await getScopingFixtures();
+    const res = await request(app.getHttpServer())
+      .post('/email/setup')
+      .set('Authorization', 'Bearer ' + f.apiKeyB)
+      .send({ sendgridKey: 'scoping-key-a' })
+      .expect(409);
+    expect(res.text).toContain('already in use');
+  });
+
+  it('Allows a project to re-save its own SendGrid key', async () => {
+    const f = await getScopingFixtures();
+    await request(app.getHttpServer())
+      .post('/email/setup')
+      .set('Authorization', 'Bearer ' + f.apiKeyA)
+      .send({ sendgridKey: 'scoping-key-a' })
+      .expect(201);
   });
 });
