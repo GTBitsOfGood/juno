@@ -16,6 +16,23 @@ export class EmailController implements EmailDbServiceController {
   async createEmailServiceConfig(
     request: EmailProto.CreateEmailServiceConfigRequest,
   ): Promise<EmailProto.EmailServiceConfig> {
+    // One SendGrid key per project: verified senders and authenticated domains
+    // belong to the SendGrid account, so a key shared across projects would let
+    // one project see another's senders and domains.
+    if (request.sendgridKey) {
+      const conflict = await this.emailService.findConfigUsingSendgridKey(
+        request.sendgridKey,
+        Number(request.projectId),
+      );
+      if (conflict) {
+        throw new RpcException({
+          code: status.ALREADY_EXISTS,
+          message:
+            'This SendGrid API key is already in use by another project. Each project must use its own SendGrid account.',
+        });
+      }
+    }
+
     const config = await this.emailService.createEmailServiceConfig({
       environment: request.environment,
       sendgridApiKey: request.sendgridKey,
