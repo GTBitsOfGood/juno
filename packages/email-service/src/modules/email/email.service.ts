@@ -301,13 +301,13 @@ export class EmailService implements OnModuleInit {
     );
 
     // The domain row is keyed by name only and can be attached to several
-    // projects, so confirm it is attached to the caller's config before using
+    // projects, so confirm it is attached to the caller's project before using
     // its SendGrid id. NOT_FOUND matches the "no such domain" response so we
     // don't reveal that another project registered this domain.
+    // Only the project id is compared: ProjectIdentifier has no environment
+    // field, so the environment can't be checked from this response.
     const ownedByCaller = (domain.projects ?? []).some(
-      (project) =>
-        Number(project.id) === Number(req.configId) &&
-        project.environment === req.configEnvironment,
+      (project) => Number(project.id) === Number(req.configId),
     );
     if (!ownedByCaller) {
       throw new RpcException({
