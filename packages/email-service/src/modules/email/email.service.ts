@@ -84,15 +84,21 @@ export class EmailService implements OnModuleInit {
       });
       this.testDomains.set(configKey, domains);
 
-      lastValueFrom(
-        this.emailService.createEmailDomain({
-          domain: req.domain,
-          subdomain: req.subdomain,
-          sendgridId: 0,
-          configId: req.configId,
-          configEnvironment: req.configEnvironment,
-        }),
-      ).catch(() => {});
+      // Awaited so the domain is attached to this config before returning;
+      // verifyDomain checks that attachment. Failures stay non-fatal in tests.
+      try {
+        await lastValueFrom(
+          this.emailService.createEmailDomain({
+            domain: req.domain,
+            subdomain: req.subdomain,
+            sendgridId: 0,
+            configId: req.configId,
+            configEnvironment: req.configEnvironment,
+          }),
+        );
+      } catch {
+        // ignore in test mode
+      }
 
       return {
         statusCode: 201,
@@ -294,6 +300,22 @@ export class EmailService implements OnModuleInit {
       }),
     );
 
+    // The domain row is keyed by name only and can be attached to several
+    // projects, so confirm it is attached to the caller's config before using
+    // its SendGrid id. NOT_FOUND matches the "no such domain" response so we
+    // don't reveal that another project registered this domain.
+    const ownedByCaller = (domain.projects ?? []).some(
+      (project) =>
+        Number(project.id) === Number(req.configId) &&
+        project.environment === req.configEnvironment,
+    );
+    if (!ownedByCaller) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Domain not found',
+      });
+    }
+
     const id = domain.sendgridId;
 
     const config = await lastValueFrom(
@@ -323,12 +345,16 @@ export class EmailService implements OnModuleInit {
     }
 
     try {
-      const response = await axios.post(sendgridUrl, {
-        headers: {
-          Authorization: `Bearer ${sendgridApiKey}`,
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        sendgridUrl,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${sendgridApiKey}`,
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       const records: EmailProto.SendGridDnsRecords =
         response.data.validation_results;
@@ -340,10 +366,7 @@ export class EmailService implements OnModuleInit {
         records,
       };
     } catch (error) {
-      throw new RpcException({
-        code: status.FAILED_PRECONDITION,
-        message: 'Failed to register domain',
-      });
+      throw toSendGridRpcException('verify domain', error);
     }
   }
   async getSenders(
