@@ -164,6 +164,24 @@ export class EmailService {
     });
   }
 
+  /**
+   * Finds a config belonging to a DIFFERENT project that already uses this
+   * SendGrid API key. Used to enforce one SendGrid key per project (configs for
+   * different environments of the same project may share a key).
+   */
+  async findConfigUsingSendgridKey(
+    sendgridApiKey: string,
+    excludeProjectId: number,
+  ): Promise<Pick<EmailServiceConfig, 'id' | 'environment'> | null> {
+    return this.prisma.emailServiceConfig.findFirst({
+      where: {
+        sendgridApiKey,
+        NOT: { id: excludeProjectId },
+      },
+      select: { id: true, environment: true },
+    });
+  }
+
   get rawPrisma() {
     return this.prisma;
   }

@@ -371,6 +371,8 @@ export class EmailService implements OnModuleInit {
     }
 
     try {
+      // NOTE: SendGrid paginates this endpoint (default page size applies);
+      // only the first page is returned for now.
       const response = await axios.get(
         'https://api.sendgrid.com/v3/verified_senders',
         {
@@ -400,10 +402,7 @@ export class EmailService implements OnModuleInit {
 
       return { senders };
     } catch (error) {
-      throw new RpcException({
-        code: status.INTERNAL,
-        message: `Failed to fetch senders from SendGrid: ${JSON.stringify(error)}`,
-      });
+      throw toSendGridRpcException('fetch senders from SendGrid', error);
     }
   }
 
@@ -434,6 +433,8 @@ export class EmailService implements OnModuleInit {
     }
 
     try {
+      // NOTE: SendGrid paginates this endpoint (default page size applies);
+      // only the first page is returned for now.
       const response = await axios.get(
         'https://api.sendgrid.com/v3/whitelabel/domains',
         {
@@ -455,10 +456,7 @@ export class EmailService implements OnModuleInit {
 
       return { domains };
     } catch (error) {
-      throw new RpcException({
-        code: status.INTERNAL,
-        message: `Failed to fetch domains from SendGrid: ${JSON.stringify(error)}`,
-      });
+      throw toSendGridRpcException('fetch domains from SendGrid', error);
     }
   }
 
@@ -536,6 +534,35 @@ export class EmailService implements OnModuleInit {
       }
     }
   }
+}
+
+/**
+ * Converts an error from a SendGrid REST call into an RpcException.
+ * Deliberately does NOT serialize the raw axios error: it contains the request
+ * config, including the Authorization header with the project's SendGrid key.
+ */
+function toSendGridRpcException(action: string, error: unknown): RpcException {
+  if (axios.isAxiosError(error)) {
+    const httpStatus = error.response?.status;
+    const detail = error.response?.data?.errors?.[0]?.message ?? error.message;
+
+    let code = status.INTERNAL;
+    if (httpStatus === 401 || httpStatus === 403) {
+      // The project's SendGrid key is invalid or lacks permission.
+      code = status.FAILED_PRECONDITION;
+    } else if (httpStatus === 429) {
+      code = status.RESOURCE_EXHAUSTED;
+    }
+
+    return new RpcException({
+      code,
+      message: `Failed to ${action} (SendGrid ${httpStatus ?? 'no response'}): ${detail}`,
+    });
+  }
+  return new RpcException({
+    code: status.INTERNAL,
+    message: `Failed to ${action}`,
+  });
 }
 
 const TEST_SENDGRID_RECORDS = {
