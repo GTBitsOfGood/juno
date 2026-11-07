@@ -63,6 +63,8 @@ function rpcStatusToHttp(rpc: status): number {
       return 401;
     case status.ALREADY_EXISTS:
       return 409;
+    case status.RESOURCE_EXHAUSTED:
+      return 429;
     default:
       return 500;
   }
