@@ -257,6 +257,8 @@ export class EmailService implements OnModuleInit {
       };
     }
 
+    let sendgridSenderId: number;
+    let httpStatus: number;
     try {
       const res = await axios.post(
         sendgridUrl,
@@ -278,43 +280,47 @@ export class EmailService implements OnModuleInit {
           },
         },
       );
-
-      return {
-        statusCode: res.status,
-        message: 'Sender registered successfully',
-      };
+      sendgridSenderId = res.data.id;
+      httpStatus = res.status;
     } catch (err) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: JSON.stringify(err),
       });
     }
+
+    // Record that this sender belongs to this project/environment. getSenders
+    // only returns senders recorded here, so a SendGrid account shared by
+    // several projects doesn't leak one project's senders to another.
+    await lastValueFrom(
+      this.emailService.createVerifiedSender({
+        configId: req.configId,
+        configEnvironment: req.configEnvironment,
+        sendgridId: sendgridSenderId,
+        fromEmail: req.fromEmail,
+      }),
+    );
+
+    return {
+      statusCode: httpStatus,
+      message: 'Sender registered successfully',
+    };
   }
 
   async verifyDomain(
     req: EmailProto.VerifyDomainRequest,
   ): Promise<EmailProto.VerifyDomainResponse> {
+    // Scoped to the caller's project/environment: db-service returns NOT_FOUND
+    // unless the domain is linked to this config, and the SendGrid id it returns
+    // is the one saved for this config (each project registers the domain with
+    // its own SendGrid account).
     const domain = await lastValueFrom(
       this.emailService.getEmailDomain({
         domain: req.domain,
+        configId: req.configId,
+        configEnvironment: req.configEnvironment,
       }),
     );
-
-    // The domain row is keyed by name only and can be attached to several
-    // projects, so confirm it is attached to the caller's project before using
-    // its SendGrid id. NOT_FOUND matches the "no such domain" response so we
-    // don't reveal that another project registered this domain.
-    // Only the project id is compared: ProjectIdentifier has no environment
-    // field, so the environment can't be checked from this response.
-    const ownedByCaller = (domain.projects ?? []).some(
-      (project) => Number(project.id) === Number(req.configId),
-    );
-    if (!ownedByCaller) {
-      throw new RpcException({
-        code: status.NOT_FOUND,
-        message: 'Domain not found',
-      });
-    }
 
     const id = domain.sendgridId;
 
@@ -393,6 +399,18 @@ export class EmailService implements OnModuleInit {
       return { senders: this.testSenders.get(configKey) ?? [] };
     }
 
+    // SendGrid returns everything in the account, so keep only the senders
+    // recorded for this project/environment.
+    const resources = await lastValueFrom(
+      this.emailService.getConfigResources({
+        id: Number(req.configId),
+        environment: req.configEnvironment,
+      }),
+    );
+    const ownedSenderIds = new Set(
+      (resources.senderSendgridIds ?? []).map(Number),
+    );
+
     try {
       // NOTE: SendGrid paginates this endpoint (default page size applies);
       // only the first page is returned for now.
@@ -406,8 +424,11 @@ export class EmailService implements OnModuleInit {
         },
       );
 
-      const senders = (response.data.results ?? []).map(
-        (sender: SendGridVerifiedSender) => ({
+      const senders = (response.data.results ?? [])
+        .filter((sender: SendGridVerifiedSender) =>
+          ownedSenderIds.has(Number(sender.id)),
+        )
+        .map((sender: SendGridVerifiedSender) => ({
           id: sender.id,
           nickname: sender.nickname ?? '',
           fromEmail: sender.from_email ?? '',
@@ -420,8 +441,7 @@ export class EmailService implements OnModuleInit {
           zip: sender.zip ?? '',
           verified: sender.verified ?? false,
           locked: sender.locked ?? false,
-        }),
-      );
+        }));
 
       return { senders };
     } catch (error) {
@@ -455,6 +475,18 @@ export class EmailService implements OnModuleInit {
       };
     }
 
+    // SendGrid returns everything in the account, so keep only the domains
+    // recorded for this project/environment.
+    const resources = await lastValueFrom(
+      this.emailService.getConfigResources({
+        id: Number(req.configId),
+        environment: req.configEnvironment,
+      }),
+    );
+    const ownedDomainIds = new Set(
+      (resources.domainSendgridIds ?? []).map(Number),
+    );
+
     try {
       // NOTE: SendGrid paginates this endpoint (default page size applies);
       // only the first page is returned for now.
@@ -468,14 +500,16 @@ export class EmailService implements OnModuleInit {
         },
       );
 
-      const domains = (response.data ?? []).map(
-        (domain: SendGridAuthenticatedDomain) => ({
+      const domains = (response.data ?? [])
+        .filter((domain: SendGridAuthenticatedDomain) =>
+          ownedDomainIds.has(Number(domain.id)),
+        )
+        .map((domain: SendGridAuthenticatedDomain) => ({
           id: domain.id,
           domain: domain.domain ?? '',
           subdomain: domain.subdomain ?? undefined,
           valid: domain.valid ?? false,
-        }),
-      );
+        }));
 
       return { domains };
     } catch (error) {
