@@ -32,9 +32,13 @@ type EmailDomainWithConfigIds = Prisma.EmailDomainGetPayload<
   typeof domainWithConfigIds
 >;
 
-type CreateConfigResult =
-  | { conflict: true }
-  | { conflict: false; config: EmailServiceConfig };
+// conflict is true when another project already uses the SendGrid key; config
+// is set otherwise. (A plain object type, not a discriminated union, because
+// this package compiles without strictNullChecks, which breaks the narrowing.)
+type CreateConfigResult = {
+  conflict: boolean;
+  config?: EmailServiceConfig;
+};
 
 @Injectable()
 export class EmailService {
