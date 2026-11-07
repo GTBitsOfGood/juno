@@ -399,7 +399,7 @@ describe('verifyDomain (real SendGrid path)', () => {
     // The SendGrid id comes from the project's own link, and the auth header is
     // sent as request config (not in the request body).
     expect(post).toHaveBeenCalledWith(
-      expect.stringContaining('/whitelabel/domains/42/'),
+      'https://api.sendgrid.com/v3/whitelabel/domains/42/validate',
       {},
       expect.objectContaining({
         headers: expect.objectContaining({

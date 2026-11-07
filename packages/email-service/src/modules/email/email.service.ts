@@ -332,7 +332,7 @@ export class EmailService implements OnModuleInit {
     );
 
     const sendgridApiKey = config.sendgridKey;
-    const sendgridUrl = `https://api.sendgrid.com/v3/whitelabel/domains/${id}/val`;
+    const sendgridUrl = `https://api.sendgrid.com/v3/whitelabel/domains/${id}/validate`;
 
     if (!sendgridApiKey) {
       throw new RpcException({
