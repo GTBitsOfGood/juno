@@ -27,6 +27,10 @@ service EmailDbService {
       returns (EmailServiceConfig);
   rpc getEmailServiceConfig(GetEmailServiceConfigRequest)
       returns (EmailServiceConfig);
+  rpc createVerifiedSender(CreateVerifiedSenderRequest)
+      returns (CreateVerifiedSenderResponse);
+  rpc getConfigResources(GetEmailServiceConfigRequest)
+      returns (GetConfigResourcesResponse);
 }
 
 message EmailSender {
@@ -181,7 +185,13 @@ message EmailDomain {
   repeated identifiers.ProjectIdentifier projects = 4;
 }
 
-message EmailDomainRequest { string domain = 1; }
+// When configId and configEnvironment are set, the domain must be linked to
+// that config and the returned sendgridId is the one saved for it.
+message EmailDomainRequest {
+  string domain = 1;
+  optional int64 configId = 2;
+  optional string configEnvironment = 3;
+}
 
 message CreateEmailDomainRequest {
   string domain = 1;
@@ -272,4 +282,19 @@ message AuthenticatedDomain {
 
 message GetDomainsResponse {
   repeated AuthenticatedDomain domains = 1;
+}
+
+message CreateVerifiedSenderRequest {
+  int64 configId = 1;
+  string configEnvironment = 2;
+  int64 sendgridId = 3;
+  string fromEmail = 4;
+}
+
+message CreateVerifiedSenderResponse {}
+
+// SendGrid ids of the domains and verified senders recorded for a config.
+message GetConfigResourcesResponse {
+  repeated int64 domainSendgridIds = 1;
+  repeated int64 senderSendgridIds = 2;
 }
