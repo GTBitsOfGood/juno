@@ -184,38 +184,36 @@ export class EmailService {
   ): Promise<CreateConfigResult> {
     const projectId = input.Project.connect.id;
 
-    return this.prisma.$transaction(
-      async (tx): Promise<CreateConfigResult> => {
-        if (input.sendgridApiKey) {
-          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${input.sendgridApiKey}))`;
+    return this.prisma.$transaction(async (tx): Promise<CreateConfigResult> => {
+      if (input.sendgridApiKey) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${input.sendgridApiKey}))`;
 
-          const conflict = await tx.emailServiceConfig.findFirst({
-            where: {
-              sendgridApiKey: input.sendgridApiKey,
-              NOT: { id: projectId },
-            },
-            select: { id: true },
-          });
-          if (conflict) {
-            return { conflict: true };
-          }
-        }
-
-        const config = await tx.emailServiceConfig.upsert({
+        const conflict = await tx.emailServiceConfig.findFirst({
           where: {
-            id_environment: {
-              id: projectId,
-              environment: input.environment,
-            },
-          },
-          create: input,
-          update: {
             sendgridApiKey: input.sendgridApiKey,
+            NOT: { id: projectId },
           },
+          select: { id: true },
         });
-        return { conflict: false, config };
-      },
-    );
+        if (conflict) {
+          return { conflict: true };
+        }
+      }
+
+      const config = await tx.emailServiceConfig.upsert({
+        where: {
+          id_environment: {
+            id: projectId,
+            environment: input.environment,
+          },
+        },
+        create: input,
+        update: {
+          sendgridApiKey: input.sendgridApiKey,
+        },
+      });
+      return { conflict: false, config };
+    });
   }
 
   /** The link between a domain and one config, holding that config's SendGrid id. */

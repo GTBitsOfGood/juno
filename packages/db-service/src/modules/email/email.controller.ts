@@ -18,8 +18,8 @@ export class EmailController implements EmailDbServiceController {
   ): Promise<EmailProto.EmailServiceConfig> {
     // One SendGrid key per project. The check and the write happen atomically
     // in the service (see createEmailServiceConfigWithUniqueKey).
-    const result = await this.emailService.createEmailServiceConfigWithUniqueKey(
-      {
+    const result =
+      await this.emailService.createEmailServiceConfigWithUniqueKey({
         environment: request.environment,
         sendgridApiKey: request.sendgridKey,
         Project: {
@@ -27,8 +27,7 @@ export class EmailController implements EmailDbServiceController {
             id: Number(request.projectId),
           },
         },
-      },
-    );
+      });
 
     if (result.conflict) {
       throw new RpcException({
