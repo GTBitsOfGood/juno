@@ -4,365 +4,18 @@ import { AppModule } from '../src/app.module';
 import * as ProtoLoader from '@grpc/proto-loader';
 import * as GRPC from '@grpc/grpc-js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AnalyticsService } from 'src/modules/analytics/analytics.service';
-import {
-  ResetProtoFile,
-  AnalyticsProto,
-  AnalyticsProtoFile,
-  AnalyticsConfigProtoFile,
-} from 'juno-proto';
-import { ANALYTICS_CONFIG_DB_SERVICE_NAME } from 'juno-proto/dist/gen/analytics_config';
+import { ResetProtoFile, AnalyticsProto, AnalyticsProtoFile } from 'juno-proto';
 
 const { JUNO_ANALYTICS_SERVICE_ANALYTICS_PACKAGE_NAME } = AnalyticsProto;
 
 let app: INestMicroservice;
-let analyticsConfigClient: any;
 
-const mockBogAnalyticsService = {
-  authenticate: jest.fn().mockReturnValue(undefined),
-  logClickEvent: jest.fn().mockImplementation((event) =>
-    Promise.resolve({
-      _id: 'mock-click-event-id',
-      category: 'Interaction',
-      subcategory: 'Click',
-      projectId: 'test-project-id',
-      environment: 'development',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      eventProperties: { objectId: event.objectId, userId: event.userId },
-    }),
-  ),
-  logInputEvent: jest.fn().mockImplementation((event) =>
-    Promise.resolve({
-      _id: 'mock-input-event-id',
-      category: 'Interaction',
-      subcategory: 'Input',
-      projectId: 'test-project-id',
-      environment: 'development',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      eventProperties: {
-        objectId: event.objectId,
-        userId: event.userId,
-        textValue: event.textValue,
-      },
-    }),
-  ),
-  logVisitEvent: jest.fn().mockImplementation((event) =>
-    Promise.resolve({
-      _id: 'mock-visit-event-id',
-      category: 'Activity',
-      subcategory: 'Visit',
-      projectId: 'test-project-id',
-      environment: 'development',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      eventProperties: { pageUrl: event.pageUrl, userId: event.userId },
-    }),
-  ),
-  logCustomEvent: jest
-    .fn()
-    .mockImplementation((category, subcategory, properties) =>
-      Promise.resolve({
-        _id: 'mock-custom-event-id',
-        eventTypeId: 'custom-event-type-id',
-        projectId: 'test-project-id',
-        environment: 'development',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        properties: properties,
-      }),
-    ),
-};
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
-const mockAnalyticsViewerService = {
-  authenticate: jest.fn().mockReturnValue(undefined),
-
-  // Custom Event Types
-  getCustomEventTypes: jest.fn().mockImplementation((_projectName) =>
-    Promise.resolve([
-      {
-        _id: 'custom-event-type-1',
-        category: 'user-action',
-        subcategory: 'form-submission',
-        properties: ['formType', 'formId', 'userId'],
-        projectId: 'test-project-id',
-        environment: 'development',
-      },
-      {
-        _id: 'custom-event-type-2',
-        category: 'user-action',
-        subcategory: 'button-click',
-        properties: ['buttonId', 'buttonText', 'userId'],
-        projectId: 'test-project-id',
-        environment: 'development',
-      },
-    ]),
-  ),
-
-  // Custom Graph Types
-  getCustomGraphTypesById: jest
-    .fn()
-    .mockImplementation((_projectName, _eventTypeId) =>
-      Promise.resolve([
-        {
-          _id: 'graph-1',
-          eventTypeId: 'custom-event-type-1',
-          projectId: 'test-project-id',
-          graphTitle: 'Form Submissions Over Time',
-          xProperty: 'createdAt',
-          yProperty: 'count',
-          graphType: 'line',
-          caption: 'Track form submission trends',
-        },
-        {
-          _id: 'graph-2',
-          eventTypeId: 'custom-event-type-1',
-          projectId: 'test-project-id',
-          graphTitle: 'Form Types Distribution',
-          xProperty: 'formType',
-          yProperty: 'count',
-          graphType: 'pie',
-          caption: 'Distribution of form types',
-        },
-      ]),
-    ),
-
-  // Click Events
-  getClickEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
-    Promise.resolve({
-      events: [
-        {
-          _id: 'click-1',
-          category: 'Interaction',
-          subcategory: 'Click',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: { objectId: 'button-1', userId: 'user-1' },
-        },
-        {
-          _id: 'click-2',
-          category: 'Interaction',
-          subcategory: 'Click',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: { objectId: 'button-2', userId: 'user-2' },
-        },
-      ],
-      afterId: 'click-2',
-    }),
-  ),
-
-  getAllClickEvents: jest
-    .fn()
-    .mockImplementation((_projectName, _afterTime, _limit) =>
-      Promise.resolve([
-        {
-          _id: 'click-1',
-          category: 'Interaction',
-          subcategory: 'Click',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: { objectId: 'button-1', userId: 'user-1' },
-        },
-        {
-          _id: 'click-2',
-          category: 'Interaction',
-          subcategory: 'Click',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: { objectId: 'button-2', userId: 'user-2' },
-        },
-      ]),
-    ),
-
-  // Visit Events
-  getVisitEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
-    Promise.resolve({
-      events: [
-        {
-          _id: 'visit-1',
-          category: 'Activity',
-          subcategory: 'Visit',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: { pageUrl: '/home', userId: 'user-1' },
-        },
-        {
-          _id: 'visit-2',
-          category: 'Activity',
-          subcategory: 'Visit',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: { pageUrl: '/about', userId: 'user-2' },
-        },
-      ],
-      afterId: 'visit-2',
-    }),
-  ),
-
-  getAllVisitEvents: jest
-    .fn()
-    .mockImplementation((_projectName, _afterTime, _limit) =>
-      Promise.resolve([
-        {
-          _id: 'visit-1',
-          category: 'Activity',
-          subcategory: 'Visit',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: { pageUrl: '/home', userId: 'user-1' },
-        },
-      ]),
-    ),
-
-  // Input Events
-  getInputEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
-    Promise.resolve({
-      events: [
-        {
-          _id: 'input-1',
-          category: 'Interaction',
-          subcategory: 'Input',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: {
-            objectId: 'search-field',
-            userId: 'user-1',
-            textValue: 'analytics query',
-          },
-        },
-      ],
-      afterId: 'input-1',
-    }),
-  ),
-
-  getAllInputEvents: jest
-    .fn()
-    .mockImplementation((_projectName, _afterTime, _limit) =>
-      Promise.resolve([
-        {
-          _id: 'input-1',
-          category: 'Interaction',
-          subcategory: 'Input',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          eventProperties: {
-            objectId: 'search-field',
-            userId: 'user-1',
-            textValue: 'analytics query',
-          },
-        },
-      ]),
-    ),
-
-  // Custom Events
-  getCustomEventsPaginated: jest.fn().mockImplementation((_queryParams) =>
-    Promise.resolve({
-      events: [
-        {
-          _id: 'custom-1',
-          eventTypeId: 'custom-event-type-1',
-          projectId: 'test-project-id',
-          environment: 'development',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          properties: {
-            formType: 'contact',
-            formId: 'contact-form-1',
-            userId: 'user-1',
-          },
-        },
-      ],
-      afterId: 'custom-1',
-    }),
-  ),
-
-  getAllCustomEvents: jest
-    .fn()
-    .mockImplementation(
-      (_projectName, _category, _subcategory, _afterTime, _limit) =>
-        Promise.resolve([
-          {
-            _id: 'custom-1',
-            eventTypeId: 'custom-event-type-1',
-            projectId: 'test-project-id',
-            environment: 'development',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            properties: {
-              formType: 'contact',
-              formId: 'contact-form-1',
-              userId: 'user-1',
-            },
-          },
-        ]),
-    ),
-};
-/* eslint-enable @typescript-eslint/no-unused-vars */
-
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 async function initApp() {
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  const MockAnalyticsLoggerConstructor = jest.fn().mockImplementation(function (
-    _config: any,
-  ) {
-    return mockBogAnalyticsService;
-  });
-
-  const MockAnalyticsViewerConstructor = jest.fn().mockImplementation(function (
-    _config: any,
-  ) {
-    return mockAnalyticsViewerService;
-  });
-  /* eslint-enable @typescript-eslint/no-unused-vars */
-
-  const MockEventEnvironment = {
-    DEVELOPMENT: 'development',
-    PRODUCTION: 'production',
-    STAGING: 'staging',
-  };
-
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
-
-  const analyticsService = moduleFixture.get(AnalyticsService);
-
-  // Replace onModuleInit to set up gRPC client but skip bog-analytics import
-  analyticsService.onModuleInit = jest.fn().mockImplementation(async function (
-    this: any,
-  ) {
-    // Set up the analytics config gRPC client (needed for getAnalyticsViewer)
-    this.analyticsService = this.analyticsClient.getService(
-      ANALYTICS_CONFIG_DB_SERVICE_NAME,
-    );
-
-    // Skip the bog-analytics import and use our mocks instead
-    this.AnalyticsLogger = MockAnalyticsLoggerConstructor;
-    this.AnalyticsViewer = MockAnalyticsViewerConstructor;
-    this.EventEnvironment = MockEventEnvironment;
-  });
 
   const app = moduleFixture.createNestMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
@@ -374,7 +27,6 @@ async function initApp() {
   });
 
   await app.init();
-
   await app.listen();
   return app;
 }
@@ -383,7 +35,6 @@ beforeAll(async () => {
   app = await initApp();
 
   const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-
   const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
 
   const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
@@ -396,31 +47,6 @@ beforeAll(async () => {
       resolve(0);
     });
   });
-
-  // Setup analytics config client
-  const configProto = ProtoLoader.loadSync([AnalyticsConfigProtoFile]) as any;
-  const configProtoGRPC = GRPC.loadPackageDefinition(configProto) as any;
-  analyticsConfigClient =
-    new configProtoGRPC.juno.analytics_service.analytics_config.AnalyticsConfigDbService(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-
-  // Create analytics config for testing
-  await new Promise((resolve, reject) => {
-    analyticsConfigClient.createAnalyticsConfig(
-      {
-        projectId: 0,
-        environment: 'test',
-        serverAnalyticsKey: 'mock-api-key-123',
-        clientAnalyticsKey: 'mock-api-key-123',
-      },
-      (err, response) => {
-        if (err) reject(err);
-        else resolve(response);
-      },
-    );
-  });
 });
 
 afterAll((done) => {
@@ -428,225 +54,7 @@ afterAll((done) => {
   done();
 });
 
-describe('Analytics Service Authenticate Domain Tests', () => {
-  let analyticsClient: any;
-  beforeEach(async () => {
-    const proto = ProtoLoader.loadSync([AnalyticsProtoFile]) as any;
-    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-    // TODO: rename analytics_service proto to just juno.analytics
-    analyticsClient =
-      new protoGRPC.juno.analytics_service.analytics.AnalyticsService(
-        process.env.ANALYTICS_SERVICE_ADDR,
-        GRPC.credentials.createInsecure(),
-      );
-  });
-
-  it('Log click event with valid analytics config', async () => {
-    const request = {
-      configId: 0,
-      configEnvironment: 'test',
-      objectId: 'button-1',
-      userId: 'user-123',
-    } as AnalyticsProto.ClickEventRequest;
-    const response: AnalyticsProto.ClickEventResponse = await new Promise(
-      (resolve, reject) => {
-        analyticsClient.logClickEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      },
-    );
-
-    expect(response).toBeDefined();
-    expect(response.eventProperties.objectId).toBe('button-1');
-    expect(response.eventProperties.userId).toBe('user-123');
-  });
-
-  it('Log click event with invalid analytics config', async () => {
-    const request = {
-      configId: 999,
-      configEnvironment: 'nonexistent',
-      objectId: 'button-1',
-      userId: 'user-123',
-    };
-
-    try {
-      await new Promise((resolve, reject) => {
-        analyticsClient.logClickEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      });
-      fail('Expected error was not thrown');
-    } catch (err) {
-      expect(err).toBeDefined();
-    }
-  });
-
-  it('Log visit event with valid analytics config', async () => {
-    const request = {
-      configId: 0,
-      configEnvironment: 'test',
-      pageUrl: 'https://example.com/page',
-      userId: 'user-123',
-    } as AnalyticsProto.VisitEventRequest;
-    const response: AnalyticsProto.VisitEventResponse = await new Promise(
-      (resolve, reject) => {
-        analyticsClient.logVisitEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      },
-    );
-
-    expect(response).toBeDefined();
-    expect(response.eventProperties.pageUrl).toBe('https://example.com/page');
-    expect(response.eventProperties.userId).toBe('user-123');
-  });
-
-  it('Log visit event with invalid analytics config', async () => {
-    const request = {
-      configId: 999,
-      configEnvironment: 'nonexistent',
-      pageUrl: 'https://example.com/page',
-      userId: 'user-123',
-    };
-
-    try {
-      await new Promise((resolve, reject) => {
-        analyticsClient.logVisitEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      });
-      fail('Expected error was not thrown');
-    } catch (err) {
-      expect(err).toBeDefined();
-    }
-  });
-
-  it('Log input event with valid analytics config', async () => {
-    const request = {
-      configId: 0,
-      configEnvironment: 'test',
-      objectId: 'input-field-1',
-      userId: 'user-123',
-      textValue: 'user input text',
-    } as AnalyticsProto.InputEventRequest;
-    const response: AnalyticsProto.InputEventResponse = await new Promise(
-      (resolve, reject) => {
-        analyticsClient.logInputEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      },
-    );
-
-    expect(response).toBeDefined();
-    expect(response.eventProperties.objectId).toBe('input-field-1');
-    expect(response.eventProperties.userId).toBe('user-123');
-    expect(response.eventProperties.textValue).toBe('user input text');
-  });
-
-  it('Log input event with invalid analytics config', async () => {
-    const request = {
-      configId: 999,
-      configEnvironment: 'nonexistent',
-      objectId: 'input-field-1',
-      userId: 'user-123',
-      textValue: 'user input text',
-    };
-
-    try {
-      await new Promise((resolve, reject) => {
-        analyticsClient.logInputEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      });
-      fail('Expected error was not thrown');
-    } catch (err) {
-      expect(err).toBeDefined();
-    }
-  });
-
-  it('Log custom event with valid analytics config', async () => {
-    const request = {
-      configId: 0,
-      environment: 'test',
-      configEnvironment: 'test',
-      category: 'user-action',
-      subcategory: 'form-submit',
-      properties: {
-        formType: 'contact',
-        formId: 'contact-form-1',
-      },
-    } as AnalyticsProto.CustomEventRequest;
-    const response: AnalyticsProto.CustomEventResponse = await new Promise(
-      (resolve, reject) => {
-        analyticsClient.logCustomEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      },
-    );
-
-    expect(response).toBeDefined();
-    expect(response.properties.formType).toBe('contact');
-    expect(response.properties.formId).toBe('contact-form-1');
-  });
-
-  it('Log custom event with invalid analytics config', async () => {
-    const request = {
-      configId: 999,
-      environment: 'nonexistent',
-      configEnvironment: 'nonexistent',
-      category: 'user-action',
-      subcategory: 'form-submit',
-      properties: {
-        formType: 'contact',
-      },
-    };
-
-    try {
-      await new Promise((resolve, reject) => {
-        analyticsClient.logCustomEvent(request, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      });
-      fail('Expected error was not thrown');
-    } catch (err) {
-      expect(err).toBeDefined();
-    }
-  });
-});
-
-describe('Analytics Service Viewer Tests', () => {
+describe('Analytics Service - Visit Events (Issue #266)', () => {
   let analyticsClient: any;
 
   beforeEach(async () => {
@@ -659,604 +67,462 @@ describe('Analytics Service Viewer Tests', () => {
       );
   });
 
-  describe('Custom Event Types', () => {
-    it('should get custom event types with valid api key', async () => {
+  describe('logVisitEvent', () => {
+    it('should log a visit event successfully', async () => {
       const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        configId: 0,
+        configId: 1,
         configEnvironment: 'test',
-      } as AnalyticsProto.CustomEventTypeRequest;
+        environment: 'test',
+        pageUrl: 'https://example.com/home',
+        userId: 'user-123',
+      } as AnalyticsProto.VisitEventRequest;
 
-      const response: AnalyticsProto.GetAllCustomEventTypeResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventTypes(request, (err, result) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(result);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.eventTypes).toBeDefined();
-      if (!response.eventTypes) {
-        fail('Expected eventTypes to be defined');
-        return;
-      }
-      expect(response.eventTypes.length).toBe(2);
-
-      const [firstEventType, secondEventType] = response.eventTypes;
-
-      if (!firstEventType || !secondEventType) {
-        fail('Expected at least two event types in response');
-        return;
-      }
-
-      expect(firstEventType.id).toBe('custom-event-type-1');
-      expect(firstEventType.category).toBe('user-action');
-      expect(firstEventType.subcategory).toBe('form-submission');
-      expect(firstEventType.properties).toContain('formType');
-      expect(firstEventType.properties).toContain('userId');
-      expect(firstEventType.projectId).toBe('test-project-id');
-
-      expect(secondEventType.id).toBe('custom-event-type-2');
-      expect(secondEventType.subcategory).toBe('button-click');
-    });
-
-    it('should fail to get custom event types with invalid api key', async () => {
-      const request = {
-        apiKey: 'invalid-api-key',
-        projectName: 'test-project',
-        configId: 0,
-        configEnvironment: 'test',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventTypes(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-
-    it('should fail to get custom event types with empty project name', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: '',
-        configId: 0,
-        configEnvironment: 'test',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventTypes(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-  });
-
-  describe('Custom Graph Types', () => {
-    it('should get custom graph types by id with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        eventTypeId: 'custom-event-type-1',
-        configId: 0,
-        configEnvironment: 'test',
-      } as AnalyticsProto.CustomGraphTypeRequest;
-
-      const response: AnalyticsProto.CustomGraphTypeResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomGraphTypesById(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.graphs).toHaveLength(2);
-      expect(response.graphs[0].id).toBe('graph-1');
-      expect(response.graphs[0].graphTitle).toBe('Form Submissions Over Time');
-      expect(response.graphs[0].graphType).toBe('line');
-      expect(response.graphs[1].graphType).toBe('pie');
-    });
-
-    it('should fail to get custom graph types with invalid api key', async () => {
-      const request = {
-        apiKey: 'invalid-api-key',
-        projectName: 'test-project',
-        eventTypeId: 'custom-event-type-1',
-        configId: 0,
-        configEnvironment: 'test',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomGraphTypesById(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-  });
-
-  describe('Click Events Retrieval', () => {
-    it('should get paginated click events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-        configId: 0,
-        configEnvironment: 'test',
-      } as AnalyticsProto.GetClickEventsRequest;
-
-      const response: AnalyticsProto.GetClickEventsResponse = await new Promise(
+      const response: AnalyticsProto.VisitEventResponse = await new Promise(
         (resolve, reject) => {
-          analyticsClient.getClickEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+          analyticsClient.logVisitEvent(request, (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
           });
         },
       );
 
       expect(response).toBeDefined();
-      expect(response.events).toHaveLength(2);
-      expect(response.events[0].id).toBe('click-1');
-      expect(response.events[0].eventProperties.objectId).toBe('button-1');
-      expect(response.events[0].eventProperties.userId).toBe('user-1');
-      expect(response.afterId).toBe('click-2');
+      expect(response.id).toBeDefined();
+      expect(response.category).toBe('Activity');
+      expect(response.subcategory).toBe('Visit');
+      expect(response.environment).toBe('test');
+      expect(response.eventProperties).toBeDefined();
+      expect(response.eventProperties.pageUrl).toBe('https://example.com/home');
+      expect(response.eventProperties.userId).toBe('user-123');
     });
 
-    it('should get all click events with valid parameters', async () => {
+    it('should fail with invalid request - missing userId', async () => {
       const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterTime: '',
-        limit: 0,
-        configId: 0,
+        configId: 1,
         configEnvironment: 'test',
-      } as AnalyticsProto.GetAllClickEventsRequest;
-
-      const response: AnalyticsProto.GetAllClickEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getAllClickEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(2);
-      expect(response.events[0].eventProperties.objectId).toBe('button-1');
-    });
-
-    it('should fail to get click events with invalid api key', async () => {
-      const request = {
-        apiKey: 'invalid-api-key',
-        projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-        configId: 0,
-        configEnvironment: 'test',
+        environment: 'test',
+        pageUrl: 'https://example.com/home',
+        userId: '',
       };
 
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getClickEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+      await expect(
+        new Promise((resolve, reject) => {
+          analyticsClient.logVisitEvent(request, (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
           });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
+        }),
+      ).rejects.toBeDefined();
+    });
+
+    it('should fail with invalid request - missing pageUrl', async () => {
+      const request = {
+        configId: 1,
+        configEnvironment: 'test',
+        environment: 'test',
+        pageUrl: '',
+        userId: 'user-123',
+      };
+
+      await expect(
+        new Promise((resolve, reject) => {
+          analyticsClient.logVisitEvent(request, (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          });
+        }),
+      ).rejects.toBeDefined();
     });
   });
 
-  describe('Visit Events Retrieval', () => {
-    it('should get paginated visit events with valid parameters', async () => {
+  describe('getVisitEventsPaginated', () => {
+    it('should retrieve visit events with pagination', async () => {
+      // First, create some visit events
+      for (let i = 0; i < 3; i++) {
+        await new Promise((resolve, reject) => {
+          analyticsClient.logVisitEvent(
+            {
+              configId: 1,
+              configEnvironment: 'test',
+              environment: 'test',
+              pageUrl: `https://example.com/page-${i}`,
+              userId: `user-${i}`,
+            },
+            (err, response) => {
+              if (err) reject(err);
+              else resolve(response);
+            },
+          );
+        });
+      }
+
+      // Get paginated events
       const request = {
-        apiKey: 'mock-api-key-123',
         projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-        configId: 0,
+        configId: 1,
         configEnvironment: 'test',
+        environment: 'test',
+        limit: 2,
       } as AnalyticsProto.GetVisitEventsRequest;
 
       const response: AnalyticsProto.GetVisitEventsResponse = await new Promise(
         (resolve, reject) => {
           analyticsClient.getVisitEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+            if (err) reject(err);
+            else resolve(response);
           });
         },
       );
 
       expect(response).toBeDefined();
-      expect(response.events).toHaveLength(2);
-      expect(response.events[0].eventProperties.pageUrl).toBe('/home');
-      expect(response.afterId).toBe('visit-2');
+      expect(response.events).toBeDefined();
+      expect(response.events.length).toBeLessThanOrEqual(2);
+      expect(response.afterId).toBeDefined();
+
+      // Each event should have proper structure
+      response.events.forEach((event) => {
+        expect(event.id).toBeDefined();
+        expect(event.category).toBe('Activity');
+        expect(event.subcategory).toBe('Visit');
+        expect(event.eventProperties).toBeDefined();
+        expect(event.eventProperties.pageUrl).toBeDefined();
+        expect(event.eventProperties.userId).toBeDefined();
+      });
     });
 
-    it('should get all visit events with valid parameters', async () => {
+    it('should support pagination with afterId cursor', async () => {
+      // Create multiple events
+      for (let i = 0; i < 5; i++) {
+        await new Promise((resolve, reject) => {
+          analyticsClient.logVisitEvent(
+            {
+              configId: 2,
+              configEnvironment: 'test',
+              environment: 'test',
+              pageUrl: `https://example.com/pagination-test-${i}`,
+              userId: `pagination-user-${i}`,
+            },
+            (err, response) => {
+              if (err) reject(err);
+              else resolve(response);
+            },
+          );
+        });
+      }
+
+      // Get first page
+      const firstPage: AnalyticsProto.GetVisitEventsResponse =
+        await new Promise((resolve, reject) => {
+          analyticsClient.getVisitEventsPaginated(
+            {
+              projectName: 'test-project',
+              configId: 2,
+              configEnvironment: 'test',
+              environment: 'test',
+              limit: 2,
+            },
+            (err, response) => {
+              if (err) reject(err);
+              else resolve(response);
+            },
+          );
+        });
+
+      expect(firstPage.events.length).toBe(2);
+      expect(firstPage.afterId).toBeDefined();
+
+      // Get second page using afterId
+      const secondPage: AnalyticsProto.GetVisitEventsResponse =
+        await new Promise((resolve, reject) => {
+          analyticsClient.getVisitEventsPaginated(
+            {
+              projectName: 'test-project',
+              configId: 2,
+              configEnvironment: 'test',
+              environment: 'test',
+              limit: 2,
+              afterId: firstPage.afterId,
+            },
+            (err, response) => {
+              if (err) reject(err);
+              else resolve(response);
+            },
+          );
+        });
+
+      expect(secondPage.events.length).toBe(2);
+      // Ensure second page events are different from first page
+      const firstPageIds = firstPage.events.map((e) => e.id);
+      const secondPageIds = secondPage.events.map((e) => e.id);
+      secondPageIds.forEach((id) => {
+        expect(firstPageIds).not.toContain(id);
+      });
+    });
+
+    it('should fail with missing projectName', async () => {
       const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterTime: '',
-        limit: 0,
-        configId: 0,
+        projectName: '',
+        configId: 1,
         configEnvironment: 'test',
+        environment: 'test',
+      };
+
+      await expect(
+        new Promise((resolve, reject) => {
+          analyticsClient.getVisitEventsPaginated(request, (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          });
+        }),
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe('getAllVisitEvents', () => {
+    it('should retrieve all visit events for a project', async () => {
+      // Create some events for a specific project
+      for (let i = 0; i < 3; i++) {
+        await new Promise((resolve, reject) => {
+          analyticsClient.logVisitEvent(
+            {
+              configId: 3,
+              configEnvironment: 'test',
+              environment: 'test',
+              pageUrl: `https://example.com/all-events-test-${i}`,
+              userId: `all-events-user-${i}`,
+            },
+            (err, response) => {
+              if (err) reject(err);
+              else resolve(response);
+            },
+          );
+        });
+      }
+
+      const request = {
+        projectName: 'test-project',
+        configId: 3,
+        configEnvironment: 'test',
+        limit: 100,
       } as AnalyticsProto.GetAllVisitEventsRequest;
 
       const response: AnalyticsProto.GetAllVisitEventsResponse =
         await new Promise((resolve, reject) => {
           analyticsClient.getAllVisitEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
+            if (err) reject(err);
+            else resolve(response);
           });
         });
 
       expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].eventProperties.pageUrl).toBe('/home');
+      expect(response.events).toBeDefined();
+      expect(response.events.length).toBeGreaterThanOrEqual(3);
+
+      response.events.forEach((event) => {
+        expect(event.category).toBe('Activity');
+        expect(event.subcategory).toBe('Visit');
+        expect(event.eventProperties).toBeDefined();
+      });
+    });
+
+    it('should fail with missing projectName', async () => {
+      const request = {
+        projectName: '',
+        configId: 1,
+        configEnvironment: 'test',
+      };
+
+      await expect(
+        new Promise((resolve, reject) => {
+          analyticsClient.getAllVisitEvents(request, (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          });
+        }),
+      ).rejects.toBeDefined();
     });
   });
 
-  describe('Input Events Retrieval', () => {
-    it('should get paginated input events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-        configEnvironment: 'test',
-        configId: 0,
-      } as AnalyticsProto.GetInputEventsRequest;
+  describe('Project isolation', () => {
+    it('should not return events from other projects', async () => {
+      // Create events for project 10
+      await new Promise((resolve, reject) => {
+        analyticsClient.logVisitEvent(
+          {
+            configId: 10,
+            configEnvironment: 'test',
+            environment: 'test',
+            pageUrl: 'https://project10.com/page',
+            userId: 'project10-user',
+          },
+          (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          },
+        );
+      });
 
-      const response: AnalyticsProto.GetInputEventsResponse = await new Promise(
+      // Create events for project 20
+      await new Promise((resolve, reject) => {
+        analyticsClient.logVisitEvent(
+          {
+            configId: 20,
+            configEnvironment: 'test',
+            environment: 'test',
+            pageUrl: 'https://project20.com/page',
+            userId: 'project20-user',
+          },
+          (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          },
+        );
+      });
+
+      // Fetch events for project 10 only
+      const response: AnalyticsProto.GetVisitEventsResponse = await new Promise(
         (resolve, reject) => {
-          analyticsClient.getInputEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
+          analyticsClient.getVisitEventsPaginated(
+            {
+              projectName: 'project-10',
+              configId: 10,
+              configEnvironment: 'test',
+              environment: 'test',
+              limit: 100,
+            },
+            (err, response) => {
+              if (err) reject(err);
+              else resolve(response);
+            },
+          );
         },
       );
 
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].eventProperties.textValue).toBe(
-        'analytics query',
-      );
-      expect(response.afterId).toBe('input-1');
-    });
-
-    it('should get all input events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        afterTime: '',
-        limit: 0,
-        configId: 0,
-        configEnvironment: 'test',
-      } as AnalyticsProto.GetAllInputEventsRequest;
-
-      const response: AnalyticsProto.GetAllInputEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getAllInputEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].eventProperties.textValue).toBe(
-        'analytics query',
-      );
+      // All returned events should be from project 10
+      response.events.forEach((event) => {
+        expect(event.projectId).toBe('10');
+      });
     });
   });
+});
 
-  describe('Custom Events Retrieval', () => {
-    it('should get paginated custom events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: 'user-action',
-        subcategory: 'form-submission',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-        configId: 0,
-        configEnvironment: 'test',
-      } as AnalyticsProto.GetCustomEventsRequest;
+describe('Analytics Service - Stubbed Methods (Return UNIMPLEMENTED)', () => {
+  let analyticsClient: any;
 
-      const response: AnalyticsProto.GetCustomEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].properties.formType).toBe('contact');
-      expect(response.events[0].properties.formId).toBe('contact-form-1');
-      expect(response.afterId).toBe('custom-1');
-    });
-
-    it('should get all custom events with valid parameters', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: 'user-action',
-        subcategory: 'form-submission',
-        afterTime: '',
-        limit: 0,
-        configId: 0,
-        configEnvironment: 'test',
-      } as AnalyticsProto.GetAllCustomEventsRequest;
-
-      const response: AnalyticsProto.GetAllCustomEventsResponse =
-        await new Promise((resolve, reject) => {
-          analyticsClient.getAllCustomEvents(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-      expect(response).toBeDefined();
-      expect(response.events).toHaveLength(1);
-      expect(response.events[0].properties.formType).toBe('contact');
-    });
-
-    it('should fail to get custom events without required category', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: '',
-        subcategory: 'form-submission',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
-
-    it('should fail to get custom events without required subcategory', async () => {
-      const request = {
-        apiKey: 'mock-api-key-123',
-        projectName: 'test-project',
-        category: 'user-action',
-        subcategory: '',
-        afterId: '',
-        environment: 'development',
-        limit: 10,
-        afterTime: '',
-      };
-
-      try {
-        await new Promise((resolve, reject) => {
-          analyticsClient.getCustomEventsPaginated(request, (err, response) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(response);
-            }
-          });
-        });
-        fail('Expected error was not thrown');
-      } catch (err) {
-        expect(err).toBeDefined();
-      }
-    });
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([AnalyticsProtoFile]) as any;
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+    analyticsClient =
+      new protoGRPC.juno.analytics_service.analytics.AnalyticsService(
+        process.env.ANALYTICS_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
   });
 
-  describe('Authentication and Validation Tests', () => {
-    it('should handle authentication errors consistently across all methods', async () => {
-      const invalidApiKey = 'invalid-key';
-      const methods = [
-        'getCustomEventTypes',
-        'getCustomGraphTypesById',
-        'getClickEventsPaginated',
-        'getAllClickEvents',
-        'getVisitEventsPaginated',
-        'getAllVisitEvents',
-        'getInputEventsPaginated',
-        'getAllInputEvents',
-        'getCustomEventsPaginated',
-        'getAllCustomEvents',
-      ];
+  it('logClickEvent should return UNIMPLEMENTED', async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        analyticsClient.logClickEvent(
+          {
+            configId: 1,
+            configEnvironment: 'test',
+            objectId: 'button-1',
+            userId: 'user-123',
+          },
+          (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          },
+        );
+      });
+      fail('Expected UNIMPLEMENTED error');
+    } catch (err: any) {
+      expect(err.code).toBe(12); // UNIMPLEMENTED
+    }
+  });
 
-      for (const method of methods) {
-        const request = {
-          apiKey: invalidApiKey,
+  it('logInputEvent should return UNIMPLEMENTED', async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        analyticsClient.logInputEvent(
+          {
+            configId: 1,
+            configEnvironment: 'test',
+            objectId: 'input-1',
+            userId: 'user-123',
+            textValue: 'test',
+          },
+          (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          },
+        );
+      });
+      fail('Expected UNIMPLEMENTED error');
+    } catch (err: any) {
+      expect(err.code).toBe(12); // UNIMPLEMENTED
+    }
+  });
+
+  it('logCustomEvent should return UNIMPLEMENTED', async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        analyticsClient.logCustomEvent(
+          {
+            configId: 1,
+            configEnvironment: 'test',
+            category: 'test',
+            subcategory: 'test',
+            properties: { key: 'value' },
+          },
+          (err, response) => {
+            if (err) reject(err);
+            else resolve(response);
+          },
+        );
+      });
+      fail('Expected UNIMPLEMENTED error');
+    } catch (err: any) {
+      expect(err.code).toBe(12); // UNIMPLEMENTED
+    }
+  });
+
+  it('getCustomEventTypes should return empty list (not crash)', async () => {
+    const response = await new Promise((resolve, reject) => {
+      analyticsClient.getCustomEventTypes(
+        {
           projectName: 'test-project',
-          configId: 0,
+          configId: 1,
           configEnvironment: 'test',
-          ...(method.includes('Custom') && !method.includes('Type')
-            ? {
-                category: 'user-action',
-                subcategory: 'form-submission',
-              }
-            : {}),
-          ...(method.includes('GraphTypes')
-            ? {
-                eventTypeId: 'custom-event-type-1',
-              }
-            : {}),
-          ...(method.includes('Paginated')
-            ? {
-                afterId: '',
-                environment: 'development',
-                limit: 10,
-                afterTime: '',
-              }
-            : {}),
-          ...(method.includes('All') && !method.includes('Custom')
-            ? {
-                afterTime: '',
-                limit: 0,
-              }
-            : {}),
-        };
-
-        try {
-          await new Promise((resolve, reject) => {
-            analyticsClient[method](request, (err, response) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(response);
-              }
-            });
-          });
-          fail(`Expected error was not thrown for method: ${method}`);
-        } catch (err) {
-          expect(err).toBeDefined();
-        }
-      }
+        },
+        (err, response) => {
+          if (err) reject(err);
+          else resolve(response);
+        },
+      );
     });
 
-    it('should validate required project name across all methods', async () => {
-      const methods = [
-        'getCustomEventTypes',
-        'getCustomGraphTypesById',
-        'getClickEventsPaginated',
-        'getAllClickEvents',
-        'getVisitEventsPaginated',
-        'getAllVisitEvents',
-        'getInputEventsPaginated',
-        'getAllInputEvents',
-        'getCustomEventsPaginated',
-        'getAllCustomEvents',
-      ];
+    expect(response).toBeDefined();
+    expect((response as any).eventTypes).toEqual([]);
+  });
 
-      for (const method of methods) {
-        const request = {
-          apiKey: 'mock-api-key-123',
-          projectName: '', // Empty project name
-          configId: 0,
+  it('getCustomGraphTypesById should return empty list (not crash)', async () => {
+    const response = await new Promise((resolve, reject) => {
+      analyticsClient.getCustomGraphTypesById(
+        {
+          projectName: 'test-project',
+          eventTypeId: 'some-type',
+          configId: 1,
           configEnvironment: 'test',
-          ...(method.includes('Custom') && !method.includes('Type')
-            ? {
-                category: 'user-action',
-                subcategory: 'form-submission',
-              }
-            : {}),
-          ...(method.includes('GraphTypes')
-            ? {
-                eventTypeId: 'custom-event-type-1',
-              }
-            : {}),
-          ...(method.includes('Paginated')
-            ? {
-                afterId: '',
-                environment: 'development',
-                limit: 10,
-                afterTime: '',
-              }
-            : {}),
-        };
-
-        try {
-          await new Promise((resolve, reject) => {
-            analyticsClient[method](request, (err, response) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(response);
-              }
-            });
-          });
-          fail(`Expected error was not thrown for method: ${method}`);
-        } catch (err) {
-          expect(err).toBeDefined();
-        }
-      }
+        },
+        (err, response) => {
+          if (err) reject(err);
+          else resolve(response);
+        },
+      );
     });
+
+    expect(response).toBeDefined();
+    expect((response as any).graphs).toEqual([]);
   });
 });

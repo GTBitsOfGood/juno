@@ -165,3 +165,24 @@ model NewAccountRequest {
   projectName String?
   createdAt   DateTime @default(now())
 }
+
+enum AnalyticsEventType {
+  CLICK
+  VISIT
+  INPUT
+  CUSTOM
+}
+
+model AnalyticsEvent {
+  id          Int                @id @default(autoincrement())
+  projectId   Int
+  environment String
+  type        AnalyticsEventType
+  category    String
+  subcategory String
+  properties  Json               @default("{}")
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([projectId, environment, type, createdAt(sort: Desc), id(sort: Desc)], name: "analytics_event_pagination_idx")
+}

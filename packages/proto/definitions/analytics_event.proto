@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package juno.db_service.analytics_event;
+
+service AnalyticsEventDbService {
+    rpc createAnalyticsEvent(CreateAnalyticsEventRequest) returns (AnalyticsEventResponse);
+    rpc getAnalyticsEventsPaginated(GetAnalyticsEventsRequest) returns (GetAnalyticsEventsResponse);
+    rpc getAllAnalyticsEvents(GetAllAnalyticsEventsRequest) returns (GetAllAnalyticsEventsResponse);
+    rpc getCustomEventTypes(GetCustomEventTypesRequest) returns (GetCustomEventTypesResponse);
+}
+
+enum AnalyticsEventType {
+    CLICK = 0;
+    VISIT = 1;
+    INPUT = 2;
+    CUSTOM = 3;
+}
+
+message CreateAnalyticsEventRequest {
+    int64 projectId = 1;
+    string environment = 2;
+    AnalyticsEventType type = 3;
+    string category = 4;
+    string subcategory = 5;
+    string properties = 6;
+}
+
+message AnalyticsEventResponse {
+    int64 id = 1;
+    int64 projectId = 2;
+    string environment = 3;
+    AnalyticsEventType type = 4;
+    string category = 5;
+    string subcategory = 6;
+    string properties = 7;
+    string createdAt = 8;
+    string updatedAt = 9;
+}
+
+message GetAnalyticsEventsRequest {
+    int64 projectId = 1;
+    string environment = 2;
+    AnalyticsEventType type = 3;
+    optional string afterId = 4;
+    optional int32 limit = 5;
+    optional string afterTime = 6;
+    optional string category = 7;
+    optional string subcategory = 8;
+}
+
+message GetAnalyticsEventsResponse {
+    repeated AnalyticsEventResponse events = 1;
+    string afterId = 2;
+}
+
+message GetAllAnalyticsEventsRequest {
+    int64 projectId = 1;
+    AnalyticsEventType type = 2;
+    optional string afterTime = 3;
+    optional int32 limit = 4;
+    optional string category = 5;
+    optional string subcategory = 6;
+}
+
+message GetAllAnalyticsEventsResponse {
+    repeated AnalyticsEventResponse events = 1;
+}
+
+message GetCustomEventTypesRequest {
+    int64 projectId = 1;
+}
+
+message GetCustomEventTypesResponse {
+    repeated CustomEventType eventTypes = 1;
+}
+
+message CustomEventType {
+    string id = 1;
+    string category = 2;
+    string subcategory = 3;
+    repeated string properties = 4;
+    string projectId = 5;
+}

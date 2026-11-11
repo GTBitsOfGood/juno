@@ -13,6 +13,7 @@ import { FileBucketModule } from './modules/file_bucket/file_bucket.module';
 import { FileConfigModule } from './modules/file_config/file_config.module';
 import { FileProviderModule } from './modules/file_provider/file_provider.module';
 import { AnalyticsConfigModule } from './modules/analytics_config/analytics_config.module';
+import { AnalyticsEventModule } from './modules/analytics_event/analytics_event.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AnalyticsConfigModule } from './modules/analytics_config/analytics_conf
     FileConfigModule,
     FileProviderModule,
     AnalyticsConfigModule,
+    AnalyticsEventModule,
   ],
   controllers: [AppController],
   providers: [AppService],
