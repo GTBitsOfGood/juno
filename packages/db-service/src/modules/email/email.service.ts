@@ -32,6 +32,14 @@ type EmailDomainWithConfigIds = Prisma.EmailDomainGetPayload<
   typeof domainWithConfigIds
 >;
 
+// conflict is true when another project already uses the SendGrid key; config
+// is set otherwise. (A plain object type, not a discriminated union, because
+// this package compiles without strictNullChecks, which breaks the narrowing.)
+type CreateConfigResult = {
+  conflict: boolean;
+  config?: EmailServiceConfig;
+};
+
 @Injectable()
 export class EmailService {
   constructor(private prisma: PrismaService) {}
@@ -162,6 +170,100 @@ export class EmailService {
     return this.prisma.emailServiceConfig.findUnique({
       where: input,
     });
+  }
+
+  /**
+   * Creates or updates a config while enforcing one SendGrid key per project
+   * (configs for different environments of the same project may share a key).
+   * The conflict check and the write run in one transaction, and a Postgres
+   * advisory lock on the key serializes concurrent setups of the same key, so
+   * two simultaneous requests can't both pass the check.
+   */
+  async createEmailServiceConfigWithUniqueKey(
+    input: Prisma.EmailServiceConfigCreateInput,
+  ): Promise<CreateConfigResult> {
+    const projectId = input.Project.connect.id;
+
+    return this.prisma.$transaction(async (tx): Promise<CreateConfigResult> => {
+      if (input.sendgridApiKey) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${input.sendgridApiKey}))`;
+
+        const conflict = await tx.emailServiceConfig.findFirst({
+          where: {
+            sendgridApiKey: input.sendgridApiKey,
+            NOT: { id: projectId },
+          },
+          select: { id: true },
+        });
+        if (conflict) {
+          return { conflict: true };
+        }
+      }
+
+      const config = await tx.emailServiceConfig.upsert({
+        where: {
+          id_environment: {
+            id: projectId,
+            environment: input.environment,
+          },
+        },
+        create: input,
+        update: {
+          sendgridApiKey: input.sendgridApiKey,
+        },
+      });
+      return { conflict: false, config };
+    });
+  }
+
+  /** The link between a domain and one config, holding that config's SendGrid id. */
+  async emailDomainLink(domain: string, configId: number, configEnv: string) {
+    return this.prisma.emailServiceConfigAndDomain.findUnique({
+      where: {
+        configId_configEnv_domainStr: {
+          configId,
+          configEnv,
+          domainStr: domain,
+        },
+      },
+    });
+  }
+
+  async createVerifiedSender(input: {
+    configId: number;
+    configEnv: string;
+    sendgridId: number;
+    fromEmail: string;
+  }) {
+    return this.prisma.emailVerifiedSender.upsert({
+      where: {
+        configId_configEnv_sendgridId: {
+          configId: input.configId,
+          configEnv: input.configEnv,
+          sendgridId: input.sendgridId,
+        },
+      },
+      create: input,
+      update: { fromEmail: input.fromEmail },
+    });
+  }
+
+  /** SendGrid ids of the domains and verified senders recorded for a config. */
+  async configResourceIds(configId: number, configEnv: string) {
+    const [domains, senders] = await Promise.all([
+      this.prisma.emailServiceConfigAndDomain.findMany({
+        where: { configId, configEnv },
+        select: { sendgridId: true },
+      }),
+      this.prisma.emailVerifiedSender.findMany({
+        where: { configId, configEnv },
+        select: { sendgridId: true },
+      }),
+    ]);
+    return {
+      domainSendgridIds: domains.map((d) => d.sendgridId),
+      senderSendgridIds: senders.map((s) => s.sendgridId),
+    };
   }
 
   get rawPrisma() {

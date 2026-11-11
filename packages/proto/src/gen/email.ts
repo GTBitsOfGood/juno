@@ -170,8 +170,14 @@ export interface EmailDomain {
   projects: ProjectIdentifier[];
 }
 
+/**
+ * When configId and configEnvironment are set, the domain must be linked to
+ * that config and the returned sendgridId is the one saved for it.
+ */
 export interface EmailDomainRequest {
   domain: string;
+  configId?: number | undefined;
+  configEnvironment?: string | undefined;
 }
 
 export interface CreateEmailDomainRequest {
@@ -225,6 +231,61 @@ export interface GetEmailServiceConfigRequest {
   environment: string;
 }
 
+export interface GetSendersRequest {
+  configId: number;
+  configEnvironment: string;
+}
+
+export interface VerifiedSender {
+  id: number;
+  nickname: string;
+  fromEmail: string;
+  fromName: string;
+  replyTo: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  verified: boolean;
+  locked: boolean;
+}
+
+export interface GetSendersResponse {
+  senders: VerifiedSender[];
+}
+
+export interface GetDomainsRequest {
+  configId: number;
+  configEnvironment: string;
+}
+
+export interface AuthenticatedDomain {
+  id: number;
+  domain: string;
+  subdomain?: string | undefined;
+  valid: boolean;
+}
+
+export interface GetDomainsResponse {
+  domains: AuthenticatedDomain[];
+}
+
+export interface CreateVerifiedSenderRequest {
+  configId: number;
+  configEnvironment: string;
+  sendgridId: number;
+  fromEmail: string;
+}
+
+export interface CreateVerifiedSenderResponse {}
+
+/** SendGrid ids of the domains and verified senders recorded for a config. */
+export interface GetConfigResourcesResponse {
+  domainSendgridIds: number[];
+  senderSendgridIds: number[];
+}
+
 export const JUNO_EMAIL_PACKAGE_NAME = 'juno.email';
 
 export interface EmailServiceClient {
@@ -243,6 +304,10 @@ export interface EmailServiceClient {
   verifyDomain(request: VerifyDomainRequest): Observable<VerifyDomainResponse>;
 
   getStatistics(request: GetStatisticsRequest): Observable<StatisticResponses>;
+
+  getSenders(request: GetSendersRequest): Observable<GetSendersResponse>;
+
+  getDomains(request: GetDomainsRequest): Observable<GetDomainsResponse>;
 }
 
 export interface EmailServiceController {
@@ -284,6 +349,20 @@ export interface EmailServiceController {
     | Promise<StatisticResponses>
     | Observable<StatisticResponses>
     | StatisticResponses;
+
+  getSenders(
+    request: GetSendersRequest,
+  ):
+    | Promise<GetSendersResponse>
+    | Observable<GetSendersResponse>
+    | GetSendersResponse;
+
+  getDomains(
+    request: GetDomainsRequest,
+  ):
+    | Promise<GetDomainsResponse>
+    | Observable<GetDomainsResponse>
+    | GetDomainsResponse;
 }
 
 export function EmailServiceControllerMethods() {
@@ -295,6 +374,8 @@ export function EmailServiceControllerMethods() {
       'authenticateDomain',
       'verifyDomain',
       'getStatistics',
+      'getSenders',
+      'getDomains',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
@@ -344,6 +425,14 @@ export interface EmailDbServiceClient {
   getEmailServiceConfig(
     request: GetEmailServiceConfigRequest,
   ): Observable<EmailServiceConfig>;
+
+  createVerifiedSender(
+    request: CreateVerifiedSenderRequest,
+  ): Observable<CreateVerifiedSenderResponse>;
+
+  getConfigResources(
+    request: GetEmailServiceConfigRequest,
+  ): Observable<GetConfigResourcesResponse>;
 }
 
 export interface EmailDbServiceController {
@@ -384,6 +473,20 @@ export interface EmailDbServiceController {
     | Promise<EmailServiceConfig>
     | Observable<EmailServiceConfig>
     | EmailServiceConfig;
+
+  createVerifiedSender(
+    request: CreateVerifiedSenderRequest,
+  ):
+    | Promise<CreateVerifiedSenderResponse>
+    | Observable<CreateVerifiedSenderResponse>
+    | CreateVerifiedSenderResponse;
+
+  getConfigResources(
+    request: GetEmailServiceConfigRequest,
+  ):
+    | Promise<GetConfigResourcesResponse>
+    | Observable<GetConfigResourcesResponse>
+    | GetConfigResourcesResponse;
 }
 
 export function EmailDbServiceControllerMethods() {
@@ -397,6 +500,8 @@ export function EmailDbServiceControllerMethods() {
       'createEmailDomain',
       'createEmailServiceConfig',
       'getEmailServiceConfig',
+      'createVerifiedSender',
+      'getConfigResources',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

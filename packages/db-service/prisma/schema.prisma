@@ -66,6 +66,7 @@ model EmailServiceConfig {
   sendgridApiKey String @default("")
   emails         EmailServiceConfigAndSender[]
   domains        EmailServiceConfigAndDomain[]
+  verifiedSenders EmailVerifiedSender[]
   Project        Project                       @relation(fields: [id], references: [id])
 
   @@id([id, environment])
@@ -88,8 +89,24 @@ model EmailServiceConfigAndDomain {
   configEnv String
   domain    EmailDomain        @relation(fields: [domainStr], references: [domain])
   domainStr String
+  // SendGrid's id for this domain in this project/environment's SendGrid
+  // account. Authoritative over EmailDomain.sendgridId, which only holds the
+  // id from the first registration of the domain name.
+  sendgridId Int @default(0)
 
   @@id([configId, configEnv, domainStr])
+}
+
+// A SendGrid verified sender registered through Juno for a project/environment.
+// getSenders only returns senders recorded here.
+model EmailVerifiedSender {
+  config     EmailServiceConfig @relation(fields: [configId, configEnv], references: [id, environment])
+  configId   Int
+  configEnv  String
+  sendgridId Int
+  fromEmail  String
+
+  @@id([configId, configEnv, sendgridId])
 }
 
 model EmailSender {

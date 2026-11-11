@@ -98,8 +98,10 @@ describe('Email Service Authenticate Domain Tests', () => {
   });
 
   it('should fail to register a domain', async () => {
-    try {
-      await new Promise((resolve, reject) => {
+    // The assertion lives outside any try/catch, so the test fails if the
+    // request unexpectedly succeeds.
+    await expect(
+      new Promise((resolve, reject) => {
         emailClient.authenticateDomain(
           {
             domain: '',
@@ -115,12 +117,8 @@ describe('Email Service Authenticate Domain Tests', () => {
             }
           },
         );
-      });
-
-      fail('Expected an error to be thrown');
-    } catch (err) {
-      expect(err).toBeDefined();
-    }
+      }),
+    ).rejects.toMatchObject({ code: status.INVALID_ARGUMENT });
   });
 });
 
@@ -415,5 +413,216 @@ describe('Email Service Send Email Tests', () => {
         },
       );
     });
+  });
+});
+
+describe('Email Service Get Senders Tests', () => {
+  let emailClient: any;
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([EmailProtoFile], {
+      arrays: true,
+    }) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    emailClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('should successfully get senders', async () => {
+    const response: EmailProto.GetSendersResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.getSenders(
+          {
+            configId: 0,
+            configEnvironment: 'prod',
+          },
+          (err: any, response: EmailProto.GetSendersResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.senders).toBeDefined();
+    expect(Array.isArray(response.senders)).toBe(true);
+  });
+
+  it('should list a sender registered through registerSender', async () => {
+    await new Promise((resolve, reject) => {
+      emailClient.registerSender(
+        {
+          fromEmail: 'listed-sender@example.com',
+          fromName: 'Listed Sender',
+          replyTo: 'listed-sender@example.com',
+          configId: 0,
+          configEnvironment: 'prod',
+          nickname: 'Listed Sender',
+          address: '1 Test St',
+          city: 'Atlanta',
+          state: 'GA',
+          country: 'US',
+          zip: '30301',
+        },
+        (err: any, response: EmailProto.RegisterSenderResponse) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        },
+      );
+    });
+
+    const response: EmailProto.GetSendersResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.getSenders(
+          {
+            configId: 0,
+            configEnvironment: 'prod',
+          },
+          (err: any, response: EmailProto.GetSendersResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response.senders).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fromEmail: 'listed-sender@example.com',
+          fromName: 'Listed Sender',
+          verified: false,
+        }),
+      ]),
+    );
+  });
+
+  it('should fail to get senders with invalid config', async () => {
+    // Asserts that the call rejects with a gRPC error (it has a numeric code).
+    // The exact code depends on how a missing config surfaces from db-service.
+    await expect(
+      new Promise((resolve, reject) => {
+        emailClient.getSenders(
+          {
+            configId: 9999,
+            configEnvironment: 'nonexistent',
+          },
+          (err: any, response: EmailProto.GetSendersResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      }),
+    ).rejects.toMatchObject({ code: expect.any(Number) });
+  });
+});
+
+describe('Email Service Get Domains Tests', () => {
+  let emailClient: any;
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([EmailProtoFile], {
+      arrays: true,
+    }) as any;
+
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+
+    emailClient = new protoGRPC.juno.email.EmailService(
+      process.env.EMAIL_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+  });
+
+  it('should successfully get domains', async () => {
+    const response: EmailProto.GetDomainsResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.getDomains(
+          {
+            configId: 0,
+            configEnvironment: 'prod',
+          },
+          (err: any, response: EmailProto.GetDomainsResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response).toBeDefined();
+    expect(response.domains).toBeDefined();
+    expect(Array.isArray(response.domains)).toBe(true);
+  });
+
+  it('should list a domain registered through authenticateDomain', async () => {
+    // 'example.com' / 'mail' is registered for config 0 prod in the
+    // authenticate-domain tests above.
+    const response: EmailProto.GetDomainsResponse = await new Promise(
+      (resolve, reject) => {
+        emailClient.getDomains(
+          {
+            configId: 0,
+            configEnvironment: 'prod',
+          },
+          (err: any, response: EmailProto.GetDomainsResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      },
+    );
+
+    expect(response.domains).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          domain: 'example.com',
+          subdomain: 'mail',
+          valid: false,
+        }),
+      ]),
+    );
+  });
+
+  it('should fail to get domains with invalid config', async () => {
+    // Asserts that the call rejects with a gRPC error (it has a numeric code).
+    // The exact code depends on how a missing config surfaces from db-service.
+    await expect(
+      new Promise((resolve, reject) => {
+        emailClient.getDomains(
+          {
+            configId: 9999,
+            configEnvironment: 'nonexistent',
+          },
+          (err: any, response: EmailProto.GetDomainsResponse) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      }),
+    ).rejects.toMatchObject({ code: expect.any(Number) });
   });
 });

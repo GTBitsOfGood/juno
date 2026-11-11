@@ -16,15 +16,28 @@ export class EmailController implements EmailDbServiceController {
   async createEmailServiceConfig(
     request: EmailProto.CreateEmailServiceConfigRequest,
   ): Promise<EmailProto.EmailServiceConfig> {
-    const config = await this.emailService.createEmailServiceConfig({
-      environment: request.environment,
-      sendgridApiKey: request.sendgridKey,
-      Project: {
-        connect: {
-          id: Number(request.projectId),
+    // One SendGrid key per project. The check and the write happen atomically
+    // in the service (see createEmailServiceConfigWithUniqueKey).
+    const result =
+      await this.emailService.createEmailServiceConfigWithUniqueKey({
+        environment: request.environment,
+        sendgridApiKey: request.sendgridKey,
+        Project: {
+          connect: {
+            id: Number(request.projectId),
+          },
         },
-      },
-    });
+      });
+
+    if (result.conflict) {
+      throw new RpcException({
+        code: status.ALREADY_EXISTS,
+        message:
+          'This SendGrid API key is already in use by another project. Each project must use its own SendGrid account.',
+      });
+    }
+
+    const config = result.config;
 
     return {
       id: config.id,
@@ -230,12 +243,13 @@ export class EmailController implements EmailDbServiceController {
     const emailDomain = await this.emailService.createEmailDomain({
       domain: request.domain,
       subdomain: request.subdomain,
-      sendgridId: request.sendgridId,
+      sendgridId: Number(request.sendgridId),
       attachedConfigs: {
         connectOrCreate: {
           create: {
             configId: Number(request.configId),
             configEnv: request.configEnvironment,
+            sendgridId: Number(request.sendgridId),
           },
           where: {
             configId_configEnv_domainStr: {
@@ -273,10 +287,35 @@ export class EmailController implements EmailDbServiceController {
         message: 'Domain not found',
       });
     }
+
+    // When a config is given, the domain must be linked to it, and the SendGrid
+    // id is the one saved for that config (each project/environment registers
+    // the domain with its own SendGrid account). Without a config, behavior is
+    // unchanged.
+    let sendgridId = domain.sendgridId;
+    if (
+      request.configId !== undefined &&
+      request.configEnvironment !== undefined &&
+      request.configEnvironment !== ''
+    ) {
+      const link = await this.emailService.emailDomainLink(
+        request.domain,
+        Number(request.configId),
+        request.configEnvironment,
+      );
+      if (!link) {
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: 'Domain not found',
+        });
+      }
+      sendgridId = link.sendgridId;
+    }
+
     return {
       domain: domain.domain,
       subdomain: domain.subdomain,
-      sendgridId: domain.sendgridId,
+      sendgridId,
       projects: domain.attachedConfigs.map((config) => {
         return {
           id: config.configId,
@@ -284,5 +323,41 @@ export class EmailController implements EmailDbServiceController {
         };
       }),
     };
+  }
+
+  async createVerifiedSender(
+    request: EmailProto.CreateVerifiedSenderRequest,
+  ): Promise<EmailProto.CreateVerifiedSenderResponse> {
+    const config = await this.emailService.getEmailServiceConfig({
+      id_environment: {
+        id: Number(request.configId),
+        environment: request.configEnvironment,
+      },
+    });
+
+    if (!config) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Config not found',
+      });
+    }
+
+    await this.emailService.createVerifiedSender({
+      configId: Number(request.configId),
+      configEnv: request.configEnvironment,
+      sendgridId: Number(request.sendgridId),
+      fromEmail: request.fromEmail,
+    });
+
+    return {};
+  }
+
+  async getConfigResources(
+    request: EmailProto.GetEmailServiceConfigRequest,
+  ): Promise<EmailProto.GetConfigResourcesResponse> {
+    return this.emailService.configResourceIds(
+      Number(request.id),
+      request.environment,
+    );
   }
 }

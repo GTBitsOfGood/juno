@@ -49,9 +49,12 @@ export const ProjectId = createParamDecorator(
       }
 
       if (user) {
+        // projectIds is undefined (not []) for a user linked to no projects.
         const hasAccess =
           user.type === CommonProto.UserType.SUPERADMIN ||
-          user.projectIds.map((id: unknown) => Number(id)).includes(projectId);
+          (user.projectIds ?? [])
+            .map((id: unknown) => Number(id))
+            .includes(projectId);
 
         if (!hasAccess) {
           throw new UnauthorizedException(
