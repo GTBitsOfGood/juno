@@ -20,11 +20,6 @@ export class AnalyticsService implements OnModuleInit {
       );
   }
 
-  // ============================================================================
-  // VISIT EVENTS - Fully implemented via db-service
-  // This is the pattern for teammates to copy for click, input, custom events.
-  // ============================================================================
-
   async logVisitEvent(
     event: AnalyticsProto.VisitEventRequest,
   ): Promise<AnalyticsProto.VisitEventResponse> {
@@ -155,17 +150,13 @@ export class AnalyticsService implements OnModuleInit {
     };
   }
 
-  // ============================================================================
-  // CLICK EVENTS - Stub: to be implemented in #263 by copying visit pattern
-  // ============================================================================
-
+  // #263: implement click events by copying visit pattern above
   async logClickEvent(
     _event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'logClickEvent not yet implemented - see #263. Copy the visit pattern from logVisitEvent.',
+      message: 'logClickEvent not yet implemented - see #263',
     });
   }
 
@@ -174,8 +165,7 @@ export class AnalyticsService implements OnModuleInit {
   ): Promise<AnalyticsProto.GetClickEventsResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'getClickEventsPaginated not yet implemented - see #263. Copy the visit pattern.',
+      message: 'getClickEventsPaginated not yet implemented - see #263',
     });
   }
 
@@ -184,22 +174,17 @@ export class AnalyticsService implements OnModuleInit {
   ): Promise<AnalyticsProto.GetAllClickEventsResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'getAllClickEvents not yet implemented - see #263. Copy the visit pattern.',
+      message: 'getAllClickEvents not yet implemented - see #263',
     });
   }
 
-  // ============================================================================
-  // INPUT EVENTS - Stub: to be implemented in #263 by copying visit pattern
-  // ============================================================================
-
+  // #263: implement input events by copying visit pattern above
   async logInputEvent(
     _event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'logInputEvent not yet implemented - see #263. Copy the visit pattern from logVisitEvent.',
+      message: 'logInputEvent not yet implemented - see #263',
     });
   }
 
@@ -208,8 +193,7 @@ export class AnalyticsService implements OnModuleInit {
   ): Promise<AnalyticsProto.GetInputEventsResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'getInputEventsPaginated not yet implemented - see #263. Copy the visit pattern.',
+      message: 'getInputEventsPaginated not yet implemented - see #263',
     });
   }
 
@@ -218,22 +202,17 @@ export class AnalyticsService implements OnModuleInit {
   ): Promise<AnalyticsProto.GetAllInputEventsResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'getAllInputEvents not yet implemented - see #263. Copy the visit pattern.',
+      message: 'getAllInputEvents not yet implemented - see #263',
     });
   }
 
-  // ============================================================================
-  // CUSTOM EVENTS - Stub: to be implemented in #263 by copying visit pattern
-  // ============================================================================
-
+  // #263: implement custom events by copying visit pattern above
   async logCustomEvent(
     _event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'logCustomEvent not yet implemented - see #263. Copy the visit pattern from logVisitEvent.',
+      message: 'logCustomEvent not yet implemented - see #263',
     });
   }
 
@@ -242,8 +221,7 @@ export class AnalyticsService implements OnModuleInit {
   ): Promise<AnalyticsProto.GetCustomEventsResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'getCustomEventsPaginated not yet implemented - see #263. Copy the visit pattern.',
+      message: 'getCustomEventsPaginated not yet implemented - see #263',
     });
   }
 
@@ -252,32 +230,20 @@ export class AnalyticsService implements OnModuleInit {
   ): Promise<AnalyticsProto.GetAllCustomEventsResponse> {
     throw new RpcException({
       code: status.UNIMPLEMENTED,
-      message:
-        'getAllCustomEvents not yet implemented - see #263. Copy the visit pattern.',
+      message: 'getAllCustomEvents not yet implemented - see #263',
     });
   }
 
-  // ============================================================================
-  // CUSTOM EVENT TYPES - Returns empty list for now, to be filled in #263
-  // ============================================================================
-
+  // #263: query distinct category/subcategory from stored events
   async getCustomEventTypes(
     _request: AnalyticsProto.CustomEventTypeRequest,
   ): Promise<AnalyticsProto.GetAllCustomEventTypeResponse> {
-    // Return empty list so dashboard doesn't crash. #263 will implement this
-    // by calling analyticsEventDbService.getCustomEventTypes().
     return { eventTypes: [] };
   }
-
-  // ============================================================================
-  // CUSTOM GRAPH TYPES - Returns empty list (harmless stub)
-  // ============================================================================
 
   async getCustomGraphTypesById(
     _request: AnalyticsProto.CustomGraphTypeRequest,
   ): Promise<AnalyticsProto.CustomGraphTypeResponse> {
-    // Return empty list so dashboard doesn't crash. Graph types can be
-    // implemented later if needed, or remain a stub.
     return { graphs: [] };
   }
 }
