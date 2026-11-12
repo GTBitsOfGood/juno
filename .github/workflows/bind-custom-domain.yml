@@ -60,7 +60,7 @@ jobs:
       - name: ${{ inputs.action }}
         uses: azure/CLI@v1
         env:
-          HOSTNAME: ${{ inputs.hostname }}
+          CUSTOM_HOSTNAME: ${{ inputs.hostname }}
           APP: ${{ inputs.app }}
           ACTION: ${{ inputs.action }}
         with:
@@ -69,7 +69,7 @@ jobs:
             set -euo pipefail
 
             RG="${RESOURCE_GROUP}"
-            HOSTNAME="${HOSTNAME}"
+            CUSTOM_HOSTNAME="${CUSTOM_HOSTNAME}"
             APP="${APP}"
             ACTION="${ACTION}"
 
@@ -101,14 +101,14 @@ jobs:
 
             echo "Container App: ${APP}"
             echo "Resource group: ${RG}"
-            echo "Hostname: ${HOSTNAME}"
+            echo "Hostname: ${CUSTOM_HOSTNAME}"
             echo "App FQDN: ${FQDN}"
             echo "Environment: ${ENV_NAME}"
             echo "Verification ID (asuid TXT value): ${VERIFY_ID}"
             echo
             echo "DNS records (must exist before bind). Use bare hostnames, no https://, no trailing slash:"
-            echo "  CNAME  ${HOSTNAME}  ->  ${FQDN}"
-            echo "  TXT    asuid.${HOSTNAME}  ->  ${VERIFY_ID}"
+            echo "  CNAME  ${CUSTOM_HOSTNAME}  ->  ${FQDN}"
+            echo "  TXT    asuid.${CUSTOM_HOSTNAME}  ->  ${VERIFY_ID}"
             echo
             echo "If these live in the bitsofgood.org zone in NS1, that is usually:"
             echo "  CNAME  api.juno  ->  ${FQDN}"
@@ -121,19 +121,19 @@ jobs:
             fi
 
             echo
-            echo "Adding hostname ${HOSTNAME} to ${APP}..."
+            echo "Adding hostname ${CUSTOM_HOSTNAME} to ${APP}..."
             add_out=""
-            if ! add_out=$(az containerapp hostname add -n "${APP}" -g "${RG}" --hostname "${HOSTNAME}" 2>&1); then
-              fail_az "${add_out}" "add hostname ${HOSTNAME} to ${APP}"
+            if ! add_out=$(az containerapp hostname add -n "${APP}" -g "${RG}" --hostname "${CUSTOM_HOSTNAME}" 2>&1); then
+              fail_az "${add_out}" "add hostname ${CUSTOM_HOSTNAME} to ${APP}"
             fi
             printf '%s\n' "${add_out}"
 
-            echo "Binding ${HOSTNAME} with a managed certificate (validation-method CNAME)..."
+            echo "Binding ${CUSTOM_HOSTNAME} with a managed certificate (validation-method CNAME)..."
             echo "Certificate issuance can take a few minutes."
             bind_out=""
-            if ! bind_out=$(az containerapp hostname bind -n "${APP}" -g "${RG}" --hostname "${HOSTNAME}" --environment "${ENV_NAME}" --validation-method CNAME 2>&1); then
-              fail_az "${bind_out}" "bind hostname ${HOSTNAME} on ${APP} with a managed cert"
+            if ! bind_out=$(az containerapp hostname bind -n "${APP}" -g "${RG}" --hostname "${CUSTOM_HOSTNAME}" --environment "${ENV_NAME}" --validation-method CNAME 2>&1); then
+              fail_az "${bind_out}" "bind hostname ${CUSTOM_HOSTNAME} on ${APP} with a managed cert"
             fi
             printf '%s\n' "${bind_out}"
 
-            echo "Bound ${HOSTNAME} to ${APP}."
+            echo "Bound ${CUSTOM_HOSTNAME} to ${APP}."
