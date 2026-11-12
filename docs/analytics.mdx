@@ -1,0 +1,82 @@
+---
+title: Analytics
+description: Log clicks, page visits, inputs, and custom events from your project.
+---
+
+<Warning>
+  Analytics is being reworked. Events are moving into Juno's own database
+  instead of an external analytics provider, so you won't need to set up a
+  client or server analytics key. This page is a short placeholder until that
+  work lands (tracked in
+  [juno#266](https://github.com/GTBitsOfGood/juno/issues/266)). Check the [API
+  reference](/api-reference/introduction) for the routes that exist today.
+</Warning>
+
+## What you can track
+
+Juno's analytics service records four kinds of events for your project and environment (both come from your API key):
+
+| Event  | Use it for                              | Fields                                  |
+| ------ | --------------------------------------- | --------------------------------------- |
+| Click  | Someone clicked a button, link, or card | `objectId`, `userId`                    |
+| Visit  | Someone viewed a page                   | `pageUrl`, `userId`                     |
+| Input  | Someone typed into a field              | `objectId`, `userId`, `textValue`       |
+| Custom | Anything else your app cares about      | `category`, `subcategory`, `properties` |
+
+## Logging events
+
+```ts
+import juno from 'juno-sdk';
+
+juno.init({
+  apiKey: process.env.JUNO_API_KEY!,
+  baseURL:
+    'https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io',
+});
+
+await juno.analytics.logClickEvent({
+  objectId: 'btn-submit',
+  userId: 'user-001',
+});
+
+await juno.analytics.logVisitEvent({
+  pageUrl: '/dashboard',
+  userId: 'user-001',
+});
+
+await juno.analytics.logInputEvent({
+  objectId: 'search-bar',
+  userId: 'user-001',
+  textValue: 'fundraising campaigns',
+});
+
+await juno.analytics.logCustomEvent({
+  category: 'donations',
+  subcategory: 'completed',
+  properties: { amount: 50, currency: 'USD' },
+});
+```
+
+## Reading events
+
+Each event type has a paginated getter and an "all" getter, for example:
+
+```ts
+const page = await juno.analytics.getClickEventsPaginated({
+  projectName: 'my-project',
+  limit: 50,
+});
+
+const everything = await juno.analytics.getAllVisitEvents({
+  projectName: 'my-project',
+});
+```
+
+Custom events also have `getCustomEventTypesByProject` and `getCustomGraphTypesById` for the event types and chart settings your project has defined.
+
+<Note>
+  Older docs told you to create an analytics config with a `clientAnalyticsKey`
+  and `serverAnalyticsKey` before logging anything. Ignore that. Those keys
+  belonged to the external provider Juno is moving off of, and the new setup
+  won't need them.
+</Note>

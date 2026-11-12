@@ -1,2 +1,3 @@
 packages/proto/src/gen/
 pnpm-lock.yaml
+docs/openapi.json

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Juno",
+  "description": "Bits of Good's shared infrastructure API: accounts, email, files, and analytics for every BoG project.",
+  "colors": {
+    "primary": "#1F6FEB",
+    "light": "#5B9BFF",
+    "dark": "#0B3D91"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": ["index", "getting-started"]
+          },
+          {
+            "group": "Contributing",
+            "pages": ["local-development"]
+          }
+        ]
+      },
+      {
+        "tab": "Services",
+        "groups": [
+          {
+            "group": "Juno services",
+            "pages": ["email", "files", "analytics"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["api-reference/introduction"]
+          },
+          {
+            "group": "Endpoints",
+            "openapi": "openapi.json"
+          }
+        ]
+      }
+    ]
+  },
+  "api": {
+    "playground": {
+      "display": "none"
+    }
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Dashboard",
+        "href": "https://juno-dashboard.netlify.app"
+      }
+    ],
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/GTBitsOfGood/juno"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/GTBitsOfGood/juno"
+    }
+  }
+}

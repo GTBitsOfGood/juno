@@ -1,0 +1,32 @@
+---
+title: API reference
+description: Every public route on the Juno API gateway.
+---
+
+The routes in this tab are generated from `openapi.json`, a snapshot of the gateway's `/docs-json`. The SDK is generated from the same spec, so anything here is something `juno-sdk` can call.
+
+## Base URL
+
+```text
+https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io
+```
+
+Running Juno locally? It's `http://localhost:8888`. See [Local development](/local-development).
+
+## Authentication
+
+Most routes take your project's API key as a bearer token:
+
+```bash
+curl "https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io/file/config/setup" \
+  -X POST \
+  -H "Authorization: Bearer $JUNO_API_KEY"
+```
+
+Routes that manage accounts and projects act as a person instead. They take a user JWT from `POST /auth/user/jwt` as a bearer token, or an email and password in the `X-User-Email` and `X-User-Password` headers.
+
+<Warning>
+  The interactive playground is turned off on this site on purpose. It would
+  send real requests, with real API keys, to the production API. Use the SDK,
+  `curl`, or a local Juno instance to try things out.
+</Warning>

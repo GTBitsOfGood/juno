@@ -1,0 +1,143 @@
+---
+title: Getting started
+description: Go from no account to your app's first Juno call.
+---
+
+This page takes you from nothing to a working API call. You'll need to know what a Node project is and not much else.
+
+<Steps>
+  <Step title="Request an account">
+    Go to the [request account page](https://juno-dashboard.netlify.app/request-account) on the Juno dashboard and fill in your name, email, and a password. Use the email you use for other BoG stuff.
+
+    Pick a **user type**:
+
+    - **Admin** is for engineering managers only. You'll also be asked for a **project name** (like "GT Scheduler"), and Juno creates that project for you when your request is approved.
+    - **User** is for everyone else. You'll need an admin or superadmin to add you to your team's project once you're approved.
+
+    Submitting creates a *pending* account request. You can't log in yet.
+
+  </Step>
+
+  <Step title="Get approved">
+    A Juno superadmin has to approve you. They do that in the dashboard at `/admin/users`, in the pending account requests list. If nobody has approved you after a day or so, ping whoever currently owns Juno (usually BoG execs) or ask in `#gt-infra-support`.
+
+    Once you're approved you can log in at [juno-dashboard.netlify.app](https://juno-dashboard.netlify.app).
+
+  </Step>
+
+  <Step title="Find your project">
+    Every API key belongs to a project. If you requested an Admin account with a project name, your project already exists and you're linked to it. Otherwise, ask an admin to add you to your team's project.
+
+    Your projects show up on the dashboard once you're linked.
+
+  </Step>
+
+  <Step title="Create an API key">
+    Open your project and go to its **Keys** page (`/projects/<project id>/keys`). Fill in a description, pick the environment it's for, and create the key. The key is scoped to that project and environment.
+
+    <Warning>
+      Copy the key as soon as it's created and treat it like a password: anyone who has it can act as your project. Put it in an environment variable or secret manager. Never commit it.
+    </Warning>
+
+  </Step>
+
+  <Step title="Install the SDK">
+    <CodeGroup>
+      ```bash npm
+      npm install juno-sdk
+      ```
+
+      ```bash pnpm
+      pnpm add juno-sdk
+      ```
+
+      ```bash yarn
+      yarn add juno-sdk
+      ```
+
+      ```bash bun
+      bun add juno-sdk
+      ```
+    </CodeGroup>
+
+  </Step>
+
+  <Step title="Initialize it">
+    The SDK is a default export, so use `import`, not `require`. Call `init` once, as early as you can in your app.
+
+    ```ts
+    import juno from 'juno-sdk';
+
+    juno.init({
+      apiKey: process.env.JUNO_API_KEY!,
+      baseURL: 'https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io',
+    });
+    ```
+
+    `baseURL` has no trailing slash. Leave it out and the SDK falls back to its built-in default, which is not what you want, so always set it.
+
+  </Step>
+
+  <Step title="Make your first call">
+    A good first call is setting up the file service for your project and environment. It's the first step of the [Files guide](/files) anyway, and it only needs your API key.
+
+    ```ts
+    const result = await juno.file.setup();
+
+    console.log(result.success); // true
+    ```
+
+    If that prints `true`, you're set up. If you get a `401 Unauthorized`, the key is wrong, revoked, or you pasted it with extra whitespace. A network error usually means the `baseURL` is wrong. A `400` can mean your project and environment already have a file config, which is fine: you're already set up.
+
+  </Step>
+</Steps>
+
+## Next steps
+
+<CardGroup cols={3}>
+  <Card title="Email" icon="envelope" href="/email">
+    Send your first email.
+  </Card>
+  <Card title="Files" icon="file" href="/files">
+    Store and fetch files.
+  </Card>
+  <Card title="Analytics" icon="chart-line" href="/analytics">
+    Track user events.
+  </Card>
+</CardGroup>
+
+## Using Juno without the SDK
+
+Everything the SDK does is a plain HTTP call. Send your API key as a bearer token:
+
+```bash
+curl -X POST "https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io/file/config/setup" \
+  -H "Authorization: Bearer $JUNO_API_KEY"
+```
+
+Every route is listed in the [API reference](/api-reference/introduction) with its request and response shapes.
+
+## Acting as a user instead of a project
+
+Some routes (like listing every project) act on behalf of a person, not a project. For those, log in to get a user JWT and pass it along:
+
+```ts
+const { token } = await juno.auth.getUserJWT({
+  email: 'you@example.com',
+  password: process.env.JUNO_PASSWORD!,
+});
+
+const projects = await juno.project.getProjects(token);
+```
+
+Many other SDK methods take an optional `credentials` argument (`{ userJwt, projectId }`) for the same purpose. That argument ships in juno-sdk 0.0.12 and newer.
+
+## Troubleshooting
+
+| Problem                                                | What it usually means                                                        |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `juno.init() must be called before using the Juno SDK` | You used `juno.email` (or another service) before calling `init`.            |
+| `401 Unauthorized`                                     | Bad, revoked, or missing API key.                                            |
+| `400 Bad Request`                                      | A required field is missing or the wrong type. The response body says which. |
+| `404 Not Found`                                        | The ID or name you passed doesn't exist in Juno.                             |
+| `juno.init is not a function`                          | You used `require('juno-sdk')`. Use `import juno from 'juno-sdk'`.           |

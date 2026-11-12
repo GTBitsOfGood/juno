@@ -34,7 +34,11 @@ async function bootstrap() {
       { type: 'http', scheme: 'bearer', bearerFormat: 'API_Key' },
       'API_Key',
     )
-
+    .addServer(
+      'https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io',
+      'Production',
+    )
+    .addServer('http://localhost:8888', 'Local development')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
