@@ -1,0 +1,38 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Juno",
+  "description": "Bits of Good's shared infrastructure API.",
+  "colors": {
+    "primary": "#1F6FEB",
+    "light": "#5B9BFF",
+    "dark": "#0B3D91"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [{ "group": "Get started", "pages": ["introduction"] }]
+      },
+      {
+        "tab": "Services",
+        "groups": []
+      },
+      {
+        "tab": "API Reference",
+        "groups": []
+      }
+    ]
+  },
+  "api": {
+    "playground": {
+      "display": "none"
+    }
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/GTBitsOfGood/juno"
+    }
+  }
+}
