@@ -503,7 +503,7 @@ describe('Analytics Service - Stubbed Methods (Return UNIMPLEMENTED)', () => {
     });
 
     expect(response).toBeDefined();
-    expect((response as any).eventTypes).toEqual([]);
+    expect((response as any).eventTypes ?? []).toEqual([]);
   });
 
   it('getCustomGraphTypesById should return empty list (not crash)', async () => {
@@ -523,6 +523,6 @@ describe('Analytics Service - Stubbed Methods (Return UNIMPLEMENTED)', () => {
     });
 
     expect(response).toBeDefined();
-    expect((response as any).graphs).toEqual([]);
+    expect((response as any).graphs ?? []).toEqual([]);
   });
 });

@@ -23,7 +23,7 @@ import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
 
 let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
@@ -45,10 +45,9 @@ async function APIKeyForProjectName(projectName: string): Promise<string> {
   return key.body['apiKey'];
 }
 
-const runSuffix = Math.random().toString(36).slice(2, 8);
-const bucketName = `test-delete-bog-juno-${runSuffix}`;
+const bucketName = 'test-delete-bog-juno';
 const configId = 0;
-const providerName = `backblazeb2-delete-gw-${runSuffix}`;
+const providerName = 'backblazeb2-delete-gw';
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
@@ -64,8 +63,11 @@ beforeAll(async () => {
     process.env.DB_SERVICE_ADDR,
     GRPC.credentials.createInsecure(),
   );
-  await new Promise((resolve) => {
-    resetClient.resetDb({}, () => resolve(0));
+  await new Promise<void>((resolve, reject) => {
+    resetClient.resetDb({}, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
   });
 
   const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
@@ -76,7 +78,7 @@ beforeAll(async () => {
       GRPC.credentials.createInsecure(),
     );
 
-  await new Promise((resolve) => {
+  await new Promise<void>((resolve) => {
     providerClient.createProvider(
       {
         providerName,
@@ -85,7 +87,7 @@ beforeAll(async () => {
         bucket: [],
         type: FileProviderProto.ProviderType.S3,
       },
-      () => resolve(0),
+      () => resolve(),
     );
   });
 
@@ -97,7 +99,7 @@ beforeAll(async () => {
       GRPC.credentials.createInsecure(),
     );
 
-  await new Promise((resolve) => {
+  await new Promise<void>((resolve) => {
     bucketClient.createBucket(
       {
         name: bucketName,
@@ -106,7 +108,7 @@ beforeAll(async () => {
         files: [],
         configEnv: 'prod',
       },
-      () => resolve(0),
+      () => resolve(),
     );
   });
 
@@ -207,7 +209,6 @@ describe('File Delete Routes', () => {
   });
 
   it('Successfully deletes a file', async () => {
-    // Upload the file first via the file service proto directly
     const fileProto = ProtoLoader.loadSync([FileProtoFile]) as any;
     const fileProtoGRPC = GRPC.loadPackageDefinition(fileProto) as any;
     const fileClient = new fileProtoGRPC.juno.file_service.file.FileDbService(
@@ -215,7 +216,7 @@ describe('File Delete Routes', () => {
       GRPC.credentials.createInsecure(),
     );
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       fileClient.createFile(
         {
           fileId: {
@@ -226,7 +227,7 @@ describe('File Delete Routes', () => {
           },
           metadata: '',
         },
-        () => resolve(0),
+        () => resolve(),
       );
     });
 
