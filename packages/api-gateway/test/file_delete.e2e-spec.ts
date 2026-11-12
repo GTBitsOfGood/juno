@@ -12,7 +12,13 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import { ResetProtoFile, FileBucketProtoFile, FileProtoFile } from 'juno-proto';
+import {
+  ResetProtoFile,
+  FileProviderProtoFile,
+  FileBucketProtoFile,
+  FileProtoFile,
+  FileProviderProto,
+} from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
@@ -42,7 +48,7 @@ async function APIKeyForProjectName(projectName: string): Promise<string> {
 
 const bucketName = 'test-delete-bog-juno';
 const configId = 0;
-const providerName = 'test-provider';
+const providerName = 'backblazeb2-delete-gw';
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
@@ -64,6 +70,30 @@ beforeAll(async () => {
         if (err) reject(err);
         else resolve();
       });
+    });
+
+    const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
+    const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
+    const providerClient =
+      new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    await new Promise<void>((resolve, reject) => {
+      providerClient.createProvider(
+        {
+          providerName,
+          accessKey: JSON.stringify({ accessKeyId, secretAccessKey }),
+          metadata: JSON.stringify({ endpoint: baseURL }),
+          bucket: [],
+          type: FileProviderProto.ProviderType.S3,
+        },
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        },
+      );
     });
 
     const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
