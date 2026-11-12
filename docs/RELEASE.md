@@ -4,7 +4,7 @@ Creating a new Juno release requires 3 steps:
 
 - Create the release on GitHub
 - Update juno-sdk to use the new auto-generated SDK
-- Change container images on Azure
+- Confirm the production images deployed to Azure (this is automatic on the release tag)
 
 ## Creating a new release on GitHub
 
@@ -18,7 +18,7 @@ Optionally check the mark as pre-release checkbox if the release is not ready fo
 
 Once this is done, click the "Publish Release" button to create the release.
 
-Monitor the auto-ran GitHub Action workflow to ensure both the "Upload SDK for Release" and "Upload Production Images" jobs complete successfully.
+Monitor the auto-ran GitHub Action workflow to ensure both the "Upload SDK for Release" and "Upload Production Images" workflows complete successfully. The images workflow now has a deploy job after the build: it updates db-service first (so `prisma migrate deploy` runs), waits until that revision is healthy, then updates the other Container Apps.
 
 ## Update juno-sdk to use the new auto-generated SDK
 
@@ -36,7 +36,13 @@ Once both PRs are merged in, create a release for the `juno-sdk` repository, fol
 
 ## Change container images on Azure
 
-Log onto Azure and navigate to the `juno` resource group.
+Tagging a `v*` release now deploys automatically. After "Upload Production Images" finishes, the deploy job updates each Container App in the `juno` resource group (override with repo variable `AZURE_RESOURCE_GROUP`) to `junoservices.azurecr.io/<app>:<tag>`. db-service goes first so migrations run before the other six apps are updated.
+
+If the deploy job fails with an authorization error, grant the GitHub Actions OIDC identity the Contributor role on the `juno` resource group, then re-run the workflow. To redeploy or roll back a tag that is already in ACR, run "Upload Production Images" from the Actions tab with that tag and leave "Skip building images" checked.
+
+### Manual fallback
+
+If you need to roll out a tag by hand, log onto Azure and navigate to the `juno` resource group.
 
 Sort the resources by type and for each resource with type `Container App`, do the following:
 
@@ -46,3 +52,17 @@ Sort the resources by type and for each resource with type `Container App`, do t
 - In the "Container Image" section, click the container/image name
 - In the sidebar that opens, change the "Image Tag" dropdown to the new tag you created for the Release
 - Click "Save" and then "Create" to create the new revision
+
+Do db-service first and check its logs for `prisma migrate deploy` before updating the rest.
+
+## Custom domains
+
+Use the "Bind custom domain" workflow to point a hostname (default `api.juno.bitsofgood.org`) at a Container App (default `api-gateway`). This also uses the Azure OIDC login, so the same Contributor grant on the `juno` resource group is required.
+
+1. Run the workflow with action `show-verification-id`. It prints the domain verification ID and the app's FQDN.
+2. In NS1 (where `bitsofgood.org` DNS lives), add:
+   - CNAME `api.juno` → the app FQDN (for api-gateway that is `api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io`). Use a bare hostname: no `https://` and no trailing slash.
+   - TXT `asuid.api.juno` → the verification ID from step 1.
+3. After those records have propagated, re-run the workflow with action `bind`. It adds the hostname and binds a managed certificate with CNAME validation. Certificate issuance can take a few minutes.
+
+The dashboard domain (`juno.bitsofgood.org`) is a Netlify custom domain plus an NS1 CNAME to `juno-dashboard.netlify.app`, not this workflow.
