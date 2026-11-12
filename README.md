@@ -17,7 +17,7 @@
 
 </div>
 
-> 📖 Juno's docs live at [juno-docs.mintlify.site](https://juno-docs.mintlify.site) (still being filled in, see [juno#267](https://github.com/GTBitsOfGood/juno/issues/267)). The dashboard is at [juno.bitsofgood.org](https://juno.bitsofgood.org).
+> 📖 Juno's docs live at [juno.bitsofgood.org/docs](https://juno.bitsofgood.org/docs) (still being filled in, see [juno#267](https://github.com/GTBitsOfGood/juno/issues/267)). The dashboard is at [juno.bitsofgood.org](https://juno.bitsofgood.org).
 
 ## Project Description
 
