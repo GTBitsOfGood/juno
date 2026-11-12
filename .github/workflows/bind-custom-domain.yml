@@ -1,0 +1,139 @@
+# Bind a custom domain (default: api.juno.bitsofgood.org) to a Container App
+# (default: api-gateway) using the same Azure OIDC login as the release workflow.
+#
+# DNS records must already exist before you run this in bind mode. bitsofgood.org
+# DNS is in NS1. Use bare hostnames (no https://, no trailing slash):
+#   CNAME  api.juno  ->  <container app FQDN, e.g. api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io>
+#   TXT    asuid.api.juno  ->  the customDomainVerificationId printed by show-verification-id
+#
+# Two-phase flow:
+#   1. Run with action=show-verification-id, add the DNS records, wait for them to propagate.
+#   2. Re-run with action=bind to add the hostname and bind a managed certificate (CNAME validation).
+#
+# The GitHub Actions OIDC identity needs Contributor on the juno resource group
+# (override with repo variable AZURE_RESOURCE_GROUP).
+
+on:
+  workflow_dispatch:
+    inputs:
+      hostname:
+        description: 'Custom domain to bind (e.g. api.juno.bitsofgood.org)'
+        required: true
+        default: api.juno.bitsofgood.org
+        type: string
+      app:
+        description: 'Container App name. Must match the app in the juno resource group.'
+        required: true
+        default: api-gateway
+        type: string
+      action:
+        description: 'show-verification-id prints the asuid TXT value and FQDN. bind adds the hostname and binds a managed cert. DNS must exist first.'
+        required: true
+        type: choice
+        options:
+          - show-verification-id
+          - bind
+        default: show-verification-id
+
+permissions:
+  id-token: write
+  contents: read
+
+name: Bind custom domain
+
+env:
+  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP || 'juno' }}
+
+jobs:
+  bind:
+    name: ${{ inputs.action }}
+    environment: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ${{ inputs.action }}
+        uses: azure/CLI@v1
+        env:
+          HOSTNAME: ${{ inputs.hostname }}
+          APP: ${{ inputs.app }}
+          ACTION: ${{ inputs.action }}
+        with:
+          azcliversion: latest
+          inlineScript: |
+            set -euo pipefail
+
+            RG="${RESOURCE_GROUP}"
+            HOSTNAME="${HOSTNAME}"
+            APP="${APP}"
+            ACTION="${ACTION}"
+
+            fail_az() {
+              local output="$1"
+              local action="$2"
+              printf '%s\n' "${output}"
+              if printf '%s\n' "${output}" | grep -qiE 'AuthorizationFailed|Forbidden|does not have authorization'; then
+                echo "::error::The GitHub Actions OIDC identity is missing Contributor on resource group ${RG}. Grant that role and re-run this workflow."
+              else
+                echo "::error::Failed to ${action}."
+              fi
+              exit 1
+            }
+
+            show_app() {
+              local query="$1"
+              local value
+              if ! value=$(az containerapp show -n "${APP}" -g "${RG}" --query "${query}" -o tsv 2>&1); then
+                fail_az "${value}" "read ${query} for ${APP}"
+              fi
+              printf '%s' "${value}"
+            }
+
+            VERIFY_ID="$(show_app properties.customDomainVerificationId)"
+            FQDN="$(show_app properties.configuration.ingress.fqdn)"
+            ENV_ID="$(show_app properties.environmentId)"
+            ENV_NAME="${ENV_ID##*/}"
+
+            echo "Container App: ${APP}"
+            echo "Resource group: ${RG}"
+            echo "Hostname: ${HOSTNAME}"
+            echo "App FQDN: ${FQDN}"
+            echo "Environment: ${ENV_NAME}"
+            echo "Verification ID (asuid TXT value): ${VERIFY_ID}"
+            echo
+            echo "DNS records (must exist before bind). Use bare hostnames, no https://, no trailing slash:"
+            echo "  CNAME  ${HOSTNAME}  ->  ${FQDN}"
+            echo "  TXT    asuid.${HOSTNAME}  ->  ${VERIFY_ID}"
+            echo
+            echo "If these live in the bitsofgood.org zone in NS1, that is usually:"
+            echo "  CNAME  api.juno  ->  ${FQDN}"
+            echo "  TXT    asuid.api.juno  ->  ${VERIFY_ID}"
+
+            if [ "${ACTION}" = "show-verification-id" ]; then
+              echo
+              echo "After the DNS records have propagated, re-run this workflow with action=bind."
+              exit 0
+            fi
+
+            echo
+            echo "Adding hostname ${HOSTNAME} to ${APP}..."
+            add_out=""
+            if ! add_out=$(az containerapp hostname add -n "${APP}" -g "${RG}" --hostname "${HOSTNAME}" 2>&1); then
+              fail_az "${add_out}" "add hostname ${HOSTNAME} to ${APP}"
+            fi
+            printf '%s\n' "${add_out}"
+
+            echo "Binding ${HOSTNAME} with a managed certificate (validation-method CNAME)..."
+            echo "Certificate issuance can take a few minutes."
+            bind_out=""
+            if ! bind_out=$(az containerapp hostname bind -n "${APP}" -g "${RG}" --hostname "${HOSTNAME}" --environment "${ENV_NAME}" --validation-method CNAME 2>&1); then
+              fail_az "${bind_out}" "bind hostname ${HOSTNAME} on ${APP} with a managed cert"
+            fi
+            printf '%s\n' "${bind_out}"
+
+            echo "Bound ${HOSTNAME} to ${APP}."

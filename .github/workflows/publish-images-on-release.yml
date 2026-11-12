@@ -4,6 +4,16 @@ on:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag to deploy (e.g. v0.0.17). Used to redeploy or roll back a past tag.'
+        required: true
+        type: string
+      skip_build:
+        description: 'Skip building images and deploy an already-published tag from ACR.'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   id-token: write
@@ -11,12 +21,27 @@ permissions:
 
 name: Upload Production Images
 
+# Container App names in CONTAINER_APPS / the build matrix must match the
+# Container App names in the resource group (default: juno). Override the
+# group with repo variable AZURE_RESOURCE_GROUP if it ever changes.
+#
+# The GitHub Actions OIDC identity needs Contributor on that resource group
+# or az containerapp update / hostname commands will fail with AuthorizationFailed.
+env:
+  ACR: junoservices.azurecr.io
+  IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP || 'juno' }}
+  CONTAINER_APPS: api-gateway auth-service db-service logging-service email-service file-service analytics-service
+
 jobs:
   build:
     name: Build & Upload Images to ACR
+    if: ${{ github.event_name == 'push' || !inputs.skip_build }}
     environment: publish
     strategy:
       matrix:
+        # Keep this list in sync with env.CONTAINER_APPS. Names must match
+        # the Container Apps in the juno resource group.
         image:
           [
             api-gateway,
@@ -31,6 +56,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ env.IMAGE_TAG }}
 
       - uses: azure/login@v1
         with:
@@ -39,7 +66,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Build ${{ matrix.image }} Image
-        run: docker build --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} --target ${{ matrix.image }} -t junoservices.azurecr.io/${{ matrix.image }}:${{ github.ref_name }} .
+        run: docker build --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} --target ${{ matrix.image }} -t ${{ env.ACR }}/${{ matrix.image }}:${{ env.IMAGE_TAG }} .
 
       - name: Get ACR credentials
         id: get-acr-credentials
@@ -58,4 +85,132 @@ jobs:
           password: ${{ steps.get-acr-credentials.outputs.ACR_ACCESS_TOKEN }}
 
       - name: Push ${{ matrix.image }} Image
-        run: docker push junoservices.azurecr.io/${{ matrix.image }}:${{ github.ref_name }}
+        run: docker push ${{ env.ACR }}/${{ matrix.image }}:${{ env.IMAGE_TAG }}
+
+  deploy:
+    name: Deploy images to Azure Container Apps
+    needs: build
+    # Run after a successful build, or when the build was skipped so we can
+    # redeploy / roll back an existing tag from workflow_dispatch.
+    if: ${{ !cancelled() && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    environment: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: azure-containerapps-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Update Container Apps
+        uses: azure/CLI@v1
+        env:
+          REVISION_TIMEOUT_SECONDS: '600'
+        with:
+          azcliversion: latest
+          inlineScript: |
+            set -euo pipefail
+
+            TAG="${IMAGE_TAG#refs/tags/}"
+            RG="${RESOURCE_GROUP}"
+            ACR_HOST="${ACR}"
+            DB_APP="db-service"
+            TIMEOUT="${REVISION_TIMEOUT_SECONDS:-600}"
+            INTERVAL=15
+
+            # shellcheck disable=SC2206
+            apps=( ${CONTAINER_APPS} )
+
+            fail_az() {
+              local output="$1"
+              local action="$2"
+              printf '%s\n' "${output}"
+              if printf '%s\n' "${output}" | grep -qiE 'AuthorizationFailed|Forbidden|does not have authorization'; then
+                echo "::error::The GitHub Actions OIDC identity is missing Contributor on resource group ${RG}. Grant that role and re-run this workflow."
+              else
+                echo "::error::Failed to ${action}."
+              fi
+              exit 1
+            }
+
+            update_app() {
+              local app="$1"
+              local image="${ACR_HOST}/${app}:${TAG}"
+              echo "Updating ${app} to ${image}"
+              local output
+              if ! output=$(az containerapp update -n "${app}" -g "${RG}" --image "${image}" 2>&1); then
+                fail_az "${output}" "update ${app} to ${image}"
+              fi
+              printf '%s\n' "${output}"
+            }
+
+            wait_for_healthy() {
+              local app="$1"
+              local latest
+              if ! latest=$(az containerapp show -n "${app}" -g "${RG}" --query properties.latestRevisionName -o tsv 2>&1); then
+                fail_az "${latest}" "read the latest revision for ${app}"
+              fi
+              if [ -z "${latest}" ]; then
+                echo "::error::No latest revision found for ${app} in resource group ${RG}."
+                exit 1
+              fi
+
+              echo "Waiting for ${app} revision ${latest} to become healthy (timeout ${TIMEOUT}s)..."
+              local elapsed=0
+              local running=""
+              local health=""
+              while [ "${elapsed}" -lt "${TIMEOUT}" ]; do
+                if ! running=$(az containerapp revision show -n "${app}" -g "${RG}" --revision "${latest}" --query properties.runningState -o tsv 2>&1); then
+                  fail_az "${running}" "read runningState for ${app} revision ${latest}"
+                fi
+                if ! health=$(az containerapp revision show -n "${app}" -g "${RG}" --revision "${latest}" --query properties.healthState -o tsv 2>&1); then
+                  fail_az "${health}" "read healthState for ${app} revision ${latest}"
+                fi
+                echo "  ${app} ${latest}: runningState=${running} healthState=${health} (${elapsed}s)"
+
+                case "${running}" in
+                  Running|"Running at max"|"Running (at max)")
+                    if [ "${health}" = "Healthy" ]; then
+                      echo "${app} revision ${latest} is healthy."
+                      return 0
+                    fi
+                    ;;
+                  Failed|"Activation failed"|Stopped)
+                    echo "::error::${app} revision ${latest} is ${running} / ${health}."
+                    exit 1
+                    ;;
+                esac
+
+                sleep "${INTERVAL}"
+                elapsed=$((elapsed + INTERVAL))
+              done
+
+              echo "::error::Timed out waiting for ${app} revision ${latest} to become healthy (last: runningState=${running} healthState=${health})."
+              exit 1
+            }
+
+            echo "Deploying tag ${TAG} to resource group ${RG}"
+            echo "db-service is updated first so prisma migrate deploy can finish before the other apps come up."
+
+            update_app "${DB_APP}"
+            wait_for_healthy "${DB_APP}"
+
+            for app in "${apps[@]}"; do
+              if [ "${app}" = "${DB_APP}" ]; then
+                continue
+              fi
+              update_app "${app}"
+            done
+
+            for app in "${apps[@]}"; do
+              if [ "${app}" = "${DB_APP}" ]; then
+                continue
+              fi
+              wait_for_healthy "${app}"
+            done
+
+            echo "All Container Apps are running the ${TAG} image."
