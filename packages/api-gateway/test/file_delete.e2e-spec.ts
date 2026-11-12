@@ -12,13 +12,7 @@ import {
 import { AppModule } from './../src/app.module';
 import { Reflector } from '@nestjs/core';
 import * as request from 'supertest';
-import {
-  ResetProtoFile,
-  FileProviderProtoFile,
-  FileBucketProtoFile,
-  FileProtoFile,
-  FileProviderProto,
-} from 'juno-proto';
+import { ResetProtoFile, FileBucketProtoFile, FileProtoFile } from 'juno-proto';
 import * as GRPC from '@grpc/grpc-js';
 import * as ProtoLoader from '@grpc/proto-loader';
 import { RpcExceptionFilter } from 'src/rpc_exception_filter';
@@ -29,6 +23,7 @@ let app: INestApplication;
 const ADMIN_EMAIL = 'test-superadmin@test.com';
 const ADMIN_PASSWORD = 'test-password';
 let apiKey: string | undefined = undefined;
+let setupError: Error | null = null;
 
 async function APIKeyForProjectName(projectName: string): Promise<string> {
   const key = await request(app.getHttpServer())
@@ -47,7 +42,7 @@ async function APIKeyForProjectName(projectName: string): Promise<string> {
 
 const bucketName = 'test-delete-bog-juno';
 const configId = 0;
-const providerName = 'backblazeb2-delete-gw';
+const providerName = 'test-provider';
 
 const accessKeyId = process.env.accessKeyId;
 const secretAccessKey = process.env.secretAccessKey;
@@ -57,74 +52,60 @@ const s3BucketName = `${bucketName}-${configId}-prod`;
 let s3Client: S3Client;
 
 beforeAll(async () => {
-  const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
-  const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
-  const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
-    process.env.DB_SERVICE_ADDR,
-    GRPC.credentials.createInsecure(),
-  );
-  await new Promise<void>((resolve, reject) => {
-    resetClient.resetDb({}, (err) => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
-
-  const providerProto = ProtoLoader.loadSync([FileProviderProtoFile]) as any;
-  const providerProtoGRPC = GRPC.loadPackageDefinition(providerProto) as any;
-  const providerClient =
-    new providerProtoGRPC.juno.file_service.provider.FileProviderDbService(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-
-  await new Promise<void>((resolve) => {
-    providerClient.createProvider(
-      {
-        providerName,
-        accessKey: JSON.stringify({ accessKeyId, secretAccessKey }),
-        metadata: JSON.stringify({ endpoint: baseURL }),
-        bucket: [],
-        type: FileProviderProto.ProviderType.S3,
-      },
-      () => resolve(),
-    );
-  });
-
-  const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
-  const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
-  const bucketClient =
-    new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
-      process.env.DB_SERVICE_ADDR,
-      GRPC.credentials.createInsecure(),
-    );
-
-  await new Promise<void>((resolve) => {
-    bucketClient.createBucket(
-      {
-        name: bucketName,
-        configId,
-        fileProviderName: providerName,
-        files: [],
-        configEnv: 'prod',
-      },
-      () => resolve(),
-    );
-  });
-
-  s3Client = new S3Client({
-    endpoint: baseURL as string,
-    region: 'us-east-005',
-    credentials: {
-      accessKeyId: accessKeyId as string,
-      secretAccessKey: secretAccessKey as string,
-    },
-    forcePathStyle: true,
-  });
   try {
-    await s3Client.send(new CreateBucketCommand({ Bucket: s3BucketName }));
-  } catch {
-    // Bucket may already exist from a previous run
+    const proto = ProtoLoader.loadSync([ResetProtoFile]) as any;
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+    const resetClient = new protoGRPC.juno.reset_db.DatabaseReset(
+      process.env.DB_SERVICE_ADDR,
+      GRPC.credentials.createInsecure(),
+    );
+    await new Promise<void>((resolve, reject) => {
+      resetClient.resetDb({}, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+
+    const bucketProto = ProtoLoader.loadSync([FileBucketProtoFile]) as any;
+    const bucketProtoGRPC = GRPC.loadPackageDefinition(bucketProto) as any;
+    const bucketClient =
+      new bucketProtoGRPC.juno.file_service.bucket.BucketDbService(
+        process.env.DB_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+
+    await new Promise<void>((resolve, reject) => {
+      bucketClient.createBucket(
+        {
+          name: bucketName,
+          configId,
+          fileProviderName: providerName,
+          files: [],
+          configEnv: 'prod',
+        },
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        },
+      );
+    });
+
+    s3Client = new S3Client({
+      endpoint: baseURL as string,
+      region: 'us-east-005',
+      credentials: {
+        accessKeyId: accessKeyId as string,
+        secretAccessKey: secretAccessKey as string,
+      },
+      forcePathStyle: true,
+    });
+    try {
+      await s3Client.send(new CreateBucketCommand({ Bucket: s3BucketName }));
+    } catch {
+      // Bucket may already exist from a previous run
+    }
+  } catch (err) {
+    setupError = err as Error;
   }
 });
 
@@ -161,6 +142,12 @@ beforeEach(async () => {
 });
 
 describe('File Delete Routes', () => {
+  beforeEach(() => {
+    if (setupError) {
+      throw new Error(`Setup failed: ${setupError.message}`);
+    }
+  });
+
   it('Rejects delete without auth key', () => {
     return request(app.getHttpServer())
       .delete('/file/delete')
@@ -216,7 +203,7 @@ describe('File Delete Routes', () => {
       GRPC.credentials.createInsecure(),
     );
 
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
       fileClient.createFile(
         {
           fileId: {
@@ -227,7 +214,10 @@ describe('File Delete Routes', () => {
           },
           metadata: '',
         },
-        () => resolve(),
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        },
       );
     });
 
