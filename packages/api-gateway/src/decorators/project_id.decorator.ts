@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CommonProto } from 'juno-proto';
 
@@ -49,7 +50,6 @@ export const ProjectId = createParamDecorator(
       }
 
       if (user) {
-        // projectIds is undefined (not []) for a user linked to no projects.
         const hasAccess =
           user.type === CommonProto.UserType.SUPERADMIN ||
           (user.projectIds ?? [])
@@ -59,6 +59,13 @@ export const ProjectId = createParamDecorator(
         if (!hasAccess) {
           throw new UnauthorizedException(
             'user does not have access to the specified project',
+          );
+        }
+      } else if (apiKey && apiKey.project) {
+        const apiKeyProjectId = Number(apiKey.project.id);
+        if (apiKeyProjectId !== projectId) {
+          throw new ForbiddenException(
+            'API key does not have access to the specified project',
           );
         }
       }
