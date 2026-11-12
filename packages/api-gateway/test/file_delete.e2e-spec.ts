@@ -260,6 +260,9 @@ describe('File Delete Routes', () => {
         fileNames: ['FileToDeleteGW'],
       });
 
+    if (res.status !== 200) {
+      console.error('file delete failed:', res.status, JSON.stringify(res.body));
+    }
     expect(res.status).toBe(200);
   });
 });
