@@ -173,7 +173,7 @@ jobs:
                 echo "  ${app} ${latest}: runningState=${running} healthState=${health} (${elapsed}s)"
 
                 case "${running}" in
-                  Running|"Running at max"|"Running (at max)")
+                  Running|RunningAtMaxScale|"Running at max"|"Running (at max)")
                     if [ "${health}" = "Healthy" ]; then
                       echo "${app} revision ${latest} is healthy."
                       return 0
