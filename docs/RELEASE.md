@@ -57,12 +57,14 @@ Do db-service first and check its logs for `prisma migrate deploy` before updati
 
 ## Custom domains
 
-Use the "Bind custom domain" workflow to point a hostname (default `api.juno.bitsofgood.org`) at a Container App (default `api-gateway`). This also uses the Azure OIDC login, so the same Contributor grant on the `juno` resource group is required.
+The API is at `https://api.juno.bitsofgood.org`. That hostname is already bound to the `api-gateway` Container App (managed cert) via the "Bind custom domain" workflow. The underlying Azure origin is `api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io`. DNS is in Netlify DNS (NS1-backed) under the `product@bitsofgood.org` account: CNAME `api.juno` to that origin, plus TXT `asuid.api.juno` for Azure domain verification.
+
+If you ever need to re-bind the domain (for example after recreating the Container App), use the "Bind custom domain" workflow. This also uses the Azure OIDC login, so the same Contributor grant on the `juno` resource group is required.
 
 1. Run the workflow with action `show-verification-id`. It prints the domain verification ID and the app's FQDN.
-2. In NS1 (where `bitsofgood.org` DNS lives), add:
-   - CNAME `api.juno` → the app FQDN (for api-gateway that is `api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io`). Use a bare hostname: no `https://` and no trailing slash.
+2. In Netlify DNS, add (or confirm):
+   - CNAME `api.juno` → the app FQDN (the current origin is listed above). Use a bare hostname: no `https://` and no trailing slash.
    - TXT `asuid.api.juno` → the verification ID from step 1.
 3. After those records have propagated, re-run the workflow with action `bind`. It adds the hostname and binds a managed certificate with CNAME validation. Certificate issuance can take a few minutes.
 
-The dashboard domain (`juno.bitsofgood.org`) is a Netlify custom domain plus an NS1 CNAME to `juno-dashboard.netlify.app`, not this workflow.
+The dashboard (`https://juno.bitsofgood.org`) and docs (`https://juno.bitsofgood.org/docs`) are a Netlify custom domain, not this workflow.
