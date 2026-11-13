@@ -1,0 +1,143 @@
+---
+title: Local development
+description: Run Juno with Docker and test changes with a local SDK build.
+---
+
+Use this guide when contributing to Juno itself. To integrate a project with hosted Juno, start with [Getting started](/getting-started).
+
+## Prerequisites
+
+- Git and Docker Desktop with Docker Compose support for `watch` and optional `env_file` entries (Compose 2.24 or later).
+- Node.js LTS and the repository's pinned pnpm version, `9.11.0`, for host-side commands.
+- `protoc` v28.2 if you generate protobuf packages on your host. Docker builds install their own protobuf tooling.
+- On Windows, use WSL2 with Docker Desktop's WSL integration for the Unix shell scripts.
+
+The repository's `.gitattributes` sets `*.sh text eol=lf`. Keep shell files in LF format: CRLF endings can cause Docker scripts to fail with interpreter or command errors. This addresses the line-ending problem in [#262](https://github.com/GTBitsOfGood/juno/issues/262); it does not remove the other Unix tooling requirements.
+
+## Install dependencies
+
+From a fresh checkout:
+
+```sh
+git clone https://github.com/GTBitsOfGood/juno.git
+cd juno
+pnpm install
+```
+
+For host-side protobuf generation, use the repository commands:
+
+```sh
+pnpm gen-proto
+pnpm sync-protos
+```
+
+## Environment configuration
+
+`docker-compose-dev.yml` supplies the local service addresses, database URL, and test settings. For the default Docker stack, you do not need production credentials.
+
+The gateway and file service also read the optional, gitignored `.env.dev.local` and `.env.gh-actions.local` files at the repository root. Use `.env.dev.local` for local overrides. The latter file is intended for CI settings, not a prerequisite for development.
+
+| Setting                                                         | Local behavior                                                                                               |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`                                                  | Set in Compose to `postgresql://user:password@db` for the database service. `db` is a container hostname.    |
+| `AUTH_SERVICE_ADDR`, `DB_SERVICE_ADDR`, other service addresses | Set to Compose service names on port `5000`; keep these for container-to-container communication.            |
+| `GATEWAY_COMMAND`, other service commands                       | Optional host environment overrides for the command Compose starts.                                          |
+| `RUN_MODE`                                                      | Defaults to `dev`; values containing `test` or `reseed` cause the database entrypoint to reset the database. |
+
+The seed uses dummy SendGrid and storage credentials. To test actual delivery or storage, configure a dedicated test provider through Juno; the seed values cannot authenticate to those providers.
+
+## Start the stack
+
+```sh
+pnpm start:dev
+```
+
+This runs `docker compose -f docker-compose-dev.yml up`. For automatic rebuilding while editing services and protobuf files, use:
+
+```sh
+pnpm start:dev:live-all
+```
+
+Wait for migrations and service health checks to finish. The gateway is exposed at **http://localhost:8888**, mapped to port `3000` inside its container. Swagger is at **http://localhost:8888/docs**, and the generated OpenAPI JSON is at **http://localhost:8888/docs-json**.
+
+To inspect startup failures:
+
+```sh
+docker compose -f docker-compose-dev.yml ps
+docker compose -f docker-compose-dev.yml logs api-gateway db-service
+```
+
+## Seed the local superadmin
+
+With the database service running, run the idempotent seed if the account has not already been created:
+
+```sh
+docker compose -f docker-compose-dev.yml exec db-service pnpm prisma db seed
+```
+
+The seed in `packages/db-service/prisma/seed.ts` creates:
+
+| Item                       | Value                      |
+| -------------------------- | -------------------------- |
+| Superadmin email           | `test-superadmin@test.com` |
+| Superadmin password        | `test-password`            |
+| Project name               | `test-seed-project`        |
+| Project ID                 | `0`                        |
+| Seeded service environment | `prod`                     |
+
+These are local test credentials. Use the local Swagger UI to call `POST /auth/user/jwt` with the seed email and password, then use the returned user JWT for management routes such as key creation. Create a key for `test-seed-project` with environment `prod` to use the seeded configurations.
+
+Initialize your application's SDK with that local key and `baseURL: 'http://localhost:8888'`. The Docker stack does not start the separate dashboard repository.
+
+The `pnpm start:dev:live-all-reseed` command resets the local database before starting the service. It deletes existing local data; ordinary startup does not intentionally reset it.
+
+## Using a local SDK build
+
+Use this when testing an unpublished SDK change or when the SDK release required by these guides is not available yet. This covers [juno-sdk#58](https://github.com/GTBitsOfGood/juno-sdk/issues/58).
+
+Clone and build the SDK in a separate directory:
+
+```sh
+git clone https://github.com/GTBitsOfGood/juno-sdk.git
+cd juno-sdk
+npm install
+npm run build
+npm pack
+```
+
+`npm pack` prints the name of a generated `.tgz` file. From your consuming application's directory, install that file using its actual path:
+
+```sh
+pnpm add /absolute/path/to/juno-sdk/juno-sdk-0.0.11.tgz
+```
+
+The filename follows the version in the SDK's `package.json`; replace `0.0.11` if your checkout declares another version. Import it normally with `import juno from 'juno-sdk'` and set `baseURL` to your local gateway. A local SDK can also target hosted Juno; the package source and gateway URL are independent choices.
+
+After modifying SDK source, rebuild, pack, and reinstall the tarball. Packing includes the compiled entry points, so installing unbuilt TypeScript source alone is insufficient. Switch back to the registry package with `pnpm add juno-sdk@<published-version>` when finished, and avoid committing a personal absolute dependency path to your application.
+
+## Run gateway tests
+
+Use a disposable local database: test mode resets it.
+
+```sh
+pnpm test:e2e:api-gateway
+```
+
+The repository also provides service-specific E2E scripts and watch variants in the root `package.json`.
+
+## Preview these docs
+
+With the Mintlify CLI installed, run from the Juno repository root:
+
+```sh
+cd docs
+mint dev
+```
+
+Open the local URL printed in your terminal. Changes to MDX pages appear in the preview. This does not require the Docker stack. Stop the preview with **Ctrl+C**.
+
+## Stop the stack
+
+```sh
+docker compose -f docker-compose-dev.yml down
+```
