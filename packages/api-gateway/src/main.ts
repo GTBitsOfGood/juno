@@ -34,6 +34,7 @@ async function bootstrap() {
       { type: 'http', scheme: 'bearer', bearerFormat: 'API_Key' },
       'API_Key',
     )
+    .addServer('/')
 
     .build();
   const document = SwaggerModule.createDocument(app, config);
