@@ -9,7 +9,7 @@ Use this guide when contributing to Juno itself. To integrate a project with hos
 
 - Git and Docker Desktop with Docker Compose support for `watch` and optional `env_file` entries (Compose 2.24 or later).
 - Node.js LTS and the repository's pinned pnpm version, `9.11.0`, for host-side commands.
-- `protoc` v28.2 if you generate protobuf packages on your host. Docker builds install their own protobuf tooling.
+- `protoc` v28.2 for the host-side `pnpm install` step, which automatically generates protobuf packages. Docker builds install their own protobuf tooling.
 - On Windows, use WSL2 with Docker Desktop's WSL integration for the Unix shell scripts.
 
 The repository's `.gitattributes` sets `*.sh text eol=lf`. Keep shell files in LF format: CRLF endings can cause Docker scripts to fail with interpreter or command errors. This addresses the line-ending problem in [#262](https://github.com/GTBitsOfGood/juno/issues/262); it does not remove the other Unix tooling requirements.

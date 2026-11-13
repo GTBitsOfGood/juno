@@ -2524,7 +2524,11 @@
     "contact": {}
   },
   "tags": [],
-  "servers": [],
+  "servers": [
+    {
+      "url": "https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io"
+    }
+  ],
   "components": {
     "securitySchemes": {
       "API_Key": {
