@@ -13,10 +13,10 @@ if (process.env.NODE_ENV !== 'test') {
 
     // Add Tracing by setting tracesSampleRate
     // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+    tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? '0.1'),
 
     // Set sampling rate for profiling
     // This is relative to tracesSampleRate
-    profilesSampleRate: 1.0,
+    profilesSampleRate: Number(process.env.SENTRY_PROFILES_SAMPLE_RATE ?? '0.1'),
   });
 }
