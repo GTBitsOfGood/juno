@@ -488,6 +488,21 @@ describe('Analytics Event Retrieval Routes', () => {
         .expect(200);
     });
 
+    it('Successfully get paginated visit events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/visit')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        })
+        .expect(200);
+    });
+
     it('Failed to get visit events due to unauthorized access', async () => {
       return await request(app.getHttpServer())
         .get('/analytics/events/visit')
@@ -509,6 +524,19 @@ describe('Analytics Event Retrieval Routes', () => {
         })
         .expect(200);
     });
+
+    it('Successfully get all visit events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/visit/all')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterTime: '2023-01-01T00:00:00Z',
+          limit: 1000,
+        })
+        .expect(200);
+    });
   });
 
   describe('GET /analytics/events/input', () => {
@@ -524,6 +552,21 @@ describe('Analytics Event Retrieval Routes', () => {
         })
         .expect(200);
     });
+
+    it('Successfully get paginated input events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/input')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        })
+        .expect(200);
+    });
   });
 
   describe('GET /analytics/events/input/all', () => {
@@ -534,6 +577,19 @@ describe('Analytics Event Retrieval Routes', () => {
         .set('Authorization', 'Bearer ' + apiKey)
         .query({
           projectName: 'test-seed-project',
+        })
+        .expect(200);
+    });
+
+    it('Successfully get all input events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/input/all')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterTime: '2023-01-01T00:00:00Z',
+          limit: 1000,
         })
         .expect(200);
     });
@@ -551,6 +607,23 @@ describe('Analytics Event Retrieval Routes', () => {
           subcategory: 'form_submission',
           environment: 'production',
           limit: 10,
+        })
+        .expect(200);
+    });
+
+    it('Successfully get paginated custom events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/custom')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          category: 'user_action',
+          subcategory: 'form_submission',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
         })
         .expect(200);
     });

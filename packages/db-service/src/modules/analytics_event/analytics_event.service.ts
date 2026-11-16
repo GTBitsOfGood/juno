@@ -47,9 +47,13 @@ export class AnalyticsEventService {
 
     const where: Prisma.AnalyticsEventWhereInput = {
       projectId: Number(req.projectId),
-      environment: req.environment,
       type,
     };
+
+    // environment is an optional filter on the gateway; '' means "all environments"
+    if (req.environment) {
+      where.environment = req.environment;
+    }
 
     if (req.category) {
       where.category = req.category;
