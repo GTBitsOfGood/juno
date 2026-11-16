@@ -17,6 +17,8 @@ if (process.env.NODE_ENV !== 'test') {
 
     // Set sampling rate for profiling
     // This is relative to tracesSampleRate
-    profilesSampleRate: Number(process.env.SENTRY_PROFILES_SAMPLE_RATE ?? '0.1'),
+    profilesSampleRate: Number(
+      process.env.SENTRY_PROFILES_SAMPLE_RATE ?? '0.1',
+    ),
   });
 }
