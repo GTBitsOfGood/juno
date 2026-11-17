@@ -3,6 +3,30 @@ title: Introduction
 description: Bits of Good's shared infrastructure API.
 ---
 
-Juno is Bits of Good's shared infrastructure: one API and SDK for the stuff almost every BoG project needs, like accounts, email, files, and analytics.
+Juno is Bits of Good's shared infrastructure API. It gives BoG projects a common way to send email, manage files, and collect application events.
 
-These docs are still in progress. See [#267](https://github.com/GTBitsOfGood/juno/issues/267) for what's left.
+## How Juno fits into your project
+
+- **Dashboard:** request an account, manage project access, create API keys, and configure services.
+- **SDK:** call Juno from JavaScript or TypeScript with the `juno-sdk` package.
+- **API gateway:** receive HTTP requests and route them to Juno's internal services. You can call the gateway directly or use the SDK.
+
+A Juno project groups your team's members and service configuration. API keys belong to a project and an environment, such as `dev` or `prod`. Use the key for the environment whose configuration you want to access.
+
+Juno user accounts manage infrastructure access. They are separate from the end-user accounts in your own application.
+
+## Services
+
+| Service                 | What it provides                                                                                |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| [Email](/email)         | SendGrid configuration, sender and domain registration, sending email, and delivery statistics. |
+| [Files](/files)         | Storage provider and bucket management, signed upload/download URLs, and file deletion.         |
+| [Analytics](/analytics) | Application events stored in Juno's database. See the guide for implementation status.          |
+
+## Start here
+
+Follow [Getting started](/getting-started) to request an account, obtain a project API key, and make your first SDK call. You can use hosted Juno without running its services locally.
+
+If you are contributing to Juno itself, follow [Local development](/local-development) to run the Docker stack or test a local SDK build.
+
+For HTTP endpoint details, the gateway also exposes [Swagger documentation](https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io/docs).

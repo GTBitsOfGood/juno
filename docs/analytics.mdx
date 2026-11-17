@@ -1,0 +1,16 @@
+---
+title: Analytics
+description: Application events stored in Juno's own database.
+---
+
+Juno analytics stores application events in Juno's database. It is separate from [email delivery statistics](/email#delivery-statistics), which come from SendGrid.
+
+The gateway source includes routes for click, visit, input, and custom events, along with event retrieval. These events are associated with a project configuration and environment.
+
+## Integration status
+
+The original migration work is tracked in [analytics database prework, #266](https://github.com/GTBitsOfGood/juno/issues/266). This guide intentionally leaves out an end-to-end SDK recipe until the supported SDK release and deployed event path have been verified together. The presence of a route in source does not establish that it is available in your deployed instance.
+
+You do not need to configure an external analytics provider's client or server keys. The old wiki's provider setup does not apply to Juno's database-backed events.
+
+For the available HTTP operations and request schemas, consult your gateway's [Swagger documentation](https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io/docs). Before integrating, confirm which event path is supported by that deployment and use a project API key for the intended environment.

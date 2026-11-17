@@ -12,21 +12,28 @@
     "tabs": [
       {
         "tab": "Guides",
-        "groups": [{ "group": "Get started", "pages": ["introduction"] }]
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": ["introduction", "getting-started", "local-development"]
+          }
+        ]
       },
       {
         "tab": "Services",
-        "groups": []
+        "groups": [
+          { "group": "Services", "pages": ["email", "files", "analytics"] }
+        ]
       },
       {
         "tab": "API Reference",
-        "groups": []
+        "openapi": "/openapi.json"
       }
     ]
   },
   "api": {
     "playground": {
-      "display": "none"
+      "display": "simple"
     }
   },
   "navbar": {
