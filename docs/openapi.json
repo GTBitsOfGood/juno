@@ -631,6 +631,7 @@
           }
         },
         "responses": {
+          "200": { "description": "" },
           "400": { "description": "Invalid user/project parameters" },
           "401": { "description": "Invalid user credentials" },
           "404": { "description": "Cannot find valid user and/or project" }
@@ -661,6 +662,7 @@
           }
         },
         "responses": {
+          "200": { "description": "" },
           "400": { "description": "Invalid user/project parameters" },
           "401": { "description": "Invalid user credentials" },
           "404": { "description": "Cannot find valid user and/or project" }
@@ -858,6 +860,7 @@
               }
             }
           },
+          "201": { "description": "" },
           "400": { "description": "Bad request" },
           "401": { "description": "Unauthorized operation" }
         },
@@ -1203,6 +1206,16 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEmailStatisticsResponses"
+                }
+              }
+            }
+          },
           "201": {
             "description": "Overall Email Analytics",
             "content": {
@@ -1283,6 +1296,14 @@
         "responses": {
           "200": {
             "description": "Returned the file provider associated with the given data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileProviderPartial" }
+              }
+            }
+          },
+          "201": {
+            "description": "",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/FileProviderPartial" }
@@ -1373,6 +1394,16 @@
               }
             }
           },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadFileResponse"
+                }
+              }
+            }
+          },
           "400": { "description": "Parameters are invalid" },
           "404": { "description": "Cannot find file to use for downloading" }
         },
@@ -1397,6 +1428,14 @@
         "responses": {
           "200": {
             "description": "Returned the pre-signed URL used for file uploading",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UploadFileResponse" }
+              }
+            }
+          },
+          "201": {
+            "description": "",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/UploadFileResponse" }
@@ -2635,12 +2674,13 @@
           "name": { "type": "string", "description": "Name of the requester" },
           "password": {
             "type": "string",
+            "minLength": 6,
             "description": "Password for the new account"
           },
           "userType": {
             "type": "string",
-            "description": "Requested user type / role",
-            "enum": ["SUPERADMIN", "ADMIN", "USER"]
+            "enum": ["SUPERADMIN", "ADMIN", "USER"],
+            "description": "Requested user type / role"
           },
           "projectName": {
             "type": "string",
@@ -2744,7 +2784,7 @@
           "projects": {
             "description": "List of projects",
             "type": "array",
-            "items": { "type": "string" }
+            "items": { "$ref": "#/components/schemas/ProjectResponse" }
           }
         },
         "required": ["projects"]
@@ -2764,6 +2804,7 @@
             "example": "John"
           },
           "type": {
+            "enum": [0, 1, 2, -1],
             "type": "number",
             "description": "User type",
             "example": 1
@@ -2799,8 +2840,7 @@
         "properties": {
           "id": { "type": "number", "description": "The ID of the user" },
           "email": { "type": "string", "description": "The email of the user" }
-        },
-        "required": ["id", "email"]
+        }
       },
       "CreateUserModel": {
         "type": "object",
@@ -2816,9 +2856,13 @@
         "properties": {
           "email": { "type": "string", "description": "User email" },
           "id": { "type": "number", "description": "User id" },
-          "type": { "type": "number", "description": "New user type" }
+          "type": {
+            "enum": [0, 1, 2, -1],
+            "type": "number",
+            "description": "New user type"
+          }
         },
-        "required": ["email", "id", "type"]
+        "required": ["type"]
       },
       "LinkProjectModel": {
         "type": "object",
@@ -2831,8 +2875,7 @@
             "type": "string",
             "description": "Name of project to be linked"
           }
-        },
-        "required": ["id", "name"]
+        }
       },
       "UnlinkProjectModel": {
         "type": "object",
@@ -2845,11 +2888,28 @@
             "type": "string",
             "description": "Name of project to be unlinked"
           }
-        },
-        "required": ["id", "name"]
+        }
       },
-      "EmailDomain": { "type": "object", "properties": {} },
-      "EmailSender": { "type": "object", "properties": {} },
+      "EmailDomain": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string" },
+          "subdomain": { "type": "string" },
+          "sendgridId": { "type": "number" },
+          "projects": { "type": "array", "items": { "type": "object" } }
+        },
+        "required": ["domain", "sendgridId", "projects"]
+      },
+      "EmailSender": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string" },
+          "description": { "type": "string" },
+          "domain": { "type": "string" },
+          "projects": { "type": "array", "items": { "type": "object" } }
+        },
+        "required": ["username", "domain", "projects"]
+      },
       "EmailConfigResponse": {
         "type": "object",
         "properties": {
@@ -2945,7 +3005,6 @@
         "required": [
           "email",
           "name",
-          "replyTo",
           "nickname",
           "address",
           "city",
@@ -2979,9 +3038,27 @@
             "description": "Subdomain to be registered"
           }
         },
-        "required": ["domain", "subdomain"]
+        "required": ["domain"]
       },
-      "SendGridDNSResponse": { "type": "object", "properties": {} },
+      "SendGridDNSRecord": {
+        "type": "object",
+        "properties": {
+          "valid": { "type": "boolean" },
+          "type": { "type": "string" },
+          "host": { "type": "string" },
+          "data": { "type": "string" }
+        },
+        "required": ["valid", "type", "host", "data"]
+      },
+      "SendGridDNSResponse": {
+        "type": "object",
+        "properties": {
+          "mail_cname": { "$ref": "#/components/schemas/SendGridDNSRecord" },
+          "dkim1": { "$ref": "#/components/schemas/SendGridDNSRecord" },
+          "dkim2": { "$ref": "#/components/schemas/SendGridDNSRecord" }
+        },
+        "required": ["mail_cname", "dkim1", "dkim2"]
+      },
       "RegisterDomainResponse": {
         "type": "object",
         "properties": {
@@ -3060,16 +3137,19 @@
             "items": { "$ref": "#/components/schemas/EmailRecipient" }
           },
           "cc": {
+            "default": [],
             "description": "List of email addresses to CC on the email",
             "type": "array",
             "items": { "$ref": "#/components/schemas/EmailRecipient" }
           },
           "bcc": {
+            "default": [],
             "description": "List of email addresses to BCC on the email",
             "type": "array",
             "items": { "$ref": "#/components/schemas/EmailRecipient" }
           },
           "replyToList": {
+            "default": [],
             "description": "List of emails to add to the Reply To list of the email",
             "type": "array",
             "items": { "$ref": "#/components/schemas/EmailRecipient" }
@@ -3386,13 +3466,7 @@
             "description": "The region to use for downloading"
           }
         },
-        "required": [
-          "bucketName",
-          "configId",
-          "fileName",
-          "providerName",
-          "region"
-        ]
+        "required": ["bucketName", "configId", "fileName", "providerName"]
       },
       "DownloadFileResponse": {
         "type": "object",
@@ -3414,19 +3488,17 @@
             "example": "AWS S3",
             "description": "Name of file provider"
           },
-          "configId": { "type": "number", "description": "File's configId" },
+          "configId": {
+            "type": "number",
+            "minimum": 0,
+            "description": "File's configId"
+          },
           "region": {
             "type": "string",
             "description": "File provider's region"
           }
         },
-        "required": [
-          "fileName",
-          "bucketName",
-          "providerName",
-          "configId",
-          "region"
-        ]
+        "required": ["fileName", "bucketName", "providerName", "configId"]
       },
       "UploadFileResponse": {
         "type": "object",
@@ -3513,7 +3585,14 @@
         "required": ["name", "configId", "fileProviderName"]
       },
       "BucketWithFiles": { "type": "object", "properties": {} },
-      "File": { "type": "object", "properties": {} },
+      "File": {
+        "type": "object",
+        "properties": {
+          "fileId": { "type": "object" },
+          "metadata": { "type": "string" }
+        },
+        "required": ["fileId", "metadata"]
+      },
       "FileConfigResponse": {
         "type": "object",
         "properties": {
@@ -3554,6 +3633,7 @@
           },
           "configId": {
             "type": "number",
+            "minimum": 0,
             "description": "Configuration ID for the bucket"
           },
           "fileNames": {
@@ -3938,9 +4018,36 @@
         },
         "required": ["events"]
       },
-      "CreateAnalyticsConfigModel": { "type": "object", "properties": {} },
-      "AnalyticsConfigResponse": { "type": "object", "properties": {} },
-      "UpdateAnalyticsConfigModel": { "type": "object", "properties": {} }
+      "CreateAnalyticsConfigModel": {
+        "type": "object",
+        "properties": {
+          "serverAnalyticsKey": { "type": "string" },
+          "clientAnalyticsKey": { "type": "string" }
+        },
+        "required": ["serverAnalyticsKey", "clientAnalyticsKey"]
+      },
+      "AnalyticsConfigResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "environment": { "type": "string" },
+          "serverAnalyticsKey": { "type": "string" },
+          "clientAnalyticsKey": { "type": "string" }
+        },
+        "required": [
+          "id",
+          "environment",
+          "serverAnalyticsKey",
+          "clientAnalyticsKey"
+        ]
+      },
+      "UpdateAnalyticsConfigModel": {
+        "type": "object",
+        "properties": {
+          "serverAnalyticsKey": { "type": "string" },
+          "clientAnalyticsKey": { "type": "string" }
+        }
+      }
     }
   }
 }

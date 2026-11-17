@@ -3,7 +3,6 @@ on:
   push:
     branches: ['main']
     paths: ['docs/**', '.github/workflows/mintlify.yml']
-  workflow_call:
 permissions:
   id-token: write
   contents: read
@@ -15,7 +14,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          # the branch tip, so a call from openapi.yml sees its new commit
-          ref: ${{ github.ref }}
       - run: npx mint@latest deploy --subdomain juno-docs --directory docs

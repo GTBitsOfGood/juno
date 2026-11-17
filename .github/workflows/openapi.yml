@@ -16,12 +16,19 @@ jobs:
   generate:
     name: Regenerate docs/openapi.json
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      changed: ${{ steps.commit.outputs.changed }}
     steps:
+      # main requires PRs; this app is allowed to bypass that, and its pushes
+      # trigger the Mintlify deploy (GITHUB_TOKEN pushes would not).
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.JUNO_BOT_APP_ID }}
+          private-key: ${{ secrets.JUNO_BOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: pnpm/action-setup@v4
 
@@ -29,6 +36,7 @@ jobs:
         uses: arduino/setup-protoc@v2
         with:
           version: '24.4'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -40,24 +48,23 @@ jobs:
         run: pnpm docs:openapi
 
       - name: Commit if changed
-        id: commit
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
           if git diff --quiet docs/openapi.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          user_id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${user_id}+${APP_SLUG}[bot]@users.noreply.github.com"
           git add docs/openapi.json
           git commit -m '[Docs] regenerate openapi.json'
-          git push
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-  # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy here.
-  deploy:
-    needs: generate
-    if: needs.generate.outputs.changed == 'true'
-    permissions:
-      id-token: write
-      contents: read
-    uses: ./.github/workflows/mintlify.yml
+          # main may have moved while we generated; rebase onto it and retry
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
