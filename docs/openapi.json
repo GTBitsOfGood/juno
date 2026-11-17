@@ -1,0 +1,4043 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/api_key/jwt": {
+      "post": {
+        "operationId": "AuthController_getApiKeyJWT",
+        "summary": "Generates a temporary JWT for the project tied to a specified API key.",
+        "description": "JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given a valid API key.",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "required": true,
+            "in": "header",
+            "description": "A valid API key",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successfully created a JWT.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IssueJWTResponse" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/auth/user/jwt": {
+      "post": {
+        "operationId": "AuthController_getUserJWT",
+        "summary": "Generates a temporary JWT tied to a specified user.",
+        "description": "Generates a user identity token that can be used to authenticate admin and management endpoints in place of email/password credentials.",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the user",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of a user",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successfully created a JWT.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IssueJWTResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "403": { "description": "Invalid User Credentials" }
+        },
+        "tags": ["auth"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/auth/key": {
+      "post": {
+        "operationId": "AuthController_createApiKey",
+        "summary": "Issues a new API key for the project tied to the specified environment.",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of the user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IssueApiKeyRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The API Key has been successfully created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IssueApiKeyResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "403": { "description": "Invalid User Credentials" }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/auth/key/{id}": {
+      "delete": {
+        "operationId": "AuthController_deleteApiKeyById",
+        "summary": "Revokes an API key, detaching it from its project.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the API key to delete",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "x-user-jwt",
+            "in": "header",
+            "description": "The user's ID token",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of the user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Successful API Key revocation" },
+          "401": {
+            "description": "Invalid API Key or insufficient permissions"
+          }
+        },
+        "tags": ["auth"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/auth/key/all": {
+      "get": {
+        "operationId": "AuthController_getAllApiKeys",
+        "summary": "Lists all API keys",
+        "parameters": [
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of records to skip",
+            "example": 0,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum records to return (default 10)",
+            "example": 10,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of the user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of all API keys successfully returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllApiKeysResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API Key or insufficient permissions"
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/auth/test-auth": {
+      "get": {
+        "operationId": "AuthController_testAuth",
+        "summary": "Validates user JWT and returns user data",
+        "description": "This endpoint validates a user JWT token and returns the associated user information if valid",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer token (User JWT)",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "JWT is valid, returns user" },
+          "401": { "description": "Invalid or expired JWT" }
+        },
+        "tags": ["auth"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/auth/account-request": {
+      "post": {
+        "operationId": "AuthController_createAccountRequest",
+        "summary": "Submit a new account request",
+        "description": "Allows a prospective user to submit a request for a new account. The request is stored and can be reviewed by an admin.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestNewAccountModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account request successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAccountRequestResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" }
+        },
+        "tags": ["auth"]
+      },
+      "get": {
+        "operationId": "AuthController_getAllAccountRequests",
+        "summary": "Retrieve all account requests",
+        "description": "Returns all pending account requests. Requires admin or superadmin credentials.",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All account requests returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAccountRequestsResponse"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["auth"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/auth/account-request/{id}": {
+      "delete": {
+        "operationId": "AuthController_deleteAccountRequest",
+        "summary": "Delete an account request by ID",
+        "description": "Deletes an account request by its ID. Requires admin or superadmin credentials.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the account request to delete",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account request successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAccountRequestResponse"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Account request not found" }
+        },
+        "tags": ["auth"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/auth/account-request/{id}/accept": {
+      "post": {
+        "operationId": "AuthController_acceptAccountRequest",
+        "summary": "Accept an account request",
+        "description": "Accepts a pending account request: creates the user, optionally creates/links a project (for ADMIN requests with a projectName), and deletes the pending request. Requires admin or superadmin credentials.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the account request to accept",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Account request accepted and user created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptAccountRequestResponseModel"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Account request not found" }
+        },
+        "tags": ["auth"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/project/id/{id}": {
+      "get": {
+        "operationId": "ProjectController_getProjectById",
+        "summary": "Retrieves a project by its unique ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned the project associated with the given ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectResponse" }
+              }
+            }
+          },
+          "400": { "description": "ID must be a number" },
+          "404": { "description": "No project with specified ID was found" }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      },
+      "delete": {
+        "operationId": "ProjectController_deleteProjectById",
+        "summary": "Delete an existing project.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the project to be deleted",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted project",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectResponse" }
+              }
+            }
+          },
+          "404": { "description": "No project with this ID was found" }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/project": {
+      "get": {
+        "operationId": "ProjectController_getAllProjects",
+        "summary": "Retrieves all projects.",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned all projects",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectResponses" }
+              }
+            }
+          }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      },
+      "post": {
+        "operationId": "ProjectController_createProject",
+        "summary": "Creates a new project with the specified parameters.",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateProjectModel" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully created project",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectResponse" }
+              }
+            }
+          },
+          "400": { "description": "Name should not be empty" }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/project/{id}/users": {
+      "get": {
+        "operationId": "ProjectController_getUsersByProject",
+        "summary": "Retrieve all users associated with a project. ",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned all users associated with given project.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponses" }
+              }
+            }
+          },
+          "404": { "description": "No project found with this id." }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/project/name/{name}": {
+      "get": {
+        "operationId": "ProjectController_getProjectByName",
+        "summary": "Retrieves a project by its unique name.",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned the project associated with the given name",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectResponse" }
+              }
+            }
+          },
+          "404": { "description": "No project with specified name was found" }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/project/id/{id}/user": {
+      "put": {
+        "operationId": "ProjectController_linkUserWithProjectId",
+        "summary": "Links a specified user with a given project ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LinkUserModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "" },
+          "400": { "description": "Invalid user/project parameters" },
+          "401": { "description": "Invalid user credentials" },
+          "404": { "description": "Cannot find valid user and/or project" }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/project/name/{name}/user": {
+      "put": {
+        "operationId": "ProjectController_linkUserWithProjectName",
+        "summary": "Links a specified user with a given project name.",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LinkUserModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "" },
+          "400": { "description": "Invalid user/project parameters" },
+          "401": { "description": "Invalid user credentials" },
+          "404": { "description": "Cannot find valid user and/or project" }
+        },
+        "tags": ["project"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/user": {
+      "get": {
+        "operationId": "UserController_getAllUsers",
+        "summary": "Retrieves all users.",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned all users",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponses" }
+              }
+            }
+          }
+        },
+        "tags": ["user"],
+        "security": [{ "API_Key": [] }]
+      },
+      "post": {
+        "operationId": "UserController_createUser",
+        "summary": "Create a new user.",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The user details",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUserModel" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The user has been successfully created.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized operation" }
+        },
+        "tags": ["user"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/user/id/{id}": {
+      "get": {
+        "operationId": "UserController_getUserById",
+        "summary": "Retrieve an existing user.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier of the user",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "400": { "description": "id must be a number" },
+          "404": { "description": "No user with id found" }
+        },
+        "tags": ["user"],
+        "security": [{ "API_Key": [] }]
+      },
+      "delete": {
+        "operationId": "UserController_deleteUserById",
+        "summary": "Delete an existing user.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID of the user to be deleted",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "404": { "description": "No user with this ID was found" }
+        },
+        "tags": ["user"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/user/type": {
+      "post": {
+        "operationId": "UserController_setUserType",
+        "summary": "Update user type.",
+        "description": "Updates the user type for an existing user. User type can be thought of as a role with role-based permissions, e.g. SUPERADMIN could have permissions an ADMIN would not. Only SUPERADMIN users can set types",
+        "parameters": [
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "User ID, email, and the new type to be set",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SetUserTypeModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "201": { "description": "" },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized operation" }
+        },
+        "tags": ["user"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/user/id/{id}/project": {
+      "put": {
+        "operationId": "UserController_linkUserWithProjectId",
+        "summary": "Link user to project.",
+        "description": "Associates a user with a project ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID being linked to a project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Project details to link with the user",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LinkProjectModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User linked to project successfully.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized operation" }
+        },
+        "tags": ["user"],
+        "security": [{ "API_Key": [] }]
+      },
+      "delete": {
+        "operationId": "UserController_unlinkUserFromProject",
+        "summary": "Unlink user from project.",
+        "description": "Removes a user from a project.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID being unlinked from a project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Password",
+            "in": "header",
+            "description": "Password of the admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-User-Email",
+            "in": "header",
+            "description": "Email of an admin or superadmin user",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Project details to unlink from the user",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UnlinkProjectModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User unlinked from project successfully.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized operation" }
+        },
+        "tags": ["user"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/config/{id}": {
+      "get": {
+        "operationId": "EmailController_getEmailConfigById",
+        "summary": "Get email configuration by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned the email config associated with the specified ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EmailConfigResponse" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Invalid API key provided" },
+          "404": {
+            "description": "No email config with specified ID was found"
+          }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/setup": {
+      "post": {
+        "operationId": "EmailController_setup",
+        "summary": "Sets up an email service with the given Sendgrid API Key",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupEmailServiceModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Email Service setup successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SetupEmailResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/register-sender": {
+      "post": {
+        "operationId": "EmailController_registerSenderAddress",
+        "summary": "Registers a sender email address.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterEmailModel" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Email registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterEmailResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/register-domain": {
+      "post": {
+        "operationId": "EmailController_registerEmailDomain",
+        "summary": "Registers a sender domain with SendGrid.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterDomainModel" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Domain registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterDomainResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/verify-domain": {
+      "post": {
+        "operationId": "EmailController_verifySenderDomain",
+        "summary": "Verifies a sender domain registration status.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VerifyDomainModel" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Domain is registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterDomainResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "No domain registered" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/send": {
+      "post": {
+        "operationId": "EmailController_sendEmail",
+        "summary": "Sends an email using Juno services.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SendEmailModel" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SendEmailResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/analytics": {
+      "get": {
+        "operationId": "EmailController_getStatistics",
+        "summary": "Gets overall email analytics",
+        "parameters": [
+          {
+            "name": "startDate",
+            "required": true,
+            "in": "query",
+            "description": "The starting date of the statistics to retrieve. Must follow format YYYY-MM-DD",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "The number of results to return",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "The point in the list to begin retrieving results",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "aggregatedBy",
+            "required": false,
+            "in": "query",
+            "description": "How to group the statistics. Must be either 'day', 'week', or 'month'",
+            "schema": { "$ref": "#/components/schemas/AggregateInterval" }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "The end date of the statistics to retrieve. Defaults to today. Must follow format YYYY-MM-DD",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEmailStatisticsResponses"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Overall Email Analytics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEmailStatisticsResponses"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/provider": {
+      "post": {
+        "operationId": "FileProviderController_registerFileProvider",
+        "summary": "Registers a File Provider.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterFileProviderModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returned the file provider associated with the given data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileProviderPartial" }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileProviderPartial" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" }
+        },
+        "tags": ["file_provider"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/provider/all": {
+      "get": {
+        "operationId": "FileProviderController_getAllFileProviders",
+        "summary": "Get All File Providers.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returned all file providers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/FileProvider" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["file_provider"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/provider/{name}": {
+      "delete": {
+        "operationId": "FileProviderController_deleteFileProvider",
+        "summary": "Delete File Provider.",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted and returned file provider with specified name",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileProviderPartial" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["file_provider"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/download": {
+      "post": {
+        "operationId": "FileDownloadController_downloadFile",
+        "summary": "Downloads a file",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DownloadFileModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returned the url for file download",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadFileResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadFileResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "404": { "description": "Cannot find file to use for downloading" }
+        },
+        "tags": ["file_download"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/upload": {
+      "post": {
+        "operationId": "FileUploadController_uploadFile",
+        "summary": "Upload a file to a File Storage Provider's Bucket",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UploadFileModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returned the pre-signed URL used for file uploading",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UploadFileResponse" }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UploadFileResponse" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" }
+        },
+        "tags": ["file_upload"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/bucket": {
+      "post": {
+        "operationId": "FileBucketController_registerFileBucket",
+        "summary": "Registers a File Bucket.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterFileBucketModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returned the file bucket associated with the given data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileBucket" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["file_bucket"],
+        "security": [{ "API_Key": [] }]
+      },
+      "delete": {
+        "operationId": "FileBucketController_deleteFileBucket",
+        "summary": "Delete a File Bucket.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeleteFileBucketModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deleted and returned the file bucket",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileBucket" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["file_bucket"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/bucket/{configId}": {
+      "get": {
+        "operationId": "FileBucketController_getBucketsByConfigIdAndEnv",
+        "summary": "Get File Buckets by Config Id and Config Env.",
+        "parameters": [
+          {
+            "name": "configId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned file buckets with Config Id and Config Env",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/FileBucket" }
+                }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["file_bucket"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/all/{configId}": {
+      "get": {
+        "operationId": "FileBucketController_getAllFiles",
+        "summary": "Get all files from all buckets for a config.",
+        "parameters": [
+          {
+            "name": "configId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned all files grouped by bucket name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/BucketWithFiles" }
+                }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["file_bucket"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/config/{projectId}": {
+      "get": {
+        "operationId": "FileConfigController_getFileConfigByProjectId",
+        "summary": "Get file configuration by project ID",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned the file config associated with the specified project ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileConfigResponse" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Invalid API key provided" },
+          "404": {
+            "description": "No file config with specified project ID was found"
+          }
+        },
+        "tags": ["file_config"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/config/setup": {
+      "post": {
+        "operationId": "FileConfigController_setup",
+        "summary": "Sets up file services for the Project/Environment",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "File Services setup successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupFileServiceResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["file_config"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/config/delete/{projectId}": {
+      "delete": {
+        "operationId": "FileConfigController_deleteFileConfigByProjectId",
+        "summary": "Delete file configuration by project ID",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted the file config associated with the specified project ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FileConfigResponse" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Invalid API key provided" },
+          "404": {
+            "description": "No file config with specified project ID was found"
+          }
+        },
+        "tags": ["file_config"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/delete": {
+      "delete": {
+        "operationId": "FileDeleteController_deleteFiles",
+        "summary": "Delete files from a bucket",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeleteFilesModel" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the bucket name and list of deleted file names",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DeleteFilesResponse" }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "404": { "description": "Bucket or file not found" }
+        },
+        "tags": ["file_delete"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/click": {
+      "post": {
+        "operationId": "AnalyticsController_logClickEvent",
+        "summary": "Log a click event",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogClickEventRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Click event logged successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ClickEventResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      },
+      "get": {
+        "operationId": "AnalyticsController_getClickEventsPaginated",
+        "summary": "Get click events with pagination",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterId",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor",
+            "example": "event_12345",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "environment",
+            "required": false,
+            "in": "query",
+            "description": "Environment filter",
+            "example": "production",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 50,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Click events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetClickEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/visit": {
+      "post": {
+        "operationId": "AnalyticsController_logVisitEvent",
+        "summary": "Log a visit event",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogVisitEventRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Visit event logged successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VisitEventResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      },
+      "get": {
+        "operationId": "AnalyticsController_getVisitEventsPaginated",
+        "summary": "Get visit events with pagination",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterId",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor",
+            "example": "event_12345",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "environment",
+            "required": false,
+            "in": "query",
+            "description": "Environment filter",
+            "example": "production",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 50,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visit events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetVisitEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/input": {
+      "post": {
+        "operationId": "AnalyticsController_logInputEvent",
+        "summary": "Log an input event",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogInputEventRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Input event logged successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InputEventResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      },
+      "get": {
+        "operationId": "AnalyticsController_getInputEventsPaginated",
+        "summary": "Get input events with pagination",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterId",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor",
+            "example": "event_12345",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "environment",
+            "required": false,
+            "in": "query",
+            "description": "Environment filter",
+            "example": "production",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 50,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Input events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInputEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/custom": {
+      "post": {
+        "operationId": "AnalyticsController_logCustomEvent",
+        "summary": "Log a custom event",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogCustomEventRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Custom event logged successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CustomEventResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      },
+      "get": {
+        "operationId": "AnalyticsController_getCustomEventsPaginated",
+        "summary": "Get custom events with pagination",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterId",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor",
+            "example": "event_12345",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "environment",
+            "required": false,
+            "in": "query",
+            "description": "Environment filter",
+            "example": "production",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 50,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "category",
+            "required": true,
+            "in": "query",
+            "description": "Event category",
+            "example": "user_action",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subcategory",
+            "required": true,
+            "in": "query",
+            "description": "Event subcategory",
+            "example": "form_submission",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custom events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCustomEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/custom-event-types": {
+      "get": {
+        "operationId": "AnalyticsController_getCustomEventTypes",
+        "summary": "Get custom event types for a project",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custom event types retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCustomEventTypeResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/custom-graph-types": {
+      "get": {
+        "operationId": "AnalyticsController_getCustomGraphTypesById",
+        "summary": "Get custom graph types by event type ID",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "eventTypeId",
+            "required": true,
+            "in": "query",
+            "description": "Event type ID",
+            "example": "event_type_123",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Custom graph types retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomGraphTypeResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/click/all": {
+      "get": {
+        "operationId": "AnalyticsController_getAllClickEvents",
+        "summary": "Get all click events",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 100,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All click events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllClickEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/visit/all": {
+      "get": {
+        "operationId": "AnalyticsController_getAllVisitEvents",
+        "summary": "Get all visit events",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 100,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All visit events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllVisitEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/input/all": {
+      "get": {
+        "operationId": "AnalyticsController_getAllInputEvents",
+        "summary": "Get all input events",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 100,
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All input events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllInputEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/events/custom/all": {
+      "get": {
+        "operationId": "AnalyticsController_getAllCustomEvents",
+        "summary": "Get all custom events",
+        "parameters": [
+          {
+            "name": "projectName",
+            "required": true,
+            "in": "query",
+            "description": "Project name",
+            "example": "my-project",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "afterTime",
+            "required": false,
+            "in": "query",
+            "description": "Filter after timestamp",
+            "example": "2023-01-01T00:00:00Z",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results",
+            "example": 100,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "category",
+            "required": true,
+            "in": "query",
+            "description": "Event category",
+            "example": "user_action",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subcategory",
+            "required": true,
+            "in": "query",
+            "description": "Event subcategory",
+            "example": "form_submission",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All custom events retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCustomEventsResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/config": {
+      "post": {
+        "operationId": "AnalyticsConfigController_createAnalyticsConfig",
+        "summary": "Create analytics configuration",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnalyticsConfigModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Analytics configuration created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsConfigResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["analytics_config"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/analytics/config/{projectId}": {
+      "get": {
+        "operationId": "AnalyticsConfigController_getAnalyticsConfig",
+        "summary": "Get analytics configuration",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics configuration retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsConfigResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Analytics configuration not found" }
+        },
+        "tags": ["analytics_config"],
+        "security": [{ "API_Key": [] }]
+      },
+      "put": {
+        "operationId": "AnalyticsConfigController_updateAnalyticsConfig",
+        "summary": "Update analytics configuration",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAnalyticsConfigModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analytics configuration updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsConfigResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Analytics configuration not found" }
+        },
+        "tags": ["analytics_config"],
+        "security": [{ "API_Key": [] }]
+      },
+      "delete": {
+        "operationId": "AnalyticsConfigController_deleteAnalyticsConfig",
+        "summary": "Delete analytics configuration",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Analytics configuration deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsConfigResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Analytics configuration not found" }
+        },
+        "tags": ["analytics_config"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/feature_flag/{id}": {
+      "get": {
+        "operationId": "FeatureFlagController_getFlag",
+        "summary": "Get a feature flag. ",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
+              }
+            }
+          }
+        },
+        "tags": ["feature_flag"],
+        "security": [{ "API_Key": [] }]
+      },
+      "put": {
+        "operationId": "FeatureFlagController_setFlag",
+        "summary": "Update a feature flag",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeatureFlagModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
+              }
+            }
+          }
+        },
+        "tags": ["feature_flag"],
+        "security": [{ "API_Key": [] }]
+      },
+      "delete": {
+        "operationId": "FeatureFlagController_deleteFlag",
+        "summary": "Delete a feature flag",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
+              }
+            }
+          }
+        },
+        "tags": ["feature_flag"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/feature_flag": {
+      "post": {
+        "operationId": "FeatureFlagController_createFlag",
+        "summary": "Create a feature flag",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeatureFlagModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
+              }
+            }
+          }
+        },
+        "tags": ["feature_flag"],
+        "security": [{ "API_Key": [] }]
+      }
+    }
+  },
+  "info": {
+    "title": "Juno",
+    "description": "Juno Public API Docs",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "API_Key": {
+        "scheme": "bearer",
+        "bearerFormat": "API_Key",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "IssueJWTResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string", "description": "Created JWT token" }
+        },
+        "required": ["token"]
+      },
+      "IssueApiKeyRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Optional description for key",
+            "example": "Production API key for mobile app"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment the key will be tied to",
+            "example": "production"
+          },
+          "project": {
+            "type": "object",
+            "description": "Project identifier",
+            "example": { "name": "my-project" }
+          }
+        },
+        "required": ["environment", "project"]
+      },
+      "IssueApiKeyResponse": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "The generated API key value (store immediately, not retrievable again)",
+            "example": "a1b2c3d4e5f6..."
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment this key was issued for",
+            "example": "production"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description provided at creation",
+            "example": "Production API key for mobile app"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO timestamp of key creation",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "project": {
+            "type": "string",
+            "description": "project identifier for the API key"
+          }
+        },
+        "required": [
+          "apiKey",
+          "environment",
+          "description",
+          "createdAt",
+          "project"
+        ]
+      },
+      "ApiKey": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The API key's ID in the databse",
+            "example": "5"
+          },
+          "hash": {
+            "type": "string",
+            "description": "The generated API key value (store immediately, not retrievable again)",
+            "example": "a1b2c3d4e5f6..."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description provided at creation",
+            "example": "Production API key for mobile app"
+          },
+          "scopes": {
+            "description": "Scopes tied to this API key",
+            "example": ["read:projects", "write:analytics"],
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "project": {
+            "type": "string",
+            "description": "project identifier for the API key"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment this key was issued for",
+            "example": "production"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO timestamp of key creation",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "hash",
+          "description",
+          "scopes",
+          "project",
+          "environment",
+          "createdAt"
+        ]
+      },
+      "PaginationParams": {
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "string",
+            "description": "first page of results",
+            "example": "/auth/key/?offset=0&limit=5"
+          },
+          "prev": {
+            "type": "string",
+            "description": "previous page of results",
+            "example": "/auth/key/?offset=15&limit=5"
+          },
+          "next": {
+            "type": "string",
+            "description": "next page of results",
+            "example": "/auth/key/?offset=20&limit=5"
+          },
+          "last": {
+            "type": "string",
+            "description": "last page of results",
+            "example": "/auth/key/?offset=25&limit=5"
+          }
+        },
+        "required": ["first", "prev", "next", "last"]
+      },
+      "GetAllApiKeysResponse": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "description": "List of API keys belonging to a project",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ApiKey" }
+          },
+          "links": {
+            "description": "Pagination parameters",
+            "allOf": [{ "$ref": "#/components/schemas/PaginationParams" }]
+          }
+        },
+        "required": ["keys", "links"]
+      },
+      "RequestNewAccountModel": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email for the new account"
+          },
+          "name": { "type": "string", "description": "Name of the requester" },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "description": "Password for the new account"
+          },
+          "userType": {
+            "type": "string",
+            "enum": ["SUPERADMIN", "ADMIN", "USER"],
+            "description": "Requested user type / role"
+          },
+          "projectName": {
+            "type": "string",
+            "description": "Optional project name to associate"
+          }
+        },
+        "required": ["email", "name", "password", "userType"]
+      },
+      "NewAccountRequestResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "Request ID" },
+          "email": { "type": "string", "description": "Email" },
+          "name": { "type": "string", "description": "Name" },
+          "userType": {
+            "type": "string",
+            "description": "Requested user type",
+            "enum": ["SUPERADMIN", "ADMIN", "USER"]
+          },
+          "projectName": { "type": "string", "description": "Project name" },
+          "createdAt": {
+            "type": "string",
+            "description": "Timestamp of request creation"
+          }
+        },
+        "required": ["id", "email", "name", "userType", "createdAt"]
+      },
+      "NewAccountRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "description": "List of new account requests",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewAccountRequestResponse"
+            }
+          }
+        },
+        "required": ["requests"]
+      },
+      "AcceptAccountRequestResponseUser": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "User ID" },
+          "email": { "type": "string", "description": "Email" },
+          "name": { "type": "string", "description": "Name" },
+          "type": {
+            "type": "string",
+            "description": "User type",
+            "enum": ["SUPERADMIN", "ADMIN", "USER"]
+          },
+          "projectIds": {
+            "description": "Project IDs the user is linked to",
+            "type": "array",
+            "items": { "type": "number" }
+          }
+        },
+        "required": ["id", "email", "name", "type"]
+      },
+      "AcceptAccountRequestResponseProject": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "Project ID" },
+          "name": { "type": "string", "description": "Project name" }
+        },
+        "required": ["id", "name"]
+      },
+      "AcceptAccountRequestResponseModel": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "description": "The created user",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AcceptAccountRequestResponseUser"
+              }
+            ]
+          },
+          "project": {
+            "description": "The created or linked project (if applicable)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AcceptAccountRequestResponseProject"
+              }
+            ]
+          }
+        },
+        "required": ["user"]
+      },
+      "ProjectResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "The ID of the project" },
+          "name": { "type": "string", "description": "The name of the project" }
+        },
+        "required": ["id", "name"]
+      },
+      "ProjectResponses": {
+        "type": "object",
+        "properties": {
+          "projects": {
+            "description": "List of projects",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProjectResponse" }
+          }
+        },
+        "required": ["projects"]
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "User id" },
+          "email": {
+            "type": "string",
+            "description": "User email",
+            "example": "user@email.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "User name",
+            "example": "John"
+          },
+          "type": {
+            "enum": [0, 1, 2, -1],
+            "type": "number",
+            "description": "User type",
+            "example": 1
+          },
+          "projectIds": {
+            "description": "Project IDs associated with user",
+            "type": "array",
+            "items": { "type": "number" }
+          }
+        },
+        "required": ["id", "email", "name", "type", "projectIds"]
+      },
+      "UserResponses": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "description": "List of Users",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/UserResponse" }
+          }
+        },
+        "required": ["users"]
+      },
+      "CreateProjectModel": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "The name of the project" }
+        },
+        "required": ["name"]
+      },
+      "LinkUserModel": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "The ID of the user" },
+          "email": { "type": "string", "description": "The email of the user" }
+        }
+      },
+      "CreateUserModel": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "description": "User email" },
+          "name": { "type": "string", "description": "User name" },
+          "password": { "type": "string", "description": "User password" }
+        },
+        "required": ["email", "name", "password"]
+      },
+      "SetUserTypeModel": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "description": "User email" },
+          "id": { "type": "number", "description": "User id" },
+          "type": {
+            "enum": [0, 1, 2, -1],
+            "type": "number",
+            "description": "New user type"
+          }
+        },
+        "required": ["type"]
+      },
+      "LinkProjectModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID of project to be linked"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of project to be linked"
+          }
+        }
+      },
+      "UnlinkProjectModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID of project to be unlinked"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of project to be unlinked"
+          }
+        }
+      },
+      "EmailDomain": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string" },
+          "subdomain": { "type": "string" },
+          "sendgridId": { "type": "number" },
+          "projects": { "type": "array", "items": { "type": "object" } }
+        },
+        "required": ["domain", "sendgridId", "projects"]
+      },
+      "EmailSender": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string" },
+          "description": { "type": "string" },
+          "domain": { "type": "string" },
+          "projects": { "type": "array", "items": { "type": "object" } }
+        },
+        "required": ["username", "domain", "projects"]
+      },
+      "EmailConfigResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "Email Configuration ID" },
+          "environment": {
+            "type": "string",
+            "description": "The configured environment"
+          },
+          "sendgridKey": {
+            "type": "string",
+            "description": "The configured sendGrid key"
+          },
+          "domains": {
+            "description": "The list of domains associated with the email config",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmailDomain" }
+          },
+          "senders": {
+            "description": "The list of senders associated with the email config",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmailSender" }
+          }
+        },
+        "required": ["id", "environment", "sendgridKey", "domains", "senders"]
+      },
+      "SetupEmailServiceModel": {
+        "type": "object",
+        "properties": {
+          "sendgridKey": {
+            "type": "string",
+            "description": "The sendgrid API Key to use"
+          }
+        },
+        "required": ["sendgridKey"]
+      },
+      "SetupEmailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether an email was successfully setup"
+          }
+        },
+        "required": ["success"]
+      },
+      "RegisterEmailModel": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email to register"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name to assosicate with the email"
+          },
+          "replyTo": {
+            "type": "string",
+            "format": "email",
+            "description": "The email to reply-to"
+          },
+          "nickname": {
+            "type": "string",
+            "description": "The nickname to assosicate with the sender (only visible in sendgrid)"
+          },
+          "address": {
+            "type": "string",
+            "example": "123 Main St.",
+            "description": "The address to assosicate with the sender"
+          },
+          "city": {
+            "type": "string",
+            "example": "Atlanta",
+            "description": "The city to assosicate with the sender"
+          },
+          "state": {
+            "type": "string",
+            "example": "GA",
+            "description": "The state to assosicate with the sender"
+          },
+          "zip": {
+            "type": "string",
+            "example": "30332",
+            "description": "The zip code to assosicate with the sender"
+          },
+          "country": {
+            "type": "string",
+            "example": "USA",
+            "description": "The country to assosicate with the sender"
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "nickname",
+          "address",
+          "city",
+          "state",
+          "zip",
+          "country"
+        ]
+      },
+      "RegisterEmailResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email registered"
+          }
+        },
+        "required": ["email"]
+      },
+      "RegisterDomainModel": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "example": "example.com",
+            "description": "Domain to be registered"
+          },
+          "subdomain": {
+            "type": "string",
+            "example": "subdomain",
+            "description": "Subdomain to be registered"
+          }
+        },
+        "required": ["domain"]
+      },
+      "SendGridDNSRecord": {
+        "type": "object",
+        "properties": {
+          "valid": { "type": "boolean" },
+          "type": { "type": "string" },
+          "host": { "type": "string" },
+          "data": { "type": "string" }
+        },
+        "required": ["valid", "type", "host", "data"]
+      },
+      "SendGridDNSResponse": {
+        "type": "object",
+        "properties": {
+          "mail_cname": { "$ref": "#/components/schemas/SendGridDNSRecord" },
+          "dkim1": { "$ref": "#/components/schemas/SendGridDNSRecord" },
+          "dkim2": { "$ref": "#/components/schemas/SendGridDNSRecord" }
+        },
+        "required": ["mail_cname", "dkim1", "dkim2"]
+      },
+      "RegisterDomainResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "valid": { "type": "string" },
+          "records": { "$ref": "#/components/schemas/SendGridDNSResponse" },
+          "statusCode": { "type": "number" }
+        },
+        "required": ["id", "valid", "records", "statusCode"]
+      },
+      "VerifyDomainModel": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "example": "example.com",
+            "description": "Domain to be verified"
+          }
+        },
+        "required": ["domain"]
+      },
+      "EmailRecipient": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Recipient email address"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "Recipient name"
+          }
+        },
+        "required": ["email"]
+      },
+      "EmailSenderSendEmailModel": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Sender email address"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "Sender name"
+          }
+        },
+        "required": ["email"]
+      },
+      "EmailContent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "text/html",
+            "description": "MIME type for the content"
+          },
+          "value": {
+            "type": "string",
+            "example": "Email content",
+            "description": "Content of the email"
+          }
+        },
+        "required": ["type", "value"]
+      },
+      "SendEmailModel": {
+        "type": "object",
+        "properties": {
+          "recipients": {
+            "description": "List of recipients for the email",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmailRecipient" }
+          },
+          "cc": {
+            "default": [],
+            "description": "List of email addresses to CC on the email",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmailRecipient" }
+          },
+          "bcc": {
+            "default": [],
+            "description": "List of email addresses to BCC on the email",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmailRecipient" }
+          },
+          "replyToList": {
+            "default": [],
+            "description": "List of emails to add to the Reply To list of the email",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmailRecipient" }
+          },
+          "sender": {
+            "description": "The sender of the email",
+            "allOf": [
+              { "$ref": "#/components/schemas/EmailSenderSendEmailModel" }
+            ]
+          },
+          "subject": {
+            "type": "string",
+            "example": "Email subject",
+            "description": "The subject of the email"
+          },
+          "content": {
+            "description": "List of MIME content to send in the email",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmailContent" }
+          }
+        },
+        "required": [
+          "recipients",
+          "cc",
+          "bcc",
+          "replyToList",
+          "sender",
+          "subject",
+          "content"
+        ]
+      },
+      "SendEmailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether an email was successfully sent"
+          }
+        },
+        "required": ["success"]
+      },
+      "AggregateInterval": {
+        "type": "string",
+        "enum": ["day", "week", "month"]
+      },
+      "SendEmailStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date",
+            "example": "2023-12-24"
+          },
+          "clicks": {
+            "type": "number",
+            "description": "The number of links that were clicked in your emails."
+          },
+          "unique_clicks": {
+            "type": "number",
+            "description": "The number of unique recipients who clicked links in your emails."
+          },
+          "opens": {
+            "type": "number",
+            "description": "The total number of times your emails were opened by recipients."
+          },
+          "unique_opens": {
+            "type": "number",
+            "description": "The number of unique recipients who opened your emails."
+          },
+          "blocks": {
+            "type": "number",
+            "description": "The number of emails that were not allowed to be delivered by ISPs."
+          },
+          "bounce_drops": {
+            "type": "number",
+            "description": "The number of emails that were dropped because of a bounce."
+          },
+          "bounces": {
+            "type": "number",
+            "description": "The number of emails that bounced instead of being delivered."
+          },
+          "deferred": {
+            "type": "number",
+            "description": "The number of emails that temporarily could not be delivered."
+          },
+          "delivered": {
+            "type": "number",
+            "description": "The number of emails confirmed to have been delivered."
+          },
+          "invalid_emails": {
+            "type": "number",
+            "description": "The number of recipients with malformed or invalid email addresses."
+          },
+          "processed": {
+            "type": "number",
+            "description": "Requests from your website, application, or mail client via SMTP Relay or API."
+          },
+          "requests": {
+            "type": "number",
+            "description": "The number of emails that were requested to be delivered."
+          },
+          "spam_report_drops": {
+            "type": "number",
+            "description": "The number of emails dropped due to a recipient marking your email as spam."
+          },
+          "spam_reports": {
+            "type": "number",
+            "description": "The number of recipients who marked your email as spam."
+          },
+          "unsubscribe_drops": {
+            "type": "number",
+            "description": "The number of emails dropped due to a recipient unsubscribing."
+          },
+          "unsubscribes": {
+            "type": "number",
+            "description": "The number of recipients who unsubscribed from your emails."
+          }
+        },
+        "required": [
+          "date",
+          "clicks",
+          "unique_clicks",
+          "opens",
+          "unique_opens",
+          "blocks",
+          "bounce_drops",
+          "bounces",
+          "deferred",
+          "delivered",
+          "invalid_emails",
+          "processed",
+          "requests",
+          "spam_report_drops",
+          "spam_reports",
+          "unsubscribe_drops",
+          "unsubscribes"
+        ]
+      },
+      "SendEmailStatisticsResponses": {
+        "type": "object",
+        "properties": {
+          "responses": {
+            "description": "List of email analytics.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SendEmailStatisticsResponse"
+            }
+          }
+        },
+        "required": ["responses"]
+      },
+      "AccessKey": {
+        "type": "object",
+        "properties": {
+          "publicAccessKey": {
+            "type": "string",
+            "description": "Client public access key"
+          },
+          "privateAccessKey": {
+            "type": "string",
+            "description": "Client private access key"
+          }
+        },
+        "required": ["publicAccessKey", "privateAccessKey"]
+      },
+      "RegisterFileProviderModel": {
+        "type": "object",
+        "properties": {
+          "accessKey": {
+            "description": "The access key to register with",
+            "allOf": [{ "$ref": "#/components/schemas/AccessKey" }]
+          },
+          "baseUrl": {
+            "type": "string",
+            "example": "https://s3.us-west-004.backblazeb2.com",
+            "description": "The base url associated with file provider."
+          },
+          "providerName": {
+            "type": "string",
+            "example": "AWS S3",
+            "description": "The file provider name being registered."
+          },
+          "type": {
+            "type": "string",
+            "description": "File provider type (one of S3 or AZURE)",
+            "example": "S3"
+          }
+        },
+        "required": ["accessKey", "baseUrl", "providerName", "type"]
+      },
+      "FileProviderPartial": {
+        "type": "object",
+        "properties": {
+          "providerName": {
+            "type": "string",
+            "description": "The unique provider name of the file provider"
+          },
+          "metadata": {
+            "type": "string",
+            "description": "The metadata of the file provider"
+          }
+        },
+        "required": ["providerName", "metadata"]
+      },
+      "FileProvider": {
+        "type": "object",
+        "properties": {
+          "accessKey": {
+            "description": "The access key to register with",
+            "allOf": [{ "$ref": "#/components/schemas/AccessKey" }]
+          },
+          "baseUrl": {
+            "type": "string",
+            "example": "https://s3.us-west-004.backblazeb2.com",
+            "description": "The base url associated with file provider."
+          },
+          "providerName": {
+            "type": "string",
+            "example": "AWS S3",
+            "description": "The file provider name being registered."
+          },
+          "type": {
+            "type": "string",
+            "description": "File provider type (one of S3 or AZURE)",
+            "example": "S3"
+          }
+        },
+        "required": ["accessKey", "baseUrl", "providerName", "type"]
+      },
+      "DownloadFileModel": {
+        "type": "object",
+        "properties": {
+          "bucketName": {
+            "type": "string",
+            "description": "The name of the bucket to use for downloading"
+          },
+          "configId": {
+            "type": "number",
+            "description": "The config id of the file to use for downloading"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "The name of the file to use for downloading"
+          },
+          "providerName": {
+            "type": "string",
+            "description": "The name of the provider to connect to for downloading"
+          },
+          "region": {
+            "type": "string",
+            "description": "The region to use for downloading"
+          }
+        },
+        "required": ["bucketName", "configId", "fileName", "providerName"]
+      },
+      "DownloadFileResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The url for file download"
+          }
+        },
+        "required": ["url"]
+      },
+      "UploadFileModel": {
+        "type": "object",
+        "properties": {
+          "fileName": { "type": "string", "description": "Name of file" },
+          "bucketName": { "type": "string", "description": "Name of bucket." },
+          "providerName": {
+            "type": "string",
+            "example": "AWS S3",
+            "description": "Name of file provider"
+          },
+          "configId": {
+            "type": "number",
+            "minimum": 0,
+            "description": "File's configId"
+          },
+          "region": {
+            "type": "string",
+            "description": "File provider's region"
+          }
+        },
+        "required": ["fileName", "bucketName", "providerName", "configId"]
+      },
+      "UploadFileResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Pre-signed URL used in file upload"
+          }
+        },
+        "required": ["url"]
+      },
+      "RegisterFileBucketModel": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The unique name of the bucket"
+          },
+          "configId": {
+            "type": "number",
+            "description": "Configuration ID for the bucket"
+          },
+          "fileProviderName": {
+            "type": "string",
+            "description": "The file provider name associated with the bucket"
+          },
+          "FileServiceFile": {
+            "description": "The file identifiers linked to this bucket",
+            "type": "array",
+            "items": { "type": "object" }
+          }
+        },
+        "required": ["name", "configId", "fileProviderName", "FileServiceFile"]
+      },
+      "FileBucket": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The unique name of the registered bucket"
+          },
+          "configId": {
+            "type": "number",
+            "description": "Configuration ID associated with the registered bucket"
+          },
+          "configEnv": {
+            "type": "string",
+            "description": "The config environment associated with the bucket"
+          },
+          "fileProviderName": {
+            "type": "string",
+            "description": "The name of the file provider associated with the bucket"
+          },
+          "FileServiceFile": {
+            "description": "The list of file identifiers associated with the bucket",
+            "type": "array",
+            "items": { "type": "object" }
+          }
+        },
+        "required": [
+          "name",
+          "configId",
+          "configEnv",
+          "fileProviderName",
+          "FileServiceFile"
+        ]
+      },
+      "DeleteFileBucketModel": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The unique name of the bucket"
+          },
+          "configId": {
+            "type": "number",
+            "description": "Configuration ID for the bucket"
+          },
+          "fileProviderName": {
+            "type": "string",
+            "description": "The file provider name associated with the bucket"
+          }
+        },
+        "required": ["name", "configId", "fileProviderName"]
+      },
+      "BucketWithFiles": { "type": "object", "properties": {} },
+      "File": {
+        "type": "object",
+        "properties": {
+          "fileId": { "type": "object" },
+          "metadata": { "type": "string" }
+        },
+        "required": ["fileId", "metadata"]
+      },
+      "FileConfigResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "description": "File Configuration ID" },
+          "environment": {
+            "type": "string",
+            "description": "The configured environment"
+          },
+          "files": {
+            "description": "The list of files associated with the config",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/File" }
+          },
+          "buckets": {
+            "description": "The list of buckets associated with the config",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FileBucket" }
+          }
+        },
+        "required": ["id", "environment", "files", "buckets"]
+      },
+      "SetupFileServiceResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether file services were successfully setup"
+          }
+        },
+        "required": ["success"]
+      },
+      "DeleteFilesModel": {
+        "type": "object",
+        "properties": {
+          "bucketName": {
+            "type": "string",
+            "description": "Name of the bucket containing the files"
+          },
+          "configId": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Configuration ID for the bucket"
+          },
+          "fileNames": {
+            "description": "List of file names to delete",
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["bucketName", "configId", "fileNames"]
+      },
+      "DeleteFilesResponse": {
+        "type": "object",
+        "properties": {
+          "bucketName": {
+            "type": "string",
+            "description": "The name of the bucket from which files were deleted"
+          },
+          "fileNames": {
+            "description": "List of file names that were deleted",
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["bucketName", "fileNames"]
+      },
+      "LogClickEventRequest": {
+        "type": "object",
+        "properties": {
+          "objectId": {
+            "type": "string",
+            "description": "The ID of the object that was clicked",
+            "example": "button_submit_form"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The ID of the user who performed the click",
+            "example": "user_12345"
+          }
+        },
+        "required": ["objectId", "userId"]
+      },
+      "ClickEventProperties": {
+        "type": "object",
+        "properties": {
+          "objectId": { "type": "string", "description": "Object ID" },
+          "userId": { "type": "string", "description": "User ID" }
+        },
+        "required": ["objectId", "userId"]
+      },
+      "ClickEventResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Event ID" },
+          "category": { "type": "string", "description": "Event category" },
+          "subcategory": {
+            "type": "string",
+            "description": "Event subcategory"
+          },
+          "projectId": { "type": "string", "description": "Project ID" },
+          "environment": { "type": "string", "description": "Environment" },
+          "createdAt": { "type": "string", "description": "Created timestamp" },
+          "updatedAt": { "type": "string", "description": "Updated timestamp" },
+          "eventProperties": {
+            "description": "Event properties",
+            "allOf": [{ "$ref": "#/components/schemas/ClickEventProperties" }]
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "subcategory",
+          "projectId",
+          "environment",
+          "createdAt",
+          "updatedAt",
+          "eventProperties"
+        ]
+      },
+      "LogVisitEventRequest": {
+        "type": "object",
+        "properties": {
+          "pageUrl": {
+            "type": "string",
+            "description": "The URL of the page that was visited",
+            "example": "https://example.com/dashboard"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The ID of the user who visited the page",
+            "example": "user_12345"
+          }
+        },
+        "required": ["pageUrl", "userId"]
+      },
+      "VisitEventProperties": {
+        "type": "object",
+        "properties": {
+          "pageUrl": { "type": "string", "description": "Page URL" },
+          "userId": { "type": "string", "description": "User ID" }
+        },
+        "required": ["pageUrl", "userId"]
+      },
+      "VisitEventResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Event ID" },
+          "category": { "type": "string", "description": "Event category" },
+          "subcategory": {
+            "type": "string",
+            "description": "Event subcategory"
+          },
+          "projectId": { "type": "string", "description": "Project ID" },
+          "environment": { "type": "string", "description": "Environment" },
+          "createdAt": { "type": "string", "description": "Created timestamp" },
+          "updatedAt": { "type": "string", "description": "Updated timestamp" },
+          "eventProperties": {
+            "description": "Event properties",
+            "allOf": [{ "$ref": "#/components/schemas/VisitEventProperties" }]
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "subcategory",
+          "projectId",
+          "environment",
+          "createdAt",
+          "updatedAt",
+          "eventProperties"
+        ]
+      },
+      "LogInputEventRequest": {
+        "type": "object",
+        "properties": {
+          "objectId": {
+            "type": "string",
+            "description": "The ID of the input object",
+            "example": "input_search_field"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The ID of the user who interacted with the input",
+            "example": "user_12345"
+          },
+          "textValue": {
+            "type": "string",
+            "description": "The text value entered in the input",
+            "example": "search query"
+          }
+        },
+        "required": ["objectId", "userId", "textValue"]
+      },
+      "InputEventProperties": {
+        "type": "object",
+        "properties": {
+          "objectId": { "type": "string", "description": "Object ID" },
+          "userId": { "type": "string", "description": "User ID" },
+          "textValue": { "type": "string", "description": "Text value" }
+        },
+        "required": ["objectId", "userId", "textValue"]
+      },
+      "InputEventResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Event ID" },
+          "category": { "type": "string", "description": "Event category" },
+          "subcategory": {
+            "type": "string",
+            "description": "Event subcategory"
+          },
+          "projectId": { "type": "string", "description": "Project ID" },
+          "environment": { "type": "string", "description": "Environment" },
+          "createdAt": { "type": "string", "description": "Created timestamp" },
+          "updatedAt": { "type": "string", "description": "Updated timestamp" },
+          "eventProperties": {
+            "description": "Event properties",
+            "allOf": [{ "$ref": "#/components/schemas/InputEventProperties" }]
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "subcategory",
+          "projectId",
+          "environment",
+          "createdAt",
+          "updatedAt",
+          "eventProperties"
+        ]
+      },
+      "LogCustomEventRequest": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "The category of the custom event",
+            "example": "user_action"
+          },
+          "subcategory": {
+            "type": "string",
+            "description": "The subcategory of the custom event",
+            "example": "form_submission"
+          },
+          "properties": {
+            "type": "object",
+            "description": "Custom properties for the event",
+            "example": { "formType": "contact", "source": "homepage" }
+          }
+        },
+        "required": ["category", "subcategory", "properties"]
+      },
+      "CustomEventResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Event ID" },
+          "eventTypeId": { "type": "string", "description": "Event type ID" },
+          "projectId": { "type": "string", "description": "Project ID" },
+          "environment": { "type": "string", "description": "Environment" },
+          "createdAt": { "type": "string", "description": "Created timestamp" },
+          "updatedAt": { "type": "string", "description": "Updated timestamp" },
+          "properties": { "type": "object", "description": "Custom properties" }
+        },
+        "required": [
+          "id",
+          "eventTypeId",
+          "projectId",
+          "environment",
+          "createdAt",
+          "updatedAt",
+          "properties"
+        ]
+      },
+      "CustomEventTypeResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Event type ID" },
+          "category": { "type": "string", "description": "Category" },
+          "subcategory": { "type": "string", "description": "Subcategory" },
+          "properties": {
+            "description": "Properties",
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "projectId": { "type": "string", "description": "Project ID" }
+        },
+        "required": ["id", "category", "subcategory", "properties", "projectId"]
+      },
+      "GetAllCustomEventTypeResponse": {
+        "type": "object",
+        "properties": {
+          "eventTypes": {
+            "description": "All custom event types",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CustomEventTypeResponse" }
+          }
+        },
+        "required": ["eventTypes"]
+      },
+      "CustomGraphType": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Graph ID" },
+          "eventTypeId": { "type": "string", "description": "Event type ID" },
+          "projectId": { "type": "string", "description": "Project ID" },
+          "graphTitle": { "type": "string", "description": "Graph title" },
+          "xProperty": { "type": "string", "description": "X-axis property" },
+          "yProperty": { "type": "string", "description": "Y-axis property" },
+          "graphType": { "type": "string", "description": "Graph type" },
+          "caption": { "type": "string", "description": "Caption" }
+        },
+        "required": [
+          "id",
+          "eventTypeId",
+          "projectId",
+          "graphTitle",
+          "xProperty",
+          "yProperty",
+          "graphType",
+          "caption"
+        ]
+      },
+      "CustomGraphTypeResponse": {
+        "type": "object",
+        "properties": {
+          "graphs": {
+            "description": "Graph types",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CustomGraphType" }
+          }
+        },
+        "required": ["graphs"]
+      },
+      "GetClickEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "Click events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ClickEventResponse" }
+          },
+          "afterId": { "type": "string", "description": "Pagination cursor" }
+        },
+        "required": ["events", "afterId"]
+      },
+      "GetAllClickEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "All click events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ClickEventResponse" }
+          }
+        },
+        "required": ["events"]
+      },
+      "GetVisitEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "Visit events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/VisitEventResponse" }
+          },
+          "afterId": { "type": "string", "description": "Pagination cursor" }
+        },
+        "required": ["events", "afterId"]
+      },
+      "GetAllVisitEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "All visit events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/VisitEventResponse" }
+          }
+        },
+        "required": ["events"]
+      },
+      "GetInputEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "Input events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/InputEventResponse" }
+          },
+          "afterId": { "type": "string", "description": "Pagination cursor" }
+        },
+        "required": ["events", "afterId"]
+      },
+      "GetAllInputEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "All input events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/InputEventResponse" }
+          }
+        },
+        "required": ["events"]
+      },
+      "GetCustomEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "Custom events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CustomEventResponse" }
+          },
+          "afterId": { "type": "string", "description": "Pagination cursor" }
+        },
+        "required": ["events", "afterId"]
+      },
+      "GetAllCustomEventsResponse": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "All custom events",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CustomEventResponse" }
+          }
+        },
+        "required": ["events"]
+      },
+      "CreateAnalyticsConfigModel": {
+        "type": "object",
+        "properties": {
+          "serverAnalyticsKey": { "type": "string" },
+          "clientAnalyticsKey": { "type": "string" }
+        },
+        "required": ["serverAnalyticsKey", "clientAnalyticsKey"]
+      },
+      "AnalyticsConfigResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "environment": { "type": "string" },
+          "serverAnalyticsKey": { "type": "string" },
+          "clientAnalyticsKey": { "type": "string" }
+        },
+        "required": [
+          "id",
+          "environment",
+          "serverAnalyticsKey",
+          "clientAnalyticsKey"
+        ]
+      },
+      "UpdateAnalyticsConfigModel": {
+        "type": "object",
+        "properties": {
+          "serverAnalyticsKey": { "type": "string" },
+          "clientAnalyticsKey": { "type": "string" }
+        }
+      },
+      "FeatureFlagResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "enabled": { "type": "boolean" },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "enabled"]
+      },
+      "CreateFeatureFlagModel": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "enabled": { "type": "boolean" },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "enabled"]
+      },
+      "UpdateFeatureFlagModel": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

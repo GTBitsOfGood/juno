@@ -1,0 +1,156 @@
+---
+title: Files
+description: Configure storage and use signed URLs to upload and download files.
+---
+
+Juno manages storage configuration and returns signed URLs for file transfers. The file bytes travel directly between your application and the storage provider.
+
+Complete [Getting started](/getting-started) and initialize the SDK first. Run the setup and SDK calls on your server with a project API key.
+
+## Storage concepts
+
+| Object        | Purpose                                                                   |
+| ------------- | ------------------------------------------------------------------------- |
+| Configuration | Connects a project's ID and API key environment to its buckets and files. |
+| Provider      | Stores a named cloud storage endpoint and its access credentials.         |
+| Bucket        | Associates a logical bucket name with a configuration and provider.       |
+| File          | Identifies an object within a bucket.                                     |
+
+Keep the project ID, key environment, provider name, and bucket name consistent across setup and transfer calls.
+
+## 1. Create the configuration
+
+```ts
+await juno.file.setup();
+```
+
+Juno takes the project and environment from your API key. To retrieve the configuration, use `juno.file.getConfig(String(projectId))`. The SDK method is `getConfig`, not the old wiki's `juno.settings.getFileConfig`.
+
+## 2. Register a provider
+
+If a suitable provider is already registered, reuse its name. Otherwise, register one using credentials supplied by your storage account:
+
+```ts
+const baseUrl = process.env.STORAGE_ENDPOINT;
+const publicAccessKey = process.env.STORAGE_PUBLIC_ACCESS_KEY;
+const privateAccessKey = process.env.STORAGE_PRIVATE_ACCESS_KEY;
+if (!baseUrl || !publicAccessKey || !privateAccessKey) {
+  throw new Error('Set the storage endpoint and access keys');
+}
+
+await juno.file.registerProvider({
+  providerName: 'project-storage',
+  baseUrl,
+  type: 'S3',
+  accessKey: { publicAccessKey, privateAccessKey },
+});
+```
+
+Use `S3` for an S3-compatible endpoint or `AZURE` for Azure Blob Storage. For S3, the keys are the access key ID and secret access key; for Azure, they are the account name and account key. Do not expose provider credentials to browsers.
+
+The current S3 handlers use the fixed region `us-east-005` for bucket operations and signed transfers. Confirm that your endpoint supports that setting before provisioning a new provider; passing a different `region` in SDK transfer options does not currently override the handler's fixed value.
+
+## 3. Register a bucket
+
+Define `projectId` as the numeric ID from your dashboard and choose a bucket name:
+
+```ts
+const bucketName = 'project-documents';
+const providerName = 'project-storage';
+
+await juno.file.registerBucket({
+  name: bucketName,
+  configId: projectId,
+  fileProviderName: providerName,
+});
+```
+
+Registration provisions storage at the provider and saves the association in Juno. Continue to pass the logical `bucketName` to the SDK; Juno handles the environment-specific storage name.
+
+## 4. Upload a file
+
+For an S3-compatible provider, request a signed upload URL, then send the bytes with `PUT`. This example uses Node.js with native `fetch`:
+
+```ts
+import { readFile } from 'node:fs/promises';
+
+const fileName = 'hello.txt';
+const region = process.env.STORAGE_REGION;
+if (!region) throw new Error('Set STORAGE_REGION for your provider');
+
+const upload = await juno.file.uploadFile({
+  fileName,
+  bucketName,
+  providerName,
+  configId: projectId,
+  region,
+});
+
+const response = await fetch(upload.url, {
+  method: 'PUT',
+  body: await readFile('./hello.txt'),
+});
+if (!response.ok) {
+  throw new Error(`Storage upload failed: ${response.status}`);
+}
+```
+
+Create `hello.txt` locally before running this example. Calling `uploadFile` only requests a URL; it does not read your local file or upload its contents.
+
+The current Azure upload handler returns only the SAS query token in `url`, rather than a complete blob URL. This `fetch(upload.url)` example therefore targets S3-compatible storage. An Azure integration must construct the full blob URL from its account endpoint, container, object path, and returned token, and send `x-ms-blob-type: BlockBlob` with the upload.
+
+## 5. Download a file
+
+Using the same identifiers and region:
+
+```ts
+import { writeFile } from 'node:fs/promises';
+
+const download = await juno.file.downloadFile({
+  fileName,
+  bucketName,
+  providerName,
+  configId: projectId,
+  region,
+});
+
+const response = await fetch(download.url);
+if (!response.ok) {
+  throw new Error(`Storage download failed: ${response.status}`);
+}
+await writeFile(
+  './downloaded-hello.txt',
+  Buffer.from(await response.arrayBuffer()),
+);
+```
+
+Signed URLs grant temporary access. Use them promptly and request a fresh URL if one expires. A browser making the storage request also needs the provider's CORS settings to allow its origin and HTTP method.
+
+## List and delete files
+
+```ts
+const buckets = await juno.file.getBucketsByConfigIdAndEnv(String(projectId));
+const files = await juno.file.getAllFiles(String(projectId));
+console.log(buckets, files);
+```
+
+To remove the test object from storage:
+
+```ts
+const result = await juno.file.deleteFiles({
+  bucketName,
+  configId: projectId,
+  fileNames: ['hello.txt'],
+});
+console.log(result);
+```
+
+Several configuration, listing, and deletion methods accept an optional second `{ userJwt, projectId }` argument for a signed-in user's project context. `uploadFile` and `downloadFile` currently accept only their options object; do not pass a credentials argument to those methods.
+
+## Troubleshooting
+
+- **Unauthorized:** check your project API key and any supplied user credentials.
+- **Configuration or bucket not found:** check the project ID, logical bucket name, provider name, and key environment.
+- **Bucket creation fails:** check provider permissions, endpoint compatibility, and the current fixed S3 bucket region described above.
+- **Signed URL returns an error:** check its expiry, storage permissions, HTTP method, and required headers.
+- **Upload appears empty:** ensure you sent the file bytes to the URL after calling `uploadFile`.

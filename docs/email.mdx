@@ -1,0 +1,130 @@
+---
+title: Email
+description: Configure SendGrid, verify a sender, and send email through Juno.
+---
+
+Juno's email service uses SendGrid. Complete [Getting started](/getting-started) and initialize the SDK before following these examples. You need a SendGrid API key, a sender mailbox you control, and access to DNS settings if you authenticate a domain.
+
+Configuration belongs to a project and an environment. Use the same Juno API key environment for setup and sending.
+
+## Configure SendGrid
+
+You can configure the SendGrid key in your project's dashboard **Settings** at `/projects/[id]/settings`, or from your server:
+
+```ts
+const sendgridKey = process.env.SENDGRID_API_KEY;
+if (!sendgridKey) throw new Error('Set SENDGRID_API_KEY');
+
+const result = await juno.email.setupEmail({ sendgridKey });
+console.log(result.success);
+```
+
+The SendGrid key is separate from your Juno API key. To read an existing configuration, call `juno.email.getEmailConfig(String(projectId))`, using your numeric project ID. The response includes the SendGrid key, so avoid logging it.
+
+## Register and verify a domain
+
+Replace `example.org` with a domain you control:
+
+```ts
+const registration = await juno.email.registerDomain({
+  domain: 'example.org',
+  subdomain: 'mail',
+});
+console.log(registration.records);
+```
+
+Add the returned records to your DNS provider using each record's `type`, `host`, and `data`. Once DNS changes have propagated, ask Juno to check them:
+
+```ts
+const verification = await juno.email.verifyDomain({
+  domain: 'example.org',
+});
+console.log(verification.valid);
+```
+
+The registration and verification responses represent `valid` as a **string** (`"true"` or `"false"`). Do not test it with `Boolean(verification.valid)`, because both strings are truthy.
+
+## Register a sender
+
+Use your organization's real sender information and mailing address:
+
+```ts
+await juno.email.registerSenderAddress({
+  email: 'notifications@example.org',
+  name: 'Your Project',
+  replyTo: 'support@example.org',
+  nickname: 'Project notifications',
+  address: '123 Example Street',
+  city: 'Atlanta',
+  state: 'GA',
+  zip: '30332',
+  country: 'US',
+});
+```
+
+Complete any verification SendGrid requests for the sender before sending mail. Registration alone does not establish that a sender has been verified.
+
+## Send an email
+
+Replace both addresses with your verified sender and a test recipient you control:
+
+```ts
+const result = await juno.email.sendEmail({
+  sender: { email: 'notifications@example.org', name: 'Your Project' },
+  recipients: [{ email: 'recipient@example.org', name: 'Test Recipient' }],
+  subject: 'Hello from Juno',
+  contents: [{ type: 'text/plain', value: 'Your Juno email setup is ready.' }],
+});
+console.log(result);
+```
+
+The SDK option is `contents` (plural). It maps to the gateway's `content` field. At least one of `recipients`, `cc`, or `bcc` must contain an address, and `contents` must contain at least one MIME content entry. You can add `text/html` content and a `replyToList` using the same recipient object shape.
+
+The response contains a `success` boolean. Check the recipient inbox and SendGrid delivery activity as well; an API response is not proof of inbox delivery.
+
+## List senders and domains
+
+```ts
+const { senders } = await juno.email.getSenders();
+const { domains } = await juno.email.getDomains();
+console.log(
+  senders.map(({ fromEmail, verified }) => ({ fromEmail, verified })),
+);
+console.log(domains.map(({ domain, valid }) => ({ domain, valid })));
+```
+
+Unlike `verifyDomain`, domain list entries have a boolean `valid` field.
+
+## Optional user and project credentials
+
+The newer SDK accepts a second `credentials` argument on email methods. Use it when acting for a signed-in user on a specific project:
+
+```ts
+const credentials = { userJwt, projectId };
+const { senders } = await juno.email.getSenders(credentials);
+```
+
+Here, `userJwt` is a user token from `juno.auth.getUserJWT`, and `projectId` is the target project's numeric ID. The SDK sends `X-User-JWT` and `X-Project-Id`; the initialized API key is still sent, and its environment selects the configuration. The gateway checks the user's access when resolving the target project. For ordinary calls using your own project's key, omit the argument.
+
+## Delivery statistics
+
+```ts
+const statistics = await juno.email.getStatistics({
+  startDate: '2026-01-01',
+  endDate: '2026-01-31',
+  aggregatedBy: 'day',
+  limit: 10,
+  offset: 0,
+});
+console.log(statistics.responses);
+```
+
+Use your desired date range in `YYYY-MM-DD` format. Aggregation can be `day`, `week`, or `month`. These are SendGrid delivery statistics, separate from Juno's [application analytics](/analytics).
+
+## Troubleshooting
+
+- **SDK validation error:** check required strings, a SendGrid key beginning with `SG`, recipients, and nonempty contents.
+- **Unauthorized:** check your Juno key and any supplied user's project access.
+- **Missing configuration:** check the project ID and API key environment.
+- **Domain or sender rejected:** finish DNS or sender verification in SendGrid, then retry.
+- **Provider error:** check SendGrid key permissions and delivery activity. Local development uses test configuration and does not demonstrate real delivery.
