@@ -1,11 +1,16 @@
 ---
 title: Files
 description: Configure storage and use signed URLs to upload and download files.
+icon: folder-open
 ---
 
 Juno manages storage configuration and returns signed URLs for file transfers. The file bytes travel directly between your application and the storage provider.
 
-Complete [Getting started](/getting-started) and initialize the SDK first. Run the setup and SDK calls on your server with a project API key.
+<Info>
+  **Before you start:** complete the [quickstart](/getting-started) and
+  initialize the SDK. Run the setup and SDK calls on your server with a project
+  API key.
+</Info>
 
 ## Storage concepts
 
@@ -18,113 +23,131 @@ Complete [Getting started](/getting-started) and initialize the SDK first. Run t
 
 Keep the project ID, key environment, provider name, and bucket name consistent across setup and transfer calls.
 
-## 1. Create the configuration
+## Set up storage
 
-```ts
-await juno.file.setup();
-```
+<Steps>
+  <Step title="Create the configuration">
+    ```ts
+    await juno.file.setup();
+    ```
 
-Juno takes the project and environment from your API key. To retrieve the configuration, use `juno.file.getConfig(String(projectId))`. The SDK method is `getConfig`, not `juno.settings.getFileConfig` from older Juno guides.
+    Juno takes the project and environment from your API key. To retrieve the configuration, use `juno.file.getConfig(String(projectId))`. The SDK method is `getConfig`, not `juno.settings.getFileConfig` from older Juno guides.
 
-## 2. Register a provider
+  </Step>
+  <Step title="Register a provider">
+    If a suitable provider is already registered, reuse its name. Otherwise, register one using credentials supplied by your storage account:
 
-If a suitable provider is already registered, reuse its name. Otherwise, register one using credentials supplied by your storage account:
+    ```ts
+    const baseUrl = process.env.STORAGE_ENDPOINT;
+    const publicAccessKey = process.env.STORAGE_PUBLIC_ACCESS_KEY;
+    const privateAccessKey = process.env.STORAGE_PRIVATE_ACCESS_KEY;
+    if (!baseUrl || !publicAccessKey || !privateAccessKey) {
+      throw new Error('Set the storage endpoint and access keys');
+    }
 
-```ts
-const baseUrl = process.env.STORAGE_ENDPOINT;
-const publicAccessKey = process.env.STORAGE_PUBLIC_ACCESS_KEY;
-const privateAccessKey = process.env.STORAGE_PRIVATE_ACCESS_KEY;
-if (!baseUrl || !publicAccessKey || !privateAccessKey) {
-  throw new Error('Set the storage endpoint and access keys');
-}
+    await juno.file.registerProvider({
+      providerName: 'project-storage',
+      baseUrl,
+      type: 'S3',
+      accessKey: { publicAccessKey, privateAccessKey },
+    });
+    ```
 
-await juno.file.registerProvider({
-  providerName: 'project-storage',
-  baseUrl,
-  type: 'S3',
-  accessKey: { publicAccessKey, privateAccessKey },
-});
-```
+    Use `S3` for an S3-compatible endpoint or `AZURE` for Azure Blob Storage. For S3, the keys are the access key ID and secret access key; for Azure, they are the account name and account key. Do not expose provider credentials to browsers.
 
-Use `S3` for an S3-compatible endpoint or `AZURE` for Azure Blob Storage. For S3, the keys are the access key ID and secret access key; for Azure, they are the account name and account key. Do not expose provider credentials to browsers.
+    <Warning>
+      The current S3 handlers use the fixed region `us-east-005` for bucket operations and signed transfers. Confirm that your endpoint supports that setting before provisioning a new provider; passing a different `region` in SDK transfer options does not currently override the handler's fixed value.
+    </Warning>
 
-The current S3 handlers use the fixed region `us-east-005` for bucket operations and signed transfers. Confirm that your endpoint supports that setting before provisioning a new provider; passing a different `region` in SDK transfer options does not currently override the handler's fixed value.
+  </Step>
+  <Step title="Register a bucket">
+    Define `projectId` as the numeric ID from your dashboard and choose a bucket name:
 
-## 3. Register a bucket
+    ```ts
+    const bucketName = 'project-documents';
+    const providerName = 'project-storage';
 
-Define `projectId` as the numeric ID from your dashboard and choose a bucket name:
+    await juno.file.registerBucket({
+      name: bucketName,
+      configId: projectId,
+      fileProviderName: providerName,
+    });
+    ```
 
-```ts
-const bucketName = 'project-documents';
-const providerName = 'project-storage';
+    Registration provisions storage at the provider and saves the association in Juno. Continue to pass the logical `bucketName` to the SDK; Juno handles the environment-specific storage name.
 
-await juno.file.registerBucket({
-  name: bucketName,
-  configId: projectId,
-  fileProviderName: providerName,
-});
-```
+  </Step>
+</Steps>
 
-Registration provisions storage at the provider and saves the association in Juno. Continue to pass the logical `bucketName` to the SDK; Juno handles the environment-specific storage name.
+## Transfer files
 
-## 4. Upload a file
+<Tabs>
+  <Tab title="Upload">
+    For an S3-compatible provider, request a signed upload URL, then send the bytes with `PUT`. This example uses Node.js with native `fetch`:
 
-For an S3-compatible provider, request a signed upload URL, then send the bytes with `PUT`. This example uses Node.js with native `fetch`:
+    ```ts
+    import { readFile } from 'node:fs/promises';
 
-```ts
-import { readFile } from 'node:fs/promises';
+    const fileName = 'hello.txt';
+    const region = process.env.STORAGE_REGION;
+    if (!region) throw new Error('Set STORAGE_REGION for your provider');
 
-const fileName = 'hello.txt';
-const region = process.env.STORAGE_REGION;
-if (!region) throw new Error('Set STORAGE_REGION for your provider');
+    const upload = await juno.file.uploadFile({
+      fileName,
+      bucketName,
+      providerName,
+      configId: projectId,
+      region,
+    });
 
-const upload = await juno.file.uploadFile({
-  fileName,
-  bucketName,
-  providerName,
-  configId: projectId,
-  region,
-});
+    const response = await fetch(upload.url, {
+      method: 'PUT',
+      body: await readFile('./hello.txt'),
+    });
+    if (!response.ok) {
+      throw new Error(`Storage upload failed: ${response.status}`);
+    }
+    ```
 
-const response = await fetch(upload.url, {
-  method: 'PUT',
-  body: await readFile('./hello.txt'),
-});
-if (!response.ok) {
-  throw new Error(`Storage upload failed: ${response.status}`);
-}
-```
+    Create `hello.txt` locally before running this example. Calling `uploadFile` only requests a URL; it does not read your local file or upload its contents.
 
-Create `hello.txt` locally before running this example. Calling `uploadFile` only requests a URL; it does not read your local file or upload its contents.
+    <Note>
+      The current Azure upload handler returns only the SAS query token in `url`, rather than a complete blob URL. This `fetch(upload.url)` example therefore targets S3-compatible storage. An Azure integration must construct the full blob URL from its account endpoint, container, object path, and returned token, and send `x-ms-blob-type: BlockBlob` with the upload.
+    </Note>
 
-The current Azure upload handler returns only the SAS query token in `url`, rather than a complete blob URL. This `fetch(upload.url)` example therefore targets S3-compatible storage. An Azure integration must construct the full blob URL from its account endpoint, container, object path, and returned token, and send `x-ms-blob-type: BlockBlob` with the upload.
+  </Tab>
+  <Tab title="Download">
+    Using the same identifiers and region:
 
-## 5. Download a file
+    ```ts
+    import { writeFile } from 'node:fs/promises';
 
-Using the same identifiers and region:
+    const download = await juno.file.downloadFile({
+      fileName,
+      bucketName,
+      providerName,
+      configId: projectId,
+      region,
+    });
 
-```ts
-import { writeFile } from 'node:fs/promises';
+    const response = await fetch(download.url);
+    if (!response.ok) {
+      throw new Error(`Storage download failed: ${response.status}`);
+    }
+    await writeFile(
+      './downloaded-hello.txt',
+      Buffer.from(await response.arrayBuffer()),
+    );
+    ```
 
-const download = await juno.file.downloadFile({
-  fileName,
-  bucketName,
-  providerName,
-  configId: projectId,
-  region,
-});
+  </Tab>
+</Tabs>
 
-const response = await fetch(download.url);
-if (!response.ok) {
-  throw new Error(`Storage download failed: ${response.status}`);
-}
-await writeFile(
-  './downloaded-hello.txt',
-  Buffer.from(await response.arrayBuffer()),
-);
-```
-
-Signed URLs grant temporary access. Use them promptly and request a fresh URL if one expires. A browser making the storage request also needs the provider's CORS settings to allow its origin and HTTP method.
+<Tip>
+  Signed URLs grant temporary access. Use them promptly and request a fresh URL
+  if one expires. A browser making the storage request also needs the provider's
+  CORS settings to allow its origin and HTTP method.
+</Tip>
 
 ## List and delete files
 
@@ -145,12 +168,26 @@ const result = await juno.file.deleteFiles({
 console.log(result);
 ```
 
-Several configuration, listing, and deletion methods accept an optional second `{ userJwt, projectId }` argument for a signed-in user's project context. `uploadFile` and `downloadFile` currently accept only their options object; do not pass a credentials argument to those methods.
+Several configuration, listing, and deletion methods accept an optional second `{ userJwt, projectId }` argument for a [signed-in user's project context](/authentication#acting-for-a-signed-in-user). `uploadFile` and `downloadFile` currently accept only their options object; do not pass a credentials argument to those methods.
 
 ## Troubleshooting
 
-- **Unauthorized:** check your project API key and any supplied user credentials.
-- **Configuration or bucket not found:** check the project ID, logical bucket name, provider name, and key environment.
-- **Bucket creation fails:** check provider permissions, endpoint compatibility, and the current fixed S3 bucket region described above.
-- **Signed URL returns an error:** check its expiry, storage permissions, HTTP method, and required headers.
-- **Upload appears empty:** ensure you sent the file bytes to the URL after calling `uploadFile`.
+<AccordionGroup>
+  <Accordion title="Unauthorized">
+    Check your project API key and any supplied user credentials.
+  </Accordion>
+  <Accordion title="Configuration or bucket not found">
+    Check the project ID, logical bucket name, provider name, and key
+    environment.
+  </Accordion>
+  <Accordion title="Bucket creation fails">
+    Check provider permissions, endpoint compatibility, and the current fixed S3
+    bucket region described above.
+  </Accordion>
+  <Accordion title="Signed URL returns an error">
+    Check its expiry, storage permissions, HTTP method, and required headers.
+  </Accordion>
+  <Accordion title="Upload appears empty">
+    Ensure you sent the file bytes to the URL after calling `uploadFile`.
+  </Accordion>
+</AccordionGroup>

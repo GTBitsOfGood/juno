@@ -1,0 +1,154 @@
+---
+title: SDK reference
+description: Every public method on the juno-sdk client, grouped by service.
+icon: code
+---
+
+This page lists the public methods of `juno-sdk` as they exist on the SDK's `main` branch. A version installed from npm may lag behind; see the [quickstart](/getting-started) for version notes. For request and response shapes, open the matching endpoint in the [API reference](/api-reference/introduction) or your editor's type hints.
+
+## Setup
+
+```ts
+import juno from 'juno-sdk';
+
+juno.init({
+  apiKey: process.env.JUNO_API_KEY!,
+  baseURL: 'https://api.juno.bitsofgood.org',
+});
+```
+
+| Option    | Type     | Notes                                                                      |
+| --------- | -------- | -------------------------------------------------------------------------- |
+| `apiKey`  | `string` | Your project API key. Sent as a bearer token on service calls.             |
+| `baseURL` | `string` | Optional, but set it: the generated client defaults to `http://localhost`. |
+
+Accessing any service before `juno.init` throws a `JunoValidationError`. The SDK also throws `JunoValidationError` when an argument fails its client-side checks, before any request is sent.
+
+## Credential types
+
+The **Credentials** column below says which extra credentials each method takes. See [Authentication](/authentication) for when to use each.
+
+<ResponseField
+  name="UserCredentials"
+  type="string | { email: string; password: string }"
+>
+  A user JWT from `juno.auth.getUserJWT`, or a Juno account's email and
+  password. Required by account, user, and project management methods.
+</ResponseField>
+
+<ResponseField
+  name="ApiCredentials"
+  type="{ userJwt?: string; projectId?: number | string }"
+>
+  Optional context for acting on behalf of a signed-in user on a specific
+  project. Sent as `X-User-JWT` and `X-Project-Id` alongside the API key.
+</ResponseField>
+
+## `juno.auth`
+
+| Method                                                                 | Credentials       |
+| ---------------------------------------------------------------------- | ----------------- |
+| `getUserJWT({ email, password })`                                      | n/a               |
+| `getApiKeyJWT({ apiKey })`                                             | n/a               |
+| `createKey({ project, environment, description, credentials })`        | `UserCredentials` |
+| `getAllApiKeys({ offset, limit, credentials })`                        | `UserCredentials` |
+| `deleteApiKeyById({ keyId, credentials })`                             | `UserCredentials` |
+| `requestNewAccount({ email, name, password, userType, projectName? })` | n/a               |
+| `getAllAccountRequests({ credentials })`                               | `UserCredentials` |
+| `acceptAccountRequest({ id, credentials })`                            | `UserCredentials` |
+| `deleteAccountRequest({ id, credentials })`                            | `UserCredentials` |
+
+`userType` is one of `SUPERADMIN`, `ADMIN`, or `USER`.
+
+## `juno.project`
+
+| Method                                        | Credentials       |
+| --------------------------------------------- | ----------------- |
+| `getProject({ id } \| { name })`              | n/a               |
+| `getProjects(credentials)`                    | `UserCredentials` |
+| `createProject({ projectName, credentials })` | `UserCredentials` |
+| `deleteProject({ project, credentials })`     | `UserCredentials` |
+| `getProjectUsersById(projectId, credentials)` | `UserCredentials` |
+| `linkProjectToUser({ project, user })`        | API key           |
+
+`project` takes `{ id }` or `{ name }`, and `user` takes `{ id }` or `{ email }`, but not both.
+
+## `juno.user`
+
+| Method                                                | Credentials       |
+| ----------------------------------------------------- | ----------------- |
+| `getUser(id)`                                         | n/a               |
+| `getUsers(credentials)`                               | `UserCredentials` |
+| `createUser({ email, name, password, credentials })`  | `UserCredentials` |
+| `setUserType({ input, credentials })`                 | `UserCredentials` |
+| `linkToProject({ userId, project, credentials })`     | `UserCredentials` |
+| `unlinkFromProject({ userId, project, credentials })` | `UserCredentials` |
+| `deleteUser({ userId, credentials })`                 | `UserCredentials` |
+
+## `juno.email`
+
+All email methods use the API key from `juno.init` and accept optional `ApiCredentials` as their last argument. See the [Email guide](/email).
+
+| Method                                                                                           |
+| ------------------------------------------------------------------------------------------------ |
+| `setupEmail({ sendgridKey })`                                                                    |
+| `getEmailConfig(projectId)`                                                                      |
+| `registerDomain({ domain, subdomain? })`                                                         |
+| `verifyDomain({ domain })`                                                                       |
+| `getDomains()`                                                                                   |
+| `registerSenderAddress({ email, name, replyTo?, nickname, address, city, state, zip, country })` |
+| `getSenders()`                                                                                   |
+| `sendEmail({ sender, recipients?, cc?, bcc?, replyToList?, subject, contents })`                 |
+| `getStatistics({ startDate, endDate?, limit?, offset?, aggregatedBy? })`                         |
+
+## `juno.file`
+
+File methods use the API key from `juno.init`. All except `uploadFile` and `downloadFile` accept optional `ApiCredentials` as their last argument. See the [Files guide](/files).
+
+| Method                                                                    |
+| ------------------------------------------------------------------------- |
+| `setup()`                                                                 |
+| `getConfig(projectId)`                                                    |
+| `deleteConfig(projectId)`                                                 |
+| `registerProvider({ providerName, baseUrl, type, accessKey })`            |
+| `getAllFileProviders()`                                                   |
+| `deleteProvider(name)`                                                    |
+| `registerBucket({ name, configId, fileProviderName })`                    |
+| `getBucketsByConfigIdAndEnv(configId)`                                    |
+| `deleteBucket(options)`                                                   |
+| `uploadFile({ fileName, bucketName, providerName, configId, region? })`   |
+| `downloadFile({ fileName, bucketName, providerName, configId, region? })` |
+| `getAllFiles(configId)`                                                   |
+| `deleteFiles({ bucketName, configId, fileNames })`                        |
+
+## Analytics
+
+Analytics methods use the API key from `juno.init`. Check the [Analytics guide](/analytics) for integration status before relying on them.
+
+### `juno.analytics`
+
+| Method                                                                                                         | `ApiCredentials` |
+| -------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `logClickEvent(event)`                                                                                         | no               |
+| `logVisitEvent(event)`                                                                                         | no               |
+| `logInputEvent(event)`                                                                                         | no               |
+| `logCustomEvent(event)`                                                                                        | no               |
+| `getClickEventsPaginated({ projectName, afterId?, environment?, limit?, afterTime? })`                         | optional         |
+| `getVisitEventsPaginated({ projectName, afterId?, environment?, limit?, afterTime? })`                         | optional         |
+| `getInputEventsPaginated({ projectName, afterId?, environment?, limit?, afterTime? })`                         | optional         |
+| `getCustomEventsPaginated({ projectName, category, subcategory, afterId?, environment?, limit?, afterTime? })` | optional         |
+| `getAllClickEvents({ projectName, afterTime?, limit? })`                                                       | optional         |
+| `getAllVisitEvents({ projectName, afterTime?, limit? })`                                                       | optional         |
+| `getAllInputEvents({ projectName, afterTime?, limit? })`                                                       | optional         |
+| `getAllCustomEvents({ projectName, category, subcategory, afterTime?, limit? })`                               | optional         |
+| `getCustomEventTypesByProject(projectName)`                                                                    | optional         |
+| `getCustomGraphTypesById({ projectName, eventTypeId })`                                                        | no               |
+
+### `juno.analyticsConfig`
+
+| Method                                     | `ApiCredentials` |
+| ------------------------------------------ | ---------------- |
+| `createAnalyticsConfig(config)`            | optional         |
+| `getAnalyticsConfig(projectId)`            | optional         |
+| `updateAnalyticsConfig(projectId, config)` | no               |
+| `deleteAnalyticsConfig(projectId)`         | no               |

@@ -1,45 +1,90 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "linden",
   "name": "Juno",
   "description": "Bits of Good's shared infrastructure API.",
   "colors": {
-    "primary": "#1F6FEB",
-    "light": "#5B9BFF",
-    "dark": "#0B3D91"
+    "primary": "#D32C4B",
+    "light": "#F4945D",
+    "dark": "#B0213D"
   },
+  "logo": {
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png",
+    "href": "https://juno.bitsofgood.org/docs"
+  },
+  "favicon": "/favicon.png",
   "navigation": {
     "tabs": [
       {
         "tab": "Guides",
+        "icon": "book-open",
         "groups": [
           {
             "group": "Get started",
-            "pages": ["introduction", "getting-started", "local-development"]
+            "pages": [
+              "introduction",
+              "getting-started",
+              "authentication",
+              "sdk-reference"
+            ]
+          },
+          {
+            "group": "Services",
+            "pages": ["email", "files", "analytics"]
+          },
+          {
+            "group": "Contributing",
+            "pages": ["local-development"]
           }
         ]
       },
       {
-        "tab": "Services",
+        "tab": "API reference",
+        "icon": "square-terminal",
         "groups": [
-          { "group": "Services", "pages": ["email", "files", "analytics"] }
+          {
+            "group": "Overview",
+            "pages": ["api-reference/introduction"]
+          },
+          {
+            "group": "Endpoints",
+            "openapi": "/openapi.json"
+          }
         ]
-      },
-      {
-        "tab": "API Reference",
-        "openapi": "/openapi.json"
       }
-    ]
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Dashboard",
+          "icon": "gauge",
+          "href": "https://juno.bitsofgood.org"
+        },
+        {
+          "anchor": "GitHub",
+          "icon": "github",
+          "href": "https://github.com/GTBitsOfGood/juno"
+        }
+      ]
+    }
   },
   "api": {
     "playground": {
-      "display": "simple"
+      "display": "interactive"
     }
   },
   "navbar": {
     "primary": {
-      "type": "github",
-      "href": "https://github.com/GTBitsOfGood/juno"
+      "type": "button",
+      "label": "Open dashboard",
+      "href": "https://juno.bitsofgood.org"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/GTBitsOfGood",
+      "website": "https://bitsofgood.org"
     }
   }
 }
