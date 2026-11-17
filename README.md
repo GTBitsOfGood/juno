@@ -38,7 +38,7 @@ Packages are managed through [PNPM Workspaces](https://pnpm.io/workspaces). The 
 
 We utilize Nest's [OpenAPI](https://docs.nestjs.com/openapi/introduction) support to autogenerate web documentation for all Juno HTTP endpoints.
 
-In production, the API is at [https://api.juno.bitsofgood.org](https://api.juno.bitsofgood.org) and its reference lives in the docs at [juno.bitsofgood.org/docs/api-reference/introduction](https://juno.bitsofgood.org/docs/api-reference/introduction).
+In production, the API is at [https://api.juno.bitsofgood.org](https://api.juno.bitsofgood.org) and its reference lives in the docs at [juno.bitsofgood.org/docs/api-reference/introduction](https://juno.bitsofgood.org/docs/api-reference/introduction). That reference is built from `docs/openapi.json`, which a GitHub Action regenerates from the gateway source (`pnpm docs:openapi`) on every push to `main`.
 
 For updating the JunoSDK, see the developer instructions below.
 

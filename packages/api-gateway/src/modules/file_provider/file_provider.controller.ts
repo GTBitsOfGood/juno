@@ -56,7 +56,10 @@ export class FileProviderController implements OnModuleInit {
   }
 
   @Post('provider')
-  @ApiOperation({ summary: 'Registers a File Provider.' })
+  @ApiOperation({
+    summary: 'Register provider',
+    description: 'Registers a File Provider.',
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Parameters are invalid',
@@ -93,7 +96,10 @@ export class FileProviderController implements OnModuleInit {
   }
 
   @Get('provider/all')
-  @ApiOperation({ summary: 'Get All File Providers.' })
+  @ApiOperation({
+    summary: 'List providers',
+    description: 'Get All File Providers.',
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
     description: 'Returned all file providers',
@@ -112,7 +118,10 @@ export class FileProviderController implements OnModuleInit {
   }
 
   @Delete('provider/:name')
-  @ApiOperation({ summary: 'Delete File Provider.' })
+  @ApiOperation({
+    summary: 'Delete provider',
+    description: 'Delete File Provider.',
+  })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({

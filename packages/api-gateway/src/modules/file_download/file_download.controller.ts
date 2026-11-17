@@ -42,7 +42,10 @@ export class FileDownloadController implements OnModuleInit {
   }
 
   @Post('download')
-  @ApiOperation({ summary: 'Downloads a file' })
+  @ApiOperation({
+    summary: 'Get download URL',
+    description: 'Downloads a file',
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Parameters are invalid',

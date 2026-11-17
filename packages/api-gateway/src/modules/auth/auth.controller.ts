@@ -94,8 +94,7 @@ export class AuthController implements OnModuleInit {
 
   @Post('/api_key/jwt')
   @ApiOperation({
-    summary:
-      'Generates a temporary JWT for the project tied to a specified API key.',
+    summary: 'Get API key JWT',
     description:
       'JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given a valid API key.',
   })
@@ -125,7 +124,7 @@ export class AuthController implements OnModuleInit {
 
   @Post('/user/jwt')
   @ApiOperation({
-    summary: 'Generates a temporary JWT tied to a specified user.',
+    summary: 'Get user JWT',
     description:
       'Generates a user identity token that can be used to authenticate admin and management endpoints in place of email/password credentials.',
   })
@@ -164,7 +163,8 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary:
+    summary: 'Create API key',
+    description:
       'Issues a new API key for the project tied to the specified environment.',
   })
   @ApiCreatedResponse({
@@ -226,7 +226,8 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Revokes an API key, detaching it from its project.',
+    summary: 'Delete API key',
+    description: 'Revokes an API key, detaching it from its project.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -322,7 +323,8 @@ export class AuthController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Lists all API keys',
+    summary: 'List API keys',
+    description: 'Lists all API keys',
   })
   @ApiOkResponse({
     description: 'Paginated list of all API keys successfully returned',
@@ -430,7 +432,7 @@ export class AuthController implements OnModuleInit {
 
   @Get('/test-auth')
   @ApiOperation({
-    summary: 'Validates user JWT and returns user data',
+    summary: 'Validate user JWT',
     description:
       'This endpoint validates a user JWT token and returns the associated user information if valid',
   })
@@ -466,7 +468,7 @@ export class AuthController implements OnModuleInit {
 
   @Post('/account-request')
   @ApiOperation({
-    summary: 'Submit a new account request',
+    summary: 'Request an account',
     description:
       'Allows a prospective user to submit a request for a new account. The request is stored and can be reviewed by an admin.',
   })
@@ -496,7 +498,7 @@ export class AuthController implements OnModuleInit {
 
   @Get('/account-request')
   @ApiOperation({
-    summary: 'Retrieve all account requests',
+    summary: 'List account requests',
     description:
       'Returns all pending account requests. Requires admin or superadmin credentials.',
   })
@@ -536,7 +538,7 @@ export class AuthController implements OnModuleInit {
 
   @Delete('/account-request/:id')
   @ApiOperation({
-    summary: 'Delete an account request by ID',
+    summary: 'Delete account request',
     description:
       'Deletes an account request by its ID. Requires admin or superadmin credentials.',
   })
@@ -591,7 +593,7 @@ export class AuthController implements OnModuleInit {
 
   @Post('/account-request/:id/accept')
   @ApiOperation({
-    summary: 'Accept an account request',
+    summary: 'Accept account request',
     description:
       'Accepts a pending account request: creates the user, optionally creates/links a project (for ADMIN requests with a projectName), and deletes the pending request. Requires admin or superadmin credentials.',
   })

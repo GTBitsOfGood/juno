@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --runInBand --watchAll",
     "tsc": "tsc",
+    "gen:openapi": "ts-node -r tsconfig-paths/register src/generate-openapi.ts",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org bits-of-good-development --project juno-api-gateway ./dist && sentry-cli sourcemaps upload --org bits-of-good-development --project juno-api-gateway ./dist"
   },
   "dependencies": {

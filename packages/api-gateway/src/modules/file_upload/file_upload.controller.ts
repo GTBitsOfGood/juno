@@ -43,7 +43,8 @@ export class FileUploadController implements OnModuleInit {
 
   @Post('/upload')
   @ApiOperation({
-    summary: `Upload a file to a File Storage Provider's Bucket`,
+    summary: 'Get upload URL',
+    description: "Upload a file to a File Storage Provider's Bucket",
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,

@@ -57,7 +57,10 @@ export class FileBucketController implements OnModuleInit {
   }
 
   @Post('bucket')
-  @ApiOperation({ summary: 'Registers a File Bucket.' })
+  @ApiOperation({
+    summary: 'Register bucket',
+    description: 'Registers a File Bucket.',
+  })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiCreatedResponse({
@@ -82,7 +85,10 @@ export class FileBucketController implements OnModuleInit {
   }
 
   @Delete('bucket')
-  @ApiOperation({ summary: 'Delete a File Bucket.' })
+  @ApiOperation({
+    summary: 'Delete bucket',
+    description: 'Delete a File Bucket.',
+  })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
@@ -106,7 +112,10 @@ export class FileBucketController implements OnModuleInit {
   }
 
   @Get('bucket/:configId')
-  @ApiOperation({ summary: 'Get File Buckets by Config Id and Config Env.' })
+  @ApiOperation({
+    summary: 'List buckets',
+    description: 'Get File Buckets by Config Id and Config Env.',
+  })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({
@@ -135,7 +144,10 @@ export class FileBucketController implements OnModuleInit {
   }
 
   @Get('all/:configId')
-  @ApiOperation({ summary: 'Get all files from all buckets for a config.' })
+  @ApiOperation({
+    summary: 'List files',
+    description: 'Get all files from all buckets for a config.',
+  })
   @ApiBadRequestResponse({ description: 'Parameters are invalid' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiOkResponse({

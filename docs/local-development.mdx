@@ -141,6 +141,18 @@ pnpm test:e2e:api-gateway
 
 The repository also provides service-specific E2E scripts and watch variants in the root `package.json`.
 
+## Update the API reference
+
+The [API reference](/api-reference/introduction) is generated from `docs/openapi.json`, which comes from the gateway's NestJS decorators. The **OpenAPI spec** workflow regenerates it on every push to `main` that touches `packages/api-gateway` or `packages/proto`, commits any change, and redeploys the docs. You do not need to commit it yourself.
+
+To preview the spec for your branch locally, run this from the repository root:
+
+```sh
+pnpm docs:openapi
+```
+
+It builds the gateway's route metadata without starting Docker or any other service, then writes and formats `docs/openapi.json`. Each `@ApiOperation` `summary` becomes that endpoint's sidebar title, so keep summaries short and put detail in `description`.
+
 ## Preview these docs
 
 With the Mintlify CLI installed, run from the Juno repository root:

@@ -42,7 +42,10 @@ export class FileDeleteController implements OnModuleInit {
   }
 
   @Delete('delete')
-  @ApiOperation({ summary: 'Delete files from a bucket' })
+  @ApiOperation({
+    summary: 'Delete files',
+    description: 'Delete files from a bucket',
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Parameters are invalid',
