@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { AnalyticsEventProto } from 'juno-proto';
+import { AnalyticsEventProto, customEventTypeId } from 'juno-proto';
 import { AnalyticsEventService } from './analytics_event.service';
 
 @Controller()
@@ -86,7 +86,11 @@ export class AnalyticsEventDbController
 
     return {
       eventTypes: eventTypes.map((eventType) => ({
-        id: `${request.projectId}-${eventType.category}-${eventType.subcategory}`,
+        id: customEventTypeId(
+          request.projectId,
+          eventType.category,
+          eventType.subcategory,
+        ),
         category: eventType.category,
         subcategory: eventType.subcategory,
         properties: eventType.properties,

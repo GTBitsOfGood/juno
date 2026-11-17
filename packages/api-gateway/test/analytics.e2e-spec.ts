@@ -436,6 +436,17 @@ describe('Analytics Event Retrieval Routes', () => {
           afterTime: '2023-01-01T00:00:00Z',
         })
         .expect(200);
+      expect(
+        mockAnalyticsService.getClickEventsPaginated,
+      ).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        }),
+      );
     });
 
     it('Failed to get click events due to missing project name', async () => {
@@ -471,6 +482,12 @@ describe('Analytics Event Retrieval Routes', () => {
           afterTime: '2023-01-01T00:00:00Z',
         })
         .expect(200);
+      expect(mockAnalyticsService.getAllClickEvents).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          afterTime: '2023-01-01T00:00:00Z',
+        }),
+      );
     });
   });
 
@@ -486,6 +503,32 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 10,
         })
         .expect(200);
+    });
+
+    it('Successfully get paginated visit events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/visit')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        })
+        .expect(200);
+      expect(
+        mockAnalyticsService.getVisitEventsPaginated,
+      ).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        }),
+      );
     });
 
     it('Failed to get visit events due to unauthorized access', async () => {
@@ -509,6 +552,26 @@ describe('Analytics Event Retrieval Routes', () => {
         })
         .expect(200);
     });
+
+    it('Successfully get all visit events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/visit/all')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterTime: '2023-01-01T00:00:00Z',
+          limit: 1000,
+        })
+        .expect(200);
+      expect(mockAnalyticsService.getAllVisitEvents).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          afterTime: '2023-01-01T00:00:00Z',
+          limit: 1000,
+        }),
+      );
+    });
   });
 
   describe('GET /analytics/events/input', () => {
@@ -524,6 +587,32 @@ describe('Analytics Event Retrieval Routes', () => {
         })
         .expect(200);
     });
+
+    it('Successfully get paginated input events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/input')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        })
+        .expect(200);
+      expect(
+        mockAnalyticsService.getInputEventsPaginated,
+      ).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        }),
+      );
+    });
   });
 
   describe('GET /analytics/events/input/all', () => {
@@ -536,6 +625,26 @@ describe('Analytics Event Retrieval Routes', () => {
           projectName: 'test-seed-project',
         })
         .expect(200);
+    });
+
+    it('Successfully get all input events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/input/all')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          afterTime: '2023-01-01T00:00:00Z',
+          limit: 1000,
+        })
+        .expect(200);
+      expect(mockAnalyticsService.getAllInputEvents).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          afterTime: '2023-01-01T00:00:00Z',
+          limit: 1000,
+        }),
+      );
     });
   });
 
@@ -553,6 +662,36 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 10,
         })
         .expect(200);
+    });
+
+    it('Successfully get paginated custom events with optional parameters', async () => {
+      const apiKey = await createApiKey('test-seed-project', 'prod');
+      await request(app.getHttpServer())
+        .get('/analytics/events/custom')
+        .set('Authorization', 'Bearer ' + apiKey)
+        .query({
+          projectName: 'test-seed-project',
+          category: 'user_action',
+          subcategory: 'form_submission',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        })
+        .expect(200);
+      expect(
+        mockAnalyticsService.getCustomEventsPaginated,
+      ).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          category: 'user_action',
+          subcategory: 'form_submission',
+          afterId: 'event-123',
+          environment: 'development',
+          limit: 5,
+          afterTime: '2023-01-01T00:00:00Z',
+        }),
+      );
     });
 
     it('Failed to get custom events due to missing category', async () => {
@@ -607,6 +746,15 @@ describe('Analytics Event Retrieval Routes', () => {
           limit: 50,
         })
         .expect(200);
+      expect(mockAnalyticsService.getAllCustomEvents).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          projectName: 'test-seed-project',
+          category: 'user_action',
+          subcategory: 'form_submission',
+          afterTime: '2023-01-01T00:00:00Z',
+          limit: 50,
+        }),
+      );
     });
 
     it('Failed to get all custom events due to missing required parameters', async () => {

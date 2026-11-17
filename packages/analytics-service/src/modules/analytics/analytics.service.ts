@@ -1,7 +1,11 @@
 import { status } from '@grpc/grpc-js';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
-import { AnalyticsProto, AnalyticsEventProto } from 'juno-proto';
+import {
+  AnalyticsEventProto,
+  AnalyticsProto,
+  customEventTypeId,
+} from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
@@ -91,7 +95,7 @@ export class AnalyticsService implements OnModuleInit {
     );
 
     return {
-      events: response.events.map((event) => {
+      events: (response.events ?? []).map((event) => {
         const eventProperties = JSON.parse(event.properties);
         return {
           id: String(event.id),
@@ -131,7 +135,7 @@ export class AnalyticsService implements OnModuleInit {
     );
 
     return {
-      events: response.events.map((event) => {
+      events: (response.events ?? []).map((event) => {
         const eventProperties = JSON.parse(event.properties);
         return {
           id: String(event.id),
@@ -150,95 +154,437 @@ export class AnalyticsService implements OnModuleInit {
     };
   }
 
-  // #263: implement click events by copying visit pattern above
   async logClickEvent(
-    _event: AnalyticsProto.ClickEventRequest,
+    event: AnalyticsProto.ClickEventRequest,
   ): Promise<AnalyticsProto.ClickEventResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'logClickEvent not yet implemented - see #263',
-    });
+    if (
+      !event ||
+      !event.objectId ||
+      !event.userId ||
+      event.objectId.length === 0 ||
+      event.userId.length === 0
+    ) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid ClickEventRequest: objectId and userId are required',
+      });
+    }
+
+    const properties = {
+      objectId: event.objectId,
+      userId: event.userId,
+    };
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.createAnalyticsEvent({
+        projectId: event.configId,
+        environment: event.environment,
+        type: AnalyticsEventProto.AnalyticsEventType.CLICK,
+        category: 'Interaction',
+        subcategory: 'Click',
+        properties: JSON.stringify(properties),
+      }),
+    );
+
+    const eventProperties = JSON.parse(response.properties);
+
+    return {
+      id: String(response.id),
+      category: response.category,
+      subcategory: response.subcategory,
+      projectId: String(response.projectId),
+      environment: response.environment,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      eventProperties: {
+        objectId: eventProperties.objectId,
+        userId: eventProperties.userId,
+      },
+    };
   }
 
   async getClickEventsPaginated(
-    _request: AnalyticsProto.GetClickEventsRequest,
+    request: AnalyticsProto.GetClickEventsRequest,
   ): Promise<AnalyticsProto.GetClickEventsResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'getClickEventsPaginated not yet implemented - see #263',
-    });
+    if (!request.projectName || request.projectName.length === 0) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid GetClickEventsRequest: projectName is required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.getAnalyticsEventsPaginated({
+        projectId: request.configId,
+        environment: request.environment,
+        type: AnalyticsEventProto.AnalyticsEventType.CLICK,
+        afterId: request.afterId || undefined,
+        limit: request.limit || undefined,
+        afterTime: request.afterTime || undefined,
+      }),
+    );
+
+    return {
+      events: (response.events ?? []).map((event) => {
+        const eventProperties = JSON.parse(event.properties);
+        return {
+          id: String(event.id),
+          category: event.category,
+          subcategory: event.subcategory,
+          projectId: String(event.projectId),
+          environment: event.environment,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          eventProperties: {
+            objectId: eventProperties.objectId,
+            userId: eventProperties.userId,
+          },
+        };
+      }),
+      afterId: response.afterId,
+    };
   }
 
   async getAllClickEvents(
-    _request: AnalyticsProto.GetAllClickEventsRequest,
+    request: AnalyticsProto.GetAllClickEventsRequest,
   ): Promise<AnalyticsProto.GetAllClickEventsResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'getAllClickEvents not yet implemented - see #263',
-    });
+    if (!request.projectName || request.projectName.length === 0) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid GetAllClickEventsRequest: projectName is required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.getAllAnalyticsEvents({
+        projectId: request.configId,
+        type: AnalyticsEventProto.AnalyticsEventType.CLICK,
+        afterTime: request.afterTime || undefined,
+        limit: request.limit || undefined,
+      }),
+    );
+
+    return {
+      events: (response.events ?? []).map((event) => {
+        const eventProperties = JSON.parse(event.properties);
+        return {
+          id: String(event.id),
+          category: event.category,
+          subcategory: event.subcategory,
+          projectId: String(event.projectId),
+          environment: event.environment,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          eventProperties: {
+            objectId: eventProperties.objectId,
+            userId: eventProperties.userId,
+          },
+        };
+      }),
+    };
   }
 
-  // #263: implement input events by copying visit pattern above
   async logInputEvent(
-    _event: AnalyticsProto.InputEventRequest,
+    event: AnalyticsProto.InputEventRequest,
   ): Promise<AnalyticsProto.InputEventResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'logInputEvent not yet implemented - see #263',
-    });
+    if (
+      !event ||
+      !event.objectId ||
+      !event.userId ||
+      !event.textValue ||
+      event.objectId.length === 0 ||
+      event.userId.length === 0 ||
+      event.textValue.length === 0
+    ) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message:
+          'Invalid InputEventRequest: objectId, userId, and textValue are required',
+      });
+    }
+
+    const properties = {
+      objectId: event.objectId,
+      userId: event.userId,
+      textValue: event.textValue,
+    };
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.createAnalyticsEvent({
+        projectId: event.configId,
+        environment: event.environment,
+        type: AnalyticsEventProto.AnalyticsEventType.INPUT,
+        category: 'Interaction',
+        subcategory: 'Input',
+        properties: JSON.stringify(properties),
+      }),
+    );
+
+    const eventProperties = JSON.parse(response.properties);
+
+    return {
+      id: String(response.id),
+      category: response.category,
+      subcategory: response.subcategory,
+      projectId: String(response.projectId),
+      environment: response.environment,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      eventProperties: {
+        objectId: eventProperties.objectId,
+        userId: eventProperties.userId,
+        textValue: eventProperties.textValue,
+      },
+    };
   }
 
   async getInputEventsPaginated(
-    _request: AnalyticsProto.GetInputEventsRequest,
+    request: AnalyticsProto.GetInputEventsRequest,
   ): Promise<AnalyticsProto.GetInputEventsResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'getInputEventsPaginated not yet implemented - see #263',
-    });
+    if (!request.projectName || request.projectName.length === 0) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid GetInputEventsRequest: projectName is required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.getAnalyticsEventsPaginated({
+        projectId: request.configId,
+        environment: request.environment,
+        type: AnalyticsEventProto.AnalyticsEventType.INPUT,
+        afterId: request.afterId || undefined,
+        limit: request.limit || undefined,
+        afterTime: request.afterTime || undefined,
+      }),
+    );
+
+    return {
+      events: (response.events ?? []).map((event) => {
+        const eventProperties = JSON.parse(event.properties);
+        return {
+          id: String(event.id),
+          category: event.category,
+          subcategory: event.subcategory,
+          projectId: String(event.projectId),
+          environment: event.environment,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          eventProperties: {
+            objectId: eventProperties.objectId,
+            userId: eventProperties.userId,
+            textValue: eventProperties.textValue,
+          },
+        };
+      }),
+      afterId: response.afterId,
+    };
   }
 
   async getAllInputEvents(
-    _request: AnalyticsProto.GetAllInputEventsRequest,
+    request: AnalyticsProto.GetAllInputEventsRequest,
   ): Promise<AnalyticsProto.GetAllInputEventsResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'getAllInputEvents not yet implemented - see #263',
-    });
+    if (!request.projectName || request.projectName.length === 0) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid GetAllInputEventsRequest: projectName is required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.getAllAnalyticsEvents({
+        projectId: request.configId,
+        type: AnalyticsEventProto.AnalyticsEventType.INPUT,
+        afterTime: request.afterTime || undefined,
+        limit: request.limit || undefined,
+      }),
+    );
+
+    return {
+      events: (response.events ?? []).map((event) => {
+        const eventProperties = JSON.parse(event.properties);
+        return {
+          id: String(event.id),
+          category: event.category,
+          subcategory: event.subcategory,
+          projectId: String(event.projectId),
+          environment: event.environment,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          eventProperties: {
+            objectId: eventProperties.objectId,
+            userId: eventProperties.userId,
+            textValue: eventProperties.textValue,
+          },
+        };
+      }),
+    };
   }
 
-  // #263: implement custom events by copying visit pattern above
   async logCustomEvent(
-    _event: AnalyticsProto.CustomEventRequest,
+    event: AnalyticsProto.CustomEventRequest,
   ): Promise<AnalyticsProto.CustomEventResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'logCustomEvent not yet implemented - see #263',
-    });
+    if (
+      !event ||
+      !event.category ||
+      !event.subcategory ||
+      event.category.length === 0 ||
+      event.subcategory.length === 0
+    ) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message:
+          'Invalid CustomEventRequest: category and subcategory are required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.createAnalyticsEvent({
+        projectId: event.configId,
+        environment: event.environment,
+        type: AnalyticsEventProto.AnalyticsEventType.CUSTOM,
+        category: event.category,
+        subcategory: event.subcategory,
+        // protobuf drops an empty map on the wire, so missing means {}.
+        properties: JSON.stringify(event.properties ?? {}),
+      }),
+    );
+
+    const properties = JSON.parse(response.properties);
+
+    return {
+      id: String(response.id),
+      // Must match the id db-service generates in getCustomEventTypes, since the
+      // dash joins custom events to their type by eventTypeId.
+      eventTypeId: customEventTypeId(
+        response.projectId,
+        response.category,
+        response.subcategory,
+      ),
+      projectId: String(response.projectId),
+      environment: response.environment,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      properties: Object.fromEntries(
+        Object.entries(properties).map(([k, v]) => [k, String(v)]),
+      ),
+    };
   }
 
   async getCustomEventsPaginated(
-    _request: AnalyticsProto.GetCustomEventsRequest,
+    request: AnalyticsProto.GetCustomEventsRequest,
   ): Promise<AnalyticsProto.GetCustomEventsResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'getCustomEventsPaginated not yet implemented - see #263',
-    });
+    if (!request.projectName || request.projectName.length === 0) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid GetCustomEventsRequest: projectName is required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.getAnalyticsEventsPaginated({
+        projectId: request.configId,
+        environment: request.environment,
+        type: AnalyticsEventProto.AnalyticsEventType.CUSTOM,
+        afterId: request.afterId || undefined,
+        limit: request.limit || undefined,
+        afterTime: request.afterTime || undefined,
+        category: request.category || undefined,
+        subcategory: request.subcategory || undefined,
+      }),
+    );
+
+    return {
+      events: (response.events ?? []).map((event) => {
+        const properties = JSON.parse(event.properties);
+        return {
+          id: String(event.id),
+          eventTypeId: customEventTypeId(
+            event.projectId,
+            event.category,
+            event.subcategory,
+          ),
+          projectId: String(event.projectId),
+          environment: event.environment,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          properties: Object.fromEntries(
+            Object.entries(properties).map(([k, v]) => [k, String(v)]),
+          ),
+        };
+      }),
+      afterId: response.afterId,
+    };
   }
 
   async getAllCustomEvents(
-    _request: AnalyticsProto.GetAllCustomEventsRequest,
+    request: AnalyticsProto.GetAllCustomEventsRequest,
   ): Promise<AnalyticsProto.GetAllCustomEventsResponse> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: 'getAllCustomEvents not yet implemented - see #263',
-    });
+    if (!request.projectName || request.projectName.length === 0) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid GetAllCustomEventsRequest: projectName is required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.getAllAnalyticsEvents({
+        projectId: request.configId,
+        type: AnalyticsEventProto.AnalyticsEventType.CUSTOM,
+        afterTime: request.afterTime || undefined,
+        limit: request.limit || undefined,
+        category: request.category || undefined,
+        subcategory: request.subcategory || undefined,
+      }),
+    );
+
+    return {
+      events: (response.events ?? []).map((event) => {
+        const properties = JSON.parse(event.properties);
+        return {
+          id: String(event.id),
+          eventTypeId: customEventTypeId(
+            event.projectId,
+            event.category,
+            event.subcategory,
+          ),
+          projectId: String(event.projectId),
+          environment: event.environment,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          properties: Object.fromEntries(
+            Object.entries(properties).map(([k, v]) => [k, String(v)]),
+          ),
+        };
+      }),
+    };
   }
 
-  // #263: query distinct category/subcategory from stored events
   async getCustomEventTypes(
-    _request: AnalyticsProto.CustomEventTypeRequest,
+    request: AnalyticsProto.CustomEventTypeRequest,
   ): Promise<AnalyticsProto.GetAllCustomEventTypeResponse> {
-    return { eventTypes: [] };
+    if (!request.projectName || request.projectName.length === 0) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'Invalid CustomEventTypeRequest: projectName is required',
+      });
+    }
+
+    const response = await lastValueFrom(
+      this.analyticsEventDbService.getCustomEventTypes({
+        projectId: request.configId,
+      }),
+    );
+
+    return {
+      eventTypes: (response.eventTypes ?? []).map((eventType) => ({
+        id: eventType.id,
+        category: eventType.category,
+        subcategory: eventType.subcategory,
+        properties: [...(eventType.properties ?? [])],
+        projectId: eventType.projectId,
+      })),
+    };
   }
 
   async getCustomGraphTypesById(
