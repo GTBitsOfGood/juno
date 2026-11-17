@@ -7,7 +7,7 @@ You need a Juno account, access to your team's project, and a project API key. T
 
 ## 1. Request an account
 
-Open [Request account](https://juno-dashboard.netlify.app/request-account) and enter your name, email, and password.
+Open [Request account](https://juno.bitsofgood.org/request-account) and enter your name, email, and password.
 
 - Choose **User** if you are joining an existing project.
 - Choose **Admin** if you are requesting administrator access for a project, and enter its project name.
@@ -16,7 +16,7 @@ Submitting the form creates an account request. A Juno administrator must approv
 
 ## 2. Open your project
 
-Once approved, sign in to the [dashboard](https://juno-dashboard.netlify.app) and open your project from the project list. A project administrator or superadmin must link your user to the project if it is not already assigned.
+Once approved, sign in to the [dashboard](https://juno.bitsofgood.org) and open your project from the project list. A project administrator or superadmin must link your user to the project if it is not already assigned.
 
 If your project is missing, check with your project administrator that your account has been linked. Creating another account request will not add an existing user to a project.
 
@@ -61,8 +61,7 @@ async function main() {
 
   juno.init({
     apiKey,
-    baseURL:
-      'https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io',
+    baseURL: 'https://api.juno.bitsofgood.org',
   });
 
   const project = await juno.project.getProject({ id: projectId });
