@@ -1,0 +1,2 @@
+# Every juno box (and the `tesser exec` workbench) starts with the docker-compose-dev images built.
+setup = "bash .agents/skills/tesser/scripts/juno-setup.sh"
