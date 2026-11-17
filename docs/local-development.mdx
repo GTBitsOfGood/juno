@@ -1,9 +1,13 @@
 ---
 title: Local development
 description: Run Juno with Docker and test changes with a local SDK build.
+icon: laptop-code
 ---
 
-Use this guide when contributing to Juno itself. To integrate a project with hosted Juno, start with [Getting started](/getting-started).
+<Info>
+  Use this guide when contributing to Juno itself. To integrate a project with
+  hosted Juno, start with the [quickstart](/getting-started).
+</Info>
 
 ## Prerequisites
 
@@ -58,7 +62,7 @@ This runs `docker compose -f docker-compose-dev.yml up`. For automatic rebuildin
 pnpm start:dev:live-all
 ```
 
-Wait for migrations and service health checks to finish. The gateway is exposed at **http://localhost:8888**, mapped to port `3000` inside its container. Swagger is at **http://localhost:8888/docs**, and the generated OpenAPI JSON is at **http://localhost:8888/docs-json**.
+Wait for migrations and service health checks to finish. The gateway is exposed at **http://localhost:8888**, mapped to port `3000` inside its container. The generated OpenAPI JSON is at **http://localhost:8888/docs-json**.
 
 To inspect startup failures:
 
@@ -85,11 +89,23 @@ The seed in `packages/db-service/prisma/seed.ts` creates:
 | Project ID                 | `0`                        |
 | Seeded service environment | `prod`                     |
 
-These are local test credentials. Use the local Swagger UI to call `POST /auth/user/jwt` with the seed email and password, then use the returned user JWT for management routes such as key creation. Create a key for `test-seed-project` with environment `prod` to use the seeded configurations.
+These are local test credentials. Exchange the seed email and password for a user JWT, then use it for management routes such as key creation:
+
+```sh
+curl -X POST http://localhost:8888/auth/user/jwt \
+  -H 'X-User-Email: test-superadmin@test.com' \
+  -H 'X-User-Password: test-password'
+```
+
+Create a key for `test-seed-project` with environment `prod` to use the seeded configurations.
 
 Initialize your application's SDK with that local key and `baseURL: 'http://localhost:8888'`. The Docker stack does not start the separate dashboard repository.
 
-The `pnpm start:dev:live-all-reseed` command resets the local database before starting the service. It deletes existing local data; ordinary startup does not intentionally reset it.
+<Warning>
+  The `pnpm start:dev:live-all-reseed` command resets the local database before
+  starting the service. It deletes existing local data; ordinary startup does
+  not intentionally reset it.
+</Warning>
 
 ## Using a local SDK build
 
@@ -117,7 +133,7 @@ After modifying SDK source, rebuild, pack, and reinstall the tarball. Packing in
 
 ## Run gateway tests
 
-Use a disposable local database: test mode resets it.
+<Warning>Use a disposable local database: test mode resets it.</Warning>
 
 ```sh
 pnpm test:e2e:api-gateway

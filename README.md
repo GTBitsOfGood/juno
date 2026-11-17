@@ -38,7 +38,7 @@ Packages are managed through [PNPM Workspaces](https://pnpm.io/workspaces). The 
 
 We utilize Nest's [OpenAPI](https://docs.nestjs.com/openapi/introduction) support to autogenerate web documentation for all Juno HTTP endpoints.
 
-When running Juno locally, the Swagger docs can be found under `localhost:<api-gateway port from docker>/docs`. In production, the API is at [https://api.juno.bitsofgood.org](https://api.juno.bitsofgood.org) and Swagger is at [https://api.juno.bitsofgood.org/docs](https://api.juno.bitsofgood.org/docs). Product docs are at [https://juno.bitsofgood.org/docs](https://juno.bitsofgood.org/docs). Note that the api-gateway port is _not_ the isolated docker port (e.g. port 3000) but the exposed host port.
+In production, the API is at [https://api.juno.bitsofgood.org](https://api.juno.bitsofgood.org) and its reference lives in the docs at [juno.bitsofgood.org/docs/api-reference/introduction](https://juno.bitsofgood.org/docs/api-reference/introduction).
 
 For updating the JunoSDK, see the developer instructions below.
 

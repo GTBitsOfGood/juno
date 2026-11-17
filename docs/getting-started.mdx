@@ -1,105 +1,136 @@
 ---
-title: Getting started
+title: Quickstart
 description: Request an account, get a project API key, and make your first SDK call.
+icon: rocket
 ---
 
-You need a Juno account, access to your team's project, and a project API key. These steps use hosted Juno; you do not need Docker.
+You need a Juno account, access to your team's project, and a project API key. These steps use hosted Juno, so you do not need Docker.
 
-## 1. Request an account
+<Steps>
+  <Step title="Request an account">
+    Open [Request account](https://juno.bitsofgood.org/request-account) and enter your name, email, and password.
 
-Open [Request account](https://juno.bitsofgood.org/request-account) and enter your name, email, and password.
+    - Choose **User** if you are joining an existing project.
+    - Choose **Admin** if you are requesting administrator access for a project, and enter its project name.
 
-- Choose **User** if you are joining an existing project.
-- Choose **Admin** if you are requesting administrator access for a project, and enter its project name.
+    <Info>
+      Submitting the form creates an account request. A Juno administrator must approve it before you can sign in; submitting it does not immediately grant access.
+    </Info>
 
-Submitting the form creates an account request. A Juno administrator must approve it before you can sign in; submitting it does not immediately grant access.
+  </Step>
+  <Step title="Open your project">
+    Once approved, sign in to the [dashboard](https://juno.bitsofgood.org) and open your project from the project list. A project administrator or superadmin must link your user to the project if it is not already assigned.
 
-## 2. Open your project
+    Note the numeric project ID in the URL: `/projects/[id]`. You will use it in SDK calls.
 
-Once approved, sign in to the [dashboard](https://juno.bitsofgood.org) and open your project from the project list. A project administrator or superadmin must link your user to the project if it is not already assigned.
+    <Tip>
+      If your project is missing, check with your project administrator that your account has been linked. Creating another account request will not add an existing user to a project.
+    </Tip>
 
-If your project is missing, check with your project administrator that your account has been linked. Creating another account request will not add an existing user to a project.
+  </Step>
+  <Step title="Create an API key">
+    In your project, open **API Keys** at `/projects/[id]/keys`.
 
-Note the numeric project ID in the URL: `/projects/[id]`. You will use it in SDK calls.
+    1. Create a key with a description that identifies its use, such as `Backend development`.
+    2. Choose an environment. Service configuration is associated with this value, so use the same environment when configuring email or files.
+    3. Copy the revealed key and store it in your application's server environment as `JUNO_API_KEY`.
 
-## 3. Create an API key
+    Key creation requires an admin with access to the project or a superadmin. If your role cannot create a key, your project administrator can create one for your application.
 
-In your project, open **API Keys** at `/projects/[id]/keys`.
+    <Warning>
+      Keep the key out of source control and browser bundles. The examples below run on your server or in a local terminal.
+    </Warning>
 
-1. Create a key with a description that identifies its use, such as `Backend development`.
-2. Choose an environment. Service configuration is associated with this value, so use the same environment when configuring email or files.
-3. Copy the revealed key and store it in your application's server environment as `JUNO_API_KEY`.
+  </Step>
+  <Step title="Install the SDK">
+    In your application directory:
 
-Key creation requires an admin with access to the project or a superadmin. If your role cannot create a key, your project administrator can create one for your application.
+    <CodeGroup>
 
-Keep the key out of source control and browser bundles. The examples below run on your server or in a local terminal.
+    ```sh pnpm
+    pnpm add juno-sdk
+    ```
 
-## 4. Install the SDK
+    ```sh npm
+    npm install juno-sdk
+    ```
 
-In your application directory:
+    ```sh yarn
+    yarn add juno-sdk
+    ```
 
-```sh
-pnpm add juno-sdk
-```
+    </CodeGroup>
 
-These guides target the SDK API intended for `0.0.12`, including the optional service `credentials` argument. If that release is not yet available from your package registry, follow [Using a local SDK build](/local-development#using-a-local-sdk-build). An older installed version may not expose every method shown here.
+    These guides target the SDK API intended for `0.0.12`, including the optional service `credentials` argument. If that release is not yet available from your package registry, follow [Using a local SDK build](/local-development#using-a-local-sdk-build). An older installed version may not expose every method shown here.
 
-## 5. Initialize Juno and make a first call
+  </Step>
+  <Step title="Initialize Juno and make a first call">
+    Create `first-call.ts` in your application:
 
-Create `first-call.ts` in your application:
+    ```ts first-call.ts
+    import juno from 'juno-sdk';
 
-```ts
-import juno from 'juno-sdk';
+    async function main() {
+      const apiKey = process.env.JUNO_API_KEY;
+      const projectId = Number(process.env.JUNO_PROJECT_ID);
 
-async function main() {
-  const apiKey = process.env.JUNO_API_KEY;
-  const projectId = Number(process.env.JUNO_PROJECT_ID);
+      if (!apiKey || !Number.isInteger(projectId) || projectId < 0) {
+        throw new Error('Set JUNO_API_KEY and a numeric JUNO_PROJECT_ID');
+      }
 
-  if (!apiKey || !Number.isInteger(projectId) || projectId < 0) {
-    throw new Error('Set JUNO_API_KEY and a numeric JUNO_PROJECT_ID');
-  }
+      juno.init({
+        apiKey,
+        baseURL: 'https://api.juno.bitsofgood.org',
+      });
 
-  juno.init({
-    apiKey,
-    baseURL: 'https://api.juno.bitsofgood.org',
-  });
+      const project = await juno.project.getProject({ id: projectId });
+      console.log(project);
+    }
 
-  const project = await juno.project.getProject({ id: projectId });
-  console.log(project);
-}
+    main().catch((error) => {
+      console.error(error);
+      process.exitCode = 1;
+    });
+    ```
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
-```
+    Set `JUNO_API_KEY` to the key you copied and `JUNO_PROJECT_ID` to your project ID, then run the script with a TypeScript runner:
 
-Set `JUNO_API_KEY` to the key you copied and `JUNO_PROJECT_ID` to your project ID in your terminal's environment. For macOS, Linux, or WSL, replace these example values:
+    <CodeGroup>
 
-```sh
-export JUNO_API_KEY='paste-your-key-here'
-export JUNO_PROJECT_ID='12'
-```
+    ```sh macOS / Linux / WSL
+    export JUNO_API_KEY='paste-your-key-here'
+    export JUNO_PROJECT_ID='12'
+    pnpm dlx tsx first-call.ts
+    ```
 
-Run the script with a TypeScript runner:
+    ```powershell Windows PowerShell
+    $env:JUNO_API_KEY = 'paste-your-key-here'
+    $env:JUNO_PROJECT_ID = '12'
+    pnpm dlx tsx first-call.ts
+    ```
 
-```sh
-pnpm dlx tsx first-call.ts
-```
+    </CodeGroup>
 
-You should see your project's ID and name, for example:
+    You should see your project's ID and name, for example:
 
-```json
-{ "id": 12, "name": "Your Project" }
-```
+    ```json
+    { "id": 12, "name": "Your Project" }
+    ```
+
+  </Step>
+</Steps>
 
 This read-only lookup checks that the SDK can reach the gateway and find your project. The current project lookup route does not validate the API key; the email and file operations in the service guides require it.
 
-Use the default import shown above and spell the option `baseURL` exactly. Initialize the SDK once before accessing its services.
+<Note>
+  Use the default import shown above and spell the option `baseURL` exactly. If
+  you omit `baseURL`, the SDK's generated client falls back to
+  `http://localhost`. Initialize the SDK once before accessing its services.
+</Note>
 
 ## List your projects
 
-`juno.project.getProjects(credentials)` calls `GET /project`. It requires **user credentials**, rather than just the project API key configured in `juno.init`.
+`juno.project.getProjects(credentials)` calls `GET /project`. It requires **user credentials**, rather than just the project API key configured in `juno.init`. See [Authentication](/authentication) for the difference.
 
 After initialization, run this on your server with your Juno account email and password supplied through environment variables:
 
@@ -118,14 +149,37 @@ Users and admins receive their assigned projects; a superadmin receives all proj
 
 ## Troubleshooting
 
-| Problem                                    | Check                                                                                                                 |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| SDK says initialization is required        | Call `juno.init(...)` before accessing a service.                                                                     |
-| Project lookup returns not found           | Use the numeric ID from the dashboard URL.                                                                            |
-| A service returns unauthorized             | Check that the API key is current and belongs to the intended project. Management calls may require user credentials. |
-| A service configuration is missing         | Configure that service for the same environment as your key.                                                          |
-| A documented method or argument is missing | Check your installed SDK version or use the local SDK instructions.                                                   |
+<AccordionGroup>
+  <Accordion title="SDK says initialization is required">
+    Call `juno.init(...)` before accessing a service.
+  </Accordion>
+  <Accordion title="Project lookup returns not found">
+    Use the numeric ID from the dashboard URL.
+  </Accordion>
+  <Accordion title="A service returns unauthorized">
+    Check that the API key is current and belongs to the intended project.
+    Management calls may require [user
+    credentials](/authentication#user-credentials).
+  </Accordion>
+  <Accordion title="A service configuration is missing">
+    Configure that service for the same environment as your key.
+  </Accordion>
+  <Accordion title="A documented method or argument is missing">
+    Check your installed SDK version or use the [local SDK
+    instructions](/local-development#using-a-local-sdk-build).
+  </Accordion>
+</AccordionGroup>
 
 ## Next steps
 
-Set up [Email](/email) or [Files](/files). See [Analytics](/analytics) for the event storage status, or [Local development](/local-development) to contribute to Juno.
+<CardGroup cols={3}>
+  <Card title="Email" icon="envelope" href="/email">
+    Configure SendGrid and send your first email.
+  </Card>
+  <Card title="Files" icon="folder-open" href="/files">
+    Register storage and transfer files with signed URLs.
+  </Card>
+  <Card title="Analytics" icon="chart-line" href="/analytics">
+    Check the status of Juno's event storage.
+  </Card>
+</CardGroup>

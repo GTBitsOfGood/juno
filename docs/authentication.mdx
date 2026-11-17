@@ -1,0 +1,104 @@
+---
+title: Authentication
+description: Project API keys, user credentials, and acting on behalf of a signed-in user.
+icon: key
+---
+
+Juno has two kinds of credentials. Most service calls use a **project API key**. Account and project management calls use **user credentials**, meaning your Juno account's email and password, or a user JWT issued for them.
+
+| Credential | Identifies                    | Used for                                                  |
+| ---------- | ----------------------------- | --------------------------------------------------------- |
+| API key    | A project and an environment  | Email, files, and analytics routes                        |
+| User       | A Juno account (and its role) | API keys, account requests, users, and project management |
+
+## Project API keys
+
+Create a key in the dashboard under **API Keys** (see the [quickstart](/getting-started)). The key's environment selects which service configuration a request reads and writes.
+
+<Tabs>
+  <Tab title="SDK">
+    Pass the key once to `juno.init`. The SDK sends it on every service call.
+
+    ```ts
+    import juno from 'juno-sdk';
+
+    juno.init({
+      apiKey: process.env.JUNO_API_KEY!,
+      baseURL: 'https://api.juno.bitsofgood.org',
+    });
+    ```
+
+  </Tab>
+  <Tab title="HTTP">
+    Send the key as a bearer token:
+
+    ```sh
+    curl https://api.juno.bitsofgood.org/email/senders \
+      -H "Authorization: Bearer $JUNO_API_KEY"
+    ```
+
+  </Tab>
+</Tabs>
+
+The gateway also accepts a JWT tied to an API key in the same `Authorization` header. Exchange a key for one with `juno.auth.getApiKeyJWT({ apiKey })`, which calls `POST /auth/api_key/jwt`.
+
+<Warning>
+  API keys grant access to your project's service configuration. Keep them on
+  your server, out of source control and browser bundles.
+</Warning>
+
+## User credentials
+
+Management methods take a `credentials` argument of type `UserCredentials`: either an `{ email, password }` object or a user JWT string.
+
+<Tabs>
+  <Tab title="SDK">
+    ```ts
+    // Email and password
+    const { projects } = await juno.project.getProjects({ email, password });
+
+    // Or exchange them for a user JWT once and reuse it
+    const { token } = await juno.auth.getUserJWT({ email, password });
+    const { projects: sameProjects } = await juno.project.getProjects(token);
+    ```
+
+  </Tab>
+  <Tab title="HTTP">
+    Send the email and password as headers, or a user JWT as a bearer token:
+
+    ```sh
+    # Issue a user JWT
+    curl -X POST https://api.juno.bitsofgood.org/auth/user/jwt \
+      -H "X-User-Email: $JUNO_USER_EMAIL" \
+      -H "X-User-Password: $JUNO_USER_PASSWORD"
+    # => { "token": "..." }
+
+    # Use it on a management route
+    curl https://api.juno.bitsofgood.org/project \
+      -H "Authorization: Bearer $USER_JWT"
+    ```
+
+  </Tab>
+</Tabs>
+
+User JWTs expire after one hour. Request a new one with `getUserJWT` when it does.
+
+### Roles
+
+Every Juno account has a type: `USER`, `ADMIN`, or `SUPERADMIN`. Users and admins act on the projects they are linked to; a superadmin can act on all projects. Creating API keys requires an admin with access to the project or a superadmin.
+
+## Acting for a signed-in user
+
+Most email, file, and analytics methods accept an optional second argument of type `ApiCredentials`. Use it when your server acts for a signed-in Juno user on a specific project, as the dashboard does:
+
+```ts
+const credentials = { userJwt, projectId };
+const { senders } = await juno.email.getSenders(credentials);
+```
+
+The SDK sends `X-User-JWT` and `X-Project-Id` headers alongside the API key from `juno.init`. The key's environment still selects the configuration, and the gateway checks the user's access when resolving the target project. For ordinary calls with your own project's key, omit the argument.
+
+<Note>
+  `juno.file.uploadFile` and `juno.file.downloadFile` currently accept only
+  their options object; do not pass a credentials argument to them.
+</Note>

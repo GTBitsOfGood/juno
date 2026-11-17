@@ -1,0 +1,33 @@
+---
+title: API reference
+sidebarTitle: Introduction
+description: Call the Juno gateway over HTTP.
+icon: square-terminal
+---
+
+Every endpoint in this tab is generated from the API gateway's OpenAPI spec, and each page has a playground you can send requests from. If you are writing JavaScript or TypeScript, the [SDK](/sdk-reference) wraps these routes for you.
+
+## Base URL
+
+```txt
+https://api.juno.bitsofgood.org
+```
+
+## Authenticating requests
+
+<CardGroup cols={2}>
+  <Card title="Project API key" icon="key">
+    Email, files, and analytics routes take `Authorization: Bearer <api key>`.
+  </Card>
+  <Card title="User credentials" icon="user">
+    Management routes take `X-User-Email` and `X-User-Password`, or
+    `Authorization: Bearer <user jwt>`.
+  </Card>
+</CardGroup>
+
+```sh
+curl https://api.juno.bitsofgood.org/email/senders \
+  -H "Authorization: Bearer $JUNO_API_KEY"
+```
+
+See [Authentication](/authentication) for how to get each credential and how to act on behalf of a signed-in user.

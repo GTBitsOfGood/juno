@@ -1,16 +1,37 @@
 ---
 title: Analytics
 description: Application events stored in Juno's own database.
+icon: chart-line
 ---
 
 Juno analytics stores application events in Juno's database. It is separate from [email delivery statistics](/email#delivery-statistics), which come from SendGrid.
 
 The gateway source includes routes for click, visit, input, and custom events, along with event retrieval. These events are associated with a project configuration and environment.
 
-## Integration status
-
-The original migration work is tracked in [analytics database prework, #266](https://github.com/GTBitsOfGood/juno/issues/266). This guide intentionally leaves out an end-to-end SDK recipe until the supported SDK release and deployed event path have been verified together. The presence of a route in source does not establish that it is available in your deployed instance.
+<Warning>
+  **Integration status:** this guide intentionally leaves out an end-to-end SDK
+  recipe until the supported SDK release and deployed event path have been
+  verified together. The presence of a route in source does not establish that
+  it is available in your deployed instance. The original migration work is
+  tracked in [analytics database prework,
+  #266](https://github.com/GTBitsOfGood/juno/issues/266).
+</Warning>
 
 You do not need to configure an external analytics provider's client or server keys. Provider setup from older Juno guides does not apply to Juno's database-backed events.
 
-For the available HTTP operations and request schemas, consult your gateway's [Swagger documentation](https://api.juno.bitsofgood.org/docs). Before integrating, confirm which event path is supported by that deployment and use a project API key for the intended environment.
+## Where to look today
+
+<CardGroup cols={2}>
+  <Card
+    title="API reference"
+    icon="square-terminal"
+    href="/api-reference/introduction"
+  >
+    The gateway's HTTP operations and request schemas.
+  </Card>
+  <Card title="SDK reference" icon="code" href="/sdk-reference#analytics">
+    The `juno.analytics` and `juno.analyticsConfig` methods in `juno-sdk`.
+  </Card>
+</CardGroup>
+
+Before integrating, confirm which event path your deployment supports and use a project API key for the intended environment.
