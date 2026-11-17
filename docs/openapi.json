@@ -2526,7 +2526,7 @@
   "tags": [],
   "servers": [
     {
-      "url": "https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io"
+      "url": "https://api.juno.bitsofgood.org"
     }
   ],
   "components": {
