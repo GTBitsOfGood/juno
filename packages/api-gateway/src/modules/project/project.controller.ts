@@ -52,7 +52,10 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Get('id/:id')
-  @ApiOperation({ summary: 'Retrieves a project by its unique ID.' })
+  @ApiOperation({
+    summary: 'Get project by ID',
+    description: 'Retrieves a project by its unique ID.',
+  })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'ID must be a number',
@@ -79,7 +82,10 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Retrieves all projects.' })
+  @ApiOperation({
+    summary: 'List projects',
+    description: 'Retrieves all projects.',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned all projects',
@@ -126,7 +132,10 @@ export class ProjectController implements OnModuleInit {
 
   //Get all users associated with a project
   @Get(':id/users')
-  @ApiOperation({ summary: 'Retrieve all users associated with a project. ' })
+  @ApiOperation({
+    summary: 'List project users',
+    description: 'Retrieve all users associated with a project.',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned all users associated with given project.',
@@ -181,7 +190,10 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Get('name/:name')
-  @ApiOperation({ summary: 'Retrieves a project by its unique name.' })
+  @ApiOperation({
+    summary: 'Get project by name',
+    description: 'Retrieves a project by its unique name.',
+  })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'No project with specified name was found',
@@ -202,7 +214,8 @@ export class ProjectController implements OnModuleInit {
 
   @Post()
   @ApiOperation({
-    summary: 'Creates a new project with the specified parameters.',
+    summary: 'Create project',
+    description: 'Creates a new project with the specified parameters.',
   })
   @ApiHeader({
     name: 'X-User-Email',
@@ -248,7 +261,8 @@ export class ProjectController implements OnModuleInit {
 
   @Put('id/:id/user')
   @ApiOperation({
-    summary: 'Links a specified user with a given project ID.',
+    summary: 'Link user to project by ID',
+    description: 'Links a specified user with a given project ID.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -295,7 +309,8 @@ export class ProjectController implements OnModuleInit {
 
   @Put('name/:name/user')
   @ApiOperation({
-    summary: 'Links a specified user with a given project name.',
+    summary: 'Link user to project by name',
+    description: 'Links a specified user with a given project name.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -346,7 +361,10 @@ export class ProjectController implements OnModuleInit {
   }
 
   @Delete('id/:id')
-  @ApiOperation({ summary: 'Delete an existing project.' })
+  @ApiOperation({
+    summary: 'Delete project',
+    description: 'Delete an existing project.',
+  })
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',

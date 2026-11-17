@@ -4,7 +4,7 @@
     "/auth/api_key/jwt": {
       "post": {
         "operationId": "AuthController_getApiKeyJWT",
-        "summary": "Generates a temporary JWT for the project tied to a specified API key.",
+        "summary": "Get API key JWT",
         "description": "JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given a valid API key.",
         "parameters": [
           {
@@ -32,7 +32,7 @@
     "/auth/user/jwt": {
       "post": {
         "operationId": "AuthController_getUserJWT",
-        "summary": "Generates a temporary JWT tied to a specified user.",
+        "summary": "Get user JWT",
         "description": "Generates a user identity token that can be used to authenticate admin and management endpoints in place of email/password credentials.",
         "parameters": [
           {
@@ -69,7 +69,8 @@
     "/auth/key": {
       "post": {
         "operationId": "AuthController_createApiKey",
-        "summary": "Issues a new API key for the project tied to the specified environment.",
+        "summary": "Create API key",
+        "description": "Issues a new API key for the project tied to the specified environment.",
         "parameters": [
           {
             "name": "X-User-Password",
@@ -112,7 +113,8 @@
     "/auth/key/{id}": {
       "delete": {
         "operationId": "AuthController_deleteApiKeyById",
-        "summary": "Revokes an API key, detaching it from its project.",
+        "summary": "Delete API key",
+        "description": "Revokes an API key, detaching it from its project.",
         "parameters": [
           {
             "name": "id",
@@ -156,7 +158,8 @@
     "/auth/key/all": {
       "get": {
         "operationId": "AuthController_getAllApiKeys",
-        "summary": "Lists all API keys",
+        "summary": "List API keys",
+        "description": "Lists all API keys",
         "parameters": [
           {
             "name": "offset",
@@ -210,7 +213,7 @@
     "/auth/test-auth": {
       "get": {
         "operationId": "AuthController_testAuth",
-        "summary": "Validates user JWT and returns user data",
+        "summary": "Validate user JWT",
         "description": "This endpoint validates a user JWT token and returns the associated user information if valid",
         "parameters": [
           {
@@ -232,7 +235,7 @@
     "/auth/account-request": {
       "post": {
         "operationId": "AuthController_createAccountRequest",
-        "summary": "Submit a new account request",
+        "summary": "Request an account",
         "description": "Allows a prospective user to submit a request for a new account. The request is stored and can be reviewed by an admin.",
         "parameters": [],
         "requestBody": {
@@ -262,7 +265,7 @@
       },
       "get": {
         "operationId": "AuthController_getAllAccountRequests",
-        "summary": "Retrieve all account requests",
+        "summary": "List account requests",
         "description": "Returns all pending account requests. Requires admin or superadmin credentials.",
         "parameters": [
           {
@@ -300,7 +303,7 @@
     "/auth/account-request/{id}": {
       "delete": {
         "operationId": "AuthController_deleteAccountRequest",
-        "summary": "Delete an account request by ID",
+        "summary": "Delete account request",
         "description": "Deletes an account request by its ID. Requires admin or superadmin credentials.",
         "parameters": [
           {
@@ -346,7 +349,7 @@
     "/auth/account-request/{id}/accept": {
       "post": {
         "operationId": "AuthController_acceptAccountRequest",
-        "summary": "Accept an account request",
+        "summary": "Accept account request",
         "description": "Accepts a pending account request: creates the user, optionally creates/links a project (for ADMIN requests with a projectName), and deletes the pending request. Requires admin or superadmin credentials.",
         "parameters": [
           {
@@ -392,7 +395,8 @@
     "/project/id/{id}": {
       "get": {
         "operationId": "ProjectController_getProjectById",
-        "summary": "Retrieves a project by its unique ID.",
+        "summary": "Get project by ID",
+        "description": "Retrieves a project by its unique ID.",
         "parameters": [
           {
             "name": "id",
@@ -418,7 +422,8 @@
       },
       "delete": {
         "operationId": "ProjectController_deleteProjectById",
-        "summary": "Delete an existing project.",
+        "summary": "Delete project",
+        "description": "Delete an existing project.",
         "parameters": [
           {
             "name": "id",
@@ -460,7 +465,8 @@
     "/project": {
       "get": {
         "operationId": "ProjectController_getAllProjects",
-        "summary": "Retrieves all projects.",
+        "summary": "List projects",
+        "description": "Retrieves all projects.",
         "parameters": [
           {
             "name": "X-User-Password",
@@ -492,7 +498,8 @@
       },
       "post": {
         "operationId": "ProjectController_createProject",
-        "summary": "Creates a new project with the specified parameters.",
+        "summary": "Create project",
+        "description": "Creates a new project with the specified parameters.",
         "parameters": [
           {
             "name": "X-User-Password",
@@ -535,7 +542,8 @@
     "/project/{id}/users": {
       "get": {
         "operationId": "ProjectController_getUsersByProject",
-        "summary": "Retrieve all users associated with a project. ",
+        "summary": "List project users",
+        "description": "Retrieve all users associated with a project.",
         "parameters": [
           {
             "name": "id",
@@ -576,7 +584,8 @@
     "/project/name/{name}": {
       "get": {
         "operationId": "ProjectController_getProjectByName",
-        "summary": "Retrieves a project by its unique name.",
+        "summary": "Get project by name",
+        "description": "Retrieves a project by its unique name.",
         "parameters": [
           {
             "name": "name",
@@ -603,7 +612,8 @@
     "/project/id/{id}/user": {
       "put": {
         "operationId": "ProjectController_linkUserWithProjectId",
-        "summary": "Links a specified user with a given project ID.",
+        "summary": "Link user to project by ID",
+        "description": "Links a specified user with a given project ID.",
         "parameters": [
           {
             "name": "id",
@@ -633,7 +643,8 @@
     "/project/name/{name}/user": {
       "put": {
         "operationId": "ProjectController_linkUserWithProjectName",
-        "summary": "Links a specified user with a given project name.",
+        "summary": "Link user to project by name",
+        "description": "Links a specified user with a given project name.",
         "parameters": [
           {
             "name": "name",
@@ -663,7 +674,8 @@
     "/user": {
       "get": {
         "operationId": "UserController_getAllUsers",
-        "summary": "Retrieves all users.",
+        "summary": "List users",
+        "description": "Retrieves all users.",
         "parameters": [
           {
             "name": "X-User-Password",
@@ -695,7 +707,8 @@
       },
       "post": {
         "operationId": "UserController_createUser",
-        "summary": "Create a new user.",
+        "summary": "Create user",
+        "description": "Create a new user.",
         "parameters": [
           {
             "name": "X-User-Password",
@@ -740,7 +753,8 @@
     "/user/id/{id}": {
       "get": {
         "operationId": "UserController_getUserById",
-        "summary": "Retrieve an existing user.",
+        "summary": "Get user",
+        "description": "Retrieve an existing user.",
         "parameters": [
           {
             "name": "id",
@@ -767,7 +781,8 @@
       },
       "delete": {
         "operationId": "UserController_deleteUserById",
-        "summary": "Delete an existing user.",
+        "summary": "Delete user",
+        "description": "Delete an existing user.",
         "parameters": [
           {
             "name": "id",
@@ -809,7 +824,7 @@
     "/user/type": {
       "post": {
         "operationId": "UserController_setUserType",
-        "summary": "Update user type.",
+        "summary": "Set user type",
         "description": "Updates the user type for an existing user. User type can be thought of as a role with role-based permissions, e.g. SUPERADMIN could have permissions an ADMIN would not. Only SUPERADMIN users can set types",
         "parameters": [
           {
@@ -856,7 +871,7 @@
     "/user/id/{id}/project": {
       "put": {
         "operationId": "UserController_linkUserWithProjectId",
-        "summary": "Link user to project.",
+        "summary": "Link user to project",
         "description": "Associates a user with a project ID.",
         "parameters": [
           {
@@ -907,7 +922,7 @@
       },
       "delete": {
         "operationId": "UserController_unlinkUserFromProject",
-        "summary": "Unlink user from project.",
+        "summary": "Unlink user from project",
         "description": "Removes a user from a project.",
         "parameters": [
           {
@@ -960,7 +975,8 @@
     "/email/config/{id}": {
       "get": {
         "operationId": "EmailController_getEmailConfigById",
-        "summary": "Get email configuration by ID",
+        "summary": "Get email config",
+        "description": "Get email configuration by ID",
         "parameters": [
           {
             "name": "id",
@@ -991,7 +1007,8 @@
     "/email/setup": {
       "post": {
         "operationId": "EmailController_setup",
-        "summary": "Sets up an email service with the given Sendgrid API Key",
+        "summary": "Set up email",
+        "description": "Sets up an email service with the given Sendgrid API Key",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1022,7 +1039,8 @@
     "/email/register-sender": {
       "post": {
         "operationId": "EmailController_registerSenderAddress",
-        "summary": "Registers a sender email address.",
+        "summary": "Register sender",
+        "description": "Registers a sender email address.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1053,7 +1071,8 @@
     "/email/register-domain": {
       "post": {
         "operationId": "EmailController_registerEmailDomain",
-        "summary": "Registers a sender domain with SendGrid.",
+        "summary": "Register domain",
+        "description": "Registers a sender domain with SendGrid.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1084,7 +1103,8 @@
     "/email/verify-domain": {
       "post": {
         "operationId": "EmailController_verifySenderDomain",
-        "summary": "Verifies a sender domain registration status.",
+        "summary": "Verify domain",
+        "description": "Verifies a sender domain registration status.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1116,7 +1136,8 @@
     "/email/send": {
       "post": {
         "operationId": "EmailController_sendEmail",
-        "summary": "Sends an email using Juno services.",
+        "summary": "Send email",
+        "description": "Sends an email using Juno services.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1145,7 +1166,8 @@
     "/email/analytics": {
       "get": {
         "operationId": "EmailController_getStatistics",
-        "summary": "Gets overall email analytics",
+        "summary": "Get email statistics",
+        "description": "Gets overall email analytics",
         "parameters": [
           {
             "name": "startDate",
@@ -1211,10 +1233,55 @@
         "security": [{ "API_Key": [] }]
       }
     },
+    "/email/senders": {
+      "get": {
+        "operationId": "EmailController_getSenders",
+        "summary": "List senders",
+        "description": "Gets all verified senders from SendGrid",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returned verified senders",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GetSendersResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/email/domains": {
+      "get": {
+        "operationId": "EmailController_getDomains",
+        "summary": "List domains",
+        "description": "Gets all authenticated domains from SendGrid",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returned authenticated domains",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GetDomainsResponse" }
+              }
+            }
+          },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        },
+        "tags": ["email"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
     "/file/provider": {
       "post": {
         "operationId": "FileProviderController_registerFileProvider",
-        "summary": "Registers a File Provider.",
+        "summary": "Register provider",
+        "description": "Registers a File Provider.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1252,7 +1319,8 @@
     "/file/provider/all": {
       "get": {
         "operationId": "FileProviderController_getAllFileProviders",
-        "summary": "Get All File Providers.",
+        "summary": "List providers",
+        "description": "Get All File Providers.",
         "parameters": [],
         "responses": {
           "200": {
@@ -1275,7 +1343,8 @@
     "/file/provider/{name}": {
       "delete": {
         "operationId": "FileProviderController_deleteFileProvider",
-        "summary": "Delete File Provider.",
+        "summary": "Delete provider",
+        "description": "Delete File Provider.",
         "parameters": [
           {
             "name": "name",
@@ -1303,7 +1372,8 @@
     "/file/download": {
       "post": {
         "operationId": "FileDownloadController_downloadFile",
-        "summary": "Downloads a file",
+        "summary": "Get download URL",
+        "description": "Downloads a file",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1344,7 +1414,8 @@
     "/file/upload": {
       "post": {
         "operationId": "FileUploadController_uploadFile",
-        "summary": "Upload a file to a File Storage Provider's Bucket",
+        "summary": "Get upload URL",
+        "description": "Upload a file to a File Storage Provider's Bucket",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1380,7 +1451,8 @@
     "/file/bucket": {
       "post": {
         "operationId": "FileBucketController_registerFileBucket",
-        "summary": "Registers a File Bucket.",
+        "summary": "Register bucket",
+        "description": "Registers a File Bucket.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1409,7 +1481,8 @@
       },
       "delete": {
         "operationId": "FileBucketController_deleteFileBucket",
-        "summary": "Delete a File Bucket.",
+        "summary": "Delete bucket",
+        "description": "Delete a File Bucket.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1438,7 +1511,8 @@
     "/file/bucket/{configId}": {
       "get": {
         "operationId": "FileBucketController_getBucketsByConfigIdAndEnv",
-        "summary": "Get File Buckets by Config Id and Config Env.",
+        "summary": "List buckets",
+        "description": "Get File Buckets by Config Id and Config Env.",
         "parameters": [
           {
             "name": "configId",
@@ -1469,7 +1543,8 @@
     "/file/all/{configId}": {
       "get": {
         "operationId": "FileBucketController_getAllFiles",
-        "summary": "Get all files from all buckets for a config.",
+        "summary": "List files",
+        "description": "Get all files from all buckets for a config.",
         "parameters": [
           {
             "name": "configId",
@@ -1500,7 +1575,8 @@
     "/file/config/{projectId}": {
       "get": {
         "operationId": "FileConfigController_getFileConfigByProjectId",
-        "summary": "Get file configuration by project ID",
+        "summary": "Get file config",
+        "description": "Get file configuration by project ID",
         "parameters": [
           {
             "name": "projectId",
@@ -1531,7 +1607,8 @@
     "/file/config/setup": {
       "post": {
         "operationId": "FileConfigController_setup",
-        "summary": "Sets up file services for the Project/Environment",
+        "summary": "Set up files",
+        "description": "Sets up file services for the Project/Environment",
         "parameters": [],
         "responses": {
           "201": {
@@ -1554,7 +1631,8 @@
     "/file/config/delete/{projectId}": {
       "delete": {
         "operationId": "FileConfigController_deleteFileConfigByProjectId",
-        "summary": "Delete file configuration by project ID",
+        "summary": "Delete file config",
+        "description": "Delete file configuration by project ID",
         "parameters": [
           {
             "name": "projectId",
@@ -1585,7 +1663,8 @@
     "/file/delete": {
       "delete": {
         "operationId": "FileDeleteController_deleteFiles",
-        "summary": "Delete files from a bucket",
+        "summary": "Delete files",
+        "description": "Delete files from a bucket",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1641,7 +1720,8 @@
       },
       "get": {
         "operationId": "AnalyticsController_getClickEventsPaginated",
-        "summary": "Get click events with pagination",
+        "summary": "List click events",
+        "description": "Get click events with pagination",
         "parameters": [
           {
             "name": "projectName",
@@ -1732,7 +1812,8 @@
       },
       "get": {
         "operationId": "AnalyticsController_getVisitEventsPaginated",
-        "summary": "Get visit events with pagination",
+        "summary": "List visit events",
+        "description": "Get visit events with pagination",
         "parameters": [
           {
             "name": "projectName",
@@ -1823,7 +1904,8 @@
       },
       "get": {
         "operationId": "AnalyticsController_getInputEventsPaginated",
-        "summary": "Get input events with pagination",
+        "summary": "List input events",
+        "description": "Get input events with pagination",
         "parameters": [
           {
             "name": "projectName",
@@ -1914,7 +1996,8 @@
       },
       "get": {
         "operationId": "AnalyticsController_getCustomEventsPaginated",
-        "summary": "Get custom events with pagination",
+        "summary": "List custom events",
+        "description": "Get custom events with pagination",
         "parameters": [
           {
             "name": "projectName",
@@ -1994,7 +2077,8 @@
     "/analytics/custom-event-types": {
       "get": {
         "operationId": "AnalyticsController_getCustomEventTypes",
-        "summary": "Get custom event types for a project",
+        "summary": "List custom event types",
+        "description": "Get custom event types for a project",
         "parameters": [
           {
             "name": "projectName",
@@ -2026,7 +2110,8 @@
     "/analytics/custom-graph-types": {
       "get": {
         "operationId": "AnalyticsController_getCustomGraphTypesById",
-        "summary": "Get custom graph types by event type ID",
+        "summary": "Get custom graph types",
+        "description": "Get custom graph types by event type ID",
         "parameters": [
           {
             "name": "projectName",
@@ -2274,7 +2359,8 @@
     "/analytics/config": {
       "post": {
         "operationId": "AnalyticsConfigController_createAnalyticsConfig",
-        "summary": "Create analytics configuration",
+        "summary": "Create analytics config",
+        "description": "Create analytics configuration",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -2307,7 +2393,8 @@
     "/analytics/config/{projectId}": {
       "get": {
         "operationId": "AnalyticsConfigController_getAnalyticsConfig",
-        "summary": "Get analytics configuration",
+        "summary": "Get analytics config",
+        "description": "Get analytics configuration",
         "parameters": [
           {
             "name": "projectId",
@@ -2336,7 +2423,8 @@
       },
       "put": {
         "operationId": "AnalyticsConfigController_updateAnalyticsConfig",
-        "summary": "Update analytics configuration",
+        "summary": "Update analytics config",
+        "description": "Update analytics configuration",
         "parameters": [
           {
             "name": "projectId",
@@ -2375,7 +2463,8 @@
       },
       "delete": {
         "operationId": "AnalyticsConfigController_deleteAnalyticsConfig",
-        "summary": "Delete analytics configuration",
+        "summary": "Delete analytics config",
+        "description": "Delete analytics configuration",
         "parameters": [
           {
             "name": "projectId",
@@ -2402,119 +2491,6 @@
         "tags": ["analytics_config"],
         "security": [{ "API_Key": [] }]
       }
-    },
-    "/feature_flag/{id}": {
-      "get": {
-        "operationId": "FeatureFlagController_getFlag",
-        "summary": "Get a feature flag. ",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
-              }
-            }
-          }
-        },
-        "tags": ["feature_flag"],
-        "security": [{ "API_Key": [] }]
-      },
-      "put": {
-        "operationId": "FeatureFlagController_setFlag",
-        "summary": "Update a feature flag",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": { "type": "string" }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateFeatureFlagModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
-              }
-            }
-          }
-        },
-        "tags": ["feature_flag"],
-        "security": [{ "API_Key": [] }]
-      },
-      "delete": {
-        "operationId": "FeatureFlagController_deleteFlag",
-        "summary": "Delete a feature flag",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
-              }
-            }
-          }
-        },
-        "tags": ["feature_flag"],
-        "security": [{ "API_Key": [] }]
-      }
-    },
-    "/feature_flag": {
-      "post": {
-        "operationId": "FeatureFlagController_createFlag",
-        "summary": "Create a feature flag",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateFeatureFlagModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/FeatureFlagResponse" }
-              }
-            }
-          }
-        },
-        "tags": ["feature_flag"],
-        "security": [{ "API_Key": [] }]
-      }
     }
   },
   "info": {
@@ -2524,11 +2500,7 @@
     "contact": {}
   },
   "tags": [],
-  "servers": [
-    {
-      "url": "https://api.juno.bitsofgood.org"
-    }
-  ],
+  "servers": [{ "url": "https://api.juno.bitsofgood.org" }],
   "components": {
     "securitySchemes": {
       "API_Key": {
@@ -3329,6 +3301,69 @@
         },
         "required": ["responses"]
       },
+      "VerifiedSenderResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "nickname": { "type": "string" },
+          "fromEmail": { "type": "string" },
+          "fromName": { "type": "string" },
+          "replyTo": { "type": "string" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "country": { "type": "string" },
+          "zip": { "type": "string" },
+          "verified": { "type": "boolean" },
+          "locked": { "type": "boolean" }
+        },
+        "required": [
+          "id",
+          "nickname",
+          "fromEmail",
+          "fromName",
+          "replyTo",
+          "address",
+          "city",
+          "state",
+          "country",
+          "zip",
+          "verified",
+          "locked"
+        ]
+      },
+      "GetSendersResponse": {
+        "type": "object",
+        "properties": {
+          "senders": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/VerifiedSenderResponse" }
+          }
+        },
+        "required": ["senders"]
+      },
+      "AuthenticatedDomainResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "domain": { "type": "string" },
+          "subdomain": { "type": "string" },
+          "valid": { "type": "boolean" }
+        },
+        "required": ["id", "domain", "valid"]
+      },
+      "GetDomainsResponse": {
+        "type": "object",
+        "properties": {
+          "domains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthenticatedDomainResponse"
+            }
+          }
+        },
+        "required": ["domains"]
+      },
       "AccessKey": {
         "type": "object",
         "properties": {
@@ -4011,31 +4046,6 @@
         "properties": {
           "serverAnalyticsKey": { "type": "string" },
           "clientAnalyticsKey": { "type": "string" }
-        }
-      },
-      "FeatureFlagResponse": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "enabled": { "type": "boolean" },
-          "description": { "type": "string" }
-        },
-        "required": ["id", "enabled"]
-      },
-      "CreateFeatureFlagModel": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "enabled": { "type": "boolean" },
-          "description": { "type": "string" }
-        },
-        "required": ["id", "enabled"]
-      },
-      "UpdateFeatureFlagModel": {
-        "type": "object",
-        "properties": {
-          "enabled": { "type": "boolean" },
-          "description": { "type": "string" }
         }
       }
     }

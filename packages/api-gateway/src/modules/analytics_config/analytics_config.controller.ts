@@ -52,7 +52,10 @@ export class AnalyticsConfigController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create analytics configuration' })
+  @ApiOperation({
+    summary: 'Create analytics config',
+    description: 'Create analytics configuration',
+  })
   @ApiCreatedResponse({
     description: 'Analytics configuration created successfully',
     type: AnalyticsConfigResponse,
@@ -76,7 +79,10 @@ export class AnalyticsConfigController implements OnModuleInit {
   }
 
   @Get(':projectId')
-  @ApiOperation({ summary: 'Get analytics configuration' })
+  @ApiOperation({
+    summary: 'Get analytics config',
+    description: 'Get analytics configuration',
+  })
   @ApiOkResponse({
     description: 'Analytics configuration retrieved successfully',
     type: AnalyticsConfigResponse,
@@ -106,7 +112,10 @@ export class AnalyticsConfigController implements OnModuleInit {
   }
 
   @Put(':projectId')
-  @ApiOperation({ summary: 'Update analytics configuration' })
+  @ApiOperation({
+    summary: 'Update analytics config',
+    description: 'Update analytics configuration',
+  })
   @ApiOkResponse({
     description: 'Analytics configuration updated successfully',
     type: AnalyticsConfigResponse,
@@ -139,7 +148,10 @@ export class AnalyticsConfigController implements OnModuleInit {
   }
 
   @Delete(':projectId')
-  @ApiOperation({ summary: 'Delete analytics configuration' })
+  @ApiOperation({
+    summary: 'Delete analytics config',
+    description: 'Delete analytics configuration',
+  })
   @ApiOkResponse({
     description: 'Analytics configuration deleted successfully',
     type: AnalyticsConfigResponse,

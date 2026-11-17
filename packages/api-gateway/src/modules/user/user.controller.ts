@@ -62,7 +62,7 @@ export class UserController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Retrieves all users.' })
+  @ApiOperation({ summary: 'List users', description: 'Retrieves all users.' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Returned all users',
@@ -93,7 +93,10 @@ export class UserController implements OnModuleInit {
   }
 
   @Get('id/:id')
-  @ApiOperation({ summary: 'Retrieve an existing user.' })
+  @ApiOperation({
+    summary: 'Get user',
+    description: 'Retrieve an existing user.',
+  })
   @ApiParam({
     name: 'id',
     required: true,
@@ -126,7 +129,7 @@ export class UserController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create a new user.' })
+  @ApiOperation({ summary: 'Create user', description: 'Create a new user.' })
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',
@@ -174,7 +177,7 @@ export class UserController implements OnModuleInit {
 
   @Post('type')
   @ApiOperation({
-    summary: 'Update user type.',
+    summary: 'Set user type',
     description:
       'Updates the user type for an existing user. User type can be thought of as a role with role-based permissions, e.g. SUPERADMIN could have permissions an ADMIN would not. Only SUPERADMIN users can set types',
   })
@@ -233,7 +236,7 @@ export class UserController implements OnModuleInit {
 
   @Put('id/:id/project')
   @ApiOperation({
-    summary: 'Link user to project.',
+    summary: 'Link user to project',
     description: 'Associates a user with a project ID.',
   })
   @ApiParam({
@@ -310,7 +313,7 @@ export class UserController implements OnModuleInit {
 
   @Delete('id/:id/project')
   @ApiOperation({
-    summary: 'Unlink user from project.',
+    summary: 'Unlink user from project',
     description: 'Removes a user from a project.',
   })
   @ApiHeader({
@@ -386,7 +389,10 @@ export class UserController implements OnModuleInit {
   }
 
   @Delete('id/:id')
-  @ApiOperation({ summary: 'Delete an existing user.' })
+  @ApiOperation({
+    summary: 'Delete user',
+    description: 'Delete an existing user.',
+  })
   @ApiHeader({
     name: 'X-User-Email',
     description: 'Email of an admin or superadmin user',

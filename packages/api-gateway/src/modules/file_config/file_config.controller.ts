@@ -59,7 +59,10 @@ export class FileConfigController implements OnModuleInit {
   }
 
   @Get('config/:projectId')
-  @ApiOperation({ summary: 'Get file configuration by project ID' })
+  @ApiOperation({
+    summary: 'Get file config',
+    description: 'Get file configuration by project ID',
+  })
   @ApiBadRequestResponse({
     description: 'Parameters are invalid',
   })
@@ -94,7 +97,8 @@ export class FileConfigController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Sets up file services for the Project/Environment',
+    summary: 'Set up files',
+    description: 'Sets up file services for the Project/Environment',
   })
   @ApiCreatedResponse({
     description: 'File Services setup successfully',
@@ -118,7 +122,10 @@ export class FileConfigController implements OnModuleInit {
   }
 
   @Delete('config/delete/:projectId')
-  @ApiOperation({ summary: 'Delete file configuration by project ID' })
+  @ApiOperation({
+    summary: 'Delete file config',
+    description: 'Delete file configuration by project ID',
+  })
   @ApiBadRequestResponse({
     description: 'Parameters are invalid',
   })

@@ -185,7 +185,10 @@ export class AnalyticsController implements OnModuleInit {
   }
 
   @Get('custom-event-types')
-  @ApiOperation({ summary: 'Get custom event types for a project' })
+  @ApiOperation({
+    summary: 'List custom event types',
+    description: 'Get custom event types for a project',
+  })
   @ApiOkResponse({
     description: 'Custom event types retrieved successfully',
     type: GetAllCustomEventTypeResponse,
@@ -212,7 +215,10 @@ export class AnalyticsController implements OnModuleInit {
   }
 
   @Get('custom-graph-types')
-  @ApiOperation({ summary: 'Get custom graph types by event type ID' })
+  @ApiOperation({
+    summary: 'Get custom graph types',
+    description: 'Get custom graph types by event type ID',
+  })
   @ApiOkResponse({
     description: 'Custom graph types retrieved successfully',
     type: CustomGraphTypeResponse,
@@ -241,7 +247,10 @@ export class AnalyticsController implements OnModuleInit {
   }
 
   @Get('events/click')
-  @ApiOperation({ summary: 'Get click events with pagination' })
+  @ApiOperation({
+    summary: 'List click events',
+    description: 'Get click events with pagination',
+  })
   @ApiOkResponse({
     description: 'Click events retrieved successfully',
     type: GetClickEventsResponse,
@@ -337,7 +346,10 @@ export class AnalyticsController implements OnModuleInit {
   }
 
   @Get('events/visit')
-  @ApiOperation({ summary: 'Get visit events with pagination' })
+  @ApiOperation({
+    summary: 'List visit events',
+    description: 'Get visit events with pagination',
+  })
   @ApiOkResponse({
     description: 'Visit events retrieved successfully',
     type: GetVisitEventsResponse,
@@ -433,7 +445,10 @@ export class AnalyticsController implements OnModuleInit {
   }
 
   @Get('events/input')
-  @ApiOperation({ summary: 'Get input events with pagination' })
+  @ApiOperation({
+    summary: 'List input events',
+    description: 'Get input events with pagination',
+  })
   @ApiOkResponse({
     description: 'Input events retrieved successfully',
     type: GetInputEventsResponse,
@@ -529,7 +544,10 @@ export class AnalyticsController implements OnModuleInit {
   }
 
   @Get('events/custom')
-  @ApiOperation({ summary: 'Get custom events with pagination' })
+  @ApiOperation({
+    summary: 'List custom events',
+    description: 'Get custom events with pagination',
+  })
   @ApiOkResponse({
     description: 'Custom events retrieved successfully',
     type: GetCustomEventsResponse,

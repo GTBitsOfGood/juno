@@ -72,7 +72,10 @@ export class EmailController implements OnModuleInit {
   }
 
   @Get('config/:id')
-  @ApiOperation({ summary: 'Get email configuration by ID' })
+  @ApiOperation({
+    summary: 'Get email config',
+    description: 'Get email configuration by ID',
+  })
   @ApiBadRequestResponse({
     description: 'Parameters are invalid',
   })
@@ -106,7 +109,8 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Sets up an email service with the given Sendgrid API Key',
+    summary: 'Set up email',
+    description: 'Sets up an email service with the given Sendgrid API Key',
   })
   @ApiCreatedResponse({
     description: 'Email Service setup successfully',
@@ -132,7 +136,8 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Registers a sender email address.',
+    summary: 'Register sender',
+    description: 'Registers a sender email address.',
   })
   @ApiCreatedResponse({
     description: 'Email registered successfully',
@@ -166,7 +171,8 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Registers a sender domain with SendGrid.',
+    summary: 'Register domain',
+    description: 'Registers a sender domain with SendGrid.',
   })
   @ApiCreatedResponse({
     description: 'Domain registered successfully',
@@ -200,7 +206,8 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Verifies a sender domain registration status.',
+    summary: 'Verify domain',
+    description: 'Verifies a sender domain registration status.',
   })
   @ApiCreatedResponse({
     description: 'Domain is registered',
@@ -232,7 +239,8 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Sends an email using Juno services.',
+    summary: 'Send email',
+    description: 'Sends an email using Juno services.',
   })
   @ApiCreatedResponse({
     description: 'Email sent successfully',
@@ -280,7 +288,10 @@ export class EmailController implements OnModuleInit {
     );
   }
 
-  @ApiOperation({ summary: 'Gets overall email analytics' })
+  @ApiOperation({
+    summary: 'Get email statistics',
+    description: 'Gets overall email analytics',
+  })
   @ApiCreatedResponse({
     description: 'Overall Email Analytics',
     type: SendEmailStatisticsResponses,
@@ -355,7 +366,10 @@ export class EmailController implements OnModuleInit {
     );
   }
 
-  @ApiOperation({ summary: 'Gets all verified senders from SendGrid' })
+  @ApiOperation({
+    summary: 'List senders',
+    description: 'Gets all verified senders from SendGrid',
+  })
   @ApiOkResponse({
     description: 'Returned verified senders',
     type: GetSendersResponse,
@@ -378,7 +392,8 @@ export class EmailController implements OnModuleInit {
   }
 
   @ApiOperation({
-    summary: 'Gets all authenticated domains from SendGrid',
+    summary: 'List domains',
+    description: 'Gets all authenticated domains from SendGrid',
   })
   @ApiOkResponse({
     description: 'Returned authenticated domains',

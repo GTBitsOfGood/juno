@@ -5,7 +5,8 @@ import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { RpcExceptionFilter } from './rpc_exception_filter';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
+import { buildOpenApiConfig } from './openapi';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
@@ -26,18 +27,7 @@ async function bootstrap() {
   app.useGlobalFilters(new RpcExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  const config = new DocumentBuilder()
-    .setTitle('Juno')
-    .setDescription('Juno Public API Docs')
-    .setVersion('1.0')
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'API_Key' },
-      'API_Key',
-    )
-    .addServer('/')
-
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, buildOpenApiConfig('/'));
   SwaggerModule.setup('docs', app, document);
   await app.listen(3000);
 }
