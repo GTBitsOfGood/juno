@@ -1,0 +1,12 @@
+# The whole juno backend (gateway + gRPC services + postgres) via docker-compose-dev.yml.
+# Gateway on 8888 like local dev; state lives in this box's postgres container.
+ports = [8888]
+size = "large"
+
+[run]
+setup = "bash .agents/skills/tesser/scripts/juno-setup.sh"
+dev = "bash .agents/skills/tesser/scripts/juno-run.sh"
+
+[health]
+path = "/docs"
+timeout = "1500s"
