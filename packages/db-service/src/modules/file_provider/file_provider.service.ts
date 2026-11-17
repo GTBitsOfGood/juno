@@ -1,11 +1,12 @@
 import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { FileProviderType } from '@prisma/client';
+import { FileProvider, FileProviderType } from '@prisma/client';
 import { FileProviderProto } from 'juno-proto';
 
-// import { Bucket } from 'juno-proto/dist/gen/file_bucket';
 import { PrismaService } from 'src/prisma.service';
+
+type ConfigScope = { configId: number; configEnv: string };
 
 @Injectable()
 export class FileProviderService {
@@ -29,50 +30,58 @@ export class FileProviderService {
     }
   }
 
+  toRpc(provider: FileProvider): FileProviderProto.FileProvider {
+    return {
+      id: provider.id,
+      providerName: provider.name,
+      accessKey: provider.accessKey,
+      metadata: provider.metadata,
+      providerType: this.prismaToRpcProvider(provider.type),
+      configId: provider.configId ?? undefined,
+      configEnv: provider.configEnv ?? undefined,
+      bucket: [],
+    };
+  }
+
+  private uniqueWhere(providerName: string, scope: ConfigScope) {
+    return {
+      name_configId_configEnv: {
+        name: providerName,
+        configId: Number(scope.configId),
+        configEnv: scope.configEnv,
+      },
+    };
+  }
+
   async createProvider(
     req: FileProviderProto.CreateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     try {
-      // const buckets = req.bucket.map((bucket: any, idx: number) => {
-      //   // bucket name and configid should be changed once bucket is implemented
-      //   return { name: bucket.name, configId: idx };
-      // });
-
       const fileProvider = await this.prisma.fileProvider.upsert({
-        where: {
-          name: req.providerName,
-        },
+        where: this.uniqueWhere(req.providerName, req),
         create: {
-          accessKey: req.accessKey,
           name: req.providerName,
+          accessKey: req.accessKey,
           metadata: req.metadata,
           type: this.rpcToPrismaProvider(req.type),
-          // FileServiceBucket: {
-          //   create: buckets,
-          // },
+          configId: Number(req.configId),
+          configEnv: req.configEnv,
         },
         update: {
           accessKey: req.accessKey,
           metadata: req.metadata,
           type: this.rpcToPrismaProvider(req.type),
-          // FileServiceBucket: {
-          //   create: buckets,
-          // },
         },
       });
-      return {
-        metadata: fileProvider.metadata,
-        providerName: fileProvider.name,
-        accessKey: fileProvider.accessKey,
-        providerType: req.type,
-        //   will have to fix once buckets are properly updated in proto
-        // bucket: buckets as Bucket[],
-        bucket: [],
-      };
+      return this.toRpc(fileProvider);
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
-        message: 'Failed to create file provider',
+        // P2003: foreign key violation, i.e. the file config does not exist.
+        message:
+          error?.code === 'P2003'
+            ? 'File config does not exist; set up file services for this project first'
+            : 'Failed to create file provider',
       });
     }
   }
@@ -80,78 +89,51 @@ export class FileProviderService {
   async getProvider(
     req: FileProviderProto.GetFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    try {
-      const fileProvider = await this.prisma.fileProvider.findFirst({
-        where: { name: req.providerName },
-      });
-
-      return {
-        metadata: fileProvider.metadata,
-        providerName: fileProvider.name,
-        providerType: this.prismaToRpcProvider(fileProvider.type),
-        bucket: [],
-        accessKey: fileProvider.accessKey,
-      };
-    } catch (error) {
+    const fileProvider = await this.prisma.fileProvider.findUnique({
+      where: this.uniqueWhere(req.providerName, req),
+    });
+    if (!fileProvider) {
       throw new RpcException({
         code: status.NOT_FOUND,
         message: 'File provider not found',
       });
     }
+    return this.toRpc(fileProvider);
   }
 
   async getAllProviders(): Promise<FileProviderProto.FileProviders> {
-    const fileProviders = await this.prisma.fileProvider.findMany();
-    return {
-      providers: fileProviders.map((provider) => ({
-        metadata: provider.metadata,
-        providerName: provider.name,
-        providerType: this.prismaToRpcProvider(provider.type),
-        bucket: [],
-        accessKey: provider.accessKey,
-      })),
-    };
+    const fileProviders = await this.prisma.fileProvider.findMany({
+      orderBy: { id: 'asc' },
+    });
+    return { providers: fileProviders.map((p) => this.toRpc(p)) };
+  }
+
+  async getProvidersByConfigId(
+    req: FileProviderProto.GetFileProvidersByConfigIdRequest,
+  ): Promise<FileProviderProto.FileProviders> {
+    const fileProviders = await this.prisma.fileProvider.findMany({
+      where: { configId: Number(req.configId), configEnv: req.configEnv },
+      orderBy: { id: 'asc' },
+    });
+    return { providers: fileProviders.map((p) => this.toRpc(p)) };
   }
 
   async updateProvider(
     req: FileProviderProto.UpdateFileProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
     try {
-      // const buckets = req.bucket.map((bucket: any, idx: number) => {
-      //   // bucket name and configid should be changed once bucket is implemented
-      //   return { name: bucket.name, configId: idx };
-      // });
-      const newData = {};
-      for (const key of Object.keys(req)) {
-        if (req[key] && key !== 'providerName') {
-          newData[key] = req[key];
-        }
-      }
-      // const fileProvider = await this.prisma.fileProvider.update({
-      //   where: { name: req.providerName },
-      //   data: {
-      //     metadata: req.metadata,
-      //     p: req.accessKey,
-      //     // FileServiceBucket: {
-      //     //   create: buckets,
-      //     // },
-      //   },
-      // });
       const fileProvider = await this.prisma.fileProvider.update({
-        where: { name: req.providerName },
-        data: newData,
+        where: this.uniqueWhere(req.providerName, req),
+        data: {
+          accessKey: req.accessKey || undefined,
+          metadata: req.metadata || undefined,
+          type:
+            req.type !== undefined
+              ? this.rpcToPrismaProvider(req.type)
+              : undefined,
+        },
       });
-
-      return {
-        metadata: fileProvider.metadata,
-        providerName: fileProvider.name,
-        accessKey: fileProvider.accessKey,
-        providerType: fileProvider.type
-          ? this.prismaToRpcProvider(fileProvider.type)
-          : undefined,
-        // bucket: buckets,
-        bucket: [],
-      };
+      return this.toRpc(fileProvider);
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
@@ -165,16 +147,9 @@ export class FileProviderService {
   ): Promise<FileProviderProto.FileProvider> {
     try {
       const fileProvider = await this.prisma.fileProvider.delete({
-        where: { name: req.providerName },
+        where: this.uniqueWhere(req.providerName, req),
       });
-
-      return {
-        metadata: fileProvider.metadata,
-        providerName: fileProvider.name,
-        accessKey: fileProvider.accessKey,
-        providerType: this.prismaToRpcProvider(fileProvider.type),
-        bucket: [],
-      };
+      return this.toRpc(fileProvider);
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,

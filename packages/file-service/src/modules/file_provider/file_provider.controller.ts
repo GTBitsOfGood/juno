@@ -56,7 +56,8 @@ export class FileProviderController
       !request.baseUrl ||
       request.baseUrl === '' ||
       !request.providerName ||
-      request.providerName === ''
+      request.providerName === '' ||
+      !request.configEnv
     ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
@@ -71,22 +72,26 @@ export class FileProviderController
         metadata: JSON.stringify({ endpoint: request.baseUrl }),
         type: request.type,
         bucket: [],
+        configId: request.configId,
+        configEnv: request.configEnv,
       });
 
-      const fileProvider = lastValueFrom(fileProviderRequest);
-
-      return fileProvider;
+      return await lastValueFrom(fileProviderRequest);
     } catch (error) {
       throw new RpcException({
         code: status.FAILED_PRECONDITION,
-        message: error.message,
+        message: error.details ?? error.message,
       });
     }
   }
   removeProvider(
     request: FileProviderProto.RemoveProviderRequest,
   ): Promise<FileProviderProto.FileProvider> {
-    if (!request.providerName || request.providerName === '') {
+    if (
+      !request.providerName ||
+      request.providerName === '' ||
+      !request.configEnv
+    ) {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message: 'Invalid argument',
@@ -95,10 +100,30 @@ export class FileProviderController
 
     const fileProviderRequest = this.fileProviderDbService.deleteProvider({
       providerName: request.providerName,
+      configId: request.configId,
+      configEnv: request.configEnv,
     });
 
     const fileProvider = lastValueFrom(fileProviderRequest);
 
     return fileProvider;
+  }
+
+  getProvidersByConfigId(
+    request: FileProviderProto.GetFileProvidersByConfigIdRequest,
+  ): Promise<FileProviderProto.FileProviders> {
+    if (request.configId === undefined || !request.configEnv) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'configId and configEnv must be provided',
+      });
+    }
+
+    return lastValueFrom(
+      this.fileProviderDbService.getProvidersByConfigId({
+        configId: request.configId,
+        configEnv: request.configEnv,
+      }),
+    );
   }
 }

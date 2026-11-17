@@ -32,11 +32,15 @@ export class FileBucketService implements OnModuleInit {
 
   async getProvider(
     providerName: string,
+    configId: number,
+    configEnv: string,
   ): Promise<FileProviderProto.FileProvider> {
     try {
       return await lastValueFrom(
         this.fileProviderDBService.getProvider({
-          providerName: providerName,
+          providerName,
+          configId,
+          configEnv,
         }),
       );
     } catch (error) {
@@ -51,7 +55,11 @@ export class FileBucketService implements OnModuleInit {
     request: FileBucketProto.RegisterBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
     try {
-      const provider = await this.getProvider(request.fileProviderName);
+      const provider = await this.getProvider(
+        request.fileProviderName,
+        request.configId,
+        request.configEnv,
+      );
       switch (provider.providerType) {
         case FileProviderProto.ProviderType.S3: {
           const handler = new S3BucketHandler(provider);
@@ -94,7 +102,11 @@ export class FileBucketService implements OnModuleInit {
     request: FileBucketProto.RemoveBucketRequest,
   ): Promise<FileBucketProto.Bucket> {
     try {
-      const provider = await this.getProvider(request.fileProviderName);
+      const provider = await this.getProvider(
+        request.fileProviderName,
+        request.configId,
+        request.configEnv,
+      );
       switch (provider.providerType) {
         case FileProviderProto.ProviderType.S3: {
           const handler = new S3BucketHandler(provider);
@@ -150,7 +162,11 @@ export class FileBucketService implements OnModuleInit {
       const results = await Promise.all(
         (buckets.buckets ?? []).map(async (bucket) => {
           try {
-            const provider = await this.getProvider(bucket.fileProviderName);
+            const provider = await this.getProvider(
+              bucket.fileProviderName,
+              bucket.configId,
+              bucket.configEnv,
+            );
             const bucketRequest: FileBucketProto.GetBucketRequest = {
               name: bucket.name,
               configId: bucket.configId,

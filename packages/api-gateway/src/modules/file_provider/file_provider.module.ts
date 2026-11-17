@@ -24,7 +24,6 @@ import {
   JWT_SERVICE_NAME,
 } from 'juno-proto/dist/gen/jwt';
 
-// TODO: Make this module Auth protected
 @Module({
   imports: [
     ConfigModule.forRoot({

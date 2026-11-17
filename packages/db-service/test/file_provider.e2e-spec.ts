@@ -5,6 +5,8 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import {
+  FileConfigProto,
+  FileConfigProtoFile,
   FileProviderProto,
   FileProviderProtoFile,
   ResetProto,
@@ -32,9 +34,10 @@ async function initApp() {
     options: {
       package: [
         FileProviderProto.JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME,
+        FileConfigProto.JUNO_FILE_SERVICE_CONFIG_PACKAGE_NAME,
         ResetProto.JUNO_RESET_DB_PACKAGE_NAME,
       ],
-      protoPath: [FileProviderProtoFile, ResetProtoFile],
+      protoPath: [FileProviderProtoFile, FileConfigProtoFile, ResetProtoFile],
       url: process.env.DB_SERVICE_ADDR,
     },
   });
@@ -97,6 +100,8 @@ describe('File Provider Tests', () => {
   it('Creating a file provider correctly', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider1',
+      configId: 0,
+      configEnv: 'prod',
       accessKey: JSON.stringify({
         publicAccessKey: 'accessKey',
         privateAccessKey: 'privateKey',
@@ -119,6 +124,8 @@ describe('File Provider Tests', () => {
   it('Creating a duplicate file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Duplicate Provider',
+      configId: 0,
+      configEnv: 'prod',
       accessKey: JSON.stringify({
         publicAccessKey: 'accessKey',
         privateAccessKey: 'privateKey',
@@ -150,6 +157,8 @@ describe('File Provider Tests', () => {
   it('Deleting a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider2',
+      configId: 0,
+      configEnv: 'prod',
       accessKey: JSON.stringify({
         publicAccessKey: 'accessKey',
         privateAccessKey: 'privateKey',
@@ -170,6 +179,8 @@ describe('File Provider Tests', () => {
 
     const deleteRequest: DeleteFileProviderRequest = {
       providerName: 'Test Provider2',
+      configId: 0,
+      configEnv: 'prod',
     };
 
     const promise2 = new Promise((resolve) => {
@@ -185,6 +196,8 @@ describe('File Provider Tests', () => {
   it('Deleting a nonexistent file provider', async () => {
     const deleteRequest: DeleteFileProviderRequest = {
       providerName: 'Test Provider3',
+      configId: 0,
+      configEnv: 'prod',
     };
 
     const promise = new Promise((resolve) => {
@@ -200,6 +213,8 @@ describe('File Provider Tests', () => {
   it('Updating a file provider with new key', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider4',
+      configId: 0,
+      configEnv: 'prod',
       accessKey: JSON.stringify({
         publicAccessKey: 'accessKey',
         privateAccessKey: 'privateKey',
@@ -220,6 +235,8 @@ describe('File Provider Tests', () => {
 
     const updateRequest: UpdateFileProviderRequest = {
       providerName: 'Test Provider4',
+      configId: 0,
+      configEnv: 'prod',
       accessKey: JSON.stringify({
         publicAccessKey: 'newAccessKey',
         privateAccessKey: 'privateKey',
@@ -240,6 +257,8 @@ describe('File Provider Tests', () => {
   it('Updating a file provider with new metadata', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider6',
+      configId: 0,
+      configEnv: 'prod',
       accessKey: JSON.stringify({
         publicAccessKey: 'accessKey',
         privateAccessKey: 'privateKey',
@@ -260,6 +279,8 @@ describe('File Provider Tests', () => {
 
     const updateRequest: UpdateFileProviderRequest = {
       providerName: 'Test Provider6',
+      configId: 0,
+      configEnv: 'prod',
       metadata: 'New metadata',
       bucket: [],
     };
@@ -277,6 +298,8 @@ describe('File Provider Tests', () => {
   it('Reading a nonexistent file provider', async () => {
     const getRequest: GetFileProviderRequest = {
       providerName: 'Test Provider7',
+      configId: 0,
+      configEnv: 'prod',
     };
 
     const promise = new Promise((resolve) => {
@@ -292,6 +315,8 @@ describe('File Provider Tests', () => {
   it('Reading a file provider', async () => {
     const createRequest: CreateFileProviderRequest = {
       providerName: 'Test Provider8',
+      configId: 0,
+      configEnv: 'prod',
       accessKey: JSON.stringify({
         publicAccessKey: 'accessKey',
         privateAccessKey: 'privateKey',
@@ -312,6 +337,8 @@ describe('File Provider Tests', () => {
 
     const getRequest: GetFileProviderRequest = {
       providerName: 'Test Provider8',
+      configId: 0,
+      configEnv: 'prod',
     };
 
     const promise2 = new Promise((resolve) => {
@@ -322,5 +349,159 @@ describe('File Provider Tests', () => {
     });
 
     await promise2;
+  });
+
+  function call<T>(method: string, req: object): Promise<T> {
+    return new Promise((resolve, reject) => {
+      fileProviderClient[method](req, (err, resp) =>
+        err ? reject(err) : resolve(resp),
+      );
+    });
+  }
+
+  function providerRequest(
+    providerName: string,
+    configEnv: string,
+    endpoint = 'https://example.com',
+  ): CreateFileProviderRequest {
+    return {
+      providerName,
+      accessKey: JSON.stringify({ accessKeyId: 'id', secretAccessKey: 'key' }),
+      metadata: JSON.stringify({ endpoint }),
+      bucket: [],
+      type: FileProviderProto.ProviderType.S3,
+      configId: 0,
+      configEnv,
+    };
+  }
+
+  describe('scoped to a file config', () => {
+    // A second config for the seed project (0, prod is seeded).
+    const otherEnv = 'provider-scope';
+
+    let otherConfigCreated = false;
+
+    // beforeEach, not beforeAll: the db-service app only listens per test.
+    beforeEach(async () => {
+      if (otherConfigCreated) return;
+      const configProto = ProtoLoader.loadSync([FileConfigProtoFile]) as any;
+      const configGRPC = GRPC.loadPackageDefinition(configProto) as any;
+      const configClient =
+        new configGRPC.juno.file_service.config.FileServiceConfigDbService(
+          process.env.DB_SERVICE_ADDR,
+          GRPC.credentials.createInsecure(),
+        );
+      await new Promise((resolve, reject) => {
+        configClient.createConfig(
+          { projectId: 0, environment: otherEnv, buckets: [], files: [] },
+          (err, resp) => (err ? reject(err) : resolve(resp)),
+        );
+      });
+      otherConfigCreated = true;
+    });
+
+    it('returns the id and owning config on create', async () => {
+      const provider = await call<FileProviderProto.FileProvider>(
+        'createProvider',
+        providerRequest('Scoped Provider', 'prod'),
+      );
+      expect(typeof provider.id).toBe('number');
+      expect(provider.configId).toBe(0);
+      expect(provider.configEnv).toBe('prod');
+    });
+
+    it('allows the same name in two configs', async () => {
+      const prod = await call<FileProviderProto.FileProvider>(
+        'createProvider',
+        providerRequest('Same Name', 'prod', 'https://prod.example.com'),
+      );
+      const other = await call<FileProviderProto.FileProvider>(
+        'createProvider',
+        providerRequest('Same Name', otherEnv, 'https://other.example.com'),
+      );
+      expect(prod.id).not.toBe(other.id);
+
+      const fetched = await call<FileProviderProto.FileProvider>(
+        'getProvider',
+        { providerName: 'Same Name', configId: 0, configEnv: otherEnv },
+      );
+      expect(fetched.id).toBe(other.id);
+      expect(JSON.parse(fetched.metadata).endpoint).toBe(
+        'https://other.example.com',
+      );
+    });
+
+    it('getProvidersByConfigId returns only that config', async () => {
+      await call('createProvider', providerRequest('Only Other', otherEnv));
+
+      const res = await call<FileProviderProto.FileProviders>(
+        'getProvidersByConfigId',
+        { configId: 0, configEnv: otherEnv },
+      );
+      const names = res.providers.map((p) => p.providerName);
+      expect(names).toEqual(
+        expect.arrayContaining(['Same Name', 'Only Other']),
+      );
+      expect(names).not.toContain('Scoped Provider');
+      expect(
+        res.providers.every(
+          (p) => p.configId === 0 && p.configEnv === otherEnv,
+        ),
+      ).toBe(true);
+    });
+
+    it('getProvidersByConfigId returns an empty list for a config with no providers', async () => {
+      const res = await call<FileProviderProto.FileProviders>(
+        'getProvidersByConfigId',
+        { configId: 12345, configEnv: 'prod' },
+      );
+      expect(res.providers ?? []).toEqual([]);
+    });
+
+    it('getProvidersByConfigId requires configEnv', async () => {
+      await expect(
+        call('getProvidersByConfigId', { configId: 0, configEnv: '' }),
+      ).rejects.toBeDefined();
+    });
+
+    it('does not find a provider through another config', async () => {
+      await expect(
+        call('getProvider', {
+          providerName: 'Only Other',
+          configId: 0,
+          configEnv: 'prod',
+        }),
+      ).rejects.toBeDefined();
+    });
+
+    it('does not delete a provider through another config', async () => {
+      await expect(
+        call('deleteProvider', {
+          providerName: 'Only Other',
+          configId: 0,
+          configEnv: 'prod',
+        }),
+      ).rejects.toBeDefined();
+      const stillThere = await call<FileProviderProto.FileProvider>(
+        'getProvider',
+        { providerName: 'Only Other', configId: 0, configEnv: otherEnv },
+      );
+      expect(stillThere.providerName).toBe('Only Other');
+    });
+
+    it('fails to create a provider for a config that does not exist', async () => {
+      await expect(
+        call('createProvider', {
+          ...providerRequest('Orphan', 'prod'),
+          configId: 999,
+        }),
+      ).rejects.toMatchObject({ code: GRPC.status.FAILED_PRECONDITION });
+    });
+
+    it('fails to create a provider without a config env', async () => {
+      await expect(
+        call('createProvider', providerRequest('No Env', '')),
+      ).rejects.toMatchObject({ code: GRPC.status.INVALID_ARGUMENT });
+    });
   });
 });

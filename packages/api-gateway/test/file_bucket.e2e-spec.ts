@@ -93,6 +93,8 @@ beforeAll(async () => {
         metadata: JSON.stringify({ endpoint: baseURL }),
         bucket: [],
         type: FileProviderProto.ProviderType.S3,
+        configId: 0,
+        configEnv: 'prod',
       },
       (err: any) => {
         if (err) return reject(err);

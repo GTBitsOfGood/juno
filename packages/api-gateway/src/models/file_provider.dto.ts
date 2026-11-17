@@ -56,6 +56,21 @@ export class RegisterFileProviderModel {
 }
 
 export class FileProvider {
+  @ApiProperty({ type: 'number', description: 'Unique id of the provider' })
+  id: number;
+
+  @ApiProperty({
+    type: 'number',
+    description: 'Id of the file config (and project) that owns the provider',
+  })
+  configId: number;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'Environment of the file config that owns the provider',
+  })
+  configEnv: string;
+
   @ApiProperty({
     type: AccessKey,
     description: 'The access key to register with',
@@ -90,6 +105,9 @@ export class FileProvider {
   type: string;
 
   constructor(fileProvider: FileProviderProto.FileProvider) {
+    this.id = fileProvider.id;
+    this.configId = fileProvider.configId;
+    this.configEnv = fileProvider.configEnv;
     this.providerName = fileProvider.providerName;
     this.type = fromEnum(fileProvider.providerType);
 
@@ -111,15 +129,35 @@ export class FileProvider {
 }
 
 export class FileProviderPartial {
-  @ApiProperty({ description: 'The unique provider name of the file provider' })
+  @ApiProperty({ type: 'number', description: 'Unique id of the provider' })
+  id: number;
+
+  @ApiProperty({
+    description: "The provider's name, unique within its file config",
+  })
   providerName: string;
 
   @ApiProperty({ description: 'The metadata of the file provider' })
   metadata: string;
 
+  @ApiProperty({
+    type: 'number',
+    description: 'Id of the file config (and project) that owns the provider',
+  })
+  configId: number;
+
+  @ApiProperty({
+    type: 'string',
+    description: 'Environment of the file config that owns the provider',
+  })
+  configEnv: string;
+
   constructor(fileProvider: FileProviderProto.FileProvider) {
+    this.id = fileProvider.id;
     this.providerName = fileProvider.providerName;
     this.metadata = fileProvider.metadata;
+    this.configId = fileProvider.configId;
+    this.configEnv = fileProvider.configEnv;
   }
 }
 

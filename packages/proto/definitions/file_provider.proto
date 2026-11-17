@@ -9,6 +9,7 @@ import "file_bucket.proto";
 service FileProviderDbService {
   rpc getProvider(GetFileProviderRequest) returns (FileProvider);
   rpc getAllProviders(Empty) returns (FileProviders);
+  rpc getProvidersByConfigId(GetFileProvidersByConfigIdRequest) returns (FileProviders);
   rpc createProvider(CreateFileProviderRequest) returns (FileProvider);
   rpc deleteProvider(DeleteFileProviderRequest) returns (FileProvider);
   rpc updateProvider(UpdateFileProviderRequest) returns (FileProvider);
@@ -17,6 +18,7 @@ service FileProviderDbService {
 service FileProviderFileService {
   rpc registerProvider(RegisterProviderRequest) returns (FileProvider);
   rpc removeProvider(DeleteFileProviderRequest) returns (FileProvider);
+  rpc getProvidersByConfigId(GetFileProvidersByConfigIdRequest) returns (FileProviders);
 }
 
 enum ProviderType {
@@ -32,13 +34,27 @@ message FileProvider {
   string metadata = 3;
   repeated bucket.Bucket bucket = 4;
   ProviderType provider_type = 5;
+  int32 id = 6;
+  int32 config_id = 7;
+  string config_env = 8;
 }
 
 message FileProviders {
   repeated FileProvider providers = 1;
 }
 
-message GetFileProviderRequest { string provider_name = 1; }
+// Providers are scoped to a file config: (config_id, config_env) identifies
+// the owning config, and provider_name is unique within it.
+message GetFileProviderRequest {
+  string provider_name = 1;
+  int32 config_id = 2;
+  string config_env = 3;
+}
+
+message GetFileProvidersByConfigIdRequest {
+  int32 config_id = 1;
+  string config_env = 2;
+}
 
 message CreateFileProviderRequest {
   string provider_name = 1;
@@ -46,6 +62,8 @@ message CreateFileProviderRequest {
   string metadata = 3;
   repeated bucket.Bucket bucket = 4;
   ProviderType type = 5;
+  int32 config_id = 6;
+  string config_env = 7;
 }
 
 message UpdateFileProviderRequest {
@@ -54,9 +72,15 @@ message UpdateFileProviderRequest {
   optional string metadata = 3;
   repeated bucket.Bucket bucket = 4;
   optional ProviderType type = 5;
+  int32 config_id = 6;
+  string config_env = 7;
 }
 
-message DeleteFileProviderRequest { string provider_name = 1; }
+message DeleteFileProviderRequest {
+  string provider_name = 1;
+  int32 config_id = 2;
+  string config_env = 3;
+}
 
 message RegisterProviderRequest {
   string provider_name = 1;
@@ -64,6 +88,12 @@ message RegisterProviderRequest {
   string private_access_key = 3;
   string baseUrl = 4;
   ProviderType type = 5;
+  int32 config_id = 6;
+  string config_env = 7;
 }
 
-message RemoveProviderRequest { string provider_name = 1; }
+message RemoveProviderRequest {
+  string provider_name = 1;
+  int32 config_id = 2;
+  string config_env = 3;
+}

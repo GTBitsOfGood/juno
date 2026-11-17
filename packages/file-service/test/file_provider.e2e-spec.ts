@@ -84,6 +84,8 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider_success',
+        configId: 0,
+        configEnv: 'prod',
         type: FileProviderProto.ProviderType.S3,
       };
       const response = await new Promise((resolve) => {
@@ -108,6 +110,8 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider',
+        configId: 0,
+        configEnv: 'prod',
         type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
@@ -132,6 +136,8 @@ describe('File Provider Tests', () => {
         privateAccessKey: '',
         baseUrl: 'https://aws.amazon.com',
         providerName: 'test_provider',
+        configId: 0,
+        configEnv: 'prod',
         type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
@@ -156,6 +162,8 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: '',
         providerName: 'test_provider',
+        configId: 0,
+        configEnv: 'prod',
         type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
@@ -179,6 +187,8 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: 'https://aws.amazon.com',
         providerName: '',
+        configId: 0,
+        configEnv: 'prod',
         type: FileProviderProto.ProviderType.S3,
       };
       await new Promise((resolve) => {
@@ -202,6 +212,8 @@ describe('File Provider Tests', () => {
         privateAccessKey: 'privateKey',
         baseUrl: 'https://azure.com',
         providerName: 'azure-test',
+        configId: 0,
+        configEnv: 'prod',
         type: FileProviderProto.ProviderType.AZURE,
       };
       await new Promise((resolve) => {
@@ -217,7 +229,7 @@ describe('File Provider Tests', () => {
       const provider: FileProviderProto.FileProvider = await new Promise(
         (resolve) => {
           fileProviderClient.getProvider(
-            { providerName: 'azure-test' },
+            { providerName: 'azure-test', configId: 0, configEnv: 'prod' },
             (err: any, resp: any) => {
               expect(err).toBeNull();
               resolve(resp);
@@ -234,5 +246,112 @@ describe('File Provider Tests', () => {
     } catch (err) {
       expect(err).not.toBeNull();
     }
+  });
+
+  function call<T>(method: string, req: object): Promise<T> {
+    return new Promise((resolve, reject) => {
+      fileProviderClient[method](req, (err: any, resp: T) =>
+        err ? reject(err) : resolve(resp),
+      );
+    });
+  }
+
+  it('Links a registered provider to the requested config', async () => {
+    const provider = await call<FileProviderProto.FileProvider>(
+      'registerProvider',
+      {
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+        baseUrl: 'https://aws.amazon.com',
+        providerName: 'scoped_provider',
+        type: FileProviderProto.ProviderType.S3,
+        configId: 0,
+        configEnv: 'prod',
+      },
+    );
+    expect(provider.providerName).toBe('scoped_provider');
+    expect(provider.configId).toBe(0);
+    expect(provider.configEnv).toBe('prod');
+    expect(typeof provider.id).toBe('number');
+  });
+
+  it('Fails to register a provider without a config env', async () => {
+    await expect(
+      call('registerProvider', {
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+        baseUrl: 'https://aws.amazon.com',
+        providerName: 'no_env_provider',
+        type: FileProviderProto.ProviderType.S3,
+        configId: 0,
+        configEnv: '',
+      }),
+    ).rejects.toMatchObject({ code: GRPC.status.INVALID_ARGUMENT });
+  });
+
+  it('Fails to register a provider for a config that does not exist', async () => {
+    await expect(
+      call('registerProvider', {
+        publicAccessKey: 'accessKey',
+        privateAccessKey: 'privateKey',
+        baseUrl: 'https://aws.amazon.com',
+        providerName: 'orphan_provider',
+        type: FileProviderProto.ProviderType.S3,
+        configId: 999,
+        configEnv: 'prod',
+      }),
+    ).rejects.toMatchObject({ code: GRPC.status.FAILED_PRECONDITION });
+  });
+
+  it('Gets providers by config id', async () => {
+    const res = await call<FileProviderProto.FileProviders>(
+      'getProvidersByConfigId',
+      { configId: 0, configEnv: 'prod' },
+    );
+    const names = res.providers.map((p) => p.providerName);
+    expect(names).toContain('scoped_provider');
+    expect(
+      res.providers.every((p) => p.configId === 0 && p.configEnv === 'prod'),
+    ).toBe(true);
+  });
+
+  it('Gets no providers for a config without any', async () => {
+    const res = await call<FileProviderProto.FileProviders>(
+      'getProvidersByConfigId',
+      { configId: 999, configEnv: 'prod' },
+    );
+    expect(res.providers ?? []).toEqual([]);
+  });
+
+  it('Fails to get providers by config id without a config env', async () => {
+    await expect(
+      call('getProvidersByConfigId', { configId: 0, configEnv: '' }),
+    ).rejects.toMatchObject({ code: GRPC.status.INVALID_ARGUMENT });
+  });
+
+  it('Does not remove a provider through another config', async () => {
+    await expect(
+      call('removeProvider', {
+        providerName: 'scoped_provider',
+        configId: 999,
+        configEnv: 'prod',
+      }),
+    ).rejects.toBeDefined();
+
+    const res = await call<FileProviderProto.FileProviders>(
+      'getProvidersByConfigId',
+      { configId: 0, configEnv: 'prod' },
+    );
+    expect(res.providers.map((p) => p.providerName)).toContain(
+      'scoped_provider',
+    );
+  });
+
+  it('Removes a provider from its own config', async () => {
+    const removed = await call<FileProviderProto.FileProvider>(
+      'removeProvider',
+      { providerName: 'scoped_provider', configId: 0, configEnv: 'prod' },
+    );
+    expect(removed.providerName).toBe('scoped_provider');
   });
 });
