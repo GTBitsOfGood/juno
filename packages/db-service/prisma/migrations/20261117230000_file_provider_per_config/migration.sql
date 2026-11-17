@@ -10,6 +10,11 @@
 -- kept with a NULL config (hidden from every project-scoped route) rather
 -- than deleted, so nobody loses credentials they registered.
 
+-- One transaction, so the locks taken by the first ALTERs hold until the new
+-- constraints exist and a bucket created mid-deploy can't slip in between the
+-- backfill and the foreign keys (Prisma doesn't wrap migrations itself).
+BEGIN;
+
 -- DropForeignKey
 ALTER TABLE "FileServiceBucket" DROP CONSTRAINT "FileServiceBucket_fileProviderName_fkey";
 
@@ -42,3 +47,5 @@ ALTER TABLE "FileProvider" ADD CONSTRAINT "FileProvider_configId_configEnv_fkey"
 
 -- AddForeignKey
 ALTER TABLE "FileServiceBucket" ADD CONSTRAINT "FileServiceBucket_fileProviderName_configId_configEnv_fkey" FOREIGN KEY ("fileProviderName", "configId", "configEnv") REFERENCES "FileProvider"("name", "configId", "configEnv") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+COMMIT;
