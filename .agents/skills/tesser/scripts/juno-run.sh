@@ -10,6 +10,7 @@ COMPOSE=(docker compose -f docker-compose-dev.yml -p juno)
     [ "$(docker inspect -f '{{.State.Health.Status}}' juno-db-service-1 2>/dev/null)" = healthy ] && break
     sleep 5
   done
-  "${COMPOSE[@]}" exec -T db-service pnpm prisma db seed && echo "tesser: juno seed applied"
+  if "${COMPOSE[@]}" exec -T db-service pnpm prisma db seed; then echo "tesser: juno seed applied"
+  else echo "tesser: juno seed failed; stopping so the box is not reported healthy" >&2; kill "$$"; fi
 ) &
 exec "${COMPOSE[@]}" up --build --remove-orphans
