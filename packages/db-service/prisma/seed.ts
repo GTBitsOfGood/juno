@@ -81,7 +81,11 @@ async function main() {
 
   await prisma.fileProvider.upsert({
     where: {
-      name: 'test-provider',
+      name_configId_configEnv: {
+        name: 'test-provider',
+        configId: 0,
+        configEnv: 'prod',
+      },
     },
     update: {},
     create: {
@@ -89,6 +93,8 @@ async function main() {
       accessKey: 'test-key',
       type: FileProviderType.S3,
       metadata: '',
+      configId: 0,
+      configEnv: 'prod',
     },
   });
 }

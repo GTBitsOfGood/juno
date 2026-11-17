@@ -25,14 +25,28 @@ export interface FileProvider {
   metadata: string;
   bucket: Bucket[];
   providerType: ProviderType;
+  id: number;
+  configId: number;
+  configEnv: string;
 }
 
 export interface FileProviders {
   providers: FileProvider[];
 }
 
+/**
+ * Providers are scoped to a file config: (config_id, config_env) identifies
+ * the owning config, and provider_name is unique within it.
+ */
 export interface GetFileProviderRequest {
   providerName: string;
+  configId: number;
+  configEnv: string;
+}
+
+export interface GetFileProvidersByConfigIdRequest {
+  configId: number;
+  configEnv: string;
 }
 
 export interface CreateFileProviderRequest {
@@ -41,6 +55,8 @@ export interface CreateFileProviderRequest {
   metadata: string;
   bucket: Bucket[];
   type: ProviderType;
+  configId: number;
+  configEnv: string;
 }
 
 export interface UpdateFileProviderRequest {
@@ -49,10 +65,14 @@ export interface UpdateFileProviderRequest {
   metadata?: string | undefined;
   bucket: Bucket[];
   type?: ProviderType | undefined;
+  configId: number;
+  configEnv: string;
 }
 
 export interface DeleteFileProviderRequest {
   providerName: string;
+  configId: number;
+  configEnv: string;
 }
 
 export interface RegisterProviderRequest {
@@ -61,10 +81,14 @@ export interface RegisterProviderRequest {
   privateAccessKey: string;
   baseUrl: string;
   type: ProviderType;
+  configId: number;
+  configEnv: string;
 }
 
 export interface RemoveProviderRequest {
   providerName: string;
+  configId: number;
+  configEnv: string;
 }
 
 export const JUNO_FILE_SERVICE_PROVIDER_PACKAGE_NAME =
@@ -74,6 +98,10 @@ export interface FileProviderDbServiceClient {
   getProvider(request: GetFileProviderRequest): Observable<FileProvider>;
 
   getAllProviders(request: Empty): Observable<FileProviders>;
+
+  getProvidersByConfigId(
+    request: GetFileProvidersByConfigIdRequest,
+  ): Observable<FileProviders>;
 
   createProvider(request: CreateFileProviderRequest): Observable<FileProvider>;
 
@@ -89,6 +117,10 @@ export interface FileProviderDbServiceController {
 
   getAllProviders(
     request: Empty,
+  ): Promise<FileProviders> | Observable<FileProviders> | FileProviders;
+
+  getProvidersByConfigId(
+    request: GetFileProvidersByConfigIdRequest,
   ): Promise<FileProviders> | Observable<FileProviders> | FileProviders;
 
   createProvider(
@@ -109,6 +141,7 @@ export function FileProviderDbServiceControllerMethods() {
     const grpcMethods: string[] = [
       'getProvider',
       'getAllProviders',
+      'getProvidersByConfigId',
       'createProvider',
       'deleteProvider',
       'updateProvider',
@@ -145,6 +178,10 @@ export interface FileProviderFileServiceClient {
   registerProvider(request: RegisterProviderRequest): Observable<FileProvider>;
 
   removeProvider(request: DeleteFileProviderRequest): Observable<FileProvider>;
+
+  getProvidersByConfigId(
+    request: GetFileProvidersByConfigIdRequest,
+  ): Observable<FileProviders>;
 }
 
 export interface FileProviderFileServiceController {
@@ -155,11 +192,19 @@ export interface FileProviderFileServiceController {
   removeProvider(
     request: DeleteFileProviderRequest,
   ): Promise<FileProvider> | Observable<FileProvider> | FileProvider;
+
+  getProvidersByConfigId(
+    request: GetFileProvidersByConfigIdRequest,
+  ): Promise<FileProviders> | Observable<FileProviders> | FileProviders;
 }
 
 export function FileProviderFileServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['registerProvider', 'removeProvider'];
+    const grpcMethods: string[] = [
+      'registerProvider',
+      'removeProvider',
+      'getProvidersByConfigId',
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,

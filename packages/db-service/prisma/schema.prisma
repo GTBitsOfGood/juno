@@ -136,22 +136,33 @@ model FileServiceConfig {
   id              Int                 
   environment    String @default("test")
   buckets         FileServiceBucket[]
+  providers       FileProvider[]
   Project         Project             @relation(fields: [id], references: [id])
   FileServiceFile FileServiceFile[]
   @@id([id, environment])
 }
 
 model FileProvider {
-  name              String              @id
+  id                Int                 @id @default(autoincrement())
+  name              String
   accessKey         String
   metadata          String
   type              FileProviderType
+  // The file config that owns this provider. Nullable only so providers that
+  // no bucket used before per-config scoping survive the migration; every
+  // provider created since is linked to a config.
+  configId          Int?
+  configEnv         String?
+  config            FileServiceConfig?  @relation(fields: [configId, configEnv], references: [id, environment], onDelete: Cascade)
   FileServiceBucket FileServiceBucket[]
+
+  @@unique([name, configId, configEnv])
 }
 
 model FileServiceBucket {
   name             String
-  provider         FileProvider      @relation(fields: [fileProviderName], references: [name])
+  // A bucket can only use a provider from its own file config.
+  provider         FileProvider      @relation(fields: [fileProviderName, configId, configEnv], references: [name, configId, configEnv])
   configId         Int
   configEnv        String
   config           FileServiceConfig @relation(fields: [configId, configEnv], references: [id, environment])

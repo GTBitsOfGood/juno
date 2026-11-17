@@ -78,6 +78,8 @@ beforeAll(async () => {
         metadata: JSON.stringify({ endpoint: baseURL }),
         bucket: [],
         type: FileProviderProto.ProviderType.S3,
+        configId: 0,
+        configEnv: 'prod',
       },
       () => resolve(0),
     );
@@ -91,6 +93,8 @@ beforeAll(async () => {
         metadata: JSON.stringify({ endpoint: '' }), // doesn't matter for azure
         bucket: [],
         type: FileProviderProto.ProviderType.AZURE,
+        configId: 0,
+        configEnv: 'prod',
       },
       () => resolve(0),
     );

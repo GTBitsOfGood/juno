@@ -70,6 +70,8 @@ export class FileTransferController implements FileServiceController {
       const provider = await lastValueFrom(
         this.fileProviderDbService.getProvider({
           providerName: bucket.fileProviderName,
+          configId: request.configId,
+          configEnv: request.configEnv,
         }),
       );
 
@@ -143,6 +145,8 @@ export class FileTransferController implements FileServiceController {
       const provider = await lastValueFrom(
         this.fileProviderDbService.getProvider({
           providerName: request.providerName,
+          configId: request.configId,
+          configEnv: request.configEnv,
         }),
       );
 
@@ -198,6 +202,8 @@ export class FileTransferController implements FileServiceController {
       const provider = await lastValueFrom(
         this.fileProviderDbService.getProvider({
           providerName: request.providerName,
+          configId: request.configId,
+          configEnv: request.configEnv,
         }),
       );
 

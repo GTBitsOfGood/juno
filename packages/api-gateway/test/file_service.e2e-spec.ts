@@ -246,7 +246,8 @@ describe('File Upload Verification Routes', () => {
     const configId = await registerConfig(-1);
     expect(configId).not.toBeDefined;
 
-    // Register file provider successfully because it does not involve config
+    // Register file provider fails: providers belong to the project's file
+    // config, which was never set up
     await assertAPIRequest({
       url: '/file/provider',
       apiKey: apiKey,
@@ -259,7 +260,7 @@ describe('File Upload Verification Routes', () => {
         baseUrl: baseURL,
         type: 'S3',
       },
-      expectStatus: 201,
+      expectStatus: 400,
     });
 
     // Create bucket failed because config is undefined
