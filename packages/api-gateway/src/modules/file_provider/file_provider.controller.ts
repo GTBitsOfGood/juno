@@ -17,7 +17,6 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
-  ApiHeader,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
@@ -54,12 +53,6 @@ function toConfigId(projectId: unknown): number {
 // key's project) in the API key's environment.
 @ApiBearerAuth('API_Key')
 @ApiTags('file_provider')
-@ApiHeader({
-  name: 'x-project-id',
-  required: false,
-  description:
-    "Project to act on. Defaults to the API key's project; with x-user-jwt the user must be linked to it.",
-})
 @Controller('file')
 export class FileProviderController implements OnModuleInit {
   private fileProviderService: FileProviderProto.FileProviderFileServiceClient;
