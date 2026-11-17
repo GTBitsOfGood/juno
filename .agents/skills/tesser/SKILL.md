@@ -9,9 +9,10 @@ For tesser itself, `tesser --help`. Pick the cheapest path that proves your task
 
 | service | manifest | port | shared instance | what it is |
 | ------- | -------- | ---- | --------------- | ---------- |
-| juno-api | `juno-api.toml` | 8888 | pinned | `docker-compose-dev.yml`: gateway on 8888, gRPC services, postgres |
+| juno-api | `juno-api.toml` | 8888 | none | `docker-compose-dev.yml`: gateway on 8888, gRPC services, postgres |
 
-The dashboard (GTBitsOfGood/juno-dashboard, service `dashboard-web`) depends on juno-api.
+The dashboard (GTBitsOfGood/juno-dashboard, service `dashboard-web`) depends on juno-api. There are no
+always-on shared instances: start your own box, and `tesser rm` it when done.
 
 ## Waiting
 Run every command below in the foreground with your tool's timeout raised to 10 minutes
@@ -39,12 +40,12 @@ migrates on start, and the run script applies the upsert-only prisma seed. Swagg
 - Seed: superadmin above, project `test-seed-project`, and its email config.
 - `bash .agents/skills/tesser/scripts/db.sh <box_id> -c 'select …'`; main tables are `"User"`, `"Project"`,
   `"ApiKey"`, and the analytics event tables in `packages/db-service/prisma/schema.prisma`.
-- Write only in your own project. Never reseed (`RUN_MODE=reseed`) or reset a shared instance.
+- Write only in your own project unless the box is yours alone.
 
 ## Iterate
 Images bake the source, so after an
 edit run `tesser sync <box> --restart` (it rebuilds changed images). A schema change needs a new prisma
-migration, applied by db-service on restart; do that on your own box, never the shared one.
+migration, applied by db-service on restart; do that on your own box.
 
 ## When it breaks
 Check one layer at a time: `tesser status <box>`, `tesser logs <box>`, then your data.
