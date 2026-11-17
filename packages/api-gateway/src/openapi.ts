@@ -9,5 +9,9 @@ export const buildOpenApiConfig = (server: string) =>
       { type: 'http', scheme: 'bearer', bearerFormat: 'API_Key' },
       'API_Key',
     )
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'JWT',
+    )
     .addServer(server)
     .build();

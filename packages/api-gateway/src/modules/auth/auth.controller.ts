@@ -102,17 +102,12 @@ export class AuthController implements OnModuleInit {
     description: 'Successfully created a JWT.',
     type: IssueJWTResponse,
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'A valid API key',
-    required: true,
-    schema: {
-      type: 'string',
-    },
-  })
   @ApiBearerAuth('API_Key')
-  async getApiKeyJWT(@Headers('Authorization') apiKey?: string) {
-    const key = apiKey?.split(' ').at(1);
+  // Read the whole header map: a named @Headers('Authorization') makes the
+  // swagger plugin document Authorization a second time, which shadows the
+  // bearer scheme in the Mintlify playground.
+  async getApiKeyJWT(@Headers() headers: Record<string, string | undefined>) {
+    const key = headers.authorization?.split(' ').at(1);
     if (!key) {
       throw new UnauthorizedException('API Key is required');
     }
@@ -444,12 +439,7 @@ export class AuthController implements OnModuleInit {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid or expired JWT',
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token (User JWT)',
-    required: true,
-  })
-  @ApiBearerAuth('API_Key')
+  @ApiBearerAuth('JWT')
   async testAuth(@User() user: CommonProto.User) {
     if (!user) {
       throw new HttpException('Invalid JWT', HttpStatus.UNAUTHORIZED);
