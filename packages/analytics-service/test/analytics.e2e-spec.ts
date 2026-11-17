@@ -2392,3 +2392,141 @@ describe('Analytics Service - Custom Event & Graph Types (#263)', () => {
     });
   });
 });
+
+describe('Analytics Service - Regressions (#281 review)', () => {
+  let analyticsClient: any;
+
+  const call = <T>(method: string, request: object): Promise<T> =>
+    new Promise((resolve, reject) => {
+      analyticsClient[method](request, (err, response) => {
+        if (err) reject(err);
+        else resolve(response);
+      });
+    });
+
+  beforeEach(async () => {
+    const proto = ProtoLoader.loadSync([AnalyticsProtoFile]) as any;
+    const protoGRPC = GRPC.loadPackageDefinition(proto) as any;
+    analyticsClient =
+      new protoGRPC.juno.analytics_service.analytics.AnalyticsService(
+        process.env.ANALYTICS_SERVICE_ADDR,
+        GRPC.credentials.createInsecure(),
+      );
+  });
+
+  it('should log a custom event with empty properties (protobuf drops the empty map)', async () => {
+    const response = await call<AnalyticsProto.CustomEventResponse>(
+      'logCustomEvent',
+      {
+        configId: 601,
+        configEnvironment: 'test',
+        environment: 'test',
+        category: 'Signup',
+        subcategory: 'Button',
+        properties: {},
+      },
+    );
+
+    expect(response.id).toBeTruthy();
+    expect(response.properties ?? {}).toEqual({});
+  });
+
+  it('should give category/subcategory pairs that only differ in where a dash falls distinct eventTypeIds', async () => {
+    const first = await call<AnalyticsProto.CustomEventResponse>(
+      'logCustomEvent',
+      {
+        configId: 602,
+        configEnvironment: 'test',
+        environment: 'test',
+        category: 'a-b',
+        subcategory: 'c',
+        properties: { k: 'v' },
+      },
+    );
+    const second = await call<AnalyticsProto.CustomEventResponse>(
+      'logCustomEvent',
+      {
+        configId: 602,
+        configEnvironment: 'test',
+        environment: 'test',
+        category: 'a',
+        subcategory: 'b-c',
+        properties: { k: 'v' },
+      },
+    );
+
+    expect(first.eventTypeId).not.toBe(second.eventTypeId);
+
+    const types = await call<AnalyticsProto.GetAllCustomEventTypeResponse>(
+      'getCustomEventTypes',
+      { projectName: 'project-602', configId: 602, configEnvironment: 'test' },
+    );
+    const idsByPair = Object.fromEntries(
+      types.eventTypes.map((et) => [`${et.category}|${et.subcategory}`, et.id]),
+    );
+    expect(idsByPair['a-b|c']).toBe(first.eventTypeId);
+    expect(idsByPair['a|b-c']).toBe(second.eventTypeId);
+
+    const events = await call<AnalyticsProto.GetCustomEventsResponse>(
+      'getCustomEventsPaginated',
+      { projectName: 'project-602', configId: 602, configEnvironment: 'test' },
+    );
+    expect(events.events.map((e) => e.eventTypeId).sort()).toEqual(
+      [first.eventTypeId, second.eventTypeId].sort(),
+    );
+  });
+
+  it('should return no visit events (not an error) for a project with none', async () => {
+    const request = {
+      projectName: 'project-603',
+      configId: 603,
+      configEnvironment: 'test',
+      environment: 'test',
+    };
+    const paginated = await call<AnalyticsProto.GetVisitEventsResponse>(
+      'getVisitEventsPaginated',
+      request,
+    );
+    const all = await call<AnalyticsProto.GetAllVisitEventsResponse>(
+      'getAllVisitEvents',
+      request,
+    );
+
+    expect(paginated.events ?? []).toEqual([]);
+    expect(all.events ?? []).toEqual([]);
+  });
+
+  it('should treat an empty or missing environment as all environments', async () => {
+    for (const environment of ['prod', 'staging']) {
+      await call('logVisitEvent', {
+        configId: 604,
+        configEnvironment: 'test',
+        environment,
+        pageUrl: `https://example.com/${environment}`,
+        userId: 'user-604',
+      });
+    }
+    const base = {
+      projectName: 'project-604',
+      configId: 604,
+      configEnvironment: 'test',
+    };
+
+    for (const request of [{ ...base, environment: '' }, base]) {
+      const response = await call<AnalyticsProto.GetVisitEventsResponse>(
+        'getVisitEventsPaginated',
+        request,
+      );
+      expect(response.events.map((e) => e.environment).sort()).toEqual([
+        'prod',
+        'staging',
+      ]);
+    }
+
+    const prodOnly = await call<AnalyticsProto.GetVisitEventsResponse>(
+      'getVisitEventsPaginated',
+      { ...base, environment: 'prod' },
+    );
+    expect(prodOnly.events.map((e) => e.environment)).toEqual(['prod']);
+  });
+});

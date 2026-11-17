@@ -1,7 +1,11 @@
 import { status } from '@grpc/grpc-js';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
-import { AnalyticsProto, AnalyticsEventProto } from 'juno-proto';
+import {
+  AnalyticsEventProto,
+  AnalyticsProto,
+  customEventTypeId,
+} from 'juno-proto';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
@@ -423,7 +427,6 @@ export class AnalyticsService implements OnModuleInit {
     if (
       !event ||
       !event.category ||
-      !event.properties ||
       !event.subcategory ||
       event.category.length === 0 ||
       event.subcategory.length === 0
@@ -431,7 +434,7 @@ export class AnalyticsService implements OnModuleInit {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
         message:
-          'Invalid CustomEventRequest: category, subcategory, and properties are required',
+          'Invalid CustomEventRequest: category and subcategory are required',
       });
     }
 
@@ -442,7 +445,8 @@ export class AnalyticsService implements OnModuleInit {
         type: AnalyticsEventProto.AnalyticsEventType.CUSTOM,
         category: event.category,
         subcategory: event.subcategory,
-        properties: JSON.stringify(event.properties),
+        // protobuf drops an empty map on the wire, so missing means {}.
+        properties: JSON.stringify(event.properties ?? {}),
       }),
     );
 
@@ -452,7 +456,11 @@ export class AnalyticsService implements OnModuleInit {
       id: String(response.id),
       // Must match the id db-service generates in getCustomEventTypes, since the
       // dash joins custom events to their type by eventTypeId.
-      eventTypeId: `${response.projectId}-${response.category}-${response.subcategory}`,
+      eventTypeId: customEventTypeId(
+        response.projectId,
+        response.category,
+        response.subcategory,
+      ),
       projectId: String(response.projectId),
       environment: response.environment,
       createdAt: response.createdAt,
@@ -491,7 +499,11 @@ export class AnalyticsService implements OnModuleInit {
         const properties = JSON.parse(event.properties);
         return {
           id: String(event.id),
-          eventTypeId: `${event.projectId}-${event.category}-${event.subcategory}`,
+          eventTypeId: customEventTypeId(
+            event.projectId,
+            event.category,
+            event.subcategory,
+          ),
           projectId: String(event.projectId),
           environment: event.environment,
           createdAt: event.createdAt,
@@ -531,7 +543,11 @@ export class AnalyticsService implements OnModuleInit {
         const properties = JSON.parse(event.properties);
         return {
           id: String(event.id),
-          eventTypeId: `${event.projectId}-${event.category}-${event.subcategory}`,
+          eventTypeId: customEventTypeId(
+            event.projectId,
+            event.category,
+            event.subcategory,
+          ),
           projectId: String(event.projectId),
           environment: event.environment,
           createdAt: event.createdAt,

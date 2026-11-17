@@ -45,3 +45,18 @@ export const AnalyticsConfigProtoFile = getProtoFilePath(
 export const AnalyticsEventProtoFile = getProtoFilePath(
   'analytics_event.proto',
 );
+
+// Id of a custom event type, shared by db-service (getCustomEventTypes) and
+// analytics-service (custom events) because the dash joins events to types on it.
+// `-` separates the parts, so each part has `-` (and `%`, via encodeURIComponent)
+// percent-encoded: category `a-b`/subcategory `c` and `a`/`b-c` get distinct ids.
+// Names without `-` or other reserved characters keep the plain
+// `${projectId}-${category}-${subcategory}` form.
+export function customEventTypeId(
+  projectId: { toString(): string },
+  category: string,
+  subcategory: string,
+): string {
+  const part = (s: string) => encodeURIComponent(s).replace(/-/g, '%2D');
+  return `${String(projectId)}-${part(category)}-${part(subcategory)}`;
+}
