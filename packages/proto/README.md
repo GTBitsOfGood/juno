@@ -5,7 +5,7 @@
   <a href="">![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)</a>
   
 </div>
-  
+
 <h3 align="center">
   @juno/proto
 </h3>
@@ -15,13 +15,19 @@
 [Bits of Good](https://bitsofgood.org/)'s central infrastructure API, integrating several in-house services to simplify and streamline project development.
 
 <br />
-<a href="https://github.com/GTBitsOfGood/juno/blob/ryder/documentation-overhaul/README.md"><strong>« Back to main README</strong></a>
+<a href="https://github.com/GTBitsOfGood/juno"><strong>« Back to main README</strong></a>
 
 </div>
 
+
 ## Proto
 
-Juno's `proto` directory is responsible for the generation and synchronization of all [proto](https://grpc.io/docs/what-is-grpc/introduction/) files across the project. Proto distribution is primarily in `copy_protos.sh` and `gen_protos.sh`.
+Juno's `proto` directory holds the [protobuf](https://grpc.io/docs/what-is-grpc/introduction/) definitions and generated TypeScript types used for gRPC between services. Generation and distribution are handled by `gen_protos.sh` and `copy_protos.sh`. From the repository root, run:
+
+```sh
+pnpm gen-proto
+pnpm sync-protos
+```
 
 ### Adding a new proto to Juno
 
@@ -30,40 +36,16 @@ To add a new proto to Juno, there are two primary files required:
 - A `.proto` file in the `definitions` folder describing the proto schemas
 - A corresponding file in `src/gen` exporting types for the proto file.
 
-## Package Structure
-
-Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a standard 3-tier architecture: controllers, service layer, and data access layer. The documentation is fairly comprehensive and a recommended read, but here are the highlights:
-
-- **Modules** - `.module.ts` files splitting the package into capabilities, allowing feature encapsulation. There will always be a root module within the package importing all other modules.
-
-- **Controllers** - `.controller.ts` files for handling and sending HTTP requests .
-
-- **Middleware** - `.middleware.ts` files for intercepting a client request before it gets routed to a controller. An example for this would be logging middleware, where a request could be sent to a logging mechanism before reaching the route handler.
-
-- **Models** - files defining the data used in all nest files, typically taking a proto as an input. For more information on proto files, see the [proto](https://github.com/GTBitsOfGood/juno/tree/ryder/documentation-overhaul/packages/proto) package.
-
-- **E2E Tests** - `.*.spec.ts` specification files testing a particular model or behavior.
-
 ### Folder Structure
 
 ```
+├── definitions
 ├── src
-│   ├── middleware
-│   ├── models
-│   └── modules
-│       ├── auth
-│       ├── email
-│       ├── project
-│       └── user
-└── test
+│   └── gen
+├── copy_protos.sh
+└── gen_protos.sh
 ```
 
 ## Development
 
-Make sure to check out the [main installation instructions](https://github.com/GTBitsOfGood/juno/tree/ryder/documentation-overhaul) first!
-
-Run E2E tests in watch mode:
-
-```
-api-gateway: `yarn test:e2e:api-gateway-live`
-```
+Make sure to check out the [main installation instructions](https://github.com/GTBitsOfGood/juno) first. This package has no E2E test script of its own; proto changes are covered by the service tests that depend on them.

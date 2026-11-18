@@ -5,9 +5,9 @@
   <a href="">![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)</a>
   
 </div>
-  
+
 <h3 align="center">
-  @juno/api-gateway
+  @juno/db-service
 </h3>
 
 <div align="center">
@@ -15,39 +15,38 @@
 [Bits of Good](https://bitsofgood.org/)'s central infrastructure API, integrating several in-house services to simplify and streamline project development.
 
 <br />
-<a href="https://github.com/GTBitsOfGood/juno/blob/ryder/documentation-overhaul/README.md"><strong>« Back to main README</strong></a>
+<a href="https://github.com/GTBitsOfGood/juno"><strong>« Back to main README</strong></a>
 
 </div>
 
+
 ## DB Service
 
-An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals.
+An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.) via [Prisma](https://www.prisma.io/). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals.
 
 ## Package Structure
 
-Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a standard 3-tier architecture: controllers, service layer, and data access layer. The documentation is fairly comprehensive and a recommended read, but here are the highlights:
-
-- **Modules** - `.module.ts` files splitting the package into capabilities, allowing feature encapsulation. There will always be a root module within the package importing all other modules.
-
-- **Controllers** - `.controller.ts` files for handling and sending HTTP requests .
-
-- **Middleware** - `.middleware.ts` files for intercepting a client request before it gets routed to a controller. An example for this would be logging middleware, where a request could be sent to a logging mechanism before reaching the route handler.
-
-- **Models** - files defining the data used in all nest files, typically taking a proto as an input. For more information on proto files, see the [proto](https://github.com/GTBitsOfGood/juno/tree/ryder/documentation-overhaul/packages/proto) package.
-
-- **E2E Tests** - `.*.spec.ts` specification files testing a particular model or behavior.
+Juno packages are built with [Nest.js](https://docs.nestjs.com/). Internal services expose gRPC controllers; the api-gateway exposes HTTP routes. A package is split into modules (`.module.ts`), with controllers, a service layer, and tests under `test/`. Shared request and response types usually come from the [proto](https://github.com/GTBitsOfGood/juno/tree/main/packages/proto) package.
 
 ### Folder Structure
 
 ```
+├── prisma
 ├── src
-│   ├── middleware
-│   ├── models
-│   └── modules
-│       ├── auth
-│       ├── email
-│       ├── project
-│       └── user
+│   ├── modules
+│   │   ├── analytics_config
+│   │   ├── analytics_event
+│   │   ├── auth
+│   │   ├── email
+│   │   ├── file
+│   │   ├── file_bucket
+│   │   ├── file_config
+│   │   ├── file_provider
+│   │   ├── health
+│   │   ├── project
+│   │   ├── reset
+│   │   └── user
+│   └── utility
 └── test
 ```
 
@@ -55,12 +54,13 @@ Juno packages are built with [Nest.js](https://docs.nestjs.com/) and follow a st
 
 ![prisma-editor](https://github.com/user-attachments/assets/7e747dae-216c-4976-950b-9949ee9f5c86)
 
+
 ## Development
 
-Make sure to check out the [main installation instructions](https://github.com/GTBitsOfGood/juno/tree/ryder/documentation-overhaul) first!
+Make sure to check out the [main installation instructions](https://github.com/GTBitsOfGood/juno) first. The [local development guide](https://juno.bitsofgood.org/docs/local-development) covers running the full Docker stack.
 
-Run E2E tests in watch mode:
+Run E2E tests in watch mode from the repository root:
 
 ```
-api-gateway: `yarn test:e2e:api-gateway-live`
+pnpm test:e2e:db-service-live
 ```
