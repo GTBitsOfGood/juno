@@ -6,15 +6,7 @@
         "operationId": "AuthController_getApiKeyJWT",
         "summary": "Get API key JWT",
         "description": "JSON Web Tokens are used for the vast majority of API-gateway calls. The Juno SDK provides the means of automatically authenticating through this route given a valid API key.",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "required": true,
-            "in": "header",
-            "description": "A valid API key",
-            "schema": { "type": "string" }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "201": {
             "description": "Successfully created a JWT.",
@@ -215,21 +207,13 @@
         "operationId": "AuthController_testAuth",
         "summary": "Validate user JWT",
         "description": "This endpoint validates a user JWT token and returns the associated user information if valid",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Bearer token (User JWT)",
-            "required": true,
-            "schema": { "type": "string" }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": { "description": "JWT is valid, returns user" },
           "401": { "description": "Invalid or expired JWT" }
         },
         "tags": ["auth"],
-        "security": [{ "API_Key": [] }]
+        "security": [{ "JWT": [] }]
       }
     },
     "/auth/account-request": {
@@ -1281,7 +1265,7 @@
       "post": {
         "operationId": "FileProviderController_registerFileProvider",
         "summary": "Register provider",
-        "description": "Registers a File Provider.",
+        "description": "Registers (or updates) a File Provider in the caller's project file config.",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1319,8 +1303,8 @@
     "/file/provider/all": {
       "get": {
         "operationId": "FileProviderController_getAllFileProviders",
-        "summary": "List providers",
-        "description": "Get All File Providers.",
+        "summary": "List all providers",
+        "description": "Get every File Provider across all projects. Superadmins only (pass a superadmin x-user-jwt); use GET /file/provider/config/{configId} for a project.",
         "parameters": [],
         "responses": {
           "200": {
@@ -1334,7 +1318,43 @@
               }
             }
           },
-          "401": { "description": "Unauthorized" }
+          "401": { "description": "Unauthorized" },
+          "403": { "description": "Caller is not a superadmin" }
+        },
+        "tags": ["file_provider"],
+        "security": [{ "API_Key": [] }]
+      }
+    },
+    "/file/provider/config/{configId}": {
+      "get": {
+        "operationId": "FileProviderController_getFileProvidersByConfigId",
+        "summary": "List providers by config",
+        "description": "Get the File Providers linked to a file config (the config id is the project id) in the API key's environment.",
+        "parameters": [
+          {
+            "name": "configId",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned the file providers linked to the file config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/FileProvider" }
+                }
+              }
+            }
+          },
+          "400": { "description": "Parameters are invalid" },
+          "401": { "description": "Unauthorized" },
+          "403": {
+            "description": "The config does not belong to the caller's project"
+          }
         },
         "tags": ["file_provider"],
         "security": [{ "API_Key": [] }]
@@ -1344,7 +1364,7 @@
       "delete": {
         "operationId": "FileProviderController_deleteFileProvider",
         "summary": "Delete provider",
-        "description": "Delete File Provider.",
+        "description": "Delete a File Provider from the caller's project file config.",
         "parameters": [
           {
             "name": "name",
@@ -2507,7 +2527,8 @@
         "scheme": "bearer",
         "bearerFormat": "API_Key",
         "type": "http"
-      }
+      },
+      "JWT": { "scheme": "bearer", "bearerFormat": "JWT", "type": "http" }
     },
     "schemas": {
       "IssueJWTResponse": {
@@ -3406,20 +3427,44 @@
       "FileProviderPartial": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique id of the provider"
+          },
           "providerName": {
             "type": "string",
-            "description": "The unique provider name of the file provider"
+            "description": "The provider's name, unique within its file config"
           },
           "metadata": {
             "type": "string",
             "description": "The metadata of the file provider"
+          },
+          "configId": {
+            "type": "number",
+            "description": "Id of the file config (and project) that owns the provider"
+          },
+          "configEnv": {
+            "type": "string",
+            "description": "Environment of the file config that owns the provider"
           }
         },
-        "required": ["providerName", "metadata"]
+        "required": ["id", "providerName", "metadata", "configId", "configEnv"]
       },
       "FileProvider": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique id of the provider"
+          },
+          "configId": {
+            "type": "number",
+            "description": "Id of the file config (and project) that owns the provider"
+          },
+          "configEnv": {
+            "type": "string",
+            "description": "Environment of the file config that owns the provider"
+          },
           "accessKey": {
             "description": "The access key to register with",
             "allOf": [{ "$ref": "#/components/schemas/AccessKey" }]
@@ -3440,7 +3485,15 @@
             "example": "S3"
           }
         },
-        "required": ["accessKey", "baseUrl", "providerName", "type"]
+        "required": [
+          "id",
+          "configId",
+          "configEnv",
+          "accessKey",
+          "baseUrl",
+          "providerName",
+          "type"
+        ]
       },
       "DownloadFileModel": {
         "type": "object",
