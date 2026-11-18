@@ -30,13 +30,13 @@ Next, look at the auto-generated PR in the `juno-sdk` repository and make any ch
 
 Once that's finished and all tests are written/passed, merge the PR into the `main` branch.
 
-Create another PR to change the release version in `package.json` to the tag you will be creating for this version of the `juno-sdk`
-
-Once both PRs are merged in, create a release for the `juno-sdk` repository, following similar steps to the main Juno repo (without worrying about any workflows)
+Then publish a new juno-sdk version. Do not just create a GitHub release by hand: tagging a `v*` tag runs the **Publish to npm** workflow, which publishes the package with npm trusted publishing. The full steps (including the one-time npm trusted publisher setup and `standard-version`) are in the [juno-sdk README](https://github.com/GTBitsOfGood/juno-sdk#releasing).
 
 ## Change container images on Azure
 
 Tagging a `v*` release now deploys automatically. After "Upload Production Images" finishes, the deploy job updates each Container App in the `juno` resource group (override with repo variable `AZURE_RESOURCE_GROUP`) to `junoservices.azurecr.io/<app>:<tag>`. db-service goes first so migrations run before the other six apps are updated.
+
+There is no infrastructure-as-code for this environment. The Azure resources were created by hand in the portal; env vars also live there. The release workflow only builds images and runs `az containerapp update` on the existing apps.
 
 If the deploy job fails with an authorization error, grant the GitHub Actions OIDC identity the Contributor role on the `juno` resource group, then re-run the workflow. To redeploy or roll back a tag that is already in ACR, run "Upload Production Images" from the Actions tab with that tag and leave "Skip building images" checked.
 

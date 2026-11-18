@@ -17,7 +17,7 @@
 
 </div>
 
-> 📖 Juno's docs live at [juno.bitsofgood.org/docs](https://juno.bitsofgood.org/docs) (still being filled in, see [juno#267](https://github.com/GTBitsOfGood/juno/issues/267)). The dashboard is at [juno.bitsofgood.org](https://juno.bitsofgood.org). The API is at [api.juno.bitsofgood.org](https://api.juno.bitsofgood.org).
+> 📖 Juno's docs live at [juno.bitsofgood.org/docs](https://juno.bitsofgood.org/docs). The dashboard is at [juno.bitsofgood.org](https://juno.bitsofgood.org). The API is at [api.juno.bitsofgood.org](https://api.juno.bitsofgood.org).
 
 ## Project Description
 
@@ -29,10 +29,12 @@ Packages are managed through [PNPM Workspaces](https://pnpm.io/workspaces). The 
 
 - [api-gateway](./packages/api-gateway/): The publicly visible API routes and their first-layer validation + logic. Decides what services to utilize per-request via [Remote Procedure Calls](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) based on the API route and given information.
 - [auth-service](./packages/auth-service/): An internal service used to handle all API authentication necessities. Provides RPC endpoints for API key generation/validation/revocation and JWT generation/validation. Used in some endpoints but primarily as middleware within the gateway to ensure authorized access to other services.
-
-- [db-service](./packages/db-service/): An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.) via [Prisma](https://www.prisma.io/). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals
+- [db-service](./packages/db-service/): An internal service that interfaces with the database layer (Postgres). Handles all schema structuring and object relations (users, projects, api keys, etc.) via [Prisma](https://www.prisma.io/). This was kept as a single service to provide an interface for all other services to perform CRUD operations on the data they work with without needing to know the underlying storage internals.
 - [email-service](./packages/email-service/): A SendGrid-based central service for managing per-project mailing functionality with support for all major mailing providers.
+- [file-service](./packages/file-service/): An Azure Blob and S3-compatible service for per-project file upload, download, and bucket management.
+- [analytics-service](./packages/analytics-service/): Stores application events (click, visit, input, and custom) in Juno's own Postgres database through db-service. There is no external analytics provider.
 - [logging-service](./packages/logging-service/): A dedicated logging service for error and audit logs, including traces, metrics information, and sentry.io integration.
+- [proto](./packages/proto/): Shared protobuf definitions and generated types used for gRPC between services.
 
 ## OpenAPI Documentation
 
@@ -58,7 +60,7 @@ For updating the JunoSDK, see the developer instructions below.
 
 ### Using Docker
 
-As this repository contains multiple packages, [Docker](https://www.docker.com/) is used to spin up all microservices in order with their respective dependencies. For more details regarding the docker process and its internal networking mechanism, take a look at the `docker-dev-compose.yml` and `Dockerfile` file.
+As this repository contains multiple packages, [Docker](https://www.docker.com/) is used to spin up all microservices in order with their respective dependencies. For more details regarding the docker process and its internal networking mechanism, take a look at the `docker-compose-dev.yml` and `Dockerfile` file.
 
 Most of the docker-related functionality has been abstracted away into pnpm commands.
 
@@ -80,7 +82,7 @@ pnpm start:dev:live-all
 
 ### Making requests
 
-The `api-gateway` service contains interactive documentation at the endpoint `localhost:<exposed docker port>/docs` for easily sending requests. Direct requests to the gateway can be made via `localhost:3000/some/request/path`.
+The `api-gateway` service is at [http://localhost:8888](http://localhost:8888) (host port 8888 maps to port 3000 inside the container). Interactive Swagger docs are at [http://localhost:8888/docs](http://localhost:8888/docs). Direct requests go to `http://localhost:8888/some/request/path`.
 
 ### Testing
 
@@ -91,12 +93,12 @@ To run tests a single time for a particular service:
 - api-gateway: `pnpm test:e2e:api-gateway`
 - auth-service: `pnpm test:e2e:auth-service`
 - db-service: `pnpm test:e2e:db-service`
+- email-service: `pnpm test:e2e:email-service`
+- file-service: `pnpm test:e2e:file-service`
+- analytics-service: `pnpm test:e2e:analytics-service`
+- logging-service: `pnpm test:e2e:logging-service`
 
-To continuously run tests for a service as file changes are made:
-
-- api-gateway: `pnpm test:e2e:api-gateway-live`
-- auth-service: `pnpm test:e2e:auth-service-live`
-- db-service: `pnpm test:e2e:db-service-live`
+To continuously run tests for a service as file changes are made, use the matching `-live` script, for example `pnpm test:e2e:api-gateway-live`.
 
 ### Modifying/creating Proto Files
 
@@ -111,13 +113,13 @@ pnpm sync-protos
 
 With [OpenAPI](https://docs.nestjs.com/openapi/introduction), much of the internal implementation of [juno-sdk](https://github.com/GTBitsOfGood/juno-sdk) is generated automatically. There are two options for triggering the SDK generation:
 
-**Automatic** - Upon a new tagged release of Juno, a GitHub action will automatically create a PR in the JunoSDK repository with the new changes.
+**Automatic** - A tagged Juno release runs the "Upload SDK for Release" workflow, which attaches a `juno-client-sdk.tar.gz` asset to the GitHub release. It does not open a PR in juno-sdk by itself. After the release is up, go to the `juno-sdk` repo, run the "Juno SDK Sync OpenAPI" workflow, and review the PR it opens.
 
 **Manual** - If the SDK needs to be updated locally for testing Juno before release, you can follow these steps:
 
-- With Juno currently running, execute the scripts/doc-extract.sh. This downloads the contents of localhost:/API_GATEWAY_URL/docs-yaml where the OpenAPI yaml specification is located, runs the OpenAPI SDK generator, and places the output into juno-client-sdk.
+- With Juno currently running, run `scripts/doc-extract-macos.sh` or `scripts/doc-extract-window.sh`. This downloads the OpenAPI YAML from `http://localhost:8888/docs-yaml`, runs the OpenAPI SDK generator, and places the output into `juno-client-sdk`.
 - Copy the `api.ts` file and `api`, `model` folders into the SDK repository
-- Ensure the changes still build (`bun run build` in the SDK repository) and fix any errors that might've been caused with the update
+- Ensure the changes still build (`pnpm build` in the SDK repository) and fix any errors that might've been caused with the update
 - Add any additional needed methods to the SDK to use new routes (e.g. your unlink user)
 - Submit a PR with the changes
 
@@ -125,7 +127,7 @@ With [OpenAPI](https://docs.nestjs.com/openapi/introduction), much of the intern
 
 We use [Prisma](https://www.prisma.io/) in `db-service` as an ORM to define all database schemas/relationships. After a change has been made to the Prisma schema, a migration must be made. There are two options:
 
-1. While Juno is running, run `DATABASE_URL=postgresql://user:password@localhost:<port> pnpm prisma migrate dev --schema=<path to schema.prisma>` to generate the migration
+1. While Juno is running, find the published Postgres port with `docker compose -f docker-compose-dev.yml port db 5432`, then run `DATABASE_URL=postgresql://user:password@localhost:<port> pnpm prisma migrate dev --schema=packages/db-service/prisma/schema.prisma` from the repo root to generate the migration
 2. Verify a new migration has been created under the `migrations` folder
 
 ### Force rebuilding docker containers
@@ -153,7 +155,7 @@ Some common issues:
 If VSCode outputs `Failed to connect. Is Docker running?`:
 
 - First, ensure Docker Desktop is actually running.
-- If it is, Docker Desktop most likely decided to nuke your settings, re-enable WSL in **Settings** > **Resources** > **WLS integration**
+- If it is, Docker Desktop most likely decided to nuke your settings, re-enable WSL in **Settings** > **Resources** > **WSL integration**
 
 To add `chmod` permissions to all shell scripts:
 

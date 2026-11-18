@@ -6,32 +6,33 @@ icon: chart-line
 
 Juno analytics stores application events in Juno's database. It is separate from [email delivery statistics](/email#delivery-statistics), which come from SendGrid.
 
-The gateway source includes routes for click, visit, input, and custom events, along with event retrieval. These events are associated with a project configuration and environment.
+Click, visit, input, and custom events all write to Juno's own Postgres through the analytics-service. There is no external analytics provider. You do not need `clientAnalyticsKey` or `serverAnalyticsKey` to log or query events through the API or SDK. Those fields still exist on the leftover `juno.analyticsConfig` API (and the dashboard still has a form for them) from when events were stored in a separate service.
 
-<Warning>
-  **Integration status:** this guide intentionally leaves out an end-to-end SDK
-  recipe until the supported SDK release and deployed event path have been
-  verified together. The presence of a route in source does not establish that
-  it is available in your deployed instance. The original migration work is
-  tracked in [analytics database prework,
-  #266](https://github.com/GTBitsOfGood/juno/issues/266).
-</Warning>
+These methods are on the SDK's `main` branch and are intended for `0.0.12`. If that release is not yet available from your package registry, follow [Using a local SDK build](/local-development#using-a-local-sdk-build).
 
-You do not need to configure an external analytics provider's client or server keys. Provider setup from older Juno guides does not apply to Juno's database-backed events.
+## Log and read a visit event
 
-## Where to look today
+After [initializing the SDK](/getting-started) with a project API key:
 
-<CardGroup cols={2}>
-  <Card
-    title="API reference"
-    icon="square-terminal"
-    href="/api-reference/introduction"
-  >
-    The gateway's HTTP operations and request schemas.
-  </Card>
-  <Card title="SDK reference" icon="code" href="/sdk-reference#analytics">
-    The `juno.analytics` and `juno.analyticsConfig` methods in `juno-sdk`.
-  </Card>
-</CardGroup>
+```ts
+const event = await juno.analytics.logVisitEvent({
+  pageUrl: 'https://example.org/home',
+  userId: 'user-123',
+});
+console.log(event.id);
 
-Before integrating, confirm which event path your deployment supports and use a project API key for the intended environment.
+const { events, afterId } = await juno.analytics.getVisitEventsPaginated({
+  projectName: 'Your Project',
+  environment: 'prod',
+  limit: 20,
+});
+console.log(events, afterId);
+```
+
+The API key's project and environment are used when writing the event. `userId` is an identifier you choose for a user in your own application, not a Juno account id. `afterId` is an opaque pagination cursor.
+
+Click, input, and custom events follow the same pattern (`logClickEvent`, `logInputEvent`, `logCustomEvent`, plus the matching `get*EventsPaginated` and `getAll*` methods). See the [SDK reference](/sdk-reference#analytics).
+
+## Optional user and project credentials
+
+Paginated and "get all" reads accept an optional second `{ userJwt, projectId }` argument when acting on behalf of a signed-in user. The log methods do not take that argument. See [Acting for a signed-in user](/authentication#acting-for-a-signed-in-user).
